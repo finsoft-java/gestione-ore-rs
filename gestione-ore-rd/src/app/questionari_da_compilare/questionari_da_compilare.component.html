@@ -1,0 +1,52 @@
+<!--Questa pagina cambia in base al parametro "storico" (boolean)-->
+
+<div *ngIf="!storico">
+    <h3>Questionari che possono essere compilati dall'utente</h3>
+</div>
+<div *ngIf="storico">
+    <h3>Storico dei questionari già compilati</h3>
+</div>
+
+<div style="float:left; width:100%">
+    <div style="float:left">
+        <button class="btn btn-dark" style="margin-right:5px;margin-top:10px;" (click)="refresh()"><i class="fa fa-sync"></i> Refresh</button>
+    </div>
+    <div style="float:right">
+        <filter-table [is_compilazioni]="this.storico" (filter)="this.filter($event)" [count]="this.countQuestionari"></filter-table>
+    </div>
+</div>
+
+<div style="background-color: #f8f9fa;float: left;width: 100%;margin-top:30px;">
+    <div style="float: left;width: 25%;padding: .75rem 0px;text-align: center;font-weight: bold;" (click)="ordinamento('titolo_progetto')">Progetto
+        <i *ngIf="current_order == 'desc' && nome_colonna_ordinamento == 'titolo_progetto'" class="fa fa-sort-alpha-up"></i>
+        <i *ngIf="current_order == 'asc' && nome_colonna_ordinamento == 'titolo_progetto'" class="fa fa-sort-alpha-down"></i>
+    </div>
+    <div style="float: left;width: 25%;padding: .75rem 0px;text-align: center;font-weight: bold;" (click)="ordinamento('titolo_questionario')">Questionario
+        <i *ngIf="current_order == 'desc' && nome_colonna_ordinamento == 'titolo_questionario'" class="fa fa-sort-alpha-up"></i>
+        <i *ngIf="current_order == 'asc' && nome_colonna_ordinamento == 'titolo_questionario'" class="fa fa-sort-alpha-down"></i></div>
+    <div style="float: left;width: 20%;padding: .75rem 0px;text-align: center;font-weight: bold;" (click)="ordinamento('data_compilazione')" title="Data Compilazione">Data comp.
+        <i *ngIf="current_order == 'desc' && nome_colonna_ordinamento == 'data_compilazione'" class="fa fa-sort-alpha-up"></i>
+        <i *ngIf="current_order == 'asc' && nome_colonna_ordinamento == 'data_compilazione'" class="fa fa-sort-alpha-down"></i></div>
+    <div style="float: left;width: 10%;padding: .75rem 0px;text-align: center;font-weight: bold;" (click)="ordinamento('stato_quest_comp')" title="Stato Compilazione">Stato comp.
+        <i *ngIf="current_order == 'desc' && nome_colonna_ordinamento == 'stato_quest_comp'" class="fa fa-sort-alpha-up"></i>
+        <i *ngIf="current_order == 'asc' && nome_colonna_ordinamento == 'stato_quest_comp'" class="fa fa-sort-alpha-down"></i></div>
+    <div style="float: left;width: 10%;padding: .75rem 0px;text-align: center;font-weight: bold;" (click)="ordinamento('nome_utente')" *ngIf="storico && currentUser.ruolo == '2'">Utente
+        <i *ngIf="current_order == 'desc' && nome_colonna_ordinamento == 'nome_utente'" class="fa fa-sort-alpha-up"></i>
+        <i *ngIf="current_order == 'asc' && nome_colonna_ordinamento == 'nome_utente'" class="fa fa-sort-alpha-down"></i></div>
+    <div style="float: left;width:10%;max-width:120px;padding: .75rem;text-align: center;font-weight: bold;">Azioni</div>
+</div>
+<div style="float: left;width: 100%;">
+    <table class="table table-striped">
+        <thead style="display:none;">
+            <th style="width:25%;">Progetto</th>
+            <th style="width:25%;">Questionario</th>
+            <th style="width:20%;">Data compilazione</th>
+            <th style="width:10%;">Stato compilazione</th>
+            <th style="width:10%;" *ngIf="storico && currentUser.ruolo == '2'">Utente</th>
+            <th style="width:10%;max-width:120px">Azioni</th>
+        </thead>
+        <tbody>
+            <tr table-quest-comp-row *ngFor="let q of quest_comp_visibili" [data]="q" [storico]="storico" (itemRemoved)="removeItem($event)" (itemCreated)="sendMsgQuestComp(q, 'Iniziata la compilazione')"></tr>
+        </tbody>
+    </table>
+</div>

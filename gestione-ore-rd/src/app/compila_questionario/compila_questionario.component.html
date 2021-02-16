@@ -1,0 +1,60 @@
+<!--<h3>Questionario</h3>-->
+
+
+<div *ngIf="questionarioCompilato != null">
+    <div>
+        <h3 style="text-align:center">{{questionarioCompilato.progetto.titolo}}</h3>
+        <h4 style="text-align:center">{{questionarioCompilato.questionario.titolo}}</h4>
+    </div>
+    <br/>
+
+    <div *ngIf="sezione_corrente != null">
+        <div style="float:left;">
+            <h5>Sezione {{sezione_corrente.progressivo_sezione}} di {{ questionarioCompilato.sezioni.length}}</h5>
+            <h5><span [innerHTML]="sezione_corrente.titolo"></span></h5>
+            <div [innerHTML]="sezione_corrente.descrizione | safeHtml"></div>
+        </div>
+        <div *ngIf="questionarioCompilato.utenti_valutati[0]" style="float:right;">
+            Valutazione Utente
+            <select class="form-control" style="display: inline;margin: 30px 0px 0px 15px;" [(ngModel)]="utente_valutato_corrente" (ngModelChange)="goToUtente()">
+                <option *ngFor="let utente of questionarioCompilato.utenti_valutati"
+                        value="{{utente.username}}"
+                        >{{ utente.nome }} {{ utente.cognome }}</option>
+            </select>
+        </div>
+
+
+        <table class="table table-striped" style="margin-top:30px;">
+            <thead style="background-color: #f8f9fa;">
+                <th style="width:10%;padding-left:10px;">N° Domanda</th>
+                <th style="width:35%">Domanda</th>
+                <th style="width:35%">Risposta</th>
+                <th style="width:20%">Note</th>
+            </thead>
+            <tr compila-questionario-domanda *ngFor="let domanda of sezione_corrente.domande" [domanda]="domanda" [questionario_modificabile]="questionarioCompilato.stato == '0'" [isValid]="domanda.is_valid">
+            </tr>
+        </table>
+
+        <div style="float:left;width:100%">
+            <div style="float: left;width: calc(100% / 6);" *ngIf="!esiste_utente_prec_hidd">
+                <button class="btn btn-dark" style="margin-right:10px;width: calc(100% - 10px);font-size: 15px;font-weight: 100;letter-spacing:0.5px" (click)="utentePrecedente()" [disabled]="!esiste_utente_prec">Utente precedente</button>
+            </div>
+            <div style="float: left;width: calc(100% / 6);">
+                <button class="btn btn-dark" style="margin-right:10px;width: calc(100% - 10px);font-size: 15px;font-weight: 100;letter-spacing:0.5px" (click)="sezPrecedente()" [disabled]="!esiste_sezione_prec">Sez. precedente</button>
+            </div>
+            <div style="float: left;width: calc(100% / 6);">
+                <button class="btn btn-warning" style="margin-right:10px;width: calc(100% - 10px);font-size: 15px;font-weight: 100;letter-spacing:0.5px" *ngIf="questionarioCompilato.stato == '0'" (click)="salvaSezione()">Salva sezione</button>
+            </div>
+            <div style="float: right;width: calc(100% / 6);" *ngIf="!esiste_utente_succ_hidd">
+                <button class="btn btn-dark" style="margin-right:10px;width: calc(100% - 10px);font-size: 15px;font-weight: 100;letter-spacing:0.5px" (click)="utenteSuccessivo()" [disabled]="!esiste_utente_succ">Utente successivo</button>
+            </div>
+            <div style="float: right;width: calc(100% / 6);">
+                <button class="btn btn-dark" style="margin-right:10px;width: calc(100% - 10px);font-size: 15px;font-weight: 100;letter-spacing:0.5px" (click)="sezSuccessiva()" [disabled]="!esiste_sezione_succ">Sez. successiva</button>
+            </div>
+            <div style="float: right;width: calc(100% / 6);">
+                <button style="margin-right:10px;width: calc(100% - 10px);font-size: 15px;font-weight: 100;letter-spacing:0.5px" *ngIf="questionarioCompilato.stato == '0'" class="btn btn-success" (click)="convalida()" title="Convalida il Questionario, solo se tutte le sezioni sono state compilate correttamente">
+                Invia le risposte</button>
+            </div>
+        </div>
+    </div>
+</div>

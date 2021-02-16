@@ -1,0 +1,45 @@
+<td>
+    <div>
+        <div title="{{utente.nome_utente}}" tabindex="0" style="outline: none !important; line-height: 38px;">{{utente.nome_utente}}&nbsp;</div>
+    </div>
+</td>
+<td>
+    <div>
+        <!--
+        <input class="form-control" type="checkbox" style="width: auto;max-width: 130px;"
+            [(ngModel)]="utente.responsabileL1" 
+            [disabled]="utente.responsabileL2||utente.utenteFinale||progetto.gia_compilato=='1'"
+            [checked]="utente.responsabileL1"
+            title=""/>
+-->
+
+        <div class="checkbox-container green">
+            <input type="checkbox" [(ngModel)]="utente.responsabileL1" 
+            [disabled]="utente.responsabileL2||utente.utenteFinale||progetto.gia_compilato=='1'"
+            [checked]="utente.responsabileL1" id="utente_L1{{utente.nome_utente}}" />
+            <label for="utente_L1{{utente.nome_utente}}"></label>
+        </div>
+    </div>
+</td>
+<td>
+    <div>
+        <div class="checkbox-container green">
+            <input type="checkbox"  [(ngModel)]="utente.responsabileL2"
+            [disabled]="utente.responsabileL1||utente.utenteFinale||progetto.gia_compilato=='1'"
+            [checked]="utente.responsabileL2" id="utente_L2{{utente.nome_utente}}" />
+            <label for="utente_L2{{utente.nome_utente}}"></label>
+        </div>
+        
+    </div>
+</td>
+<td>
+    <div>
+        <div class="checkbox-container green">
+            <input type="checkbox"  
+            [(ngModel)]="utente.utenteFinale"
+            [disabled]="utente.responsabileL2||utente.responsabileL1||progetto.gia_compilato=='1'"
+            [checked]="utente.utenteFinale" id="utente_F{{utente.nome_utente}}" />
+            <label for="utente_F{{utente.nome_utente}}"></label>
+        </div>
+    </div>
+</td>

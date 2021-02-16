@@ -1,0 +1,98 @@
+<div *ngIf="questionario == null">
+    Loading...
+</div>
+<div *ngIf="questionario != null">
+
+    <form style="margin-bottom:30px;margin-bottom:30px; border-bottom: 1px solid;float:left;width:100%;padding-bottom: 15px;">
+        <h3>Questionario</h3> <br>
+
+        <div *ngIf="this.questionario.gia_compilato=='1'" style="margin-bottom: 30px;background-color: #c82333;padding: 15px;font-size: 16px;font-weight: 500;color: #fff;border-radius: 10px;text-align: center;">
+            Attenzione! Qualcuno ha gi&agrave; iniziato a compilare questo questionario.<br/> Modificare con cautela.
+        </div>
+
+
+        <h5>Dati Generali</h5> <br>
+        <div class="row">
+            <div class=" col">
+                <label for="titolo_progetto">Titolo Questionario</label>
+                <input type="text" class="form-control" id="titolo_progetto" placeholder="Titolo Questionario" [(ngModel)]="questionario.titolo" [ngModelOptions]="{standalone: true}">
+            </div>
+            <div class="col">
+                <label for="stato_progetto">Stato</label>
+                <select class="form-control" required [(ngModel)]="questionario.stato" title="Solo i questionari Validi possono essere compilati" [ngModelOptions]="{standalone: true}">
+                    <option *ngFor="let dati_stato_progetto of stato_questionario; index as i" value="{{i}}">
+                        {{ dati_stato_progetto }}
+                    </option>   
+                </select>
+            </div>
+
+            <div class="col">
+                <label>Comune</label>
+                <div class="checkbox-container green">
+                    <input type="checkbox" [disabled]="questionario.gia_compilato=='1'" [(ngModel)]="questionario.flag_comune" [checked]="questionario.flag_comune_dec" id="toggle1" [ngModelOptions]="{standalone: true}" />
+                    <label for="toggle1" title="Se selezionato, il questionario può essere modficato da altri utenti"></label>
+                </div>
+            </div>
+        </div>
+        <div><button class="btn btn-success" style="float:right;margin-right:5px;margin-top:10px;" (click)="updQuestionario(questionario)">Salva Questionario</button></div>
+    </form>
+
+    <button class="btn btn-dark" style="float:left" (click)="sezPrecedente()" title="Sez. precendente" alt="Sez. precendente" [disabled]="!esiste_prec">Sez. precendente<!--<i class="fa fa-step-backward"></i>--></button>
+    <button class="btn btn-dark" style="float:right" (click)="sezSuccessiva()" title="Sez. successiva" alt="Sez. successiva" [disabled]="!esiste_succ">Sez. successiva<!--<i class="fa fa-step-forward"></i>--></button>
+    <button (click)="creaSezione()" class="btn btn-success" style="margin: 0px auto;display: block;" [title]="this.disableCrea ? 'Disabilitato fino al salvataggio della Sezione':'' " [disabled]="questionario.gia_compilato=='1' || this.disableCrea == true">Crea Nuova Sezione</button>
+
+    <div *ngIf="(questionario.sezioni.length > 0) && (sezione_corrente != null)" style="border: 1px solid;float: left;width: 100%;padding: 15px;margin-top: 30px;">
+        <form style="margin-top:30px;margin-bottom:30px;float:left;width:100%;padding-bottom: 30px;border-bottom:1px solid">
+            <h5>Sezione N° {{sezione_corrente.progressivo_sezione}}</h5> <br>
+            <div class="row" style="margin-bottom:30px;">
+                <div class=" col">
+                    <label for="titolo_progetto">Titolo Sezione</label>
+                    <input type="text" class="form-control" id="titolo_progetto" placeholder="Titolo Sezione" [(ngModel)]="sezione_corrente.titolo" [ngModelOptions]="{standalone: true}">
+                </div>
+
+            </div>
+            <div class="row" style="margin-bottom:30px;">
+                <div class="col">
+                    <label for="stato_progetto">Descrizione</label>
+                    <div style="float: left;width:100%">
+                        <quill-editor [(ngModel)]="sezione_corrente.descrizione" [ngModelOptions]="{standalone:true}"></quill-editor>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class=" col">
+                    <button *ngIf="!is_nuova_sezione" class="btn btn-success" style="margin-right:5px;" (click)="modificaSezione(sezione_corrente)">Salva Sezione</button>
+                    <button *ngIf="is_nuova_sezione" class="btn btn-success" style="margin-right:5px;" (click)="salvaSezione(sezione_corrente)" [disabled]="questionario.gia_compilato=='1'">Salva Sezione</button>
+                    <button *ngIf="!is_nuova_sezione" class="btn btn-dark" style="margin-right:5px;" (click)="duplicaSezioneCorrente()" [disabled]="questionario.gia_compilato=='1'">Duplica sezione</button>
+                    <button *ngIf="!is_nuova_sezione" class="btn btn-danger" style="margin-right:5px;" (click)="eliminaSezioneCorrente()" [disabled]="questionario.gia_compilato=='1'">Elimina sezione</button>
+                </div>
+            </div>
+        </form>
+
+        <h5 style="float:left;width:100%;margin-bottom: 30px;">Domande Sezione N° {{sezione_corrente.progressivo_sezione}}</h5>
+        <button *ngIf="!editMode && !is_nuova_sezione" (click)="creaDomanda()" style="margin-bottom: 25px;" class="btn btn-success" [disabled]="questionario.gia_compilato=='1'">Crea Nuova Domanda</button>
+
+        <table class="table table-striped" style="margin-bottom:0px;float:left;width:100%;padding-bottom: 15px;">
+            <thead *ngIf="!editMode" style="background-color: #f8f9fa;">
+                <th alt="Descrizione" title="Descrizione" style="padding:.75rem;">Descrizione</th>
+                <th alt="Obbligatoria" title="Obbligatoria" style="padding:.75rem;">Obblig.</th>
+                <th alt="Coefficiente valutazione" title="Coefficiente valutazione" style="padding:.75rem;">Coeff.</th>
+                <th alt="Rimescola" title="Rimescola" style="padding:.75rem;">Rimescola</th>
+                <th alt="HTML Type" title="HTML Type" style="padding:.75rem;">Type</th>
+                <th alt="HTML Maxlength" title="HTML Maxlength" style="padding:.75rem;">Maxlength</th>
+                <th alt="Pattern" title="Pattern" style="padding:.75rem;">Pattern</th>
+                <th alt="Min" title="Min" style="padding:.75rem;">Min</th>
+                <th alt="Max" title="Max" style="padding:.75rem;">Max</th>
+                <th>Azioni</th>
+            </thead>
+            <tbody>
+                <tr table-domande-row *ngFor="let domanda_row of sezione_corrente.domande; let i= index;" (domandaDupl)="getQuestionario()" (mostraRisposte)="showRisposte($event)" [questionario]="this.questionario" [domanda]="domanda_row" [indexDomanda]="i" [esisteDomandaEditing]="editMode"
+                    (itemRemoved)="removeItem(i)" (changeEditMode)="changeEditMode($event)"></tr>
+            </tbody>
+        </table>
+    </div>
+    <div *ngIf="questionario.sezioni.length == 0" style="margin-top:20px;">
+        Questo questionario non ha ancora sezioni.
+    </div>
+
+</div>

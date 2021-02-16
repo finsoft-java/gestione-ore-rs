@@ -1,0 +1,144 @@
+<td *ngIf="domanda.editing" colspan="11">
+    <div class="row" style="margin:10px 0px;">
+        <div class="col">
+            <h5 *ngIf="domanda.creating">Form Inserimento Domanda</h5>
+            <h5 *ngIf="!domanda.creating">Form Modifica Domanda</h5>
+        </div>
+    </div>
+    <div class="row" style="margin:10px 0px;">
+        <div class="col">
+            <label>Descrizione</label>
+            <div style="float:left;width:100%;">
+                <quill-editor [(ngModel)]="domanda_in_modifica.descrizione" [ngModelOptions]="{standalone:true}"></quill-editor>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin:10px 0px;">
+        <div class="col">
+            <label>Obbligatorietà</label>
+            <div class="checkbox-container green">
+                <input type="checkbox" [disabled]="questionario.gia_compilato=='1'" [(ngModel)]="domanda_in_modifica.obbligatorieta" [checked]="domanda.obbligatorieta" id="toggleobblig" />
+                <label for="toggleobblig" title="Se selezionato, l'utente dovrà compilare obbligatoriamente la domanda per poter proseguire"></label>
+            </div>
+        </div>
+        <div class="col">
+            <label>Rimescola</label>
+            <div class="checkbox-container green">
+                <input type="checkbox" [disabled]="questionario.gia_compilato=='1'" [(ngModel)]="domanda_in_modifica.rimescola" [checked]="domanda.rimescola" id="togglerimescola" />
+                <label for="togglerimescola" title="Se selezionato, le risposte verranno presentate in ordine casuale"></label>
+            </div>
+        </div>
+
+    </div>
+    <div class="row" style="margin:10px 0px;">
+        <div class="col">
+            <label>Coefficiente di Valutazione</label>
+            <input class="form-control" type="number" [disabled]="questionario.gia_compilato=='1'" [(ngModel)]="domanda_in_modifica.coeff_valutazione" title="Quanto è importante la domanda?" min="1" max="300" />
+        </div>
+        <div class="col">
+            <label>Tipo Risposta</label>
+            <select class="form-control" [disabled]="questionario.gia_compilato=='1'" (change)="setValidRisposte()" [(ngModel)]="tipo_risposta" title="">
+                <option *ngFor="let option of tipiRisposte; index as i" value="{{i}}">
+                    {{ option }}
+                </option>   
+            </select>
+        </div>
+    </div>
+    <div class="row" style="margin:10px 0px;" *ngIf="risposta_aperta">
+        <div class="col">
+            <label>Tipo di input</label>
+            <select class="form-control" [disabled]="questionario.gia_compilato=='1'" (change)="setValidInput()" [(ngModel)]="domanda_in_modifica.html_type" title="HTML input type">
+                <option *ngFor="let option of html_type_array; index as i" value="{{i}}">
+                    {{ option }}
+                </option>   
+            </select>
+        </div>
+    </div>
+    <div class="row" style="margin:10px 0px;" *ngIf="setDisableText && risposta_aperta">
+        <div class="col">
+            <label>Lunghezza massima</label>
+            <input class="form-control" type="number" [disabled]="questionario.gia_compilato=='1'" [(ngModel)]="domanda_in_modifica.html_maxlength" min="1" title="Lunghezza massima in caratteri (solo per campi testuali)" />
+        </div>
+        <div class="col">
+            <label>Pattern</label>
+            <input class="form-control" type="text" [disabled]="questionario.gia_compilato=='1'" [(ngModel)]="domanda_in_modifica.html_pattern" title="Espressione regolare. Es. [A-Za-z]{3} (solo per campi testuali)" />
+        </div>
+    </div>
+    <div class="row" style="margin:10px 0px;" *ngIf="setDisableNumber && risposta_aperta">
+        <div class="col">
+            <label>Minimo</label>
+            <input class="form-control" type="number" [disabled]="questionario.gia_compilato=='1'" [(ngModel)]="domanda_in_modifica.html_min" title="Minimo (solo per campi numerici)" />
+        </div>
+        <div class="col">
+            <label>Massimo</label>
+            <input class="form-control" type="number" [disabled]="questionario.gia_compilato=='1'" [(ngModel)]="domanda_in_modifica.html_max" title="Massimo (solo per campi numerici)" />
+        </div>
+    </div>
+    <div class="row" style="margin-top:15px;padding-bottom: 35px;">
+        <div class="col">
+            <button class="btn btn-success btn2" *ngIf="!domanda.editing" alt="Modifica Domanda" title="Modifica Domanda" (click)="goToEdit()" [disabled]="questionario.gia_compilato=='1'"><i class="fa fa-edit"></i></button>
+            <button class="btn btn-danger btn2" *ngIf="!domanda.editing" (click)="delete(this.domanda)" [disabled]="questionario.gia_compilato=='1'"><i class="fa fa-trash-alt"></i></button>
+
+            <button style="margin-right: 5px;margin-left: 15px;" class="btn btn-success" *ngIf="domanda.editing" alt="Salva Domanda" title="Salva Domanda" (click)="save()">Salva</button>
+            <button style="margin-right: 5px;" class="btn btn-danger" *ngIf="domanda.editing" (click)="returnFromEdit()">Chiudi Domanda</button>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom:30px;padding-top: 30px;border-top:1px solid;" *ngIf="domanda_in_modifica && !risposta_aperta">
+        <div class="col" style="padding:0px 30px;">
+            <div style="float:left;width:100%">
+                <h5 style="float:left">Risposte</h5>
+                <button style="float:right" (click)="creaRisposta()" [disabled]="questionario.gia_compilato=='1'|| domanda.progressivo_domanda == null" class="btn btn-success">Crea Nuova Risposta</button>
+            </div>
+
+            <table class="table table-striped" style="margin-top:30px;float:left;width:100%">
+                <thead style="background-color: #f8f9fa;">
+                    <th alt="Descrizione" title="Descrizione" style="padding-left: 15px;">Descrizione</th>
+                    <th alt="Valore Risposta" title="Valore Risposta">Valore Risposta</th>
+                    <th>Azioni</th>
+                </thead>
+                <tbody>
+                    <tr table-risposte-row *ngFor="let risposta_row of domanda_in_modifica.risposte; let i= index;" [questionario]="this.questionatioSelezionato" [domanda]="domanda_in_modifica" [rispostaCorrente]="risposta_row" [indexRisposta]="i" (itemRemoved)="removeItem(i)"></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!--<button style="margin-right: 5px;" class="btn btn-danger" *ngIf="domanda.editing" (click)="returnFromEdit()">Chiudi domanda</button>-->
+</td>
+
+
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div tabindex="0" style="outline: none !important; line-height: 38px;text-align: center;max-width:110px; text-overflow:ellipsis; white-space: nowrap;overflow: hidden;padding-left:.75rem;" title="" innerHTML="{{ truncate(descrizione_truncate) }}"></div>
+</td>
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="">{{ domanda.obbligatorieta_dec }}&nbsp;</div>
+</td>
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="">{{ domanda.coeff_valutazione }}&nbsp;</div>
+</td>
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="">{{ domanda.rimescola_dec }}&nbsp;</div>
+</td>
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="">{{ domanda.html_type_dec }}&nbsp;</div>
+</td>
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="">{{ domanda.html_maxlength }}&nbsp;</div>
+</td>
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="">{{ domanda.html_pattern }}&nbsp;</div>
+</td>
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="">{{ domanda.html_min }}&nbsp;</div>
+</td>
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="">{{ domanda.html_max }}&nbsp;</div>
+</td>
+<td *ngIf="!domanda.editing && !esisteDomandaEditing">
+    <div>
+        <button style="min-width: calc((100% / 3) - 35px);margin-right: 5px;" class="btn btn-success" *ngIf="!domanda.editing" alt="Modifica Domanda" title="Modifica Domanda" (click)="goToEdit()"><i class="fa fa-edit"></i></button>
+        <button style="min-width: calc((100% / 3) - 35px);margin-right: 5px;" class="btn btn-dark" *ngIf="!domanda.editing" alt="Duplica Domanda" title="Duplica Domanda" [disabled]="questionatioSelezionato.gia_compilato=='1'" (click)="duplicaDomanda()"><i class="fa fa-copy"></i></button>
+        <button style="min-width: calc((100% / 3) - 35px);margin-right: 5px;" class="btn btn-danger" *ngIf="!domanda.editing" (click)="delete(this.domanda)" [disabled]="questionatioSelezionato.gia_compilato=='1'" title="Elimina Domanda"><i class="fa fa-trash-alt"></i></button>
+        <button style="min-width: calc((100% / 3) - 35px);margin-right: 5px;" class="btn btn-success" *ngIf="domanda.editing" alt="Salva Domanda" [disabled]="questionatioSelezionato.gia_compilato=='1'" title="Salva Domanda" (click)="save()"><i class="fa fa-save"></i></button>
+        <button style="min-width: calc((100% / 3) - 35px);margin-right: 5px;" class="btn btn-danger" *ngIf="domanda.editing" (click)="returnFromEdit()" title="Annulla"><i class="fa fa-undo"></i></button>
+    </div>
+</td>

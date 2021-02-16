@@ -1,0 +1,48 @@
+<h3>Progetti</h3>
+<div style="float:left; width:100%">
+    <div style="float:left">
+        <button class="btn btn-dark" style="margin-right:5px;margin-top:10px;" (click)="crea()"><i class="fa fa-plus-square"></i> Nuovo progetto</button>
+        <button class="btn btn-dark" style="margin-top:10px;margin-right:5px;" (click)="refresh()"><i class="fa fa-sync"></i> Refresh</button>
+    </div>
+    <div style="float:right">
+        <filter-table [is_quest_prog]="true" [is_compilazioni]="false" (filter)="this.filter($event)" [count]="this.countProgetti"></filter-table>
+    </div>
+</div>
+<div style="background-color: #f8f9fa;float: left;width: 100%;margin-top:15px;">
+    <div style="float: left;width: 30%;padding: .75rem;text-align: center;font-weight: bold;" (click)="ordinamento('titolo')">Titolo
+        <i *ngIf="current_order == 'desc' && nome_colonna_ordinamento == 'titolo'" class="fa fa-sort-alpha-up"></i>
+        <i *ngIf="current_order == 'asc' && nome_colonna_ordinamento == 'titolo'" class="fa fa-sort-alpha-down"></i>
+    </div>
+    <div style="float: left;width: 10%;padding: .75rem;text-align: center;font-weight: bold;" (click)="ordinamento('stato')">Stato
+        <i *ngIf="current_order == 'desc' && nome_colonna_ordinamento == 'stato'" class="fa fa-sort-alpha-up"></i>
+        <i *ngIf="current_order == 'asc' && nome_colonna_ordinamento == 'stato'" class="fa fa-sort-alpha-down"></i>
+    </div>
+    <div style="float: left;width: 15%;padding: .75rem;text-align: center;font-weight: bold;" (click)="ordinamento('utente_creazione')">Creato da
+        <i *ngIf="current_order == 'desc' && nome_colonna_ordinamento == 'utente_creazione'" class="fa fa-sort-alpha-up"></i>
+        <i *ngIf="current_order == 'asc' && nome_colonna_ordinamento == 'utente_creazione'" class="fa fa-sort-alpha-down"></i>
+    </div>
+    <div style="float: left;width: 20%;padding: .75rem;text-align: center;font-weight: bold;" (click)="ordinamento('data_creazione')">Data Creazione
+        <i *ngIf="current_order == 'desc' && nome_colonna_ordinamento == 'data_creazione'" class="fa fa-sort-alpha-up"></i>
+        <i *ngIf="current_order == 'asc' && nome_colonna_ordinamento == 'data_creazione'" class="fa fa-sort-alpha-down"></i>
+    </div>
+    <div style="float: left;width:25%;padding: .75rem;text-align: center;font-weight: bold;">Azioni</div>
+</div>
+<div style="float: left;width: 100%;">
+    <table class="table table-striped">
+        <tbody>
+            <tr *ngFor="let p of progetti_visibili">
+                <!-- | truncate:30 -->
+                <td style="text-align:center;line-height: 38px;width:30%" title="{{p.titolo}}">{{p.titolo}}</td>
+                <td style="text-align:center;line-height: 38px;width: 10%;">{{p.stato_dec}}</td>
+                <td style="text-align:center;line-height: 38px;width: 15%;" title="{{ (p.cognome || '') +' '+ (p.nome || '')}}">{{ (p.cognome || '') +' '+ (p.nome || '')}}</td>
+                <td style="text-align:center;line-height: 38px;width: 20%;">{{p.data_creazione | date: 'dd/MM/yyyy h:mm:ss a'}}</td>
+                <td style="width:25%">
+                    <button class="{{p.gia_compilato=='1' ? 'btn btn3 btn-readonly' : 'btn btn3 btn-success'}}" routerLink="/progetti/{{p.id_progetto}}" routerLinkActive="active" [title]="p.gia_compilato=='1' ? 'Apri (read-only perchè esistono compilazioni)' : 'Apri'">
+                    <i class="fa fa-edit"></i></button>
+                    <button class="btn btn-dark btn3" (click)="duplica(p.id_progetto)" title="Duplica"><i class="fa fa-clone"></i></button>
+                    <button class="btn btn-danger btn3" [disabled]="p.gia_compilato=='1'" (click)="elimina(p.id_progetto)" [title]="p.gia_compilato=='1' ? 'Impossibile eliminare perchè esistono compilazioni' : 'Elimina'"><i class="fa fa-trash-alt"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

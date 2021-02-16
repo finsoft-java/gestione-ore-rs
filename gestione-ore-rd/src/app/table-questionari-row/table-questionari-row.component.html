@@ -1,0 +1,80 @@
+<td>
+    <div *ngIf="questionario.creating">
+
+        <ng-select2 *ngIf="select2Data[0] != null" [data]="select2Data" [options]="optionsSelect2" [(ngModel)]="questionario_in_modifica.id_questionario" [placeholder]="'Seleziona un questionario'">
+        </ng-select2>
+        <!--
+        <select class="form-control" style="width: auto;max-width: 140px;display: block;margin: 0px auto;" required [(ngModel)]="questionario_in_modifica.id_questionario" title="Scegliere un questionario dall'elenco">
+            <option *ngFor="let dato_questionario of elenco_questionari; index as i" value="{{dato_questionario.id_questionario}}">
+                {{ dato_questionario.titolo }}
+            </option>   
+        </select>
+        -->
+    </div>
+    <div *ngIf="!questionario.creating">
+        <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="{{ questionario.titolo_questionario}}">{{ questionario.titolo_questionario }}&nbsp;</div>
+    </div>
+</td>
+<td>
+    <div *ngIf="questionario.editing">
+        <select class="form-control" style="width: auto;max-width: 140px;display: block;margin: 0px auto;" required [(ngModel)]="questionario_in_modifica.tipo_questionario" title="Chi compila il questionario deve valutare qualcuno/qualcosa? O semplicemente rispondere a delle domande?">
+                    <option *ngFor="let option of tipo_questionario; index as i"
+                        value="{{i}}">
+                        {{ option }}
+                    </option>   
+                </select>
+    </div>
+    <div *ngIf="!questionario.editing">
+        <div tabindex="0" style="outline: none !important; line-height: 38px;text-align:center" title="">{{ questionario.tipo_questionario_dec }}&nbsp;</div>
+    </div>
+</td>
+
+<td>
+    <div *ngIf="questionario.editing">
+        <select class="form-control" style="width: auto;max-width: 140px;display: block;margin: 0px auto;" required [(ngModel)]="questionario_in_modifica.gruppo_compilanti" title="Quale gruppo di persone dovrà compilare il questionario?">
+            <option></option>
+            <option *ngFor="let option of gruppi; index as i"
+                value="{{i}}">
+                {{ option }}
+            </option>   
+        </select>
+    </div>
+    <div *ngIf="!questionario.editing">
+        <div title="" tabindex="0" style="outline: none !important; line-height: 38px;text-align:center">{{ questionario.gruppo_compilanti_dec }}</div>
+    </div>
+</td>
+<td>
+    <div *ngIf="questionario.editing">
+        <select class="form-control" style="width: auto;max-width: 140px;display: block;margin: 0px auto;" [(ngModel)]="questionario_in_modifica.gruppo_valutati" [required]="questionario_in_modifica.tipo_questionario == '1' ? false : true" [disabled]="questionario_in_modifica.tipo_questionario == '1' ? true : false"
+            title="Quale gruppo di persone verrà valutato?">
+                <option></option>
+            <option *ngFor="let option of gruppi; index as i"
+                value="{{i}}">
+                {{ option }}
+            </option>   
+        </select>
+    </div>
+    <div *ngIf="!questionario.editing">
+        <div title="" tabindex="0" style="outline: none !important; line-height: 38px;text-align:center">{{ questionario.gruppo_valutati_dec }}</div>
+    </div>
+</td>
+<td>
+    <div *ngIf="questionario.editing">
+        <div class="checkbox-container green">
+            <input type="checkbox" [(ngModel)]="questionario_in_modifica.autovalutazione_bool" [disabled]="questionario_in_modifica.tipo_questionario == '1' ? true : false" title="Il compilante dovrà anche valutare se stesso?" id="toggle1" />
+            <label for="toggle1"></label>
+        </div>
+    </div>
+    <div *ngIf="!questionario.editing">
+        <div title="" tabindex="0" style="outline: none !important; line-height: 38px;text-align:center">{{ questionario.autovalutazione_dec }}</div>
+    </div>
+</td>
+
+<td>
+    <div>
+        <button style="min-width: calc((100% / 2) - 10px); margin-right: 5px;" class="btn btn-success" *ngIf="!questionario.editing" (click)="goToEdit()" [disabled]="progetto.gia_compilato=='1'" title="{{progetto.gia_compilato=='1' ? 'Non &egrave; possibile modificare un progetto con questionari già compilati.' : 'Modifica'}}"><i class="fa fa-edit"></i></button>
+        <button style="min-width: calc((100% / 2) - 10px);" class="btn btn-danger" *ngIf="!questionario.editing" (click)="delete()" [disabled]="progetto.gia_compilato=='1'" title="{{progetto.gia_compilato=='1' ? 'Non &egrave; possibile modificare un progetto con questionari già compilati.' : 'Elimina'}}"><i class="fa fa-trash-alt"></i></button>
+        <button style="min-width: calc((100% / 2) - 10px); margin-right: 5px;" class="btn btn-success" *ngIf="questionario.editing" (click)="save()" title="{{progetto.gia_compilato=='1' ? 'Non &egrave; possibile modificare un progetto con questionari già compilati.' : 'Salva'}}"><i class="fa fa-save"></i></button>
+        <button style="min-width: calc((100% / 2) - 10px);" class="btn btn-danger" *ngIf="questionario.editing" (click)="returnFromEdit()" title="Indietro"><i class="fa fa-undo"></i></button>
+    </div>
+</td>

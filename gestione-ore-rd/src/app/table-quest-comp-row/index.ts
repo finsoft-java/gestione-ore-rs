@@ -1,0 +1,1 @@
+﻿export * from './table-quest-comp-row.component';

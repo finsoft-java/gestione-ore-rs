@@ -1,0 +1,1 @@
+﻿export * from './table-risposte-row.component';

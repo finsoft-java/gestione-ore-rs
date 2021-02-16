@@ -1,0 +1,33 @@
+<td>
+    <span style="padding-left:15px;">{{domanda.progressivo_sezione}}.{{domanda.progressivo_domanda}}</span>
+</td>
+<td>
+    <span style="width:90%;float:left" [innerHTML]="domanda.descrizione | safeHtml"></span>
+</td>
+<td>
+    <div *ngIf="domanda.risposte.length > 0">
+        <!-- DOMANDA CHIUSA -->
+        <div *ngFor="let opt of domanda.risposte">
+            <label for="enum_answer_{{opt.progressivo_domanda}}_{{opt.progressivo_risposta}}">
+              <input id="enum_answer_{{opt.progressivo_domanda}}_{{opt.progressivo_risposta}}" name="enum_answer_{{opt.progressivo_domanda}}_{{opt.progressivo_risposta}}" type="radio"  [checked]="domanda.risposta.progressivo_risposta == opt.progressivo_risposta" [(ngModel)]="domanda.risposta.progressivo_risposta" [value]="opt.progressivo_risposta">
+              {{ opt.descrizione }}
+            </label>
+        </div>
+        <!--
+        <select [(ngModel)]="domanda.risposta.progressivo_risposta" style="width: auto;float: left;" [disabled]="!questionario_modificabile" (change)="calc_flags()" class="form-control" [ngClass]="{'border_red': isValid === false}">
+            <option value="" selected></option>
+            <option *ngFor="let opt of domanda.risposte"value="{{opt.progressivo_risposta}}">{{ opt.descrizione }}</option>
+        </select>
+        -->
+        <span *ngIf="domanda.obbligatorieta" style="color:red">&nbsp;*</span>
+    </div>
+    <div *ngIf="domanda.risposte.length == 0">
+        <!-- DOMANDA APERTA -->
+        <input [(ngModel)]="domanda.risposta.risposta_aperta" [required]="domanda.obbligatorieta" [disabled]="!questionario_modificabile" [type]="domanda.html_type_dec || 'text'" [pattern]="domanda.html_pattern" [max]="domanda.html_max" [min]="domanda.html_min"
+            [maxlength]="domanda.html_maxlength" (keyup)="calc_flags()" style="width: auto;float: left;" [ngClass]="{'border_red': isValid === false}" class="form-control" title="{{titleRispostaControlli}}" />
+        <span *ngIf="domanda.obbligatorieta" style="color:red">&nbsp;*</span>
+    </div>
+</td>
+<td>
+    <textarea [(ngModel)]="domanda.risposta.note" class="form-control" style="width: auto;float: left;" [disabled]="!questionario_modificabile"></textarea>
+</td>

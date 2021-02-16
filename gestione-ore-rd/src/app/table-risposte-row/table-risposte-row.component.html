@@ -1,0 +1,25 @@
+<td>
+    <div *ngIf="rispostaCorrente.editing">
+        <input class="form-control" type="text" [(ngModel)]="rispostaCorrente.descrizione" title="" style="width: calc(100% - 30px);
+                    margin-left: 15px;" />
+    </div>
+    <div *ngIf="!rispostaCorrente.editing">
+        <div tabindex="0" style="outline: none !important; line-height: 38px;padding-left:15px;" title="">{{ rispostaCorrente.descrizione }}&nbsp;</div>
+    </div>
+</td>
+<td>
+    <div *ngIf="rispostaCorrente.editing">
+        <input class="form-control" type="number" [disabled]="questionario.gia_compilato=='1'" [(ngModel)]="rispostaCorrente.valore" title="" style="width: calc(100% - 30px);" />
+    </div>
+    <div *ngIf="!rispostaCorrente.editing">
+        <div tabindex="0" style="outline: none !important; line-height: 38px;padding-left:15px;" title="">{{ rispostaCorrente.valore }}&nbsp;</div>
+    </div>
+</td>
+<td>
+    <div>
+        <button class="btn btn-success btn2" *ngIf="!rispostaCorrente.editing" alt="Modifica risposta" title="Modifica risposta" (click)="goToEdit()"><i class="fa fa-edit"></i></button>
+        <button class="btn btn-danger btn2" *ngIf="!rispostaCorrente.editing" [disabled]="questionario.gia_compilato=='1'" title="Elimina risposta" (click)="delete()"><i class="fa fa-trash-alt"></i></button>
+        <button class="btn btn-success btn2" *ngIf="rispostaCorrente.editing" alt="Salva risposta" title="Salva risposta" (click)="save()"><i class="fa fa-save"></i></button>
+        <button class="btn btn-danger btn2" *ngIf="rispostaCorrente.editing" title="Annulla" (click)="returnFromEdit()"><i class="fa fa-undo"></i></button>
+    </div>
+</td>

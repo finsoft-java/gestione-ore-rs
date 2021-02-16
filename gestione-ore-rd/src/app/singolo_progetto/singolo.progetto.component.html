@@ -1,0 +1,135 @@
+<div *ngIf="progetto == null">
+    Loading...
+</div>
+<div *ngIf="progetto != null">
+
+    <form style="margin-bottom:30px">
+        <h3>Progetto</h3> <br>
+
+        <div *ngIf="this.progetto.gia_compilato=='1'" style="margin-bottom: 30px;background-color: #c82333;padding: 15px;font-size: 16px;font-weight: 500;color: #fff;border-radius: 10px;text-align: center;">
+            Attenzione! Qualcuno ha gi&agrave; iniziato a compilare questionari di questo progetto.<br/> Modificare con cautela.
+        </div>
+
+        <h5>Dati Generali</h5> <br>
+        <div class="row">
+            <div class=" col">
+                <label for="titolo_progetto">Titolo Progetto</label>
+                <input type="text" class="form-control" title="{{progetto.gia_compilato=='1' ? 'Non &egrave; possibile modificare un progetto con questionari già compilati.' : 'Un breve titolo per questo Progetto'}}" id="titolo_progetto" placeholder="Titolo Progetto"
+                    [(ngModel)]="progetto.titolo" [ngModelOptions]="{standalone: true}">
+            </div>
+            <div class="col">
+                <label for="stato_progetto">Stato</label>
+                <select class="form-control" required [disabled]="progetto.gia_compilato=='1'" title="{{progetto.gia_compilato=='1' ? 'Non &egrave; possibile modificare un progetto con questionari già compilati.' : 'Solo i questionari di progetti Validi possono essere compilati'}}"
+                    [(ngModel)]="progetto.stato" [ngModelOptions]="{standalone: true}">
+                    <option *ngFor="let dati_stato_progetto of stato_progetto; index as i"
+                        value="{{i}}">
+                        {{ dati_stato_progetto }}
+                    </option>   
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div style="float:left;margin-right:5px;">
+                    <button class="btn btn-success" title="{{progetto.gia_compilato=='1' ? 'Non &egrave; possibile modificare un progetto con questionari già compilati.' : ''}}" [disabled]="progetto.gia_compilato=='1'" style="margin-top:15px;" (click)="updProgetto()">Salva Progetto</button>
+                </div>
+                <div style="float:left;margin-right:5px;">
+                    <button *ngIf="progetto.gia_compilato=='1'" class="btn btn-dark" (click)="download()" style="margin-top:15px;">Scarica (XLSX)</button>
+                </div>
+                <div style="float:left;margin-right:5px;">
+                    <button *ngIf="progetto.gia_compilato=='1' && progetto.stato == '1'" class="btn btn-danger" (click)="completa()" title="Manda il progetto in stato 'Completato'" style="margin-top:15px;">Completa progetto</button>
+                </div>
+                <div style="float:left;margin-right:5px;">
+                    <button *ngIf="progetto.stato != '2'" class="btn btn-danger" (click)="annulla()" title="Manda il progetto in stato 'Annullato'" style="margin-top:15px;">Annulla progetto</button>
+                </div>
+                <div style="float:left;">
+                    <button *ngIf="progetto.stato > '1'" class="btn btn-danger" (click)="riapri()" title="Rimanda il progetto in stato 'Valido'" style="margin-top:15px;">Riapri progetto</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+    <h5>Questionari per Progetto</h5>
+    <button class="btn btn-success" style="margin-right:5px;margin-top:15px;" (click)="newQuestionario()" title="{{progetto.gia_compilato=='1' ? 'Non &egrave; possibile modificare un progetto con questionari già compilati.' : ''}}">Aggiungi Questionario</button>
+    <button class="btn btn-dark" style="margin-right:5px;margin-top:15px;" (click)="refreshQuestionario()">Refresh</button>
+
+    <table class="table table-striped" style="margin-top:30px;">
+        <thead style="background-color: #f8f9fa;">
+            <th style="padding:.75rem">Nome Questionario</th>
+            <th style="padding:.75rem">Tipo Questionario</th>
+            <th style="padding:.75rem">Gruppo Compilanti</th>
+            <th style="padding:.75rem">Gruppo Valutati</th>
+            <th style="padding:.75rem">Autovalutazione</th>
+            <th style="padding:.75rem">Azioni</th>
+        </thead>
+        <tbody>
+            <tr table-questionari-row *ngFor="let questionario_row of progetto.questionari; let i= index;" [progetto]="progetto" [questionario]="questionario_row" [indexQuestionario]="i" (itemRemoved)="removeItem($event)"></tr>
+        </tbody>
+    </table>
+
+</div>
+
+
+<br/>
+<h5>Utenti per Progetto</h5>
+<div style="float:left; width:calc(50% - 60px) ;margin-right:10px;margin-top: 30px;">
+    <label>Utenze Osai</label>
+    <select class="select2" [(ngModel)]="utentiSelect" style="width:100%;min-height: 500px;max-height: 500px;overflow-y: scroll;" id="all_user" multiple>
+        <ng-container *ngFor="let dati_stato_progetto of progettoUtenti; index as i">
+            <option *ngIf="!dati_stato_progetto.responsabileL1 && !dati_stato_progetto.responsabileL2 && !dati_stato_progetto.utenteFinale" 
+                value="{{i}}">
+                {{ dati_stato_progetto.nominativo }}
+            </option>   
+        </ng-container>
+    </select>
+</div>
+
+<div style="float:left;width:calc(50% + 50px);margin-top: 40px;">
+    <div style="float:left;width:100%;margin-bottom:30px;">
+        <div style="float:left;width:50px;margin-right:10px;margin-top: 40px;">
+            <div style="float:left;border:1px solid;width:100%;height:37px;margin-right:10px;margin-bottom:10px;text-align: center;line-height: 50px;" (click)="goToSelect('l1')"><i class="fa fa-angle-right fa-2x"></i></div>
+            <div style="float:left;border:1px solid; width:100%;height:37px;margin-right:10px;text-align: center;line-height: 50px;" (click)="returnToSelect('l1')"><i class="fa fa-angle-left fa-2x"></i></div>
+        </div>
+        <label>Responsabili L1</label>
+        <select class="select2" [(ngModel)]="utentiSelect" style="width:calc(100% - 60px);max-height: 120px;min-height: 120px;" id="l1" multiple>
+            <ng-container *ngFor="let dati_stato_progetto of progettoUtenti; index as i">
+                <option *ngIf="dati_stato_progetto.responsabileL1 && !dati_stato_progetto.responsabileL2 && !dati_stato_progetto.utenteFinale" 
+                    value="{{i}}">
+                    {{ dati_stato_progetto.nominativo }}
+                </option>   
+            </ng-container>
+        </select>
+    </div>
+    <div style="float:left;width:100%;margin-bottom:30px;">
+        <div style="float:left;width:50px;margin-right:10px;margin-top: 40px;">
+            <div style="float:left;border:1px solid; width:100%;height:37px;margin-right:10px;margin-bottom:10px;text-align: center;line-height: 50px;" (click)="goToSelect('l2')"><i class="fa fa-angle-right fa-2x"></i></div>
+            <div style="float:left;border:1px solid; width:100%;height:37px;margin-right:10px;text-align: center;line-height: 50px;" (click)="returnToSelect('l2')"><i class="fa fa-angle-left fa-2x"></i></div>
+        </div>
+
+        <label>Responsabili L2</label>
+        <select class="select2" [(ngModel)]="utentiSelect" style="width:calc(100% - 60px);max-height: 120px;min-height: 120px;" id="l2" multiple>
+            <ng-container *ngFor="let dati_stato_progetto of progettoUtenti; index as i">
+                <option *ngIf="!dati_stato_progetto.responsabileL1 && dati_stato_progetto.responsabileL2 && !dati_stato_progetto.utenteFinale" 
+                    value="{{i}}">
+                    {{ dati_stato_progetto.nominativo }}
+                </option>   
+            </ng-container>
+        </select>
+    </div>
+    <div style="float:left;width:100%;margin-bottom:30px;">
+        <div style="float:left;width:50px;margin-right:10px;margin-top: 40px;">
+            <div style="float:left;border:1px solid; width:100%;height:37px;margin-right:10px;margin-bottom:10px;text-align: center;line-height: 50px;" (click)="goToSelect('uf')"><i class="fa fa-angle-right fa-2x"></i></div>
+            <div style="float:left;border:1px solid; width:100%;height:37px;margin-right:10px;text-align: center;line-height: 50px;" (click)="returnToSelect('uf')"><i class="fa fa-angle-left fa-2x"></i></div>
+        </div>
+        <label>Utenti Finali</label>
+        <select class="select2" [(ngModel)]="utentiSelect" style="width:calc(100% - 60px);max-height: 120px;min-height: 120px;" id="uf" multiple>
+            <ng-container *ngFor="let dati_stato_progetto of progettoUtenti; index as i">
+                <option *ngIf="!dati_stato_progetto.responsabileL1 && !dati_stato_progetto.responsabileL2 && dati_stato_progetto.utenteFinale" 
+                    value="{{i}}">
+                    {{ dati_stato_progetto.nominativo }}
+                </option>   
+            </ng-container>
+        </select>
+    </div>
+</div>
