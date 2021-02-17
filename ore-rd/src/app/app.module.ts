@@ -13,6 +13,7 @@ import { EsportazioneRapportiniComponent } from './esportazione-rapportini/espor
 import { ReportCompattoComponent } from './report-compatto/report-compatto.component';
 import { ReportCompletoComponent } from './report-completo/report-completo.component';
 import { GeneraDatiTestComponent } from './genera-dati-test/genera-dati-test.component';
+import { ProgettoDettaglioComponent } from './progetto-dettaglio/progetto-dettaglio.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { GeneraDatiTestComponent } from './genera-dati-test/genera-dati-test.com
     EsportazioneRapportiniComponent,
     ReportCompattoComponent,
     ReportCompletoComponent,
-    GeneraDatiTestComponent
+    GeneraDatiTestComponent,
+    ProgettoDettaglioComponent
   ],
   imports: [
     BrowserModule,
