@@ -1,7 +1,6 @@
 import { ProgettiComponent } from './progetti/progetti.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
 const routes: Routes = [
   { path: 'progetti', component: ProgettiComponent},
 /*  { path: 'questionari_compilati', component: QuestionariDaCompilareComponent, data: {storico: true}, canActivate: [AuthGuard] },
