@@ -1,1 +1,0 @@
-﻿export * from './table-questionari-row.component';

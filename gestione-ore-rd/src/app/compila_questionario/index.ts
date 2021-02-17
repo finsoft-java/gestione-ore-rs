@@ -1,1 +1,0 @@
-export * from './compila_questionario.component';
