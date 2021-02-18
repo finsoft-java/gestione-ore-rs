@@ -1,27 +1,57 @@
-<nav style="padding:15px;">
-    <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu" style="height: 30px;">
-      <mat-icon>menu</mat-icon>
-      <!--<span>Menu</span>-->
-    </button>
-    <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="navigateMenu('progetti')">
-          <mat-icon>list</mat-icon>
-          <span>Progetti</span>
-      </button>
-        <button mat-menu-item (click)="navigateMenu('tipologia')">
-        <mat-icon>voicemail</mat-icon>
-        <span>Tipologia Spesa</span>
-      </button>
-        <button mat-menu-item>
-        <mat-icon>notifications_off</mat-icon>
-        <span>Disable alerts</span>
-      </button>
-    </mat-menu>
-</nav>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <nav style="padding:15px;">
+                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu" style="height: 30px;">
+            <mat-icon>menu</mat-icon>
+            <!--<span>Menu</span>-->
+          </button>
+                <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="router_frontend.navigate(['progetti'])">
+                <mat-icon>list</mat-icon>
+                <span>Progetti</span>
+            </button>
+                    <button mat-menu-item (click)="router_frontend.navigate(['tipologie-spesa'])">
+              <mat-icon>list</mat-icon>
+              <span>Tipologia Spesa</span>
+            </button>
+
+                    <button mat-menu-item (click)="router_frontend.navigate(['importazione-lul'])">
+              <mat-icon>list</mat-icon>
+              <span>Importazione Lul</span>
+            </button>
+
+                    <button mat-menu-item (click)="router_frontend.navigate(['importazione-rapportini'])">
+              <mat-icon>list</mat-icon>
+              <span>Importazione Rapportini</span>
+            </button>
+
+                    <button mat-menu-item (click)="router_frontend.navigate(['esportazione-rapportini'])">
+              <mat-icon>list</mat-icon>
+              <span>Esportazione Rapportini</span>
+            </button>
+
+                    <button mat-menu-item (click)="router_frontend.navigate(['report-compatto'])">
+              <mat-icon>list</mat-icon>
+              <span>Report Compatto</span>
+            </button>
+                    <button mat-menu-item (click)="router_frontend.navigate(['report-completo'])">
+              <mat-icon>list</mat-icon>
+              <span>Report Completo</span>
+            </button>
+                    <button mat-menu-item (click)="router_frontend.navigate(['dati-test'])">
+              <mat-icon>list</mat-icon>
+              <span>Dati Test</span>
+            </button>
+                </mat-menu>
+            </nav>
+        </div>
+        <div class="logo"><img src="assets/img/logo.png"></div>
+    </div>
+</div>
 <div class="content" role="main">
     <div class="container">
         <router-outlet></router-outlet>
-        <!-- Footer -->
     </div>
     <footer>
         footer

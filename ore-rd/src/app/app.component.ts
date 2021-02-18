@@ -8,14 +8,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class AppComponent {
   title = 'ore-rd';
+  router_frontend: Router;
   constructor(private route: ActivatedRoute, private router: Router) {
+    this.router_frontend = router;
   }
-  navigateMenu(page: string) {
-    if(page === 'progetti'){
-      this.router.navigate(['/progetti']);
-    }else if(page === 'tipologia'){
-      this.router.navigate(['/tipologie-spesa']);
-    }
-  }
+
 }
 
