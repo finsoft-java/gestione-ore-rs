@@ -9,9 +9,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class AppComponent {
   title = 'ore-rd';
   router_frontend: Router;
+  showFiller = false;
   constructor(private route: ActivatedRoute, private router: Router) {
     this.router_frontend = router;
   }
+  changeIcon(){
 
+  }
 }
 

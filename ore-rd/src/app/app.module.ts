@@ -16,6 +16,7 @@ import { ReportCompattoComponent } from './report-compatto/report-compatto.compo
 import { ReportCompletoComponent } from './report-completo/report-completo.component';
 import { GeneraDatiTestComponent } from './genera-dati-test/genera-dati-test.component';
 import { ProgettoDettaglioComponent } from './progetto-dettaglio/progetto-dettaglio.component';
+import { MatSidenavModule } from '@angular/material/sidenav';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { ProgettoDettaglioComponent } from './progetto-dettaglio/progetto-dettag
     BrowserAnimationsModule,
     NgMaterialMultilevelMenuModule,
     MatIconModule,
-    MatMenuModule
+    MatMenuModule,
+    MatSidenavModule
   ],
   providers: [],
   bootstrap: [AppComponent]
