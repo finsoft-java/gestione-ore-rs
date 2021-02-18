@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MultilevelMenuService, MultilevelNodes } from 'ng-material-multilevel-menu';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -8,5 +8,14 @@ import { MultilevelMenuService, MultilevelNodes } from 'ng-material-multilevel-m
 })
 export class AppComponent {
   title = 'ore-rd';
+  constructor(private route: ActivatedRoute, private router: Router) {
+  }
+  navigateMenu(page: string) {
+    if(page === 'progetti'){
+      this.router.navigate(['/progetti']);
+    }else if(page === 'tipologia'){
+      this.router.navigate(['/tipologie-spesa']);
+    }
+  }
 }
 
