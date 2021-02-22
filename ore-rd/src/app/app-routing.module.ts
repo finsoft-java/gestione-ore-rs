@@ -9,16 +9,19 @@ import { ProgettiComponent } from './progetti/progetti.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ProgettoDettaglioComponent } from './progetto-dettaglio/progetto-dettaglio.component';
+import { LoginComponent } from './login/login.component';
+import { AuthGuard } from './_guards/auth.guard';
 const routes: Routes = [
-  { path: 'progetti', component: ProgettiComponent},
-  { path: 'progetto/:id', component: ProgettoDettaglioComponent},
-  { path: 'tipologie-spesa', component: TipologiaSpesaComponent},
-  { path: 'importazione-lul', component: ImportazioneLulComponent},
-  { path: 'importazione-rapportini', component: ImportazioneRapportiniComponent},
-  { path: 'esportazione-rapportini', component: EsportazioneRapportiniComponent},
-  { path: 'report-compatto', component: ReportCompattoComponent},
-  { path: 'report-completo', component: ReportCompletoComponent},
-  { path: 'dati-test', component: GeneraDatiTestComponent},
+  { path: 'login', component: LoginComponent},
+  { path: 'progetti', component: ProgettiComponent, canActivate:[AuthGuard]},
+  { path: 'progetto/:id', component: ProgettoDettaglioComponent, canActivate:[AuthGuard]},
+  { path: 'tipologie-spesa', component: TipologiaSpesaComponent, canActivate:[AuthGuard]},
+  { path: 'importazione-lul', component: ImportazioneLulComponent, canActivate:[AuthGuard]},
+  { path: 'importazione-rapportini', component: ImportazioneRapportiniComponent, canActivate:[AuthGuard]},
+  { path: 'esportazione-rapportini', component: EsportazioneRapportiniComponent, canActivate:[AuthGuard]},
+  { path: 'report-compatto', component: ReportCompattoComponent, canActivate:[AuthGuard]},
+  { path: 'report-completo', component: ReportCompletoComponent, canActivate:[AuthGuard]},
+  { path: 'dati-test', component: GeneraDatiTestComponent, canActivate:[AuthGuard]},
   { path: '**', redirectTo: 'progetti' }
 ];
 
