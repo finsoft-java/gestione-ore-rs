@@ -21,10 +21,14 @@
     "@angular/platform-browser": "~11.2.0",
     "@angular/platform-browser-dynamic": "~11.2.0",
     "@angular/router": "~11.2.0",
+    "bootstrap": "^4.6.0",
+    "jquery": "^3.5.1",
     "ng-material-multilevel-menu": "^5.5.3",
     "rxjs": "~6.6.0",
+    "save": "^2.4.0",
     "tslib": "^2.0.0",
-    "zone.js": "~0.11.3"
+    "zone.js": "~0.11.3",
+    "ngx-take-until-destroy": "^5.4.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1102.0",
