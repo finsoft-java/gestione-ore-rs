@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from '../_models/index';
 
@@ -9,9 +9,15 @@ import { User } from '../_models/index';
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
     public currentUserSubject: User;
+    nameChange: Subject<string> = new Subject<string>();
 
-    constructor(private http: HttpClient) {
+    constructor (private http: HttpClient) {
       this.currentUserSubject = new User;
+    }
+
+    changeUsername(username: string) {
+      this.currentUserSubject.username = username;
+      this.nameChange.next(username);
     }
 
     login(username: string, password: string) {
@@ -22,7 +28,7 @@ export class AuthenticationService {
         //return this.http.post<any>(url, body).pipe(map(response => {
         //    if (response) {
         localStorage.setItem('currentUser', JSON.stringify(username));
-        this.currentUserSubject.username = username;
+        this.changeUsername(username);
         //    }
         //    return response;
         // }));

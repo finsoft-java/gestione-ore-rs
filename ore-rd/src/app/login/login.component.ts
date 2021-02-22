@@ -25,12 +25,10 @@ export class LoginComponent implements OnInit {
   get f() { return this.form.controls; }
 
   submit() {
-    console.log(this.form);
     if (!this.form.invalid) {
       this.authenticationService.login(this.f.username.value,this.f.password.value);
       if(this.authenticationService.isAuthenticated()){
-        this.authenticationService.currentUserSubject.username = this.f.username.value;
-        console.log('submit',this.authenticationService.currentUserSubject.username);
+        this.authenticationService.changeUsername(this.f.username.value);
         this.router.navigate(['/progetti']);
       }
     }
