@@ -1,3 +1,4 @@
+import { FormGroup, FormControl } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -8,7 +9,6 @@ import { Component, OnInit } from '@angular/core';
 export class ProgettoDettaglioComponent implements OnInit {
 
   constructor() { }
-
   ngOnInit(): void {
   }
 

@@ -1,5 +1,14 @@
-.mat-form-field {
-    width: 49%;
+.fraz2_width>.mat-form-field {
+    width: calc(50% - 5px);
+}
+
+.max_width>.mat-form-field {
+    width: 100%;
+}
+
+.max_width,
+.fraz2_width {
+    margin-bottom: 15px !important;
 }
 
 .mat-paginator {
