@@ -1,1 +1,92 @@
-<p>progetto-dettaglio works!</p>
+<h5 style="margin-bottom: 30px;text-align:center">Modifica / Inserimento Progetto</h5>
+
+<div>
+    <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
+        <mat-form-field appearance="fill">
+            <mat-label>Titolo</mat-label>
+            <input matInput placeholder="Inserisci il Titolo">
+            <mat-hint>required</mat-hint>
+        </mat-form-field>
+    </p>
+</div>
+
+<div>
+    <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+        <mat-form-field appearance="fill" style="margin-right: 10px;">
+            <mat-label>Acronimo</mat-label>
+            <input matInput placeholder="Inserisci l'acronimo">
+            <mat-hint>required</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+            <mat-label>Grant Number</mat-label>
+            <input matInput placeholder="Inserisci il Grant Number">
+            <mat-hint>required</mat-hint>
+        </mat-form-field>
+    </p>
+</div>
+<div>
+    <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
+        <mat-form-field appearance="fill" style="float:right">
+            <mat-label>Abstract</mat-label>
+            <textarea matInput placeholder="Inserisci l'Abstract"></textarea>
+        </mat-form-field>
+    </p>
+</div>
+<div>
+    <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+        <mat-form-field appearance="fill" style="margin-right: 10px;">
+            <mat-label>Data Inizio</mat-label>
+            <input matInput [matDatepicker]="picker">
+            <mat-datepicker-toggle matSuffix [for]="picker">
+                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-hint>required</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Data Fine</mat-label>
+            <input matInput [matDatepicker]="picker2">
+            <mat-datepicker-toggle matSuffix [for]="picker2">
+                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+            <mat-hint>required</mat-hint>
+        </mat-form-field>
+    </p>
+</div>
+<div>
+    <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+        <mat-form-field appearance="fill" style="margin-right: 10px;">
+            <mat-label>Monte Ore Totale</mat-label>
+            <input matInput placeholder="Inserisci il Monte Ore Totale">
+            <mat-hint>required</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Costo Medio Uomo</mat-label>
+            <input matInput placeholder="Inserisci il Costo Medio Uomo">
+            <mat-hint>required</mat-hint>
+        </mat-form-field>
+    </p>
+</div>
+
+<div>
+    <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+        <mat-form-field appearance="fill">
+            <mat-label>Tipo Costo Panthera</mat-label>
+            <mat-select>
+                <mat-option value="primary">Poco Costoso</mat-option>
+                <mat-option value="accent">Molto Costoso</mat-option>
+                <mat-option value="warn">Azz</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill" style="float:right">
+            <mat-label>Matricola Supervisor</mat-label>
+            <mat-select>
+                <mat-option value="primary">1</mat-option>
+                <mat-option value="accent">2</mat-option>
+                <mat-option value="warn">3</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </p>
+</div>
