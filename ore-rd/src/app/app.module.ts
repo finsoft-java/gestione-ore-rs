@@ -1,3 +1,4 @@
+import { EditableComponent } from './editable/editable.component';
 import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,7 +36,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReportCompletoComponent,
     GeneraDatiTestComponent,
     ProgettoDettaglioComponent,
-    LoginComponent
+    LoginComponent,
+    EditableComponent
   ],
   imports: [
     HttpClientModule,
