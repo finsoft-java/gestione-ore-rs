@@ -26,6 +26,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 @NgModule({
   declarations: [
     AppComponent,
@@ -55,12 +57,11 @@ import { MatSortModule } from '@angular/material/sort';
     FormsModule,
     ReactiveFormsModule,
     MatTableModule,
-    MatInputModule,
     MatNativeDateModule,
-    MatInputModule,
-    MatTableModule,
     MatPaginatorModule,
-    MatSortModule
+    MatSortModule,
+    MatFormFieldModule,
+    MatSelectModule
   ],
   providers: [],
   bootstrap: [AppComponent],
