@@ -1,0 +1,7 @@
+{
+    "comment": "Leggi https://clivern.com/how-to-install-dependencies-with-php-composer/ per usare Composer",
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.16",
+        "firebase/php-jwt": "^5.2"
+    }
+}
