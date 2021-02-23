@@ -41,6 +41,7 @@ ore-rd/typings/
 
 # Optional npm cache directory
 ore-rd/.npm
+ore-rd/package-lock.json
 
 # Optional eslint cache
 ore-rd/.eslintcache
@@ -91,3 +92,7 @@ ws/!.vscode/extensions.json
 
 # dist
 ore-rd/dist
+
+# PHP Composer
+ws/composer.lock
+ws/composer.phar
