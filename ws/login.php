@@ -1,7 +1,5 @@
 <?php
-
 // Per i test: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJub21lX3V0ZW50ZSI6ImZpbnNvZnQiLCJub21lIjoiTWFyaW8iLCJjb2dub21lIjoiUm9zc2kiLCJlbWFpbCI6ImZpbnNvZnRAZXhhbXBsZS5jb20iLCJydW9sbyI6IjIiLCJydW9sb19kZWMiOiJBbW1pbmlzdHJhdG9yZSJ9.uGM9xHtv8dYMrjPL5suIh8I2gY1lOPaZ7QNtXsBJ45A
-
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
@@ -39,7 +37,7 @@ if ($user) {
 function check_and_load_user($username, $pwd) {
     // PRIMA, proviamo la backdoor
     if ($username == 'finsoft' && $pwd == 'finsoft2020') {
-        $user = [];
+        $user = (object) [];
         $user->nome_utente = 'Finsoft User';
         $user->nome = 'User';
         $user->cognome = 'Finsoft';

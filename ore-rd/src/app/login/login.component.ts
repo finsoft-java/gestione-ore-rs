@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { first } from 'rxjs/operators';
-
 @Component({
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
@@ -27,10 +26,6 @@ export class LoginComponent implements OnInit {
   submit() {
     if (!this.form.invalid) {
       this.authenticationService.login(this.f.username.value,this.f.password.value);
-      if(this.authenticationService.isAuthenticated()){
-        this.authenticationService.changeUsername(this.f.username.value);
-        this.router.navigate(['/progetti']);
-      }
     }
   }
 

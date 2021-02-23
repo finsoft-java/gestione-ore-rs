@@ -1,17 +1,17 @@
+import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from '../_models/index';
-
-//import { User } from '@/_models';
+import { environment } from './../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
     public currentUserSubject: User;
     nameChange: Subject<string> = new Subject<string>();
 
-    constructor (private http: HttpClient) {
+    constructor (private http: HttpClient,private router: Router) {
       this.currentUserSubject = new User;
     }
 
@@ -21,17 +21,21 @@ export class AuthenticationService {
     }
 
     login(username: string, password: string) {
-        const url = `http://localhost/ore-rd/ws/login.php`;
+      
+        const url = environment.wsUrl+`login.php`;
         const body = JSON.stringify({username: username,
                                      password: password});
-
-        //return this.http.post<any>(url, body).pipe(map(response => {
-        //    if (response) {
-        localStorage.setItem('currentUser', JSON.stringify(username));
-        this.changeUsername(username);
-        //    }
-        //    return response;
-        // }));
+        this.http.post<any>(url, body).subscribe(data => {
+          if (data) {
+            localStorage.setItem('currentUser', data["value"].username);
+            this.changeUsername(username);
+            if(this.isAuthenticated()){
+              this.router.navigate(['/progetti']);
+            }
+          }else{
+            alert('da gestire')
+          }
+        });
     }
     public isAuthenticated(): boolean {
       const token = localStorage.getItem('currentUser');
