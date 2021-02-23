@@ -30,7 +30,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'e0b49d5f17457e59dccd4fb2469f9411a26d84a9',
+    'reference' => 'c65f7caeda78a904b4636027c78a7f5b254e6eb0',
     'name' => '__root__',
   ),
   'versions' => 
@@ -42,7 +42,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'e0b49d5f17457e59dccd4fb2469f9411a26d84a9',
+      'reference' => 'c65f7caeda78a904b4636027c78a7f5b254e6eb0',
     ),
     'ezyang/htmlpurifier' => 
     array (
@@ -142,6 +142,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '408d5eafb83c57f6365a3ca330ff23aa4a5fa39b',
+    ),
+    'setasign/fpdf' => 
+    array (
+      'pretty_version' => '1.8.2',
+      'version' => '1.8.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'd77904018090c17dc9f3ab6e944679a7a47e710a',
     ),
     'symfony/polyfill-mbstring' => 
     array (
