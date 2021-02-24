@@ -89,6 +89,54 @@ function utente_admin() {
     return $logged_user->ruolo == '2';
 }
 
+/*
+Esegue un comado SQL SELECT e lo ritorna come array di oggetti, oppure lancia un print_error
+*/
+function select_list($sql) {
+    if ($result = mysqli_query($con, $sql)) {
+        $arr = array();
+        while ($row = mysqli_fetch_assoc($result))
+        {
+            $arr[] = $row;
+        }
+        return $arr;
+    } else {
+        print_error(500, $con ->error);
+    }
+}
+
+/*
+Esegue un comado SQL SELECT ritorna solo la prima colonna come array, oppure lancia un print_error
+*/
+function select_column($sql) {
+    if ($result = mysqli_query($con, $sql)) {
+        $arr = array();
+        while ($row = mysqli_fetch_array($result))
+        {
+            $arr[] = $row[0];
+        }
+        return $arr;
+    } else {
+        print_error(500, $con ->error);
+    }
+}
+
+/*
+Esegue un comado SQL SELECT e lo ritorna come singolo oggetto, oppure lancia un print_error
+*/
+function select_single($sql) {
+    if ($result = mysqli_query($con, $sql)) {
+        if ($row = mysqli_fetch_assoc($result))
+        {
+            return $row;
+        } else {
+            return null;
+        }
+    } else {
+        print_error(500, $con ->error);
+    }
+}
+
 // funzioni per creare comandi SQL
 function sql_str_or_null($s) {
     if ($s || $s === 0 || $s === '0'){
