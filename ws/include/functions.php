@@ -223,4 +223,19 @@ function insert_select($table, $lista_tutte_le_colonne, $mappa_valori_da_modific
     return $sql;
 }
 
+/**
+Estrae un indice tra 1 e count($probabilities), con probabilità non uniforme
+La probabilità di estrarre $i è $probabilities[i]/array_sum($probabilities)
+@param $probabilities: array di numeri (probabilità)
+*/
+function random_probability($probabilities) {
+    $rand = rand(0, array_sum($probabilities)-1);
+    $cum = 0;
+    for ($i = 0; $i < count($probabilities); ++$i) {
+        $cum += $probabilities[$i];
+        if ($rand < $cum) return $i;
+    }
+    // should never be here
+}
+    
 ?>
