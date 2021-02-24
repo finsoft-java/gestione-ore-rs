@@ -9,6 +9,7 @@ import { first } from 'rxjs/operators';
 })
 export class LoginComponent implements OnInit {
   error: string= '';
+    messaggio_errore_login = false;
 
   constructor(public fb: FormBuilder,
     private router: Router,
@@ -25,7 +26,7 @@ export class LoginComponent implements OnInit {
 
   submit() {
     if (!this.form.invalid) {
-      this.authenticationService.login(this.f.username.value,this.f.password.value);
+      return this.authenticationService.login(this.f.username.value,this.f.password.value);
     }
   }
 

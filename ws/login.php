@@ -4,6 +4,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
 include("./include/all.php");
+include("./include/JWT.php");
 // $con = connect();
 
 $user = '';
@@ -16,7 +17,6 @@ if($request != ''){
     $password = $request->password;
     $user = check_and_load_user($username, $password);
 }
-
 if ($user) {
     try {
         $user->username = JWT::encode($user, JWT_SECRET_KEY);
@@ -46,30 +46,26 @@ function check_and_load_user($username, $pwd) {
     }
 
     // POI, proviamo su LDAP
-
     $ldap = ldap_connect(AD_SERVER);
     if (FALSE === $ldap) {
         print_error(500, "Errore interno nella configurazione di Active Directory: " . AD_SERVER);
     }
-
     // We have to set this option for the version of Active Directory we are using.
     ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3) or die('Unable to set LDAP protocol version');
     ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0); // We need this for doing an LDAP search.
-
     $ldaprdn = $username . "@" . AD_DOMAIN;
+    
     $bind = @ldap_bind($ldap, $ldaprdn, $pwd);
     if ($bind) {
         $filter="(SamAccountName=$username)";
         $result = ldap_search($ldap, AD_BASE_DN, $filter);
         ldap_sort($ldap,$result,"sn");
         $info = ldap_get_entries($ldap, $result);
-
         $user = [];
         $user->nome_utente = $info[0]["samaccountname"][0];
         $user->nome = $info[0]["sn"][0];
         $user->cognome = $info[0]["givenname"][0];
         $user->email = $info[0]["mail"][0];
-        
         @ldap_close($ldap);
         return $user;
     }

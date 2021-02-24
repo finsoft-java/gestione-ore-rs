@@ -32,9 +32,9 @@ export class AuthenticationService {
             if(this.isAuthenticated()){
               this.router.navigate(['/progetti']);
             }
-          }else{
-            alert('da gestire')
           }
+        },err => {
+          console.log('HTTP Error', err);
         });
     }
     public isAuthenticated(): boolean {
