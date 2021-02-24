@@ -58,10 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!empty($matricola) && !empty($data) && $ore > 0)) {
                 $query = "insert into ore_presenza_lul(MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) values('$matricola','$data',$ore)";
-                mysqli_query($conn, $query);
-                if ($con ->error) {
-                    print_error(500, $con ->error);
-                }
+                execute_update($query);
             }
         }
     } else {

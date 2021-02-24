@@ -93,6 +93,7 @@ function utente_admin() {
 Esegue un comado SQL SELECT e lo ritorna come array di oggetti, oppure lancia un print_error
 */
 function select_list($sql) {
+    global $con;
     if ($result = mysqli_query($con, $sql)) {
         $arr = array();
         while ($row = mysqli_fetch_assoc($result))
@@ -109,6 +110,7 @@ function select_list($sql) {
 Esegue un comado SQL SELECT ritorna solo la prima colonna come array, oppure lancia un print_error
 */
 function select_column($sql) {
+    global $con;
     if ($result = mysqli_query($con, $sql)) {
         $arr = array();
         while ($row = mysqli_fetch_array($result))
@@ -125,6 +127,7 @@ function select_column($sql) {
 Esegue un comado SQL SELECT e lo ritorna come singolo oggetto, oppure lancia un print_error
 */
 function select_single($sql) {
+    global $con;
     if ($result = mysqli_query($con, $sql)) {
         if ($row = mysqli_fetch_assoc($result))
         {
@@ -133,6 +136,17 @@ function select_single($sql) {
             return null;
         }
     } else {
+        print_error(500, $con ->error);
+    }
+}
+
+/*
+Esegue un comado SQL UPDATE/INSERT/DELETE e se serve lancia un print_error
+*/
+function execute_update($sql) {
+    global $con;
+    mysqli_query($con, $query);
+    if ($con ->error) {
         print_error(500, $con ->error);
     }
 }
