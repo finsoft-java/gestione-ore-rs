@@ -1,15 +1,13 @@
 <?php
-// Per i test: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJub21lX3V0ZW50ZSI6ImZpbnNvZnQiLCJub21lIjoiTWFyaW8iLCJjb2dub21lIjoiUm9zc2kiLCJlbWFpbCI6ImZpbnNvZnRAZXhhbXBsZS5jb20iLCJydW9sbyI6IjIiLCJydW9sb19kZWMiOiJBbW1pbmlzdHJhdG9yZSJ9.uGM9xHtv8dYMrjPL5suIh8I2gY1lOPaZ7QNtXsBJ45A
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
+//header('Access-Control-Allow-Origin: *');
+//header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+//header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
 include("./include/all.php");
-include("./include/JWT.php");
-// $con = connect();
+use Firebase\JWT\JWT;
+
 
 $user = '';
 $postdata = file_get_contents("php://input");
-
 $request = json_decode($postdata);
 
 if($request != ''){
@@ -17,16 +15,18 @@ if($request != ''){
     $password = $request->password;
     $user = check_and_load_user($username, $password);
 }
+
 if ($user) {
     try {
         $user->username = JWT::encode($user, JWT_SECRET_KEY);
         $user->login = date("Y-m-d H:i:s");
         echo json_encode(['value' => $user]);
     } catch(Exception $e) {
+        echo 'p';
         print_error(403, $e->getMessage());
     } catch (Error $e) {
         print_error(403, $e->getMessage());
-     }
+    }
    
 } else {
     session_unset();
@@ -56,6 +56,7 @@ function check_and_load_user($username, $pwd) {
     $ldaprdn = $username . "@" . AD_DOMAIN;
     
     $bind = @ldap_bind($ldap, $ldaprdn, $pwd);
+
     if ($bind) {
         $filter="(SamAccountName=$username)";
         $result = ldap_search($ldap, AD_BASE_DN, $filter);

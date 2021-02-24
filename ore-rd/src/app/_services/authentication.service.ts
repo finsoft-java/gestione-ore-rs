@@ -25,17 +25,19 @@ export class AuthenticationService {
         const url = environment.wsUrl+`login.php`;
         const body = JSON.stringify({username: username,
                                      password: password});
-        this.http.post<any>(url, body).subscribe(data => {
+        return this.http.post<any>(url, body).pipe(map(data => {
           if (data) {
             localStorage.setItem('currentUser', data["value"].username);
             this.changeUsername(username);
-            if(this.isAuthenticated()){
-              this.router.navigate(['/progetti']);
-            }
+            //if(this.isAuthenticated()){
+            //  this.router.navigate(['/progetti']);
+            //}
+          }else{
+            data = 'bho';
           }
-        },err => {
-          console.log('HTTP Error', err);
-        });
+          console.log('aaa');
+          return data;
+        }));
     }
     public isAuthenticated(): boolean {
       const token = localStorage.getItem('currentUser');
