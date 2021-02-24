@@ -1,5 +1,6 @@
 <mat-card>
-    <mat-card-title>Login</mat-card-title>
+    <img mat-card-image src="assets/img/logo.png" alt="OSAI" style="display: block;width: 150px;margin: 0px auto;padding: 30px 10px;">
+    <!--<mat-card-title>Login</mat-card-title>-->
     <mat-card-content>
         <form [formGroup]="form" (ngSubmit)="submit()">
             <p>
@@ -19,7 +20,10 @@
             </p>
 
             <div class="button">
-                <button type="submit" mat-button>Login</button>
+                <button [disabled]="loading" type="submit" mat-button>Accedi</button>
+                <div *ngIf="loading" style="position: fixed;top: 0px;left: 0px;width: 100%;height: 100%;background-color: black;opacity: 0.7;">
+                    <img class="pl-3" src="assets/img/loading.gif" style="position: fixed;left: 50%;width: 100px;top: 50%;transform: translate(-50%, -50%);" />
+                </div>
             </div>
 
         </form>

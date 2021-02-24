@@ -1,3 +1,4 @@
+import { AlertService } from './../_services/alert.service';
 import { AuthenticationService } from './../_services/authentication.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
@@ -11,11 +12,13 @@ export class LoginComponent implements OnInit {
   error: string = '';
   messaggio_errore_login = false;
   returnUrl: string = '';
+  loading = false;
 
   constructor(public fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private authenticationService: AuthenticationService) {
+    private authenticationService: AuthenticationService,
+    private alertService: AlertService) {
 
     }
   form = this.fb.group({
@@ -28,6 +31,8 @@ export class LoginComponent implements OnInit {
 
   submit() {
     if (!this.form.invalid) {
+      
+      this.loading = true;
       return this.authenticationService.login(this.f.username.value,this.f.password.value)           
       .pipe(first())
       .subscribe(
@@ -35,8 +40,6 @@ export class LoginComponent implements OnInit {
               this.router.navigate([this.returnUrl]);
           },
           error => {
-            
-              /*
               if (error.status == 401 || error.status == 403){
                   this.alertService.error("Credenziali non valide");
               } else {
@@ -44,7 +47,6 @@ export class LoginComponent implements OnInit {
                   this.alertService.error(error);
               }
               this.loading = false;
-              */
           }
         )
     }else{
