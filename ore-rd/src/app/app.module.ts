@@ -1,3 +1,4 @@
+import { AlertComponent } from './_components/alert.component';
 import { JwtInterceptor } from './_helpers/jwt.interceptor';
 import { ErrorInterceptor } from './_helpers/error.interceptor';
 import { HttpClient, HttpClientModule, HttpHandler, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -32,6 +33,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {MatDatepickerModule} from '@angular/material/datepicker';
+import { CommonModule } from '@angular/common';
 @NgModule({
   declarations: [
     AppComponent,
@@ -44,7 +46,8 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
     ReportCompletoComponent,
     GeneraDatiTestComponent,
     ProgettoDettaglioComponent,
-    LoginComponent
+    LoginComponent,
+    AlertComponent
   ],
   imports: [
     HttpClientModule,
