@@ -65,7 +65,7 @@ CREATE TABLE `progetti` (
   `DATA_FINE` date NOT NULL,
   `COSTO_MEDIO_UOMO` decimal(19,2) NOT NULL,
   `COD_TIPO_COSTO_PANTHERA` varchar(20) NOT NULL,
-  `MATRICOLA_SUPERVISOR` varchar(3) NOT NULL
+  `MATRICOLA_SUPERVISOR` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
