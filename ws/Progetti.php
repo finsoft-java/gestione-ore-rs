@@ -7,7 +7,6 @@
 // PUT Progetti -> creazione nuovo progetto
 // POST Progetti -> update progetto esistente
 // DELETE Progetti?id_progetto=xxx -> elimina progetto esistente
-
 include("include/all.php");
 $con = connect();
 

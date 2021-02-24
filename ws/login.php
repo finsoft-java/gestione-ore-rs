@@ -22,7 +22,6 @@ if ($user) {
         $user->login = date("Y-m-d H:i:s");
         echo json_encode(['value' => $user]);
     } catch(Exception $e) {
-        echo 'p';
         print_error(403, $e->getMessage());
     } catch (Error $e) {
         print_error(403, $e->getMessage());

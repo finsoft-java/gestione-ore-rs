@@ -1,6 +1,6 @@
 <?php 
 
-use \Firebase\JWT\JWT;
+use Firebase\JWT\JWT;
 
 
 function connect() {
@@ -29,7 +29,8 @@ function require_logged_user_JWT() {
         print_error(401, 'Missing authentication token');
     }
     try {
-        $logged_user = JWT::decode($token, JWT_SECRET_KEY);            
+        $logged_user = JWT::decode($token, JWT_SECRET_KEY);       
+        echo 'pp4';
         if (!$logged_user) {
             print_error(401, 'User must be logged for this page');
         }
@@ -94,6 +95,7 @@ Esegue un comado SQL SELECT e lo ritorna come array di oggetti, oppure lancia un
 */
 function select_list($sql) {
     global $con;
+    echo 'p';
     if ($result = mysqli_query($con, $sql)) {
         $arr = array();
         while ($row = mysqli_fetch_assoc($result))

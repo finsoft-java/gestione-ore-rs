@@ -178,29 +178,8 @@ class ProgettiManager {
     function get_progetto($id_progetto) {
         global $con, $STATO_PROGETTO, $BOOLEAN;
         $progetto = new Progetto();
-        $sql = "SELECT * FROM progetti p JOIN utenti u on p.utente_creazione = u.username WHERE id_progetto = '$id_progetto'";
-        if($result = mysqli_query($con, $sql)) {
-            if($row = mysqli_fetch_assoc($result))
-            {
-                $progetto->id_progetto        = $row['id_progetto'];
-                $progetto->titolo             = $row['titolo'];
-                $progetto->stato              = $row['stato'];
-                $progetto->stato_dec          = $STATO_PROGETTO[$row['stato']];
-                $progetto->gia_compilato      = $row['gia_compilato'];
-                $progetto->gia_compilato_dec  = $BOOLEAN[$row['gia_compilato']];
-                $progetto->utente_creazione   = $row['utente_creazione'];
-                $progetto->nome               = $row['nome'];
-                $progetto->cognome            = $row['cognome'];
-                $progetto->data_creazione     = $row['data_creazione'];
-                $progetto->utenti             = $progetto->get_progetto_utenti();
-                $progetto->questionari        = $progetto->get_progetto_questionari();
-            } else {
-                return null;
-            }
-        } else {
-            print_error(500, $con ->error);
-        }
-        return $progetto;
+        $sql = "SELECT * FROM progetti p WHERE id_progetto = '$id_progetto'";
+        return select_list($sql);
     }
     
     /**

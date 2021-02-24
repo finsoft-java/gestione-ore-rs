@@ -12,7 +12,7 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'ora-rd');
 
-define('JWT_SECRET_KEY', 'my very very secret key');
+define('JWT_SECRET_KEY', 'OSAISECRET2021');
 
 define('AD_SERVER', 'ldap://osai.loc');
 define('AD_DOMAIN', 'OSAI.LOC');
