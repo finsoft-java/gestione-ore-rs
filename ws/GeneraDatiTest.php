@@ -41,7 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $query_date = "SELECT DISTINCT DATA FROM ORE_PRESENZA_LUL " .
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
     $query_lul = "SELECT DATA,MATRICOLA_DIPENDENTE,ORE_PRESENZA_ORDINARIE FROM ORE_PRESENZA_LUL " .
-                "WHERE WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
+                "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
+    $query_pregresso = "SELECT ID_PROGETTO_ID_WP,DATA,MATRICOLA_DIPENDENTE,ORE_LAVORATE FROM ORE_CONSUNTIVATE " .
+                "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_LAVORATE > 0";
     
     // TODO selezionare anche i dati preesistenti
 
@@ -49,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $wp = select_list($query_wp);
     $date = select_column($query_date);
     $lul = select_list($query_lul);
+    $pregresso = select_list($query_pregresso);
     
     // Inizializzo la struttura x (ore lavorate dal dipendente i sul WP j il giorno k)
     $x = array();
@@ -58,6 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $x[$i][$j] = array();
             for ($k = 0; $k < count($date); $k++) {
                 $x[$i][$j][$k] = 0;
+                for ($w = 0; $w < count($pregresso); ++w) {
+                    if ($pregresso["MATRICOLA_DIPENDENTE"] == $matricole[$i] and $pregresso["DATA"] == $date[$k] and $pregresso["ID_PROGETTO"] == $wp[$j]["ID_PROGETTO"] and $pregresso["ID_WP"] == $wp[$j]["ID_WP"]) {
+                        $x[$i][$j][$k] = $pregresso["ORE_LAVORATE"];
+                        break;
+                    }
+                }
             }
         }
     }
@@ -101,7 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $probabilita[$j] = $M[$j] / date_diff($wp[$j]["DATA_FINE"], $data);
                 }
             }
-            $val = 0;
             for ($ora = 0; $ora < $L[$i][$k]; $ora++) {
                 $j = random_probability($probabilities);
                 $x[$i][$j][$k]++;
