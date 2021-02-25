@@ -36,5 +36,8 @@ export class ProgettiComponent implements OnInit {
     console.log(a);
     this.router.navigate(['/progetto/'+a.idProgetto]);
   }
+  nuovoProgetto(){
+    this.router.navigate(['/progetto/nuovo']);
+  }
 
 }
