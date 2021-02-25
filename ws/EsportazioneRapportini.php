@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
     
-//require_logged_user_JWT();
+require_logged_user_JWT();
 
 function carica_dati_da_db($anno, $mese) {
     $primo = "DATE('$anno-$mese-01')";
@@ -47,9 +47,11 @@ function carica_dati_da_db($anno, $mese) {
         $idprogetto = $row["ID_PROGETTO"];
         $matr = $row["MATRICOLA_DIPENDENTE"];
         $idwp = $row["ID_WP"];
+        $data = new DateTime($row["DATA"]);
+        $curCol = $i + 2;
         $wp = $map_progetti_matricole_wp[$idprogetto][$matr][$idwp];
         if (! array_key_exists($wp["ORE_LAVORATE"], $wp)) $wp["ORE_LAVORATE"] = array();
-        $wp["ORE_LAVORATE"][] = $row;
+        $wp["ORE_LAVORATE"][$data->format('j')] = $row;
     }
     
     return $map_progetti_matricole_wp;
@@ -101,21 +103,40 @@ function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese) {
     $first_day = new DateTime("$anno-$mese-01"); 
     $num_days = $first_day->format('t');
 
+    // Imposto la width delle colonne
+    for ($i = 0; $i < 32; ++$i) {
+        $sheet->getColumnDimensionByColumn($i + 2)->setWidth(4);
+    }
     // In alto i giorni
     $curRow++;
     for ($i = 0; $i < $num_days; ++$i) {
-        $colnum = $i + 2;
-        $sheet->setCellValueByColumnAndRow($colnum, $curRow, $i);
+        $curCol = $i + 2;
+        $sheet->setCellValueByColumnAndRow($curCol, $curRow, $i);
     }
     $sheet->setCellValueByColumnAndRow($i + 2, $curRow, 'TOT');
-    for ($i = 0; $i < 32; ++$i) {
-        $sheet->getColumnDimensionByColumn($i + 2)->setWidth(4);
-        // TODO ore lavorate
+
+    // day of week
+    $curRow++;
+    for ($i = 0; $i < $num_days; ++$i) {
+        $d = new DateTime("$anno-$mese-$i");
+        $curCol = $i + 2;
+        $sheet->setCellValueByColumnAndRow($curCol, $curRow, $d->format('D'));
     }
+    
+    // TODO assenze / festivita
+
     // A sinistra le WP
     foreach($map_wp_wp as $idwp => $wp) {
         ++$curRow;
         $sheet->setCellValue('A' . $curRow, $wp["TITOLO"]);
+        // In mezzo, le ore consuntivate
+        if (isset($wp["ORE_LAVORATE"]) && ! empty($wp["ORE_LAVORATE"])) {
+            for ($i = 0; $i < $num_days; ++$i) {
+                if (isset($wp["ORE_LAVORATE"][$i]))
+                $curCol = $i + 2;
+                $sheet->setCellValueByColumnAndRow($curCol, $curRow, $wp["ORE_LAVORATE"][$i]);
+            }
+        }
     }
     // TODO Totali
 }
@@ -125,12 +146,12 @@ function creaFooter($sheet, &$curRow, $map_wp_wp) {
     $sheet->setCellValue('E' . $curRow, 'Working person:');
     $sheet->setCellValue('J' . $curRow, '(FIXME nome cognome)');
     $sheet->setCellValue('P' . $curRow, 'Signature');
-    $sheet->setCellValue('P' . $curRow, '(FIXME Data firma)');
+    $sheet->setCellValue('S' . $curRow, '(FIXME Data firma)');
     $curRow++;
     $sheet->setCellValue('E' . $curRow, 'Supervisor:');
     $sheet->setCellValue('J' . $curRow, '(FIXME nome cognome)');
     $sheet->setCellValue('P' . $curRow, 'Signature');
-    $sheet->setCellValue('P' . $curRow, '(FIXME Data firma)');
+    $sheet->setCellValue('S' . $curRow, '(FIXME Data firma)');
 }
 
 
