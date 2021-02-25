@@ -22,14 +22,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
-    if (!$json_data->periodo) {
+    $periodo = $json_data->periodo
+    if (! $periodo) {
         print_error(400, "Missing parameter: periodo");
     }
-    $anno = substr($json_data->periodo, 0, 4);
-    $mese = substr($json_data->periodo, 5, 2);
-    if (empty($anno) || empty($mese)) {
-        print_error(400, "Il periodo di lancio deve essere nella forma YYYY-MM");
+    if (strlen($periodo) != 7) {
+        print_error(400, "Bad parameter: Il periodo di lancio deve essere nella forma YYYY-MM");
     }
+    $anno = substr($periodo, 0, 4);
+    $mese = substr($periodo, 5, 2);
 
     // REPERIRE DATI DA DB
     $primo = "DATE('$anno-$mese-01')";
