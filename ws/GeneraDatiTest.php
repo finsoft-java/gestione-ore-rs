@@ -1,6 +1,6 @@
 <?php
 
-// Mi aspetto un solo parametro, il periodo di lancio, nel formato YYYY-MM oppure YYYY-MM-DD
+// Mi aspetto un solo parametro, il periodo di lancio, nel formato YYYY-MM
 
 include("include/all.php");    
 $con = connect();
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
     $query_wp = "SELECT ID_PROGETTO, ID_WP, DATA_INIZIO, DATA_FINE, MONTE_ORE_RESIDUO " . 
                 "FROM progetti_wp_residuo ".
-                "WHERE (DATA_INIZIO >= $primo AND DATA_INIZIO <= LAST_DAY($primo)) OR (DATA_FINE >= $primo AND DATA_FINE <= LAST_DAY($primo)) AND MONTE_ORE_RESIDUO > 0";
+                "WHERE DATA_FINE >= $primo AND DATA_INIZIO <= LAST_DAY($primo) AND MONTE_ORE_RESIDUO > 0";
     $query_date = "SELECT DISTINCT DATA FROM ORE_PRESENZA_LUL " .
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
     $query_lul = "SELECT DATA,MATRICOLA_DIPENDENTE,ORE_PRESENZA_ORDINARIE FROM ORE_PRESENZA_LUL " .
