@@ -54,15 +54,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $idprogetto = $row["ID_PROGETTO"];
         $matr = $row["MATRICOLA_DIPENDENTE"];
         $idwp = $row["ID_WP"];
-        if (! array_key_exists($idprogetto, $matricole_map_wp)) $matricole_map_wp[$idprogetto] = array();
-        if (! array_key_exists($matr, $matricole_map_wp[$idprogetto])) $matricole_map_wp[$idprogetto][$matr] = array();
-        $matricole_map_wp[$idprogetto][$matr][$idwp] = $row;
+        if (! array_key_exists($idprogetto, $map_progetti_matricole_wp)) $map_progetti_matricole_wp[$idprogetto] = array();
+        if (! array_key_exists($matr, $map_progetti_matricole_wp[$idprogetto])) $map_progetti_matricole_wp[$idprogetto][$matr] = array();
+        $map_progetti_matricole_wp[$idprogetto][$matr][$idwp] = $row;
     }
     foreach ($consuntivo as $row) {
         $idprogetto = $row["ID_PROGETTO"];
         $matr = $row["MATRICOLA_DIPENDENTE"];
         $idwp = $row["ID_WP"];
-        $wp = $matricole_map_wp[$idprogetto][$matr][$idwp];
+        $wp = $map_progetti_matricole_wp[$idprogetto][$matr][$idwp];
         if (! array_key_exists($wp["ORE_LAVORATE"], $wp)) $wp["ORE_LAVORATE"] = array();
         $wp["ORE_LAVORATE"][] = $row;
     }
@@ -72,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (! $zip->open($zipfilename, ZipArchive::CREATE)) {
         print_error(500, 'Cannot create ZIP file');
     }
+    $tempfiles = [$zipfilename];
     
     // MAIN LOOP
     foreach ($map_progetti_matricole_wp as $idProgetto => $map_matricole_wp) {
@@ -85,8 +86,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $xlsxfilename = tempnam(null, "Rapportini");
             $writer->save($xlsxfilename);
             $xlsxfilename_final = 'Rapportini_' . $idProgetto . '_' . $matr . '.xlsx';
+            
+            // addFile() non salva il file su disco, viene salvato al close()
             $zip->addFile($xlsxfilename, $xlsxfilename_final);
-            unlink($xlsxfilename);
+
+            $tempfiles[] = $xlsxfilename;
         }
     }
 
@@ -99,7 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     header('Content-Length: ' . filesize($zipfilename));
     flush();
     readfile($zipfilename);
-    unlink($zipfilename);
+    
+    // DELETE TEMP FILES
+    foreach($tempfiles as $t) unlink($t);
     
     
 } else {
