@@ -1,92 +1,94 @@
 <h5 style="margin-bottom: 30px;text-align:center">Modifica / Inserimento Progetto</h5>
+<div *ngIf="progetto">
+    <div>
+        <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
+            <mat-form-field appearance="fill">
+                <mat-label>Titolo</mat-label>
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.TITOLO" placeholder="Inserisci il Titolo">
+                <mat-hint>required</mat-hint>
+            </mat-form-field>
+        </p>
+    </div>
 
-<div>
-    <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
-        <mat-form-field appearance="fill">
-            <mat-label>Titolo</mat-label>
-            <input matInput [(ngModel)]="progetto.TITOLO" placeholder="Inserisci il Titolo">
-            <mat-hint>required</mat-hint>
-        </mat-form-field>
-    </p>
-</div>
+    <div>
+        <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+            <mat-form-field appearance="fill" style="margin-right: 10px;">
+                <mat-label>Acronimo</mat-label>
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ACRONIMO" placeholder="Inserisci l'acronimo">
+                <mat-hint>required</mat-hint>
+            </mat-form-field>
 
-<div>
-    <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
-        <mat-form-field appearance="fill" style="margin-right: 10px;">
-            <mat-label>Acronimo</mat-label>
-            <input matInput [(ngModel)]="progetto.ACRONIMO" placeholder="Inserisci l'acronimo">
-            <mat-hint>required</mat-hint>
-        </mat-form-field>
+            <mat-form-field appearance="fill">
+                <mat-label>Grant Number</mat-label>
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.GRANT_NUMBER" placeholder="Inserisci il Grant Number">
+                <mat-hint>required</mat-hint>
+            </mat-form-field>
+        </p>
+    </div>
+    <div>
+        <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
+            <mat-form-field appearance="fill" style="float:right">
+                <mat-label>Abstract</mat-label>
+                <textarea matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ABSTRACT" placeholder="Inserisci l'Abstract"></textarea>
+            </mat-form-field>
+        </p>
+    </div>
+    <div>
+        <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+            <mat-form-field appearance="fill" style="margin-right: 10px;">
+                <mat-label>Data Inizio</mat-label>
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker">
+                <mat-datepicker-toggle matSuffix [for]="picker">
+                    <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-hint>required</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+                <mat-label>Data Fine</mat-label>
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_FINE" [matDatepicker]="picker2">
+                <mat-datepicker-toggle matSuffix [for]="picker2">
+                    <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                </mat-datepicker-toggle>
+                <mat-datepicker #picker2></mat-datepicker>
+                <mat-hint>required</mat-hint>
+            </mat-form-field>
+        </p>
+    </div>
+    <div>
+        <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+            <mat-form-field appearance="fill" style="margin-right: 10px;">
+                <mat-label>Monte Ore Totale</mat-label>
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.MONTE_ORE_TOT" placeholder="Inserisci il Monte Ore Totale">
+                <mat-hint>required</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+                <mat-label>Costo Medio Uomo</mat-label>
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.COSTO_MEDIO_UOMO" placeholder="Inserisci il Costo Medio Uomo">
+                <mat-hint>required</mat-hint>
+            </mat-form-field>
+        </p>
+    </div>
 
-        <mat-form-field appearance="fill">
-            <mat-label>Grant Number</mat-label>
-            <input matInput [(ngModel)]="progetto.GRANT_NUMBER" placeholder="Inserisci il Grant Number">
-            <mat-hint>required</mat-hint>
-        </mat-form-field>
-    </p>
-</div>
-<div>
-    <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
-        <mat-form-field appearance="fill" style="float:right">
-            <mat-label>Abstract</mat-label>
-            <textarea matInput [(ngModel)]="progetto.ABSTRACT" placeholder="Inserisci l'Abstract"></textarea>
-        </mat-form-field>
-    </p>
-</div>
-<div>
-    <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
-        <mat-form-field appearance="fill" style="margin-right: 10px;">
-            <mat-label>Data Inizio</mat-label>
-            <input matInput [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker">
-            <mat-datepicker-toggle matSuffix [for]="picker">
-                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-            </mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <mat-hint>required</mat-hint>
-        </mat-form-field>
-        <mat-form-field appearance="fill">
-            <mat-label>Data Fine</mat-label>
-            <input matInput [(ngModel)]="progetto.DATA_FINE" [matDatepicker]="picker2">
-            <mat-datepicker-toggle matSuffix [for]="picker2">
-                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-            </mat-datepicker-toggle>
-            <mat-datepicker #picker2></mat-datepicker>
-            <mat-hint>required</mat-hint>
-        </mat-form-field>
-    </p>
-</div>
-<div>
-    <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
-        <mat-form-field appearance="fill" style="margin-right: 10px;">
-            <mat-label>Monte Ore Totale</mat-label>
-            <input matInput [(ngModel)]="progetto.MONTE_ORE_TOT" placeholder="Inserisci il Monte Ore Totale">
-            <mat-hint>required</mat-hint>
-        </mat-form-field>
-        <mat-form-field appearance="fill">
-            <mat-label>Costo Medio Uomo</mat-label>
-            <input matInput [(ngModel)]="progetto.COSTO_MEDIO_UOMO" placeholder="Inserisci il Costo Medio Uomo">
-            <mat-hint>required</mat-hint>
-        </mat-form-field>
-    </p>
-</div>
-
-<div>
-    <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
-        <mat-form-field appearance="fill">
-            <mat-label>Tipo Costo Panthera</mat-label>
-            <mat-select>
-                <mat-option value="primary">Poco Costoso</mat-option>
-                <mat-option value="accent">Molto Costoso</mat-option>
-                <mat-option value="warn">Azz</mat-option>
-            </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="fill" style="float:right">
-            <mat-label>Matricola Supervisor</mat-label>
-            <mat-select>
-                <mat-option value="primary">1</mat-option>
-                <mat-option value="accent">2</mat-option>
-                <mat-option value="warn">3</mat-option>
-            </mat-select>
-        </mat-form-field>
-    </p>
+    <div style="margin-bottom:30px;">
+        <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+            <mat-form-field appearance="fill">
+                <mat-label>Tipo Costo Panthera</mat-label>
+                <mat-select [ngModelOptions]="{standalone: true}" [(value)]="progetto.COD_TIPO_COSTO_PANTERA">
+                    <mat-option value="PC">Poco Costoso</mat-option>
+                    <mat-option value="MC">Molto Costoso</mat-option>
+                    <mat-option value="AZ">Azz</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill" style="float:right">
+                <mat-label>Matricola Supervisor</mat-label>
+                <mat-select [ngModelOptions]="{standalone: true}" [(value)]="progetto.MATRICOLA_SUPERVISOR">
+                    <mat-option value="1">1</mat-option>
+                    <mat-option value="2">2</mat-option>
+                    <mat-option value="3">3</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <button mat-raised-button color="primary" style="float:right">Salva</button>
+        </p>
+    </div>
 </div>
