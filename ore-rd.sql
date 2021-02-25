@@ -1,14 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 4.9.0.1
+-- version 5.0.4
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Feb 16, 2021 alle 16:50
--- Versione del server: 10.4.6-MariaDB
--- Versione PHP: 7.3.9
+-- Creato il: Feb 24, 2021 alle 16:18
+-- Versione del server: 10.4.17-MariaDB
+-- Versione PHP: 7.3.27
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -21,6 +20,18 @@ SET time_zone = "+00:00";
 --
 -- Database: `ore-rd`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `date_firma`
+--
+
+CREATE TABLE `date_firma` (
+  `MATRICOLA_DIPENDENTE` varchar(50) NOT NULL,
+  `MENSILITA` varchar(6) NOT NULL,
+  `DATA_FIRMA` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -67,6 +78,13 @@ CREATE TABLE `progetti` (
   `COD_TIPO_COSTO_PANTHERA` varchar(20) NOT NULL,
   `MATRICOLA_SUPERVISOR` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dump dei dati per la tabella `progetti`
+--
+
+INSERT INTO `progetti` (`ID_PROGETTO`, `ACRONIMO`, `TITOLO`, `GRANT_NUMBER`, `ABSTRACT`, `MONTE_ORE_TOT`, `DATA_INIZIO`, `DATA_FINE`, `COSTO_MEDIO_UOMO`, `COD_TIPO_COSTO_PANTHERA`, `MATRICOLA_SUPERVISOR`) VALUES
+(1, 'xxx', 'prova', 'xxx', 'hello world', 100, '2021-02-01', '2021-02-24', '20.00', 'XXX', '123');
 
 -- --------------------------------------------------------
 
@@ -126,6 +144,12 @@ CREATE TABLE `tipologie_spesa` (
 --
 
 --
+-- Indici per le tabelle `date_firma`
+--
+ALTER TABLE `date_firma`
+  ADD PRIMARY KEY (`MATRICOLA_DIPENDENTE`,`MENSILITA`);
+
+--
 -- Indici per le tabelle `ore_consuntivate`
 --
 ALTER TABLE `ore_consuntivate`
@@ -162,7 +186,8 @@ ALTER TABLE `progetti_wp`
 -- Indici per le tabelle `progetti_wp_risorse`
 --
 ALTER TABLE `progetti_wp_risorse`
-  ADD PRIMARY KEY (`ID_WP`,`ID_PROGETTO`,`MATRICOLA_DIPENDENTE`) USING BTREE;
+  ADD PRIMARY KEY (`ID_WP`,`ID_PROGETTO`,`MATRICOLA_DIPENDENTE`) USING BTREE,
+  ADD KEY `progetti_wp_risorse_ibfk_1` (`ID_PROGETTO`,`ID_WP`);
 
 --
 -- Indici per le tabelle `tipologie_spesa`
@@ -178,7 +203,7 @@ ALTER TABLE `tipologie_spesa`
 -- AUTO_INCREMENT per la tabella `progetti`
 --
 ALTER TABLE `progetti`
-  MODIFY `ID_PROGETTO` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_PROGETTO` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT per la tabella `progetti_spese`
@@ -199,6 +224,16 @@ ALTER TABLE `tipologie_spesa`
   MODIFY `ID_TIPOLOGIA` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- Limiti per le tabelle scaricate
+--
+
+--
+-- Limiti per la tabella `ore_consuntivate`
+--
+ALTER TABLE `ore_consuntivate`
+  ADD CONSTRAINT `ore_consuntivate_ibfk_1` FOREIGN KEY (`ID_PROGETTO`,`ID_WP`,`MATRICOLA_DIPENDENTE`) REFERENCES `progetti_wp_risorse` (`ID_PROGETTO`, `ID_WP`, `MATRICOLA_DIPENDENTE`);
+
+--
 -- Limiti per la tabella `progetti_spese`
 --
 ALTER TABLE `progetti_spese`
@@ -216,11 +251,7 @@ ALTER TABLE `progetti_wp`
 --
 ALTER TABLE `progetti_wp_risorse`
   ADD CONSTRAINT `progetti_wp_risorse_ibfk_1` FOREIGN KEY (`ID_PROGETTO`,`ID_WP`) REFERENCES `progetti_wp` (`ID_PROGETTO`, `ID_WP`);
-
---
--- aggiunto a mano
---
-ALTER TABLE `ore_consuntivate` ADD FOREIGN KEY (`ID_PROGETTO`, `ID_WP`, `MATRICOLA_DIPENDENTE`) REFERENCES `progetti_wp_risorse`(`ID_PROGETTO`, `ID_WP`, `MATRICOLA_DIPENDENTE`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ore = $spreadSheetAry[$i][2];
             }
 
-            if (!empty($matricola) && !empty($data) && $ore > 0)) {
+            if (!empty($matricola) && !empty($data) && $ore > 0) {
                 $query = "insert into ore_presenza_lul(MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) values('$matricola','$data',$ore)";
                 execute_update($query);
             }
