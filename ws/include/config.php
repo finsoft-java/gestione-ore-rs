@@ -10,7 +10,7 @@ define('DB_NAME', 'questionari');
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'ore-rd');
+define('DB_NAME', 'ora-rd');
 
 define('JWT_SECRET_KEY', 'OSAISECRET2021');
 
