@@ -1,8 +1,8 @@
+import { Progetto } from './../_models/progetto';
 import { ProgettiService } from './../_services/progetti.service';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-import { ELEMENT_DATA_PROGETTO, Progetto } from './../_models/progetto';
 import { Component, OnInit, ViewChild } from '@angular/core';
 
 
@@ -14,7 +14,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 export class ProgettiComponent implements OnInit {
 
   displayedColumns: string[] = ['titolo', 'dataInizio', 'actions'];
-  dataSource = new MatTableDataSource<Progetto>(ELEMENT_DATA_PROGETTO);
+  dataSource = new MatTableDataSource<Progetto>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;
   constructor(private router: Router, private progettiService: ProgettiService){
@@ -28,6 +28,8 @@ export class ProgettiComponent implements OnInit {
     this.progettiService.getAll()
         .subscribe(response => {
           console.log(response);
+          this.dataSource = new MatTableDataSource<Progetto>(response);
+          console.log(this.dataSource);
         },
         error => {
         });

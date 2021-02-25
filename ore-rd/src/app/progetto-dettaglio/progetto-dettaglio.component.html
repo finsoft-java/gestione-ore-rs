@@ -4,7 +4,7 @@
     <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
         <mat-form-field appearance="fill">
             <mat-label>Titolo</mat-label>
-            <input matInput placeholder="Inserisci il Titolo">
+            <input matInput [value]="progetto.titolo" placeholder="Inserisci il Titolo">
             <mat-hint>required</mat-hint>
         </mat-form-field>
     </p>
