@@ -5,7 +5,8 @@
 include("include/all.php");    
 $con = connect();
 
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -66,16 +67,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $wp["ORE_LAVORATE"][] = $row;
     }
     
+    $zip = new ZipArchive;
+    $zipfilename = tempnam(null, "export");
+    if (! $zip->open($zipfilename, ZipArchive::CREATE)) {
+        print_error(500, 'Cannot create ZIP file');
+    }
     
     // MAIN LOOP
     foreach ($map_progetti_matricole_wp as $idProgetto => $map_matricole_wp) {
         foreach ($map_matricole_wp as $matr => $map_matr_wp) {
             
             // TODO Qui devo creare un file Excel
-            
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue('A1', 'Hello World !');
+            $writer = new Xlsx($spreadsheet);
+            $xlsxfilename = tempnam(null, "Rapportini");
+            $writer->save($xlsxfilename);
+            $xlsxfilename_final = 'Rapportini_' . $idProgetto . '_' . $matr . '.xlsx';
+            $zip->addFile($xlsxfilename, $xlsxfilename_final);
+            unlink($xlsxfilename);
         }
     }
 
+    $zip->close();
+    
+    //DOWNLOAD ZIP
+    $zipfilename_final = "export.zip";
+    header('Content-Type: application/zip');
+    header('Content-Disposition: attachment; filename="' . $zipfilename_final . '"');
+    header('Content-Length: ' . filesize($zipfilename));
+    flush();
+    readfile($zipfilename);
+    unlink($zipfilename);
+    
     
 } else {
     //==========================================================
