@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $x[$i][$j] = array();
             for ($k = 0; $k < count($date); $k++) {
                 $x[$i][$j][$k] = 0;
-                for ($w = 0; $w < count($pregresso); ++w) {
+                for ($w = 0; $w < count($pregresso); $w++) {
                     if ($pregresso["MATRICOLA_DIPENDENTE"] == $matricole[$i] and $pregresso["DATA"] == $date[$k] and $pregresso["ID_PROGETTO"] == $wp[$j]["ID_PROGETTO"] and $pregresso["ID_WP"] == $wp[$j]["ID_WP"]) {
                         $x[$i][$j][$k] = $pregresso["ORE_LAVORATE"];
                         break;
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $L[$i] = array();
         for ($k = 0; $k < count($date); $k++) {
             $L[$i][$k] = 0;
-            for ($w = 0; $w < count($lul); ++w) {
+            for ($w = 0; $w < count($lul); $w++) {
                 if ($lul["MATRICOLA_DIPENDENTE"] == $matricole[$i] and $lul["DATA"] == $date[$k]) {
                     $L[$i][$k] = $lul["ORE_PRESENZA_ORDINARIE"];
                     break;
