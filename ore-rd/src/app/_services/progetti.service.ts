@@ -13,12 +13,19 @@ export class ProgettiService {
         return this.http.get<any>(environment.wsUrl+`Progetti.php?id_progetto=${id_progetto}`);
     }
     insert(progetto: Progetto) {
-        return this.http.put(environment.wsUrl+`Progetti.php`, progetto);
+        return this.http.put<any>(environment.wsUrl+`Progetti.php`, progetto);
     }
     update(progetto: Progetto) {
-        return this.http.post(environment.wsUrl+`Progetti.php`, progetto);
+        return this.http.post<any>(environment.wsUrl+`Progetti.php`, progetto);
     }
     delete(id_progetto: number) {
         return this.http.delete(environment.wsUrl+`Progetti.php?id_progetto=${id_progetto}`);
+    }
+
+    getAllTipiCostoPanthera() {
+        return '{"value":["TIPO1","TIPO2,"TIPO3"]}';
+    }
+    getAllMatricole() {
+        return '{"value":[{"id_matricola":"1","nome":"A"},{"id_matricola":"2","nome":"B"}]}';
     }
 }

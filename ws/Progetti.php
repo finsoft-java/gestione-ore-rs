@@ -44,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $json_data = json_decode($postdata);
     $id_progetto = '';
     
-    if(isset($json_data->id_progetto)){
-        $id_progetto = $json_data->id_progetto;
+    if(isset($json_data->ID_PROGETTO)){
+        $id_progetto = $json_data->ID_PROGETTO;
     }
     
     if (!$json_data) {
@@ -53,9 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
     if ($id_progetto) {
         print_error(400, "id_progetto must be null when creating new project");
-    }
-    if (!$progettiManager->utente_puo_creare_progetti()) {
-        print_error(403, "Utente non autorizzato a creare progetti.");
     }
     $progetto = $progettiManager->crea($json_data);
     
@@ -69,34 +66,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
-    $progetto_su_db = $progettiManager->get_progetto($json_data->id_progetto);
+    $progetto_su_db = $progettiManager->get_progetto($json_data->ID_PROGETTO);
     if (!$progetto_su_db) {
         print_error(404, 'Not found');
     }
-    if (!$progetto_su_db->utente_puo_modificarlo()) {
-        print_error(403, "Utente non autorizzato a modificare questo Progetto.");
-    }
+    $progettiManager->aggiorna($progetto_su_db, $json_data);
     
-    $aggiorna_solo_lo_stato = false;
-    
-    if ($progetto_su_db->is_gia_compilato()) {
-        if ($json_data->stato == '3' ) {
-            $aggiorna_solo_lo_stato = true;
-        } elseif($progetto_su_db->stato == '3' and $json_data->stato == '1') {
-            $aggiorna_solo_lo_stato = true;
-        } else {
-            $aggiorna_solo_lo_stato = true;
-            //print_error(403, "Non e' possibile modificare un progetto con questionari già compilati.");
-        }
-    }
-
-    if ($aggiorna_solo_lo_stato) {
-        $progettiManager->cambia_stato($progetto_su_db, $json_data->stato);
-    } else {
-        $progettiManager->aggiorna($progetto_su_db, $json_data);
-    }
-    
-    $progetto_su_db = $progettiManager->get_progetto($json_data->id_progetto);
+    $progetto_su_db = $progettiManager->get_progetto($json_data->ID_PROGETTO);
     header('Content-Type: application/json');
     echo json_encode(['value' => $progetto_su_db]);
     

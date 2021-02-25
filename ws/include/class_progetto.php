@@ -77,11 +77,18 @@ class ProgettiManager {
 
     function crea($json_data) {
         global $con, $logged_user;
-        $sql = insert("progetti", ["id_progetto" => null,
-                               "titolo" => $con->escape_string($json_data->titolo),
-                               "stato" => ($json_data->stato ? $json_data->stato : '0'),
-                               "gia_compilato" => '0',
-                               "utente_creazione" => $logged_user->nome_utente]);
+        $sql = insert("progetti", ["ID_PROGETTO" => null,
+                                   "TITOLO" => $con->escape_string($json_data->TITOLO),
+                                   "ACRONIMO" => $json_data->ACRONIMO,
+                                   "GRANT_NUMBER" => $json_data->GRANT_NUMBER,
+                                   "ABSTRACT" => $json_data->ABSTRACT,
+                                   "MONTE_ORE_TOT" => $json_data->MONTE_ORE_TOT,
+                                   "DATA_INIZIO" => $json_data->DATA_INIZIO,
+                                   "DATA_FINE" => $json_data->DATA_FINE,
+                                   "COSTO_MEDIO_UOMO" => $json_data->COSTO_MEDIO_UOMO,
+                                   "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
+                                   "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR
+                                  ]);
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
@@ -92,10 +99,19 @@ class ProgettiManager {
     
     function aggiorna($progetto, $json_data) {
         global $con, $STATO_PROGETTO;
-        $this->controllaStato($progetto,$json_data->stato);
-        $titolo = $con->escape_string($json_data->titolo);
-        $stato = $con->escape_string($json_data->stato);
-        $sql = "UPDATE progetti SET titolo='$titolo', stato='$stato' WHERE id_progetto = '$progetto->id_progetto'";
+        $titolo = $con->escape_string($json_data->TITOLO);
+        $sql = update("progetti", [
+                                    "TITOLO" => $con->escape_string($json_data->TITOLO),
+                                    "ACRONIMO" => $json_data->ACRONIMO,
+                                    "GRANT_NUMBER" => $json_data->GRANT_NUMBER,
+                                    "ABSTRACT" => $json_data->ABSTRACT,
+                                    "MONTE_ORE_TOT" => $json_data->MONTE_ORE_TOT,
+                                    "DATA_INIZIO" => $json_data->DATA_INIZIO,
+                                    "DATA_FINE" => $json_data->DATA_FINE,
+                                    "COSTO_MEDIO_UOMO" => $json_data->COSTO_MEDIO_UOMO,
+                                    "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
+                                    "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR
+                                  ], ["ID_PROGETTO" => $json_data->ID_PROGETTO]);
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
