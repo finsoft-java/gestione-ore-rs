@@ -226,7 +226,8 @@ function insert_select($table, $lista_tutte_le_colonne, $mappa_valori_da_modific
 /**
 Estrae un indice tra 1 e count($probabilities), con probabilità non uniforme
 La probabilità di estrarre $i è $probabilities[i]/sum($probabilities)
-@param $probabilities: array di numeri (probabilità)
+@param $probabilities: array di numeri (sono frequenze), positivi o nulli
+@return $i in [0, count($probabilities)-1] indice estratto, oppure null se sono tutti zeri
 */
 function random_probability($probabilities) {
     // $rand numero decimale casuale tra 0 e sum($probabilities) inclusi
@@ -236,7 +237,12 @@ function random_probability($probabilities) {
         $cum += $probabilities[$i];
         if ($rand <= $cum) return $i;
     }
-    return count($probabilities) - 1;
+    // Li ho provati tutti meno l'ultimo. A naso, dovrei prendere l'ultimo,
+    // ma devo tenere in considerazione che non sia zero
+    for ($i = count($probabilities) - 1; $i >= 0; --$i) {
+        if ($probabilities[$i] > 0) return $i;
+    }
+    return null; // tutti zeri!!!
 }
     
 ?>

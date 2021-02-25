@@ -104,16 +104,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         for ($i = 0; $i < count($matricole); $i++) {
             $matricola = $matricole[$j];
             $probabilita = array();
+            $almeno_un_positivo = false;
             for ($j = 0; $j < count($wp); $j++) {
                 $probabilita[$j] = 0;
+                // la probabilita resta zero se $j non è ammissibile
                 if ($M[$j] > 0 and in_array($matricola, $wp_rsr[$j]) and $data >= $wp["DATA_INIZIO"] and $data <= $wp["DATA_FINE"]) {
-                    $probabilita[$j] = $M[$j] / date_diff($wp[$j]["DATA_FINE"], $data);
+                    $diff = date_diff($wp[$j]["DATA_FINE"], $data); // giorni alla scadenza del WP
+                    $probabilita[$j] = $M[$j] / ($diff + 1);
+                    $almeno_un_positivo = true;
                 }
             }
+            if (! $almeno_un_positivo) {
+                //nessuna scelta disponibile
+                continue;                
+            }
             for ($ora = 0; $ora < $L[$i][$k]; $ora++) {
-                $j = random_probability($probabilities);
+                $j = random_probability($probabilita);
                 $x[$i][$j][$k]++;
                 $M[$j]--;
+                if ($M[$j] == 0) $probabilita[$j] = 0;
             }
         }
     }
