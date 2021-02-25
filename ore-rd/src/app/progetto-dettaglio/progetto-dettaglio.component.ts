@@ -17,14 +17,19 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   projectSubscription: Subscription;
   progetto!: Progetto;
-  id_progetto!: number;
+  id_progetto!: any;
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
     private alertService: AlertService,
     private route: ActivatedRoute,
     private router: Router) {
+
       this.projectSubscription = this.route.params.subscribe(params => {
-        this.id_progetto = +params['id_progetto']; 
+        if(params['id_progetto'] == 'nuovo'){
+          this.id_progetto = null; 
+        }else{
+          this.id_progetto = +params['id_progetto']; 
+        }
       },
         error => {
         this.alertService.error(error);
@@ -33,8 +38,11 @@ export class ProgettoDettaglioComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.getProgetto();
-    console.log(this.progetto);
+    if(this.id_progetto != null){
+      this.getProgetto();
+    } else{
+      this.progetto = new Progetto;
+    }
   }
 
   getProgetto(): void {
@@ -46,6 +54,27 @@ export class ProgettoDettaglioComponent implements OnInit {
       error => {
         this.alertService.error(error);
       });
+  }
+
+  salva() {
+    if(this.id_progetto != null){
+      this.progettiService.insert(this.progetto)
+      .subscribe(response => {
+
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    } else {
+      this.progettiService.update(this.progetto)
+      .subscribe(response => {
+
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    }
+    
   }
 
 }
