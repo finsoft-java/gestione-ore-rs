@@ -1,16 +1,16 @@
 ﻿export class Progetto {
   constructor(
-    public idProgetto:number,
-    public acronimo:string,
-    public titolo:string,
-    public grantNumber:string,
-    public abstract:string,
-    public monteOreTot:string,
-    public dataInizio:string,
-    public dataFine:string,
-    public costoMedioUomo:string,
-    public codTipoCostoPanthera:string,
-    public matricolaSupervisor:string    
+    public ID_PROGETTO?:number,
+    public ACRONIMO?:string,
+    public TITOLO?:string,
+    public GRANT_NUMBER?:string,
+    public ABSTRACT?:string,
+    public MONTE_ORE_TOT?:string,
+    public DATA_INIZIO?:string,
+    public DATA_FINE?:string,
+    public COSTO_MEDIO_UOMO?:string,
+    public COD_TIPO_COSTO_PANTERA?:string,
+    public MATRICOLA_SUPERVISOR?:string    
     ) {}
     
 }

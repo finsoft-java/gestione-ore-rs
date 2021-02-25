@@ -7,10 +7,10 @@ import { environment } from './../../environments/environment';
 export class ProgettiService {
     constructor(private http: HttpClient) { }
     getAll() {
-        return this.http.get<Progetto[]>(environment.wsUrl+`Progetti.php`);
+        return this.http.get<any>(environment.wsUrl+`Progetti.php`);
     }
     getById(id_progetto: number) {
-        return this.http.get(environment.wsUrl+`Progetti.php?id_progetto=${id_progetto}`);
+        return this.http.get<any>(environment.wsUrl+`Progetti.php?id_progetto=${id_progetto}`);
     }
     insert(progetto: Progetto) {
         return this.http.put(environment.wsUrl+`Progetti.php`, progetto);

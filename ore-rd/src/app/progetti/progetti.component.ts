@@ -14,7 +14,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 export class ProgettiComponent implements OnInit {
 
   displayedColumns: string[] = ['titolo', 'dataInizio', 'actions'];
-  dataSource = new MatTableDataSource<Progetto>();
+  dataSource = new MatTableDataSource<Progetto[]>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;
   constructor(private router: Router, private progettiService: ProgettiService){
@@ -27,9 +27,7 @@ export class ProgettiComponent implements OnInit {
   getAll() {
     this.progettiService.getAll()
         .subscribe(response => {
-          console.log(response);
-          this.dataSource = new MatTableDataSource<Progetto>(response);
-          console.log(this.dataSource);
+          this.dataSource = new MatTableDataSource<Progetto[]>(response["data"]);
         },
         error => {
         });

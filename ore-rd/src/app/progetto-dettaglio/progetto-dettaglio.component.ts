@@ -40,9 +40,8 @@ export class ProgettoDettaglioComponent implements OnInit {
   getProgetto(): void {
     this.progettiService.getById(this.id_progetto)
       .subscribe(response => {
-        console.log(response);
-        //this.progetto = new Progetto();
-        console.log("progetto ->",this.progetto);
+        this.progetto = new Progetto;
+        this.progetto = response["value"][0];
       },
       error => {
         this.alertService.error(error);

@@ -4,7 +4,7 @@
     <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
         <mat-form-field appearance="fill">
             <mat-label>Titolo</mat-label>
-            <input matInput [value]="progetto.titolo" placeholder="Inserisci il Titolo">
+            <input matInput [(ngModel)]="progetto.TITOLO" placeholder="Inserisci il Titolo">
             <mat-hint>required</mat-hint>
         </mat-form-field>
     </p>
@@ -14,13 +14,13 @@
     <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
         <mat-form-field appearance="fill" style="margin-right: 10px;">
             <mat-label>Acronimo</mat-label>
-            <input matInput placeholder="Inserisci l'acronimo">
+            <input matInput [(ngModel)]="progetto.ACRONIMO" placeholder="Inserisci l'acronimo">
             <mat-hint>required</mat-hint>
         </mat-form-field>
 
         <mat-form-field appearance="fill">
             <mat-label>Grant Number</mat-label>
-            <input matInput placeholder="Inserisci il Grant Number">
+            <input matInput [(ngModel)]="progetto.GRANT_NUMBER" placeholder="Inserisci il Grant Number">
             <mat-hint>required</mat-hint>
         </mat-form-field>
     </p>
@@ -29,7 +29,7 @@
     <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
         <mat-form-field appearance="fill" style="float:right">
             <mat-label>Abstract</mat-label>
-            <textarea matInput placeholder="Inserisci l'Abstract"></textarea>
+            <textarea matInput [(ngModel)]="progetto.ABSTRACT" placeholder="Inserisci l'Abstract"></textarea>
         </mat-form-field>
     </p>
 </div>
@@ -37,7 +37,7 @@
     <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
         <mat-form-field appearance="fill" style="margin-right: 10px;">
             <mat-label>Data Inizio</mat-label>
-            <input matInput [matDatepicker]="picker">
+            <input matInput [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker">
             <mat-datepicker-toggle matSuffix [for]="picker">
                 <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
             </mat-datepicker-toggle>
@@ -46,7 +46,7 @@
         </mat-form-field>
         <mat-form-field appearance="fill">
             <mat-label>Data Fine</mat-label>
-            <input matInput [matDatepicker]="picker2">
+            <input matInput [(ngModel)]="progetto.DATA_FINE" [matDatepicker]="picker2">
             <mat-datepicker-toggle matSuffix [for]="picker2">
                 <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
             </mat-datepicker-toggle>
@@ -59,12 +59,12 @@
     <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
         <mat-form-field appearance="fill" style="margin-right: 10px;">
             <mat-label>Monte Ore Totale</mat-label>
-            <input matInput placeholder="Inserisci il Monte Ore Totale">
+            <input matInput [(ngModel)]="progetto.MONTE_ORE_TOT" placeholder="Inserisci il Monte Ore Totale">
             <mat-hint>required</mat-hint>
         </mat-form-field>
         <mat-form-field appearance="fill">
             <mat-label>Costo Medio Uomo</mat-label>
-            <input matInput placeholder="Inserisci il Costo Medio Uomo">
+            <input matInput [(ngModel)]="progetto.COSTO_MEDIO_UOMO" placeholder="Inserisci il Costo Medio Uomo">
             <mat-hint>required</mat-hint>
         </mat-form-field>
     </p>
