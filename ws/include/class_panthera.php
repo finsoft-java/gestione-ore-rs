@@ -41,6 +41,25 @@ class PantheraManager {
         }
         return $result;
     }
+    
+    function getCosti($data) {
+        $query = "SELECT DISTINCT ID_RISORSA,COSTO " .
+            "FROM THIP.TIPI_COSTO " .
+            "WHERE ID_AZIENDA='001' AND TIPO_RISORSA='U' AND LIVELLO_RISORSA='4' " .
+            "AND (DATA_COSTO IS NULL OR DATA_COSTO<='$data') " .
+            "AND (DATA_FINE_COSTO IS NULL OR DATA_FINE_COSTO>='$data') ";
+        // TODO BISOGNA RICHIAMARE SQL SERVER, $costi = select_list($query)
+        
+        $costi = [ [ 'ID_RISORSA' => '1234', 'COSTO' => 8.0 ],
+                      [ 'ID_RISORSA' => '4321', 'COSTO' => 9.0 ],
+                      [ 'ID_RISORSA' => '6666', 'COSTO' => 10.0 ]
+                     ];
+        $result = [];
+        foreach ($tipiCosto as $t) {
+            $result[$t['ID_RISORSA']] = $t['COSTO'];
+        }
+        return $result;
+    }
 
 }
 ?>
