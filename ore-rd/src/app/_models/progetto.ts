@@ -11,6 +11,5 @@
     public COSTO_MEDIO_UOMO?:string,
     public COD_TIPO_COSTO_PANTHERA?:string,
     public MATRICOLA_SUPERVISOR?:string    
-    ) {}
-    
+    ) {}   
 }

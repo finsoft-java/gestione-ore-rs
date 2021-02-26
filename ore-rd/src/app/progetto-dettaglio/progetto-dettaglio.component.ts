@@ -1,3 +1,4 @@
+import { Matricola } from './../_models/matricola';
 import { Subscription } from 'rxjs';
 import { Progetto } from './../_models/progetto';
 import { User } from './../_models/user';
@@ -17,6 +18,7 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   projectSubscription: Subscription;
   progetto!: Progetto;
+  allMatricole: any;
   id_progetto!: any;
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
@@ -43,6 +45,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     } else{
       this.progetto = new Progetto;
     }
+    this.getMatricole();
   }
 
   getProgetto(): void {
@@ -55,6 +58,19 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
   }
+  getMatricole(): void {
+    this.progettiService.getAllMatricole()
+      .subscribe(response => {
+        console.log(response);
+        this.allMatricole  = new Matricola;
+        this.allMatricole = response["data"];
+        console.log(this.allMatricole);
+      },
+      error => {
+        this.alertService.error(error);
+      });
+  }
+  
 
   salva() {
     if(this.id_progetto == null){
