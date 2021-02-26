@@ -1,8 +1,9 @@
+import { AlertService } from './../_services/alert.service';
 import { TipoSpesaService } from './../_services/tipospesa.service';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-import { ELEMENT_DATA, Tipologia } from './../_models/tipologia';
+import { Tipologia } from './../_models/tipologia';
 import { Component, OnInit, ViewChild } from '@angular/core';
 
 @Component({
@@ -19,7 +20,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     this.dataSource.paginator = this.paginator;
     this.getAll();
   }
-  constructor(private router: Router, private tipoSpesaService: TipoSpesaService){
+  constructor(private router: Router, private tipoSpesaService: TipoSpesaService, private alertService: AlertService){
   }
   getAll() {
     this.tipoSpesaService.getAll()
@@ -33,23 +34,45 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
   }
 
   getRecord(a:Tipologia){
-    console.log("get",a);
     a.isEditable=true;
   }
 
   saveChange(a:Tipologia){
-    console.log("save",a);
     a.isEditable=false;
+
+
+    if(a.ID_TIPOLOGIA == null){
+      this.tipoSpesaService.insert(a)
+      .subscribe(response => {
+        this.alertService.success("Tipologia inserita con successo");
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    } else {
+      this.tipoSpesaService.update(a)
+      .subscribe(response => {
+        this.alertService.success("Tipologia modificata con successo");
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    }
+    
   }
+
+
   nuovaTipologia() {  
     let tipologia_nuova:any;
-    tipologia_nuova = {ID_TIPOLOGIA:0,DESCRIZIONE:""};
+    tipologia_nuova = {ID_TIPOLOGIA:null,DESCRIZIONE:"", isEditable:true};
     const data = this.dataSource.data;
-    data.push(tipologia_nuova[0]);
+    console.log(tipologia_nuova.ID_TIPOLOGIA);
+    data.push(tipologia_nuova);
+    console.log(this.dataSource.data);
     this.dataSource.data = data;
   }
+  
   undoChange(a:Tipologia){
-    console.log("undo",a);
     a.isEditable=false;
   }
 }
