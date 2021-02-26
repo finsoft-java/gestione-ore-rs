@@ -33,7 +33,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {MatDatepickerModule} from '@angular/material/datepicker';
-import { CommonModule } from '@angular/common';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MomentUtcDateAdapter } from './_helpers/date.adapter';
 @NgModule({

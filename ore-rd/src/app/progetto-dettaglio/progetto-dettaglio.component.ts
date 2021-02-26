@@ -55,14 +55,8 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
   }
-  EndDateChange(data:any){
-    alert();
-    console.log(data);console.log(this.progetto.DATA_INIZIO);
-  }
 
   salva() {
-    
-    console.log(this.progetto);
     if(this.id_progetto == null){
       this.progettiService.insert(this.progetto)
       .subscribe(response => {
