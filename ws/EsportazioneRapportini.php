@@ -7,19 +7,21 @@ $con = connect();
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     //do nothing, HTTP 200
     exit();
 }
     
-require_logged_user_JWT();
+//require_logged_user_JWT();
 
 function carica_dati_da_db($anno, $mese) {
     $primo = "DATE('$anno-$mese-01')";
 
-    $query_matr_wp = "SELECT p.ID_PROGETTO, p.ACRONIMO, p.TITOLO, p.GRANT_NUMBER, p.MATRICOLA_SUPERVISOR, " .
+    $query_matr_wp = "SELECT p.ID_PROGETTO, p.ACRONIMO, p.TITOLO AS TITOLO_P, p.GRANT_NUMBER, p.MATRICOLA_SUPERVISOR, " .
                 "wp.ID_WP, wp.TITOLO, wp.DESCRIZIONE, wp.DATA_INIZIO, wp.DATA_FINE, " .
                 "r.MATRICOLA_DIPENDENTE " .
                 "FROM progetti p " .
@@ -48,25 +50,32 @@ function carica_dati_da_db($anno, $mese) {
         $matr = $row["MATRICOLA_DIPENDENTE"];
         $idwp = $row["ID_WP"];
         $data = new DateTime($row["DATA"]);
-        $curCol = $i + 2;
         $wp = $map_progetti_matricole_wp[$idprogetto][$matr][$idwp];
-        if (! array_key_exists($wp["ORE_LAVORATE"], $wp)) $wp["ORE_LAVORATE"] = array();
-        $wp["ORE_LAVORATE"][$data->format('j')] = $row;
+        if (! isset($wp["ORE_LAVORATE"])) $wp["ORE_LAVORATE"] = array();
+        $wp["ORE_LAVORATE"][$data->format('j')] = $row["ORE_LAVORATE"];
+        $map_progetti_matricole_wp[$idprogetto][$matr][$idwp] = $wp;
     }
     
     return $map_progetti_matricole_wp;
 }
 
 function creaFileExcel($idProgetto, $matr, $anno, $mese, $map_wp_wp, $zip, $tempfiles) {
+    
+    $wp = $map_wp_wp[array_keys($map_wp_wp)[0]]; // uno a caso
+    
+    global $panthera;
+    $nomecognome = $panthera->getUtente($matr);
+    $nomecognome_super = $panthera->getUtente($wp['MATRICOLA_SUPERVISOR']);
+
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     
     $curRow = 1;
     
-    creaIntestazione($sheet, $curRow, $map_wp_wp, $anno, $mese, $matr);
+    creaIntestazione($sheet, $curRow, $wp, $anno, $mese, $matr, $nomecognome);
     creaLegenda($sheet, $curRow, $map_wp_wp);
-    creaTabella($sheet, $curRow, $map_wp_wp, $anno, $mese);
-    creaFooter($sheet, $curRow, $map_wp_wp);
+    creaTabella($sheet, $curRow, $map_wp_wp, $anno, $mese, $nomecognome);
+    creaFooter($sheet, $curRow, $wp, $nomecognome, $nomecognome_super);
 
     $writer = new Xlsx($spreadsheet);
     $xlsxfilename = tempnam(null, "Rapportini");
@@ -79,27 +88,45 @@ function creaFileExcel($idProgetto, $matr, $anno, $mese, $map_wp_wp, $zip, $temp
     $tempfiles[] = $xlsxfilename;
 }
 
-function creaIntestazione($sheet, &$curRow, $map_wp_wp, $anno, $mese, $matr) {
+function creaIntestazione($sheet, &$curRow, $wp, $anno, $mese, $matr, $nomecognome) {
+    
+    $sheet->setCellValue('H' . $curRow, $wp['TITOLO_P']);
+    $sheet->getStyle('H' . $curRow)->getFont()->setBold(true);
+    $sheet->getStyle('H' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    $sheet->setCellValue('I' . $curRow, 'project');
+    $sheet->setCellValue('O' . $curRow, 'Grant');
+    $sheet->getStyle('O' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    $sheet->setCellValue('P' . $curRow, $wp['GRANT_NUMBER']);
+    $sheet->setCellValue('U' . $curRow, $wp['ACRONIMO']);
     $curRow++;
-    $sheet->setCellValue('A' . $curRow, 'OSAI');
+    $sheet->setCellValue('X' . $curRow, 'OSAI');
     $curRow++;
     $sheet->setCellValue('A' . $curRow, 'TIMESHEET');
-    // FIXME Mi manca il "Full name of the person working in the action:"
+    $sheet->setCellValue('G' . $curRow, 'year');
+    $sheet->getStyle('J' . $curRow)->setQuotePrefix(true);
+    $sheet->setCellValue('J' . $curRow, "$anno");
 }
 
 function creaLegenda($sheet, &$curRow, $map_wp_wp) {
     $curRow += 3;
     $sheet->setCellValue('A' . $curRow, 'Activities description');
+    $sheet->setCellValue('I' . $curRow, 'Start');
+    $sheet->setCellValue('J' . $curRow, 'End');
     foreach($map_wp_wp as $idwp => $wp) {
         $curRow++;
         $sheet->setCellValue('A' . $curRow, $wp["TITOLO"]);
+        $sheet->getStyle('A' . $curRow)->getFont()->setBold(true);
         $sheet->setCellValue('B' . $curRow, $wp["DESCRIZIONE"]);
+        $sheet->setCellValue('I' . $curRow, '??');
+        $sheet->setCellValue('J' . $curRow, '??');
     }
 }
 
-function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese) {
+function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese, $nomecognome) {
     $curRow += 3;
     $sheet->setCellValue('A' . $curRow, 'Activity details and daily working hours on ADIR project');
+    $sheet->setCellValue('P' . $curRow, 'Full name of the person working in the action:');
+    $sheet->setCellValue('Z' . $curRow, $nomecognome);
     $first_day = new DateTime("$anno-$mese-01"); 
     $num_days = $first_day->format('t');
 
@@ -117,39 +144,71 @@ function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese) {
 
     // day of week
     $curRow++;
+    $supertot = 0;
+    $totali_colonna = array();
     for ($i = 0; $i < $num_days; ++$i) {
         $d = new DateTime("$anno-$mese-$i");
         $curCol = $i + 2;
         $sheet->setCellValueByColumnAndRow($curCol, $curRow, $d->format('D'));
+        $sheet->getStyleByColumnAndRow($curCol, $curRow)->getFont()->setBold(true);
+        $totali_colonna[] = 0;
     }
     
     // TODO assenze / festivita
 
     // A sinistra le WP
+    
+    $OFFSET = 2;
+    $row_prima_riga = $curRow + 1;
     foreach($map_wp_wp as $idwp => $wp) {
         ++$curRow;
         $sheet->setCellValue('A' . $curRow, $wp["TITOLO"]);
+        $sheet->getStyle('A' . $curRow)->getFont()->setBold(true);
         // In mezzo, le ore consuntivate
+        $totale_riga = 0;
         if (isset($wp["ORE_LAVORATE"]) && ! empty($wp["ORE_LAVORATE"])) {
             for ($i = 0; $i < $num_days; ++$i) {
-                if (isset($wp["ORE_LAVORATE"][$i]))
-                $curCol = $i + 2;
-                $sheet->setCellValueByColumnAndRow($curCol, $curRow, $wp["ORE_LAVORATE"][$i]);
+                if (isset($wp["ORE_LAVORATE"][$i])) {
+                    $val = $wp["ORE_LAVORATE"][$i];
+                    $sheet->setCellValueByColumnAndRow($i + $OFFSET, $curRow, $val);
+                    $totale_riga += $val;
+                    $totali_colonna[$i] += $val;
+                    $supertot += $val;
+                }
             }
         }
+        // A destra, totale di riga
+        $letter_last = Coordinate::stringFromColumnIndex($num_days - 1 + $OFFSET, $curRow);
+        $formula = '=SUM(B'.$curRow.':'.$letter_last.$curRow.')';
+        $sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, $formula);
+        //$sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, $totale_riga);
+        $sheet->getStyleByColumnAndRow($num_days + $OFFSET, $curRow)->getFont()->setBold(true);
     }
-    // TODO Totali
+    $row_ultima_riga = $curRow;
+    
+    // Totali di colonna
+    ++$curRow;
+    $sheet->setCellValue('A' . $curRow, "TOT");
+    for ($i = 0; $i <= $num_days; ++$i) {
+        $letter = Coordinate::stringFromColumnIndex($i + $OFFSET, $curRow);
+        $formula = '=SUM('.$letter.$row_prima_riga.':'.$letter.$row_ultima_riga.')';
+        $sheet->setCellValueByColumnAndRow($i + $OFFSET, $curRow, $formula);
+        $sheet->getStyleByColumnAndRow($i + $OFFSET, $curRow)->getFont()->setBold(true);
+    }
+    
+    // Supertotale
+    $sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, $supertot);
 }
 
-function creaFooter($sheet, &$curRow, $map_wp_wp) {
+function creaFooter($sheet, &$curRow, $wp, $nomecognome, $nomecognome_super) {
     $curRow += 3;
     $sheet->setCellValue('E' . $curRow, 'Working person:');
-    $sheet->setCellValue('J' . $curRow, '(FIXME nome cognome)');
+    $sheet->setCellValue('J' . $curRow, $nomecognome);
     $sheet->setCellValue('P' . $curRow, 'Signature');
     $sheet->setCellValue('S' . $curRow, '(FIXME Data firma)');
     $curRow++;
     $sheet->setCellValue('E' . $curRow, 'Supervisor:');
-    $sheet->setCellValue('J' . $curRow, '(FIXME nome cognome)');
+    $sheet->setCellValue('J' . $curRow, $nomecognome_super);
     $sheet->setCellValue('P' . $curRow, 'Signature');
     $sheet->setCellValue('S' . $curRow, '(FIXME Data firma)');
 }
@@ -192,12 +251,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     
     //DOWNLOAD ZIP
     $zipfilename_final = "export.zip";
+
     header('Content-Type: application/zip');
     header('Content-Disposition: attachment; filename="' . $zipfilename_final . '"');
     header('Content-Length: ' . filesize($zipfilename));
     flush();
     readfile($zipfilename);
-    
+
     // DELETE TEMP FILES
     foreach($tempfiles as $t) unlink($t);
     
