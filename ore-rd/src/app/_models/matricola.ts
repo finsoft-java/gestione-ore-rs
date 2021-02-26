@@ -1,6 +1,6 @@
 ﻿export class Matricola {
   constructor(
-    public id?:number,
-    public value?:string 
+    public MATRICOLA?:number,
+    public NOME?:string 
     ) {}    
 }

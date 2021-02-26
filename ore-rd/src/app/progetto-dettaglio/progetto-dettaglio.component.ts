@@ -1,3 +1,4 @@
+import { TipoCosto } from './../_models/tipocosto';
 import { Matricola } from './../_models/matricola';
 import { Subscription } from 'rxjs';
 import { Progetto } from './../_models/progetto';
@@ -19,6 +20,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   projectSubscription: Subscription;
   progetto!: Progetto;
   allMatricole: any;
+  allTipiCosto: any;
   id_progetto!: any;
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
@@ -46,6 +48,7 @@ export class ProgettoDettaglioComponent implements OnInit {
       this.progetto = new Progetto;
     }
     this.getMatricole();
+    this.getSupervisor();
   }
 
   getProgetto(): void {
@@ -58,6 +61,7 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
   }
+
   getMatricole(): void {
     this.progettiService.getAllMatricole()
       .subscribe(response => {
@@ -70,7 +74,19 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
   }
-  
+
+  getSupervisor(): void {
+    this.progettiService.getAllTipiCostoPanthera()
+      .subscribe(response => {
+        console.log(response);
+        this.allTipiCosto  = new TipoCosto;
+        this.allTipiCosto = response["data"];
+        console.log(this.allMatricole);
+      },
+      error => {
+        this.alertService.error(error);
+      });
+  }
 
   salva() {
     if(this.id_progetto == null){
