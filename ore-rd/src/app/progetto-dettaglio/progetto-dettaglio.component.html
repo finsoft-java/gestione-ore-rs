@@ -37,7 +37,7 @@
         <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
             <mat-form-field appearance="fill" style="margin-right: 10px;">
                 <mat-label>Data Inizio</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker" (dateChange)="EndDateChange($event)">
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker">
                 <mat-datepicker-toggle matSuffix [for]="picker">
                     <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                 </mat-datepicker-toggle>
