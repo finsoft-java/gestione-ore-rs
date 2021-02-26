@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     //==========================================================
 
-    $result = $panthera->getUtenti();
+    $result = $panthera->getTipiCosto();
 
     header('Content-Type: application/json');
     echo json_encode(['data' => $result]);
