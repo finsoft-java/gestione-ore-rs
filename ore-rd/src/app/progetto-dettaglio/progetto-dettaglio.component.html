@@ -74,14 +74,14 @@
         <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
             <mat-form-field appearance="fill">
                 <mat-label>Tipo Costo Panthera</mat-label>
-                <mat-select [ngModelOptions]="{standalone: true}" [(value)]="progetto.COD_TIPO_COSTO_PANTHERA">
-                    <mat-option *ngFor="let tipoCosto of allTipiCosto" [ngValue]="tipoCosto.ID_TIPO_COSTO">{{tipoCosto.DESCRIZIONE}}</mat-option>
+                <mat-select [(ngModel)]="progetto.COD_TIPO_COSTO_PANTHERA">
+                    <mat-option *ngFor="let tipoCosto of allTipiCosto" [value]="tipoCosto.ID_TIPO_COSTO">{{tipoCosto.DESCRIZIONE}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" style="float:right">
                 <mat-label>Matricola Supervisor</mat-label>
-                <mat-select [ngModelOptions]="{standalone: true}" [(value)]="progetto.MATRICOLA_SUPERVISOR">
-                    <mat-option *ngFor="let competence of allMatricole" [ngValue]="competence.MATRICOLA">{{competence.NOME}}</mat-option>
+                <mat-select [(ngModel)]="progetto.MATRICOLA_SUPERVISOR">
+                    <mat-option *ngFor="let competence of allMatricole" [value]="competence.MATRICOLA">{{competence.NOME}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <button mat-raised-button color="primary" style="float:right" (click)="salva()">Salva</button>
