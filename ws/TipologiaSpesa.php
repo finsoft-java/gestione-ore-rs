@@ -44,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $json_data = json_decode($postdata);
     $id_tipologia_spesa = '';
     
-    if(isset($json_data->ID_PROGETTO)){
-        $id_tipologia_spesa = $json_data->ID_PROGETTO;
+    if(isset($json_data->ID_TIPOLOGIA)){
+        $id_tipologia_spesa = $json_data->ID_TIPOLOGIA;
     }
     
     if (!$json_data) {
@@ -66,13 +66,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
-    $tipologiaSpesa_su_db = $tipologiaManager->get_tipologia($json_data->ID_PROGETTO);
+    $tipologiaSpesa_su_db = $tipologiaManager->get_tipologia($json_data->ID_TIPOLOGIA);
     if (!$tipologiaSpesa_su_db) {
         print_error(404, 'Not found');
     }
     $tipologiaManager->aggiorna($tipologiaSpesa_su_db, $json_data);
     
-    $tipologiaSpesa_su_db = $tipologiaManager->get_tipologia($json_data->ID_PROGETTO);
+    $tipologiaSpesa_su_db = $tipologiaManager->get_tipologia($json_data->ID_TIPOLOGIA);
     header('Content-Type: application/json');
     echo json_encode(['value' => $tipologiaSpesa_su_db]);
     

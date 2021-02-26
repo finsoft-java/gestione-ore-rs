@@ -8,7 +8,7 @@ class Tipologia {
     function get_tipologia() {
         global $tipologiaManager;
         if (!$this->_tipologia) {
-            $this->_tipologia = $tipologiaManager->get_tipologia($this->id_progetto);
+            $this->_tipologia = $tipologiaManager->get_tipologia($this->id_tipologia);
         }
         return $this->_tipologia;
     }
@@ -60,7 +60,7 @@ class TipologiaManager {
     
     function get_tipologia($id_tipologia) {
         global $con, $BOOLEAN;
-        $tipologia = new TipologieSpesa();
+       // $tipologia = new TipologieSpesa();
         $sql = "SELECT * FROM tipologie_spesa p WHERE ID_TIPOLOGIA = '$id_tipologia'";
         return select_list($sql);
     }
@@ -79,7 +79,6 @@ class TipologiaManager {
     
     function aggiorna($progetto, $json_data) {
         global $con;
-        $titolo = $con->escape_string($json_data->TITOLO);
         
         $sql = update("tipologie_spesa", [ "DESCRIZIONE" => $json_data->DESCRIZIONE ], ["ID_TIPOLOGIA" => $json_data->ID_TIPOLOGIA]);
         mysqli_query($con, $sql);
