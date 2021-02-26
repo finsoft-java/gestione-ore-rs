@@ -11,4 +11,5 @@ include("config.php");
 include("costanti.php");
 include("functions.php");
 include("class_progetto.php");
+include("class_tipologia.php");
 include("class_panthera.php");
