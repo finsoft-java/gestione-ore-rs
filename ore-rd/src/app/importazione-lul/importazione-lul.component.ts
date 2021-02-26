@@ -1,3 +1,4 @@
+import { AlertService } from './../_services/alert.service';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UploadFilesService } from './../_services/upload.service';
@@ -15,7 +16,7 @@ export class ImportazioneLulComponent implements OnInit {
 
   fileInfos: Observable<any> = new Observable;
 
-  constructor(private uploadService: UploadFilesService) { }
+  constructor(private uploadService: UploadFilesService, private alertService: AlertService) { }
   ngOnInit(){
     //this.fileInfos = this.uploadService.getFiles();
   }
@@ -44,8 +45,9 @@ export class ImportazioneLulComponent implements OnInit {
         }
       },
       err => {
+        console.log(err);
         this.progressInfos[idx].value = 0;
-        this.message = 'Could not upload the file:' + file.name;
+        this.alertService.error("Errore nel WS controllare i log");
       });
   }
 }

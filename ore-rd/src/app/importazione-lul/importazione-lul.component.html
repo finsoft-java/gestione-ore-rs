@@ -1,3 +1,4 @@
+<h5 style="margin-bottom: 20px;text-align:center">Importazione File Lul</h5>
 <div *ngFor="let progressInfo of progressInfos" class="mb-2">
     <span>{{ progressInfo.fileName }}</span>
     <div class="progress">
@@ -11,8 +12,4 @@
     <input type="file" multiple (change)="selectFiles($event)" />
   </label>
 
-<button class="btn btn-success" [disabled]="!selectedFiles" (click)="uploadFiles()">
-    Upload
-  </button>
-
-<div class="alert alert-light" role="alert">{{ message }}</div>
+<button class="btn btn-success" [disabled]="!selectedFiles" (click)="uploadFiles()">Upload</button>

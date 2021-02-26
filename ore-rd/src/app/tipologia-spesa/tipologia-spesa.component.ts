@@ -39,8 +39,6 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
 
   saveChange(a:Tipologia){
     a.isEditable=false;
-
-
     if(a.ID_TIPOLOGIA == null){
       this.tipoSpesaService.insert(a)
       .subscribe(response => {
