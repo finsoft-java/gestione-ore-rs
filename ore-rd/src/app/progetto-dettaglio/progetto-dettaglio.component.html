@@ -83,7 +83,7 @@
             <mat-form-field appearance="fill" style="float:right">
                 <mat-label>Matricola Supervisor</mat-label>
                 <mat-select [ngModelOptions]="{standalone: true}" [(value)]="progetto.MATRICOLA_SUPERVISOR">
-                    <mat-option *ngFor="let competence of allMatricole" [ngValue]="competence.id">{{competence.value}}</mat-option>
+                    <mat-option *ngFor="let competence of allMatricole" [ngValue]="competence.MATRICOLA">{{competence.NOME}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <button mat-raised-button color="primary" style="float:right" (click)="salva()">Salva</button>
