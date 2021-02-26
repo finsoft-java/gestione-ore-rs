@@ -28,7 +28,7 @@ export class ProgettiService {
     }
 
     getAllTipiCostoPanthera() {
-        return this.http.get<any>(environment.wsUrl+`GetNomiUtenti.php`);;
+        return this.http.get<any>(environment.wsUrl+`GetTipiCosto.php`);;
     }
 
     getAllMatricole() {

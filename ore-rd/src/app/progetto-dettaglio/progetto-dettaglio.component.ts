@@ -1,3 +1,4 @@
+import { TipoCosto } from './../_models/tipocosto';
 import { Matricola } from './../_models/matricola';
 import { Subscription } from 'rxjs';
 import { Progetto } from './../_models/progetto';
@@ -8,7 +9,6 @@ import { AlertService } from './../_services/alert.service';
 import { AuthenticationService } from './../_services/authentication.service';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
-import { Console } from 'console';
 
 @Component({
   selector: 'app-progetto-dettaglio',
@@ -20,6 +20,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   projectSubscription: Subscription;
   progetto!: Progetto;
   allMatricole: any;
+  allTipiCosto: any;
   id_progetto!: any;
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
@@ -47,19 +48,20 @@ export class ProgettoDettaglioComponent implements OnInit {
       this.progetto = new Progetto;
     }
     this.getMatricole();
+    this.getSupervisor();
   }
 
   getProgetto(): void {
     this.progettiService.getById(this.id_progetto)
       .subscribe(response => {
         this.progetto = new Progetto;
-        console.log('ciao Fra')
         this.progetto = response["value"][0];
       },
       error => {
         this.alertService.error(error);
       });
   }
+
   getMatricole(): void {
     this.progettiService.getAllMatricole()
       .subscribe(response => {
@@ -72,7 +74,19 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
   }
-  
+
+  getSupervisor(): void {
+    this.progettiService.getAllTipiCostoPanthera()
+      .subscribe(response => {
+        console.log(response);
+        this.allTipiCosto  = new TipoCosto;
+        this.allTipiCosto = response["data"];
+        console.log(this.allMatricole);
+      },
+      error => {
+        this.alertService.error(error);
+      });
+  }
 
   salva() {
     if(this.id_progetto == null){

@@ -75,9 +75,7 @@
             <mat-form-field appearance="fill">
                 <mat-label>Tipo Costo Panthera</mat-label>
                 <mat-select [ngModelOptions]="{standalone: true}" [(value)]="progetto.COD_TIPO_COSTO_PANTHERA">
-                    <mat-option value="PC">Poco Costoso</mat-option>
-                    <mat-option value="MC">Molto Costoso</mat-option>
-                    <mat-option value="AZ">Azz</mat-option>
+                    <mat-option *ngFor="let tipoCosto of allTipiCosto" [ngValue]="tipoCosto.ID_TIPO_COSTO">{{tipoCosto.DESCRIZIONE}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field appearance="fill" style="float:right">
