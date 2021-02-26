@@ -8,6 +8,7 @@ import { AlertService } from './../_services/alert.service';
 import { AuthenticationService } from './../_services/authentication.service';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
+import { Console } from 'console';
 
 @Component({
   selector: 'app-progetto-dettaglio',
@@ -52,6 +53,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.progettiService.getById(this.id_progetto)
       .subscribe(response => {
         this.progetto = new Progetto;
+        console.log('ciao Fra')
         this.progetto = response["value"][0];
       },
       error => {
