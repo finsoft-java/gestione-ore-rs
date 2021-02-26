@@ -41,6 +41,7 @@ export class ImportazioneLulComponent implements OnInit {
           if(event.total)
           this.progressInfos[idx].value = Math.round(100 * event.loaded / event.total);
         } else if (event instanceof HttpResponse) {
+          console.log('event -> ',event);
           //this.fileInfos = this.uploadService.getFiles();
         }
       },
