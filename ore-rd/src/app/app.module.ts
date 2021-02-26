@@ -49,7 +49,6 @@ import { MomentUtcDateAdapter } from './_helpers/date.adapter';
     ProgettoDettaglioComponent,
     LoginComponent,
     AlertComponent
-    
   ],
   imports: [
     HttpClientModule,
