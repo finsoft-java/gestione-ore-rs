@@ -10,13 +10,15 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     //do nothing, HTTP 200
     exit(); 
 }
     
-//require_logged_user_JWT();
+require_logged_user_JWT();
 
 function carica_dati_da_db($anno, $mese) {
     $primo = "DATE('$anno-$mese-01')";
@@ -99,12 +101,24 @@ function creaIntestazione($sheet, &$curRow, $wp, $anno, $mese, $matr, $nomecogno
     $sheet->setCellValue('P' . $curRow, $wp['GRANT_NUMBER']);
     $sheet->setCellValue('U' . $curRow, $wp['ACRONIMO']);
     $curRow++;
-    $sheet->setCellValue('X' . $curRow, 'OSAI');
     $curRow++;
     $sheet->setCellValue('A' . $curRow, 'TIMESHEET');
     $sheet->setCellValue('G' . $curRow, 'year');
-    $sheet->getStyle('J' . $curRow)->setQuotePrefix(true);
     $sheet->setCellValue('J' . $curRow, "$anno");
+    $sheet->getStyle('J' . $curRow)->setQuotePrefix(true);
+    
+    creaLogo($sheet, './images/logo.png', 50, 'Logo', 'X2');
+}
+
+function creaLogo($sheet, $path, $height, $caption, $coordinates) {
+    // see https://phpspreadsheet.readthedocs.io/en/latest/topics/recipes/#add-a-drawing-to-a-worksheet
+    $drawing = new Drawing();
+    $drawing->setName($caption);
+    $drawing->setDescription($caption);
+    $drawing->setPath($path);
+    $drawing->setHeight($height);
+    $drawing->setCoordinates($coordinates);
+    $drawing->setWorksheet($sheet);
 }
 
 function creaLegenda($sheet, &$curRow, $map_wp_wp) {
@@ -130,50 +144,47 @@ function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese, $nomecognome) {
     $first_day = new DateTime("$anno-$mese-01"); 
     $num_days = $first_day->format('t');
 
+    $OFFSET = 2;
+    
     // Imposto la width delle colonne
     for ($i = 0; $i < 32; ++$i) {
-        $sheet->getColumnDimensionByColumn($i + 2)->setWidth(4);
+        $sheet->getColumnDimensionByColumn($i + $OFFSET)->setWidth(5);
     }
     // In alto i giorni
     $curRow++;
     for ($i = 0; $i < $num_days; ++$i) {
-        $curCol = $i + 2;
+        $curCol = $i + $OFFSET;
         $sheet->setCellValueByColumnAndRow($curCol, $curRow, $i);
+        $sheet->getStyleByColumnAndRow($curCol, $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
     }
-    $sheet->setCellValueByColumnAndRow($i + 2, $curRow, 'TOT');
+    $sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, 'TOT');
 
     // day of week
     $curRow++;
-    $supertot = 0;
-    $totali_colonna = array();
     for ($i = 0; $i < $num_days; ++$i) {
         $d = new DateTime("$anno-$mese-$i");
-        $curCol = $i + 2;
+        $curCol = $i + $OFFSET;
         $sheet->setCellValueByColumnAndRow($curCol, $curRow, $d->format('D'));
         $sheet->getStyleByColumnAndRow($curCol, $curRow)->getFont()->setBold(true);
-        $totali_colonna[] = 0;
+        $sheet->getStyleByColumnAndRow($curCol, $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
     }
     
     // TODO assenze / festivita
 
     // A sinistra le WP
-    
-    $OFFSET = 2;
     $row_prima_riga = $curRow + 1;
     foreach($map_wp_wp as $idwp => $wp) {
         ++$curRow;
         $sheet->setCellValue('A' . $curRow, $wp["TITOLO"]);
         $sheet->getStyle('A' . $curRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
         // In mezzo, le ore consuntivate
-        $totale_riga = 0;
         if (isset($wp["ORE_LAVORATE"]) && ! empty($wp["ORE_LAVORATE"])) {
             for ($i = 0; $i < $num_days; ++$i) {
+                $sheet->getStyleByColumnAndRow($i + $OFFSET, $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
                 if (isset($wp["ORE_LAVORATE"][$i])) {
                     $val = $wp["ORE_LAVORATE"][$i];
                     $sheet->setCellValueByColumnAndRow($i + $OFFSET, $curRow, $val);
-                    $totale_riga += $val;
-                    $totali_colonna[$i] += $val;
-                    $supertot += $val;
                 }
             }
         }
@@ -181,11 +192,10 @@ function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese, $nomecognome) {
         $letter_last = Coordinate::stringFromColumnIndex($num_days - 1 + $OFFSET, $curRow);
         $formula = '=SUM(B'.$curRow.':'.$letter_last.$curRow.')';
         $sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, $formula);
-        //$sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, $totale_riga);
         $sheet->getStyleByColumnAndRow($num_days + $OFFSET, $curRow)->getFont()->setBold(true);
     }
     $row_ultima_riga = $curRow;
-    
+
     // Totali di colonna
     ++$curRow;
     $sheet->setCellValue('A' . $curRow, "TOT");
@@ -195,9 +205,6 @@ function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese, $nomecognome) {
         $sheet->setCellValueByColumnAndRow($i + $OFFSET, $curRow, $formula);
         $sheet->getStyleByColumnAndRow($i + $OFFSET, $curRow)->getFont()->setBold(true);
     }
-    
-    // Supertotale
-    $sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, $supertot);
 }
 
 function creaFooter($sheet, &$curRow, $wp, $nomecognome, $nomecognome_super) {
