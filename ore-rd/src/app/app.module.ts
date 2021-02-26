@@ -26,7 +26,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
-import { MatNativeDateModule } from '@angular/material/core';
+import { DateAdapter, MatNativeDateModule } from '@angular/material/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -34,6 +34,8 @@ import { MatSelectModule } from '@angular/material/select';
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import { CommonModule } from '@angular/common';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { MomentUtcDateAdapter } from './_helpers/date.adapter';
 @NgModule({
   declarations: [
     AppComponent,
@@ -48,6 +50,7 @@ import { CommonModule } from '@angular/common';
     ProgettoDettaglioComponent,
     LoginComponent,
     AlertComponent
+    
   ],
   imports: [
     HttpClientModule,
@@ -70,10 +73,12 @@ import { CommonModule } from '@angular/common';
     MatFormFieldModule,
     MatSelectModule,
     TextFieldModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatMomentDateModule
   ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-              { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }],
+              { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+              { provide: DateAdapter, useClass: MomentUtcDateAdapter }],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

@@ -55,13 +55,19 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
   }
+  EndDateChange(data:any){
+    alert();
+    console.log(data);console.log(this.progetto.DATA_INIZIO);
+  }
 
   salva() {
-    console.log(this.id_progetto);
+    
+    console.log(this.progetto);
     if(this.id_progetto == null){
       this.progettiService.insert(this.progetto)
       .subscribe(response => {
         this.router.navigate(['/progetto/'+response["value"][0]["ID_PROGETTO"]]);
+        this.alertService.success("Progetto inserito con successo");
       },
       error => {
         this.alertService.error(error);
@@ -70,6 +76,7 @@ export class ProgettoDettaglioComponent implements OnInit {
       this.progettiService.update(this.progetto)
       .subscribe(response => {
         this.router.navigate(['/progetto/'+response["value"][0]["ID_PROGETTO"]]);
+        this.alertService.success("Progetto modificato con successo");
       },
       error => {
         this.alertService.error(error);

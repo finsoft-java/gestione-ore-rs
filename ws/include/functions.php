@@ -140,6 +140,7 @@ function select_single($sql) {
     }
 }
 
+
 /*
 Esegue un comado SQL UPDATE/INSERT/DELETE e se serve lancia un print_error
 */

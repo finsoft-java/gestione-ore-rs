@@ -100,6 +100,7 @@ class ProgettiManager {
     function aggiorna($progetto, $json_data) {
         global $con, $STATO_PROGETTO;
         $titolo = $con->escape_string($json_data->TITOLO);
+        
         $sql = update("progetti", [
                                     "TITOLO" => $con->escape_string($json_data->TITOLO),
                                     "ACRONIMO" => $json_data->ACRONIMO,
