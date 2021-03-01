@@ -13,3 +13,12 @@
     public MATRICOLA_SUPERVISOR?:string    
     ) {}   
 }
+export class ProgettoSpesa {
+  constructor(
+    public ID_PROGETTO?:number,
+    public ID_SPESA?:string,
+    public DESCRIZIONE?:string,
+    public IMPORTO?:string,
+    public ID_TIPOLOGIA?:string  
+    ) {}   
+}
