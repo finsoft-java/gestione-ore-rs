@@ -11,6 +11,7 @@ include("config.php");
 include("costanti.php");
 include("functions.php");
 include("class_progetto.php");
+include("class_progetto_spesa.php");
 include("class_tipologia.php");
 include("class_panthera.php");
 include("class_rapportini.php");

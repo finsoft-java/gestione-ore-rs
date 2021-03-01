@@ -1,7 +1,9 @@
+import { ProgettiSpesaService } from './../_services/progetti.spesa.service';
+import { MatTableDataSource } from '@angular/material/table';
 import { TipoCosto } from './../_models/tipocosto';
 import { Matricola } from './../_models/matricola';
 import { Subscription } from 'rxjs';
-import { Progetto } from './../_models/progetto';
+import { Progetto, ProgettoSpesa } from './../_models/progetto';
 import { User } from './../_models/user';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProgettiService } from './../_services/progetti.service';
@@ -19,11 +21,15 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   projectSubscription: Subscription;
   progetto!: Progetto;
+  displayedColumns: string[] = ['descrizione','importo', 'tipologia','spesa', 'actions'];
+  dataSource = new MatTableDataSource<[]>();
   allMatricole: any;
   allTipiCosto: any;
+  progetto_spesa!: ProgettoSpesa;
   id_progetto!: any;
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
+    private progettiSpesaService: ProgettiSpesaService,    
     private alertService: AlertService,
     private route: ActivatedRoute,
     private router: Router) {
@@ -44,13 +50,26 @@ export class ProgettoDettaglioComponent implements OnInit {
   ngOnInit(): void {
     if(this.id_progetto != null){
       this.getProgetto();
+      this.getProgettoSpesa();
     } else{
       this.progetto = new Progetto;
     }
     this.getMatricole();
     this.getSupervisor();
   }
+  nuovoProgettoSpesa() {
 
+  }
+  getProgettoSpesa(): void {
+    this.progettiSpesaService.getById(this.id_progetto)
+      .subscribe(response => {
+        this.dataSource = new MatTableDataSource<[]>(response["value"]);
+        console.log(this.dataSource.data);
+      },
+      error => {
+        this.alertService.error(error);
+      });
+  }
   getProgetto(): void {
     this.progettiService.getById(this.id_progetto)
       .subscribe(response => {
@@ -60,6 +79,9 @@ export class ProgettoDettaglioComponent implements OnInit {
       error => {
         this.alertService.error(error);
       });
+  }
+
+  getRecord(a: ProgettoSpesa){
   }
 
   getMatricole(): void {
