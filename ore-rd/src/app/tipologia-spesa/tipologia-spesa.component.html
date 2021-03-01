@@ -28,6 +28,7 @@
         <th mat-header-cell *matHeaderCellDef> Azione </th>
         <td mat-cell *matCellDef="let row">
             <button *ngIf="!row.isEditable" mat-raised-button color="primary" (click)="getRecord(row)">Modifica</button>
+            <button *ngIf="!row.isEditable" mat-raised-button color="" (click)="deleteChange(row)">Elimina</button>
         </td>
     </ng-container>
 
