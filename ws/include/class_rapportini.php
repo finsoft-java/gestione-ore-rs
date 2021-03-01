@@ -1,7 +1,6 @@
 <?php
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -71,7 +70,7 @@ class RapportiniManager {
         $this->creaTabella($sheet, $curRow, $map_wp_wp, $anno, $mese, $nomecognome);
         $this->creaFooter($sheet, $curRow, $wp, $nomecognome, $nomecognome_super);
 
-        $writer = new Xlsx($spreadsheet);
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $xlsxfilename = tempnam(null, "Rapportini");
         $writer->save($xlsxfilename);
         $xlsxfilename_final = 'Rapportini_' . $idProgetto . '_' . $matr . '.xlsx';
@@ -146,7 +145,7 @@ class RapportiniManager {
         $curRow++;
         for ($i = 0; $i < $num_days; ++$i) {
             $curCol = $i + $OFFSET;
-            $sheet->setCellValueByColumnAndRow($curCol, $curRow, $i);
+            $sheet->setCellValueByColumnAndRow($curCol, $curRow, $i + 1);
             $sheet->getStyleByColumnAndRow($curCol, $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
         }
         $sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, 'TOT');
@@ -212,5 +211,84 @@ class RapportiniManager {
         $sheet->setCellValue('S' . $curRow, '(FIXME Data firma)');
     }
 
+    function importExcel($filename, &$message) {
+
+        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $spreadSheet = $reader->load($_FILES['file']['tmp_name'][$filenum]);
+        $excelSheet = $spreadSheet->getActiveSheet();
+        $spreadSheetAry = $excelSheet->toArray();
+        $numRows = count($spreadSheetAry);
+
+        $titolo_progetto = $spreadSheetAry[0][7];
+        $id_progetto = select_single("SELECT ID_PROGETTO FROM PROGETTI WHERE TITOLO='$titolo_progetto'"); // FIXME chiave unica?!?        
+        if (empty($id_progetto)) {
+            $message .= 'Bad file. Non riesco a identificare il titolo del progetto.<br/>';
+            return;
+        }
+        
+        $anno = $spreadSheetAry[0][9];
+        if (empty($anno)) {
+            $message .= 'Bad file. Non riesco a identificare l\'anno del rapportino.<br/>';
+            return;
+        }
+        $mese = $spreadSheetAry[0][14];
+        if (empty($mese)) {
+            $message .= 'Bad file. Non riesco a identificare il mes del rapportino.<br/>';
+            return;
+        }
+        
+
+        $matricola = '';
+            
+        // skip first rows
+        for ($i = 0; $i <= $numRows; ++$i) {
+            if (str_contains($spreadSheetAry[$i][0], 'Activity details')) {
+                ++$i;
+                $matricola = $spreadSheetAry[$i][23];
+                break;
+            }
+        }
+        
+        if ($i == $numRows) {
+            $message .= 'Bad file. Non trovo la stringa "Activity details".<br/>';
+            return;
+        }
+        
+        if (empty($matricola)) {
+            $message .= 'Bad file. Non riesco a identificare la matricola utente.</br>';
+            return;
+        }
+        
+        $riga_date = $i;
+        ++$i;
+        
+        for ( ; $i <= $numRows; ++$i) {
+            if (empty($spreadSheetAry[$i][0])) {
+                continue;
+            }
+            if ($spreadSheetAry[$i][0] === 'TOT') {
+                break;
+            }
+            $titolo_wp = mysqli_real_escape_string($con, $spreadSheetAry[$i][0]);
+            $id_wp = select_single("SELECT ID_WP FROM PROGETTI_WP WHERE ID_PROGETTO=$id_progetto AND TITOLO='$titolo_wp'");
+             
+            for ($day = 1; $day < count($spreadSheetAry[$riga_date]); ++$day) { // OFFSET == 0
+                if ($spreadSheetAry[$riga_date][$day] === 'TOT') {
+                    break;
+                }
+                $data = "$anno-$mese-" . $spreadSheetAry[$i][$day];
+                $ore = $spreadSheetAry[$i][$day];
+                
+            }
+
+            if (!empty($matricola) && !empty($data) && $ore > 0) {
+                $query = "insert into ore_consuntivate(MATRICOLA_DIPENDENTE,DATA,ID_PROGETTO,ID_WP,ORE_LAVORATE) values('$matricola','$data',$id_progetto,$id_wp,$ore)";
+                execute_update($query);
+            }
+        }
+        
+        $message .= 'Fatto.</br>';
+    }
+    
 }
 ?>

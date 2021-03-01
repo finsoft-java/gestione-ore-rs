@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     //do nothing, HTTP 200
     exit(); 
 }
-    
+
 require_logged_user_JWT();
 
 
