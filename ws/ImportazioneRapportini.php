@@ -24,21 +24,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'text/xlsx',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     ];
-    for($i = 0; $i < count($_FILES); $i++){
-        if (! isset($_FILES["file$i"]["name"]) or count($_FILES["file$i"]) == 0) {
-            print_error(400, "You have to upload at least 1 file.");
-        }
+
+    if (!isset($_FILES["file"]["name"]) or count($_FILES["file"]["name"]) == 0) {
+        print_error(400, "You have to upload at least 1 file.");
     }
-  
     
     $message = "";
-    for ($filenum = 0; $filenum < count($_FILES); ++$filenum) {
-        $message .= "Analysing file " . $_FILES["file$filenum"]["name"][$filenum] . "...<br/>";
-        $filename = $_FILES["file$filenum"]["name"];
-        if (in_array($_FILES["file$filenum"]["type"], $allowedFileType)) {
+    for ($filenum = 0; $filenum < count($_FILES["file"]["name"]); ++$filenum) {
+        $message .= "Analysing file " . $_FILES["file"]["name"][$filenum] . "...<br/>";
+        $filename =  $_FILES["file"]["tmp_name"][$filenum];
+        if (in_array($_FILES["file"]["type"][$filenum], $allowedFileType)) {
             $rapportini->importExcel($filename, $message);
         } else {
-            $message .= "Invalid File Type. Upload Excel File.</br>";
+            $message .= "Invalid File Type. Upload Excel File.<br/>";
         }
     }
 

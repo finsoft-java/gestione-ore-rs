@@ -12,11 +12,11 @@ export class UploadRapportiniService {
 
   constructor(private http: HttpClient) { }
 
-  upload(file: File[]): Observable<HttpEvent<any>> {
+  upload(file: FileList): Observable<HttpEvent<any>> {
     const formData: FormData = new FormData();
     console.log(formData);
     for(let i = 0; i < file.length; i++){
-      formData.append('file'+i+'', file[i]);
+      formData.append('file[]', file[i]);
     }
     console.log(formData);
 

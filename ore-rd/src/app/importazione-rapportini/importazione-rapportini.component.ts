@@ -22,7 +22,6 @@ export class ImportazioneRapportiniComponent implements OnInit {
     //this.fileInfos = this.uploadService.getFiles();
   }
   selectFiles(event: any) {
-    this.progressInfos = [];
     this.selectedFiles = event.target.files;
   }
 
@@ -41,18 +40,21 @@ export class ImportazioneRapportiniComponent implements OnInit {
     //}
   }
 
-  upload(files:any) {
+  upload(files: FileList) {
     this.progressInfos = { value: 0, fileName: 'Caricamento' };
   
     this.uploadService.upload(files).subscribe(
       event => {
-        console.log('event', event);
         if (event.type === HttpEventType.UploadProgress) {
-          if(event.total)
-          this.progressInfos.value = Math.round(100 * event.loaded / event.total);
-          this.message_success = 'Tutto ok';
+          console.log(event);
+          if(event.total){
+            this.progressInfos.value = Math.round(100 * event.loaded / event.total);
+            console.log(this.progressInfos);
+          }
         } else if (event instanceof HttpResponse) {
-          console.log('event success?? -> ',event);
+          console.log('success -> ',event.body.value);
+          this.message_error = event.body.value;
+          console.log('success -> ',this.message_error);
         }
       },
       err => {

@@ -262,16 +262,17 @@ class RapportiniManager {
     function importExcel($filename, &$message) {
 
         $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-        for ($filenum = 0; $filenum < count($_FILES); ++$filenum) {
-            $spreadSheet = $reader->load($_FILES["file$filenum"]['tmp_name']);
-            $excelSheet = $spreadSheet->getActiveSheet();
-            $spreadSheetAry = $excelSheet->toArray();
-            $numRows = count($spreadSheetAry);
-            echo $numRows;
-            var_dump($spreadSheetAry);
+        $spreadSheet = $reader->load($filename);
+        $excelSheet = $spreadSheet->getActiveSheet();
+        $spreadSheetAry = $excelSheet->toArray();
+        
+        $numRows = count($spreadSheetAry);
+        if(isset($spreadSheetAry[0][7])){
+            $titolo_progetto = $spreadSheetAry[0][7];
+        } else {
+            $message .= 'Bad file. Non riesco a identificare le corrette colonne del file.<br/>';
+            return;
         }
-        return false;
-        $titolo_progetto = $spreadSheetAry[0][7];
         $id_progetto = select_single("SELECT ID_PROGETTO FROM PROGETTI WHERE TITOLO='$titolo_progetto'"); // FIXME chiave unica?!?        
         if (empty($id_progetto)) {
             $message .= 'Bad file. Non riesco a identificare il titolo del progetto.<br/>';
