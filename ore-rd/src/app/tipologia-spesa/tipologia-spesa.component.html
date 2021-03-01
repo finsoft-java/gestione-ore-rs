@@ -15,12 +15,11 @@
         <td mat-cell *matCellDef="let element">
             <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}} </label>
             <!--<input matInput [value]="element.descrizione" [(ngModel)]="element.descrizione">-->
-            <div>
+            <div style="display: block;margin: 0px auto;width: 423px;">
                 <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
                 <button style="margin-right:10px;" *ngIf="element.isEditable" mat-raised-button color="primary" (click)="saveChange(element)">Salva</button>
                 <button *ngIf="element.isEditable" mat-raised-button color="" (click)="undoChange(element)">Annulla</button>
             </div>
-
         </td>
 
     </ng-container>

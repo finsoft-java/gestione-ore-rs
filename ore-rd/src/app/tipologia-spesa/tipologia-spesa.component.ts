@@ -43,6 +43,10 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
       this.tipoSpesaService.insert(a)
       .subscribe(response => {
         this.alertService.success("Tipologia inserita con successo");
+        this.dataSource.data.splice(-1, 1);
+        this.dataSource.data.push(response["value"][0]);
+        this.dataSource.data = this.dataSource.data;
+
       },
       error => {
         this.alertService.error(error);
@@ -72,6 +76,10 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
   
   undoChange(a:Tipologia){
     a.isEditable=false;
+    if(a.ID_TIPOLOGIA == null){
+      this.dataSource.data.splice(-1, 1);
+      this.dataSource.data = this.dataSource.data;
+    }
   }
 }
 

@@ -13,7 +13,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 })
 export class ProgettiComponent implements OnInit {
 
-  displayedColumns: string[] = ['titolo', 'dataInizio', 'actions'];
+  displayedColumns: string[] = ['titolo','acronimo', 'dataInizio','dataFine', 'actions'];
   dataSource = new MatTableDataSource<Progetto[]>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;

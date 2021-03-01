@@ -5,3 +5,14 @@ table {
 .mat-paginator {
     background: initial;
 }
+
+.mat-header-cell {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.mat-cell {
+    text-align: center;
+    justify-content: center;
+}
