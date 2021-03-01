@@ -67,7 +67,7 @@ export class ProgettoDettaglioComponent implements OnInit {
         console.log(this.dataSource.data);
       },
       error => {
-        this.alertService.error(error);
+        this.dataSource = new MatTableDataSource<[]>();
       });
   }
   getProgetto(): void {

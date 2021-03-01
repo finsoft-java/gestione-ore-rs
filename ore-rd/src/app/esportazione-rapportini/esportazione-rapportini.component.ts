@@ -18,13 +18,13 @@ import { formatDate } from '@angular/common';
 const moment = _moment;
 export const MY_FORMATS = {
   parse: {
-    dateInput: 'MM/YYYY',
+    dateInput: 'YYYY-MM',
   },
   display: {
-    dateInput: 'MM/YYYY',
-    monthYearLabel: 'MMM YYYY',
+    dateInput: 'YYYY-MM',
+    monthYearLabel: 'YYYY MMM',
     dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM YYYY',
+    monthYearA11yLabel: 'YYYY MMMM',
   },
 };
 
@@ -42,24 +42,24 @@ export const MY_FORMATS = {
 export class EsportazioneRapportiniComponent implements OnInit {
     date = new FormControl(moment());
     chosenYearHandler(normalizedYear: Moment) {
-        const ctrlValue = this.date.value;
-        ctrlValue.year(normalizedYear.year());
-        this.date.setValue(ctrlValue);
-      }
-  
-      chosenMonthHandler(normalizedMonth: Moment, datepicker: MatDatepicker<Moment>) {
-        const ctrlValue = this.date.value;
-        ctrlValue.month(normalizedMonth.month());
-        this.date.setValue(ctrlValue);
-        datepicker.close();
-      }
+      const ctrlValue = this.date.value;
+      ctrlValue.year(normalizedYear.year());
+      this.date.setValue(ctrlValue);
+    }
+
+    chosenMonthHandler(normalizedMonth: Moment, datepicker: MatDatepicker<Moment>) {
+      const ctrlValue = this.date.value;
+      ctrlValue.month(normalizedMonth.month());
+      this.date.setValue(ctrlValue);
+      datepicker.close();
+    }
     constructor(private uploadRapportiniService: UploadRapportiniService) { }
 
     ngOnInit(): void {
     }
 
     download() {
-        this.uploadRapportiniService.download(formatDate(this.date.value,"MM/YYYY","en-GB")).subscribe(response => {
+        this.uploadRapportiniService.download(formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe(response => {
             this.downloadFile(response);
         },
         error => {

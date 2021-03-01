@@ -28,12 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
         header('Content-Type: application/json');
         echo json_encode(['value' => $progetto]);
-    } else {
-        //==========================================================
-        [$progetti, $count] = $progettiSpesaManager->get_progetti($top, $skip, $orderby);
-          
-        header('Content-Type: application/json');
-        echo json_encode(['data' => $progetti, 'count' => $count]);
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     //==========================================================

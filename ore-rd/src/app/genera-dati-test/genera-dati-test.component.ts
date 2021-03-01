@@ -17,13 +17,13 @@ import { formatDate } from '@angular/common';
 const moment = _moment;
 export const MY_FORMATS = {
   parse: {
-    dateInput: 'MM/YYYY',
+    dateInput: 'YYYY-MM',
   },
   display: {
-    dateInput: 'MM/YYYY',
-    monthYearLabel: 'MMM YYYY',
+    dateInput: 'YYYY-MM',
+    monthYearLabel: 'YYYY MMM',
     dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM YYYY',
+    monthYearA11yLabel: 'YYYY MMMM',
   },
 };
 
@@ -60,6 +60,6 @@ export class GeneraDatiTestComponent implements OnInit {
     }
 
     run() {
-        this.datitestService.run(formatDate(this.date.value,"MM/YYYY",'en-GB')).subscribe();
+        this.datitestService.run(formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe();
     }
 }
