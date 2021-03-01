@@ -34,6 +34,9 @@ class PantheraManager {
         return $tipiCosto;
     }
     
+    /**
+    * Costi validi alla data specificata
+    */
     function getCosti($data) {
         $query = "SELECT DISTINCT ID_RISORSA,COSTO " .
             "FROM THIP.TIPI_COSTO " .
@@ -45,6 +48,24 @@ class PantheraManager {
         $costi = [ [ 'ID_RISORSA' => '1234', 'COSTO' => 8.0 ],
                       [ 'ID_RISORSA' => '4321', 'COSTO' => 9.0 ],
                       [ 'ID_RISORSA' => '6666', 'COSTO' => 10.0 ]
+                     ];
+        return $costi;
+    }
+    
+    /**
+    * Restituisce tutti i record di costo nel range specificato
+    */
+    function getMatriceCosti($data1, $data2) {
+        $query = "SELECT DISTINCT ID_RISORSA,COSTO,DATA_COSTO,DATA_FINE_COSTO " .
+            "FROM THIP.TIPI_COSTO " .
+            "WHERE ID_AZIENDA='001' AND TIPO_RISORSA='U' AND LIVELLO_RISORSA='4' " .
+            "AND (DATA_COSTO IS NULL OR DATA_COSTO<='$data2') " .
+            "AND (DATA_FINE_COSTO IS NULL OR DATA_FINE_COSTO>='$data1') ";
+        // TODO BISOGNA RICHIAMARE SQL SERVER, $costi = select_list($query)
+        
+        $costi = [ [ 'ID_RISORSA' => '1234', 'COSTO' => 8.0, 'DATA_COSTO' => '2020-01-01', 'DATA_FINE_COSTO' => null ],
+                      [ 'ID_RISORSA' => '4321', 'COSTO' => 9.0, 'DATA_COSTO' => '200-01-01', 'DATA_FINE_COSTO' => '2010-12-31' ],
+                      [ 'ID_RISORSA' => '6666', 'COSTO' => 10.0, 'DATA_COSTO' => '2020-01-01', 'DATA_FINE_COSTO' => null ]
                      ];
         return $costi;
     }
