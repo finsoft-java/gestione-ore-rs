@@ -81,5 +81,17 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
       this.dataSource.data = this.dataSource.data;
     }
   }
+
+  deleteChange(a:Tipologia){
+
+    this.tipoSpesaService.delete(a.ID_TIPOLOGIA)
+        .subscribe(response => {
+          this.getAll();
+          this.dataSource = new MatTableDataSource<Tipologia[]>(this.allTipologie);
+        },
+        error => {
+        });
+
+  }
 }
 

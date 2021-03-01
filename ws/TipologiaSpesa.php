@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_logged_user_JWT();
 
 $id_tipologia_spesa = isset($_GET['id_tipologia_spesa']) ? $con->escape_string($_GET['id_tipologia_spesa']) : null;
+$id_tipologia = isset($_GET['id_tipologia']) ? $con->escape_string($_GET['id_tipologia']) : null;
 $top = isset($_GET['top']) ? $con->escape_string($_GET['top']) : null;
 $skip = isset($_GET['skip']) ? $con->escape_string($_GET['skip']) : null;
 $orderby = isset($_GET['orderby']) ? $con->escape_string($_GET['orderby']) : null;
@@ -78,15 +79,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     //==========================================================
-    if (!$id_tipologia_spesa) {
-        print_error(400, 'Missing id_tipologia_spesa');
+    if (!$id_tipologia) {
+        print_error(400, 'Missing id_tipologia');
     }
-    $tipologiaSpesa_su_db = $tipologiaManager->get_tipologia($id_tipologia_spesa);
+    $tipologiaSpesa_su_db = $tipologiaManager->get_tipologia($id_tipologia);
     if (!$tipologiaSpesa_su_db) {
         print_error(404, 'Not found');
     }
     
-    $tipologiaManager->elimina($id_tipologia_spesa);
+    $tipologiaManager->elimina($id_tipologia);
     
 } else {
     //==========================================================
