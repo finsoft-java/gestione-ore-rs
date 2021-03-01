@@ -13,6 +13,7 @@ export class ImportazioneLulComponent implements OnInit {
   selectedFiles?: FileList;
   progressInfos: Array<any> = [];
   message = '';
+  loading = false;
 
   fileInfos: Observable<any> = new Observable;
 
@@ -25,6 +26,7 @@ export class ImportazioneLulComponent implements OnInit {
     this.selectedFiles = event.target.files;
   }
   uploadFiles() {
+    this.loading = true;
     this.message = '';
     if(this.selectedFiles)
     for (let i = 0; i < this.selectedFiles.length; i++) {
@@ -40,8 +42,10 @@ export class ImportazioneLulComponent implements OnInit {
         if (event.type === HttpEventType.UploadProgress) {
           if(event.total)
           this.progressInfos[idx].value = Math.round(100 * event.loaded / event.total);
+          this.loading = false;
         } else if (event instanceof HttpResponse) {
           console.log('event -> ',event);
+          this.loading = false;
           //this.fileInfos = this.uploadService.getFiles();
         }
       },
@@ -49,6 +53,7 @@ export class ImportazioneLulComponent implements OnInit {
         console.log(err);
         this.progressInfos[idx].value = 0;
         this.alertService.error("Errore nel WS controllare i log");
+        this.loading = false;
       });
   }
 }

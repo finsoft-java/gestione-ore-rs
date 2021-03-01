@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpRequest, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from './../../environments/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
-export class UploadFilesService {
+export class UploadRapportiniService {
 
   private baseUrl = environment.wsUrl;
 
@@ -17,7 +17,7 @@ export class UploadFilesService {
 
     formData.append('file', file);
 
-    const req = new HttpRequest('POST', `${this.baseUrl}/ImportExcelLul.php`, formData, {
+    const req = new HttpRequest('POST', `${this.baseUrl}/ImportazioneRapportini.php`, formData, {
       reportProgress: true,
       responseType: 'json'
     });
