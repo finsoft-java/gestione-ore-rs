@@ -14,3 +14,4 @@ include("class_progetto.php");
 include("class_tipologia.php");
 include("class_panthera.php");
 include("class_rapportini.php");
+include("class_lul.php");

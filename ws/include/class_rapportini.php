@@ -11,7 +11,7 @@ $rapportini = new RapportiniManager();
 
 class RapportiniManager {
 
-    function carica_dati_da_db($anno, $mese) {
+    function carica_wp_da_db($anno, $mese) {
         $primo = "DATE('$anno-$mese-01')";
 
         $query_matr_wp = "SELECT p.ID_PROGETTO, p.ACRONIMO, p.TITOLO AS TITOLO_P, p.GRANT_NUMBER, p.MATRICOLA_SUPERVISOR, " .
@@ -52,7 +52,40 @@ class RapportiniManager {
         return $map_progetti_matricole_wp;
     }
 
-    function creaFileExcel($idProgetto, $matr, $anno, $mese, $map_wp_wp, $zip, $tempfiles) {
+    function creaZip($anno, $mese) {
+        global $lul;
+        
+        // REPERIRE DATI DA DB
+        $map_progetti_matricole_wp = $this->carica_wp_da_db($anno, $mese);
+        $map_matr_ore = $lul->carica_da_db($anno, $mese);
+        
+        // CREA FILE ZIP VUOTO
+        $zip = new ZipArchive;
+        $zipfilename = tempnam(null, "export");
+        if (! $zip->open($zipfilename, ZipArchive::CREATE)) {
+            print_error(500, 'Cannot create ZIP file');
+        }
+        $tempfiles = [];
+        
+        // MAIN LOOP
+        foreach ($map_progetti_matricole_wp as $idProgetto => $map_matricole_wp) {
+            foreach ($map_matricole_wp as $matr => $map_wp_wp) {
+                $xlsxfilename = $this->creaFileExcel($idProgetto, $matr, $anno, $mese, $map_wp_wp, $map_matr_ore);
+                $xlsxfilename_final = 'Rapportini_' . $idProgetto . '_' . $matr . '.xlsx';
+                $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON esegue il salvataggio
+                $tempfiles[] = $xlsxfilename;
+            }
+        }
+
+        $zip->close();
+        
+        // ELIMINO FILE TEMPORANEI (tutti tranne lo zip!)
+        foreach($tempfiles as $t) unlink($t);
+        
+        return $zipfilename;
+    }
+
+    function creaFileExcel($idProgetto, $matr, $anno, $mese, $map_wp_wp, $map_matr_ore) {
         
         $wp = $map_wp_wp[array_keys($map_wp_wp)[0]]; // uno a caso
         
@@ -67,21 +100,21 @@ class RapportiniManager {
         
         $this->creaIntestazione($sheet, $curRow, $wp, $anno, $mese, $matr, $nomecognome);
         $this->creaLegenda($sheet, $curRow, $map_wp_wp);
-        $this->creaTabella($sheet, $curRow, $map_wp_wp, $anno, $mese, $nomecognome);
+        $this->creaTabella($sheet, $curRow, $map_wp_wp, $anno, $mese, $matr, $nomecognome, $map_matr_ore);
         $this->creaFooter($sheet, $curRow, $wp, $nomecognome, $nomecognome_super);
 
+        $sheet->getPageSetup()->setPrintArea('A1:AH' . $curRow);
+        
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $xlsxfilename = tempnam(null, "Rapportini");
         $writer->save($xlsxfilename);
-        $xlsxfilename_final = 'Rapportini_' . $idProgetto . '_' . $matr . '.xlsx';
         
-        // addFile() non salva il file su disco, viene salvato al close()
-        $zip->addFile($xlsxfilename, $xlsxfilename_final);
-
-        $tempfiles[] = $xlsxfilename;
+        return $xlsxfilename;
     }
 
     function creaIntestazione($sheet, &$curRow, $wp, $anno, $mese, $matr, $nomecognome) {
+        
+        $data = new DateTime("$anno-$mese-01");
         
         $sheet->setCellValue('H' . $curRow, $wp['TITOLO_P']);
         $sheet->getStyle('H' . $curRow)->getFont()->setBold(true);
@@ -90,15 +123,21 @@ class RapportiniManager {
         $sheet->setCellValue('O' . $curRow, 'Grant');
         $sheet->getStyle('O' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->setCellValue('P' . $curRow, $wp['GRANT_NUMBER']);
-        $sheet->setCellValue('U' . $curRow, $wp['ACRONIMO']);
+        $sheet->setCellValue('T' . $curRow, $wp['ACRONIMO']);
         $curRow++;
         $curRow++;
         $sheet->setCellValue('A' . $curRow, 'TIMESHEET');
-        $sheet->setCellValue('G' . $curRow, 'year');
+        $sheet->setCellValue('I' . $curRow, 'year');
+        $sheet->getStyle('I' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->setCellValue('J' . $curRow, "$anno");
+        $sheet->setCellValue('M' . $curRow, 'month');
+        $sheet->getStyle('M' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('N' . $curRow, $data->format('F'));
         $sheet->getStyle('J' . $curRow)->setQuotePrefix(true);
         
         $this->insertImage($sheet, './images/logo.png', 50, 'Logo', 'X2');
+
+        $curRow += 2;
     }
 
     function insertImage($sheet, $path, $height, $caption, $coordinates) {
@@ -113,7 +152,6 @@ class RapportiniManager {
     }
 
     function creaLegenda($sheet, &$curRow, $map_wp_wp) {
-        $curRow += 3;
         $sheet->setCellValue('A' . $curRow, 'Activities description');
         $sheet->setCellValue('I' . $curRow, 'Start');
         $sheet->setCellValue('J' . $curRow, 'End');
@@ -125,12 +163,14 @@ class RapportiniManager {
             $sheet->setCellValue('I' . $curRow, '??');
             $sheet->setCellValue('J' . $curRow, '??');
         }
+        $curRow += 2;
     }
 
-    function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese, $nomecognome) {
-        $curRow += 3;
+    function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese, $matricola, $nomecognome, $map_matr_ore) {
         $sheet->setCellValue('A' . $curRow, 'Activity details and daily working hours on ADIR project');
-        $sheet->setCellValue('P' . $curRow, 'Full name of the person working in the action:');
+        $sheet->setCellValue('W' . $curRow, 'Full name of the person working in the action:');
+        $sheet->getStyle('W' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('X' . $curRow, $matricola);
         $sheet->setCellValue('Z' . $curRow, $nomecognome);
         $first_day = new DateTime("$anno-$mese-01"); 
         $num_days = $first_day->format('t');
@@ -160,8 +200,6 @@ class RapportiniManager {
             $sheet->getStyleByColumnAndRow($curCol, $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
         }
         
-        // TODO assenze / festivita
-
         // A sinistra le WP
         $row_prima_riga = $curRow + 1;
         foreach($map_wp_wp as $idwp => $wp) {
@@ -196,10 +234,19 @@ class RapportiniManager {
             $sheet->setCellValueByColumnAndRow($i + $OFFSET, $curRow, $formula);
             $sheet->getStyleByColumnAndRow($i + $OFFSET, $curRow)->getFont()->setBold(true);
         }
+        
+        // Dati dei LUL
+        ++$curRow;
+        $sheet->setCellValue('A' . $curRow, "LUL");
+        for ($i = 0; $i <= $num_days; ++$i) {
+            if (!isset($map_matr_ore[$i])) $map_matr_ore[$i] = 0;
+            $sheet->setCellValueByColumnAndRow($i + $OFFSET, $curRow, $map_matr_ore[$i]);
+        }
+
+        $curRow += 3;
     }
 
     function creaFooter($sheet, &$curRow, $wp, $nomecognome, $nomecognome_super) {
-        $curRow += 3;
         $sheet->setCellValue('E' . $curRow, 'Working person:');
         $sheet->setCellValue('J' . $curRow, $nomecognome);
         $sheet->setCellValue('P' . $curRow, 'Signature');
@@ -209,6 +256,7 @@ class RapportiniManager {
         $sheet->setCellValue('J' . $curRow, $nomecognome_super);
         $sheet->setCellValue('P' . $curRow, 'Signature');
         $sheet->setCellValue('S' . $curRow, '(FIXME Data firma)');
+        $curRow += 2;
     }
 
     function importExcel($filename, &$message) {
@@ -231,20 +279,16 @@ class RapportiniManager {
             $message .= 'Bad file. Non riesco a identificare l\'anno del rapportino.<br/>';
             return;
         }
-        $mese = $spreadSheetAry[0][14];
+        $mese = $spreadSheetAry[0][13];
         if (empty($mese)) {
             $message .= 'Bad file. Non riesco a identificare il mes del rapportino.<br/>';
             return;
         }
-        
 
         $matricola = '';
-            
         // skip first rows
         for ($i = 0; $i <= $numRows; ++$i) {
             if (str_contains($spreadSheetAry[$i][0], 'Activity details')) {
-                ++$i;
-                $matricola = $spreadSheetAry[$i][23];
                 break;
             }
         }
@@ -254,11 +298,13 @@ class RapportiniManager {
             return;
         }
         
+        $matricola = $spreadSheetAry[$i][23];
         if (empty($matricola)) {
             $message .= 'Bad file. Non riesco a identificare la matricola utente.</br>';
             return;
         }
         
+        ++$i;
         $riga_date = $i;
         ++$i;
         
