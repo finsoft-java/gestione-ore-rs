@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DatitestService } from './../_services/datitest.service';
 
 @Component({
   selector: 'app-genera-dati-test',
@@ -7,9 +8,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class GeneraDatiTestComponent implements OnInit {
 
-  constructor() { }
+  periodo = '2021-02'; //TODO datepicker
+
+  constructor(private datitestService: DatitestService) { }
 
   ngOnInit(): void {
   }
 
+  run() {
+      this.datitestService.run(this.periodo).subscribe();
+  }
 }
