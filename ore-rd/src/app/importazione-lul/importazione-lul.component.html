@@ -7,9 +7,9 @@
         </div>
     </div>
 </div>
-
-<label class="btn btn-default">
-    <input type="file" multiple (change)="selectFiles($event)" />
-  </label>
-
-<button class="btn btn-success" [disabled]="!selectedFiles" (click)="uploadFiles()">Upload</button>
+<div style="border: 1px;border-style: dashed;padding: 30px;text-align: center;">
+    <label class="btn btn-default">
+        <input type="file" multiple (change)="selectFiles($event)" />
+    </label>
+    <button class="btn btn-success" [disabled]="!selectedFiles" (click)="uploadFiles()">Carica</button>
+</div>
