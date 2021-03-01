@@ -19,12 +19,12 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private authenticationService: AuthenticationService,
     private alertService: AlertService) {}
+
   form = this.fb.group({
     username: ['', [Validators.required]],
     password: ['', [Validators.required]]
   })
 
-  // convenience getter for easy access to form fields
   get f() { return this.form.controls; }
 
   submit() {
@@ -52,9 +52,7 @@ export class LoginComponent implements OnInit {
     }
   }
 
-
   ngOnInit(): void {
-    
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';   
   }
 
