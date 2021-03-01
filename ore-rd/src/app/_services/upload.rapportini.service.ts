@@ -14,11 +14,10 @@ export class UploadRapportiniService {
 
   upload(file: FileList): Observable<HttpEvent<any>> {
     const formData: FormData = new FormData();
-    console.log(formData);
+
     for(let i = 0; i < file.length; i++){
       formData.append('file[]', file[i]);
     }
-    console.log(formData);
 
     const req = new HttpRequest('POST', `${this.baseUrl}/ImportazioneRapportini.php`, formData, {
       reportProgress: true,

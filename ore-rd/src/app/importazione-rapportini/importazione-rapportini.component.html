@@ -25,7 +25,7 @@
         </div>
     </div>
     <label class="btn btn-default">
-        <input type="file" multiple (change)="selectFiles($event)" />
+        <input type="file" multiple (change)="selectFiles($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
     </label>
     <button class="btn btn-success" [disabled]="!selectedFiles" (click)="uploadFiles()">Carica</button>
 </div>

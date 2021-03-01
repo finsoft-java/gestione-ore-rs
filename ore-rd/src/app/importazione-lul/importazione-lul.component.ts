@@ -10,50 +10,58 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
   styleUrls: ['./importazione-lul.component.css']
 })
 export class ImportazioneLulComponent implements OnInit {
-  selectedFiles?: FileList;
-  progressInfos: Array<any> = [];
-  message = '';
-  loading = false;
 
+  selectedFiles?: FileList;
+  progressInfos: any;
+  message_success = '';
+  message_error = '';
   fileInfos: Observable<any> = new Observable;
 
   constructor(private uploadService: UploadFilesService, private alertService: AlertService) { }
+
   ngOnInit(){
-    //this.fileInfos = this.uploadService.getFiles();
   }
+
   selectFiles(event: any) {
-    this.progressInfos = [];
     this.selectedFiles = event.target.files;
   }
+
+  resetAlertSuccess() {    
+    this.message_success = '';
+  }
+  
+  resetAlertDanger() {
+    this.message_error = '';
+  }
+
   uploadFiles() {
-    this.loading = true;
-    this.message = '';
-    if(this.selectedFiles)
-    for (let i = 0; i < this.selectedFiles.length; i++) {
-      this.upload(i, this.selectedFiles[i]);
+    if(this.selectedFiles) {
+      this.upload(this.selectedFiles);
     }
   }
-  upload(idx:any, file:any) {
-    this.progressInfos[idx] = { value: 0, fileName: file.name };
+
+  upload(files: FileList) {
+    this.progressInfos = { value: 0, fileName: 'Caricamento' };
   
-    this.uploadService.upload(file).subscribe(
+    this.uploadService.upload(files).subscribe(
       event => {
-        console.log(event);
         if (event.type === HttpEventType.UploadProgress) {
-          if(event.total)
-          this.progressInfos[idx].value = Math.round(100 * event.loaded / event.total);
-          this.loading = false;
+          console.log(event);
+          if(event.total){
+            this.progressInfos.value = Math.round(100 * event.loaded / event.total);
+            console.log(this.progressInfos);
+          }
         } else if (event instanceof HttpResponse) {
-          console.log('event -> ',event);
-          this.loading = false;
-          //this.fileInfos = this.uploadService.getFiles();
+          console.log('success -> ',event.body.value);
+          this.message_error = event.body.value;
+          console.log('success -> ',this.message_error);
         }
       },
       err => {
-        console.log(err);
-        this.progressInfos[idx].value = 0;
-        this.alertService.error("Errore nel WS controllare i log");
-        this.loading = false;
+        console.log('err', err);
+        this.progressInfos.value = 0;        
+        this.message_error = err.error.error.message;
       });
   }
+
 }

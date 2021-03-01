@@ -12,10 +12,12 @@ export class UploadFilesService {
 
   constructor(private http: HttpClient) { }
 
-  upload(file: File): Observable<HttpEvent<any>> {
+  upload(file: FileList): Observable<HttpEvent<any>> {
     const formData: FormData = new FormData();
 
-    formData.append('file', file);
+    for(let i = 0; i < file.length; i++){
+      formData.append('file[]', file[i]);
+    }
 
     const req = new HttpRequest('POST', `${this.baseUrl}/ImportExcelLul.php`, formData, {
       reportProgress: true,

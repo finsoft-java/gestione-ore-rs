@@ -18,9 +18,10 @@ export class ImportazioneRapportiniComponent implements OnInit {
   fileInfos: Observable<any> = new Observable;
 
   constructor(private uploadService: UploadRapportiniService, private alertService: AlertService) { }
+
   ngOnInit(){
-    //this.fileInfos = this.uploadService.getFiles();
   }
+
   selectFiles(event: any) {
     this.selectedFiles = event.target.files;
   }
@@ -34,10 +35,9 @@ export class ImportazioneRapportiniComponent implements OnInit {
   }
 
   uploadFiles() {
-    if(this.selectedFiles)
-    //for (let i = 0; i < this.selectedFiles.length; i++) {
+    if(this.selectedFiles) {
       this.upload(this.selectedFiles);
-    //}
+    }
   }
 
   upload(files: FileList) {
