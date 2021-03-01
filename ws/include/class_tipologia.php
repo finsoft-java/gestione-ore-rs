@@ -24,7 +24,6 @@ class TipologiaManager {
         $sql = "FROM tipologie_spesa p ";
         
         if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
-            // avoid SQL-injection
             $sql .= " ORDER BY $orderby";
         } else {
             $sql .= " ORDER BY p.ID_TIPOLOGIA DESC";
@@ -45,8 +44,7 @@ class TipologiaManager {
         }
         if($result = mysqli_query($con, $sql1 . $sql)) {
             $cr = 0;
-            while($row = mysqli_fetch_assoc($result))
-            {
+            while($row = mysqli_fetch_assoc($result)) {
                 $tipologia = new Progetto();
                 $tipologia->ID_TIPOLOGIA = $row['ID_TIPOLOGIA'];
                 $tipologia->DESCRIZIONE  = $row['DESCRIZIONE'];
@@ -60,7 +58,6 @@ class TipologiaManager {
     
     function get_tipologia($id_tipologia) {
         global $con, $BOOLEAN;
-       // $tipologia = new TipologieSpesa();
         $sql = "SELECT * FROM tipologie_spesa p WHERE ID_TIPOLOGIA = '$id_tipologia'";
         return select_list($sql);
     }
@@ -79,7 +76,6 @@ class TipologiaManager {
     
     function aggiorna($progetto, $json_data) {
         global $con;
-        
         $sql = update("tipologie_spesa", [ "DESCRIZIONE" => $json_data->DESCRIZIONE ], ["ID_TIPOLOGIA" => $json_data->ID_TIPOLOGIA]);
         mysqli_query($con, $sql);
         if ($con ->error) {
@@ -95,6 +91,5 @@ class TipologiaManager {
             print_error(500, $con ->error);
         }
     }
-
 }
 ?>
