@@ -20,7 +20,6 @@ class ProgettiSpesaManager {
         global $con, $STATO_PROGETTO, $BOOLEAN;
         $progetto = new Progetto();
         $sql = "SELECT * FROM progetti_spese p WHERE id_progetto = '$id_progetto'";
-        return select_list($sql);
     }   
 
     function crea($json_data) {
