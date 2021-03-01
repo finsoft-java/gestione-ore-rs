@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
-    $periodo = $json_data->periodo
+    $periodo = $json_data->periodo;
     if (! $periodo) {
         print_error(400, "Missing parameter: periodo");
     }
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
     $query_lul = "SELECT DATA,MATRICOLA_DIPENDENTE,ORE_PRESENZA_ORDINARIE FROM ORE_PRESENZA_LUL " .
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
-    $query_pregresso = "SELECT ID_PROGETTO_ID_WP,DATA,MATRICOLA_DIPENDENTE,ORE_LAVORATE FROM ORE_CONSUNTIVATE " .
+    $query_pregresso = "SELECT ID_PROGETTO,ID_WP,DATA,MATRICOLA_DIPENDENTE,ORE_LAVORATE FROM ORE_CONSUNTIVATE " .
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_LAVORATE > 0";
     
     // TODO selezionare anche i dati preesistenti
@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $lul = select_list($query_lul);
     $pregresso = select_list($query_pregresso);
     
+
     // Inizializzo la struttura x (ore lavorate dal dipendente i sul WP j il giorno k)
     $x = array();
     for ($i = 0; $i < count($matricole); $i++) {
@@ -62,9 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $x[$i][$j] = array();
             for ($k = 0; $k < count($date); $k++) {
                 $x[$i][$j][$k] = 0;
-                for ($w = 0; $w < count($pregresso); $w++) {
-                    if ($pregresso["MATRICOLA_DIPENDENTE"] == $matricole[$i] and $pregresso["DATA"] == $date[$k] and $pregresso["ID_PROGETTO"] == $wp[$j]["ID_PROGETTO"] and $pregresso["ID_WP"] == $wp[$j]["ID_WP"]) {
-                        $x[$i][$j][$k] = $pregresso["ORE_LAVORATE"];
+                foreach ($pregresso as $p) {
+                    if ($p["MATRICOLA_DIPENDENTE"] == $matricole[$i] and $p["DATA"] == $date[$k] and $p["ID_PROGETTO"] == $wp[$j]["ID_PROGETTO"] and $p["ID_WP"] == $wp[$j]["ID_WP"]) {
+                        $x[$i][$j][$k] = (int) $p["ORE_LAVORATE"]; 
                         break;
                     }
                 }
@@ -76,10 +77,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $M = array();
     $wp_rsr = array();
     for ($j = 0; $j < count($wp); $j++) {
-        $M[$j] = $wp["MONTE_ORE_RESIDUO"];
+        $M[$j] = $wp[$j]["MONTE_ORE_RESIDUO"];
         
-        $idprogetto = $wp["ID_PROGETTO"];
-        $idwp = $wp["ID_WP"];
+        $idprogetto = $wp[$j]["ID_PROGETTO"];
+        $idwp = $wp[$j]["ID_WP"];
         $query_wp_rsr = "SELECT MATRICOLA_DIPENDENTE FROM progetti_wp_risorse WHERE ID_PROGETTO='$idprogetto' AND ID_WP='$idwp' ";
         $wp_rsr[$j] = select_list($query_wp_rsr);
     }
@@ -90,9 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $L[$i] = array();
         for ($k = 0; $k < count($date); $k++) {
             $L[$i][$k] = 0;
-            for ($w = 0; $w < count($lul); $w++) {
-                if ($lul["MATRICOLA_DIPENDENTE"] == $matricole[$i] and $lul["DATA"] == $date[$k]) {
-                    $L[$i][$k] = $lul["ORE_PRESENZA_ORDINARIE"];
+            foreach ($lul as $lul_row) {
+                if ($lul_row["MATRICOLA_DIPENDENTE"] == $matricole[$i] and $lul_row["DATA"] == $date[$k]) {
+                    $L[$i][$k] = $lul_row["ORE_PRESENZA_ORDINARIE"];
                     break;
                 }
             }
@@ -103,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     for ($k = 0; $k < count($date); $k++) {
         $data = $date[$k];
         for ($i = 0; $i < count($matricole); $i++) {
-            $matricola = $matricole[$j];
+            $matricola = $matricole[$i];
             $probabilita = array();
             $almeno_un_positivo = false;
             for ($j = 0; $j < count($wp); $j++) {
@@ -132,8 +133,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     for ($i = 0; $i < count($matricole); $i++) {
         $matr = $matricole[$i];
         for ($j = 0; $j < count($wp); $j++) {
-            $idprogetto = $wp["ID_PROGETTO"];
-            $idwp = $wp["ID_WP"];
+            $idprogetto = $wp[$j]["ID_PROGETTO"];
+            $idwp = $wp[$j]["ID_WP"];
             for ($k = 0; $k < count($date); $k++) {
                 $data = $date[$k];
                 $ore = $x[$i][$j][$k];

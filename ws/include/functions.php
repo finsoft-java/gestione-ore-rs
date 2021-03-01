@@ -144,7 +144,7 @@ Esegue un comado SQL UPDATE/INSERT/DELETE e se serve lancia un print_error
 */
 function execute_update($sql) {
     global $con;
-    mysqli_query($con, $query);
+    mysqli_query($con, $sql);
     if ($con ->error) {
         print_error(500, $con ->error);
     }
