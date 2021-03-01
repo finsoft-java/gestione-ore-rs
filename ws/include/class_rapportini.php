@@ -262,11 +262,15 @@ class RapportiniManager {
     function importExcel($filename, &$message) {
 
         $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-        $spreadSheet = $reader->load($_FILES['file']['tmp_name'][$filenum]);
-        $excelSheet = $spreadSheet->getActiveSheet();
-        $spreadSheetAry = $excelSheet->toArray();
-        $numRows = count($spreadSheetAry);
-
+        for ($filenum = 0; $filenum < count($_FILES); ++$filenum) {
+            $spreadSheet = $reader->load($_FILES["file$filenum"]['tmp_name']);
+            $excelSheet = $spreadSheet->getActiveSheet();
+            $spreadSheetAry = $excelSheet->toArray();
+            $numRows = count($spreadSheetAry);
+            echo $numRows;
+            var_dump($spreadSheetAry);
+        }
+        return false;
         $titolo_progetto = $spreadSheetAry[0][7];
         $id_progetto = select_single("SELECT ID_PROGETTO FROM PROGETTI WHERE TITOLO='$titolo_progetto'"); // FIXME chiave unica?!?        
         if (empty($id_progetto)) {

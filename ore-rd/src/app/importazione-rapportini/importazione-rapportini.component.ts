@@ -12,7 +12,7 @@ import { Component, OnInit } from '@angular/core';
 export class ImportazioneRapportiniComponent implements OnInit {
 
   selectedFiles?: FileList;
-  progressInfos: Array<any> = [];
+  progressInfos: any;
   message_success = '';
   message_error = '';
   fileInfos: Observable<any> = new Observable;
@@ -36,20 +36,20 @@ export class ImportazioneRapportiniComponent implements OnInit {
 
   uploadFiles() {
     if(this.selectedFiles)
-    for (let i = 0; i < this.selectedFiles.length; i++) {
-      this.upload(i, this.selectedFiles[i]);
-    }
+    //for (let i = 0; i < this.selectedFiles.length; i++) {
+      this.upload(this.selectedFiles);
+    //}
   }
 
-  upload(idx:any, file:any) {
-    this.progressInfos[idx] = { value: 0, fileName: file.name };
+  upload(files:any) {
+    this.progressInfos = { value: 0, fileName: 'Caricamento' };
   
-    this.uploadService.upload(file).subscribe(
+    this.uploadService.upload(files).subscribe(
       event => {
         console.log('event', event);
         if (event.type === HttpEventType.UploadProgress) {
           if(event.total)
-          this.progressInfos[idx].value = Math.round(100 * event.loaded / event.total);
+          this.progressInfos.value = Math.round(100 * event.loaded / event.total);
           this.message_success = 'Tutto ok';
         } else if (event instanceof HttpResponse) {
           console.log('event success?? -> ',event);
@@ -57,8 +57,8 @@ export class ImportazioneRapportiniComponent implements OnInit {
       },
       err => {
         console.log('err', err);
-        this.progressInfos[idx].value = 0;        
-        this.message_error = 'Un errore';
+        this.progressInfos.value = 0;        
+        this.message_error = err.error.error.message;
       });
   }
 
