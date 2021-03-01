@@ -11,10 +11,20 @@
         <td mat-cell *matCellDef="let element"> {{element.titolo}} </td>
     </ng-container>
 
+    <!-- Position Column -->
+    <ng-container matColumnDef="acronimo">
+        <th mat-header-cell *matHeaderCellDef> Acronimo </th>
+        <td mat-cell *matCellDef="let element"> {{element.acronimo}} </td>
+    </ng-container>
     <!-- Name Column -->
     <ng-container matColumnDef="dataInizio">
         <th mat-header-cell *matHeaderCellDef> Data Inizio </th>
         <td mat-cell *matCellDef="let element"> {{element.dataInizio}} </td>
+    </ng-container>
+    <!-- Name Column -->
+    <ng-container matColumnDef="dataFine">
+        <th mat-header-cell *matHeaderCellDef> Data Fine </th>
+        <td mat-cell *matCellDef="let element"> {{element.dataFine}} </td>
     </ng-container>
 
     <ng-container matColumnDef="actions">
