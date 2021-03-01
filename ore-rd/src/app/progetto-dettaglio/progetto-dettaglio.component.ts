@@ -21,7 +21,7 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   projectSubscription: Subscription;
   progetto!: Progetto;
-  displayedColumns: string[] = ['descrizione','importo', 'tipologia','spesa', 'actions'];
+  displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
   dataSource = new MatTableDataSource<[]>();
   allMatricole: any;
   allTipiCosto: any;

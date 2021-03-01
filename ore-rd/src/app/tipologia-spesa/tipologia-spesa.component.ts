@@ -90,6 +90,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
           this.dataSource = new MatTableDataSource<Tipologia[]>(this.allTipologie);
         },
         error => {
+          this.alertService.error("La tipologia è stata già utilizzata per un ProgettoSpesa");
         });
 
   }
