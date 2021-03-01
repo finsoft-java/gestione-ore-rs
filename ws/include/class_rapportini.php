@@ -59,6 +59,10 @@ class RapportiniManager {
         $map_progetti_matricole_wp = $this->carica_wp_da_db($anno, $mese);
         $map_matr_ore = $lul->carica_da_db($anno, $mese);
         
+        if (empty($map_progetti_matricole_wp)) {
+            print_error(404, 'Nessun dato trovato.');
+        }
+
         // CREA FILE ZIP VUOTO
         $zip = new ZipArchive;
         $zipfilename = tempnam(null, "export");

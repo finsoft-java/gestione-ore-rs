@@ -8,14 +8,14 @@ import { DatitestService } from './../_services/datitest.service';
 })
 export class GeneraDatiTestComponent implements OnInit {
 
-  periodo = '2021-02'; //TODO datepicker
+    periodo = '2021-02'; //TODO datepicker
 
-  constructor(private datitestService: DatitestService) { }
+    constructor(private datitestService: DatitestService) { }
 
-  ngOnInit(): void {
-  }
+    ngOnInit(): void {
+    }
 
-  run() {
-      this.datitestService.run(this.periodo).subscribe();
-  }
+    run() {
+        this.datitestService.run(this.periodo).subscribe();
+    }
 }

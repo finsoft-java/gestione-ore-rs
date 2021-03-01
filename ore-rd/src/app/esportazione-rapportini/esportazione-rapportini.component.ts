@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { UploadRapportiniService } from './../_services/upload.rapportini.service';
 
 @Component({
   selector: 'app-esportazione-rapportini',
@@ -7,9 +8,29 @@ import { Component, OnInit } from '@angular/core';
 })
 export class EsportazioneRapportiniComponent implements OnInit {
 
-  constructor() { }
+    periodo = '2021-02';
 
-  ngOnInit(): void {
-  }
+    constructor(private uploadRapportiniService: UploadRapportiniService) { }
+
+    ngOnInit(): void {
+    }
+
+    download() {
+        this.uploadRapportiniService.download(this.periodo).subscribe(response => {
+            this.downloadFile(response);
+        },
+        error => {
+            // TODO
+        });
+    }
+  
+    downloadFile(data: any) {
+        const blob = new Blob([data], { type: 'applicazion/zip' });
+        const url = window.URL.createObjectURL(blob);
+        var anchor = document.createElement("a");
+        anchor.download = "Esportazione.zip";
+        anchor.href = url;
+        anchor.click();
+    }
 
 }

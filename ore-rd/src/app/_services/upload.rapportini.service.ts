@@ -27,4 +27,10 @@ export class UploadRapportiniService {
     return this.http.request(req);
   }
   
+  download(periodo: string) {
+    return this.http.get(`${this.baseUrl}/EsportazioneRapportini.php?periodo=${periodo}`, {
+      responseType: 'arraybuffer'
+    });
+  }
+  
 }
