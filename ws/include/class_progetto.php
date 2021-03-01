@@ -71,6 +71,7 @@ class ProgettiManager {
         global $con, $STATO_PROGETTO, $BOOLEAN;
         $progetto = new Progetto();
         $sql = "SELECT * FROM progetti p WHERE id_progetto = '$id_progetto'";
+        // FIXME dovrei restituire select_list($sql)[0], oppure null
         return select_list($sql);
     }
     
