@@ -21,4 +21,8 @@ define('AD_BASE_DN', "dc=OSAI,dc=LOC");
 // define('AD_USERNAME', 'surveyosai@OSAI.LOC');
 // define('AD_PASSWORD', 's0fu3Y2o19!');
 
+
+define('MOCK_PANTHERA', 'true');
+
+
 ?>

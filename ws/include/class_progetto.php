@@ -68,10 +68,19 @@ class ProgettiManager {
     }
     
     function get_progetto($id_progetto) {
-        global $con, $STATO_PROGETTO, $BOOLEAN;
-        $progetto = new Progetto();
         $sql = "SELECT * FROM progetti p WHERE id_progetto = '$id_progetto'";
-        // FIXME dovrei restituire select_list($sql)[0], oppure null
+        // FIXME dovrei restituire select_single($sql)
+        return select_list($sql);
+    }
+    
+    function get_progetto_wp($id_progetto, $anno=null, $mese=null) {
+        $sql = "SELECT * FROM progetti_wp WHERE id_progetto = '$id_progetto' ";
+        
+        if (!empty($anno) and !empty($mese)) {
+            $primo = "DATE('$anno-$mese-01')";
+            $query .= "AND DATA_FINE >= $primo AND DATA_INIZIO <= LAST_DAY($primo)";
+        }
+        
         return select_list($sql);
     }
     

@@ -90,9 +90,12 @@ function utente_admin() {
 /*
 Esegue un comado SQL SELECT e lo ritorna come array di oggetti, oppure lancia un print_error
 */
-function select_list($sql) {
+function select_list($sql, $connessione=null) {
     global $con;
-    if ($result = mysqli_query($con, $sql)) {
+    if ($connessione == null) {
+        $connessione = $con;
+    }
+    if ($result = mysqli_query($connessione, $sql)) {
         $arr = array();
         while ($row = mysqli_fetch_assoc($result))
         {
@@ -100,16 +103,19 @@ function select_list($sql) {
         }
         return $arr;
     } else {
-        print_error(500, $con ->error);
+        print_error(500, $connessione ->error);
     }
 }
 
 /*
 Esegue un comado SQL SELECT ritorna solo la prima colonna come array, oppure lancia un print_error
 */
-function select_column($sql) {
+function select_column($sql, $connessione=null) {
     global $con;
-    if ($result = mysqli_query($con, $sql)) {
+    if ($connessione == null) {
+        $connessione = $con;
+    }
+    if ($result = mysqli_query($connessione, $sql)) {
         $arr = array();
         while ($row = mysqli_fetch_array($result))
         {
@@ -117,16 +123,19 @@ function select_column($sql) {
         }
         return $arr;
     } else {
-        print_error(500, $con ->error);
+        print_error(500, $connessione ->error);
     }
 }
 
 /*
 Esegue un comado SQL SELECT e lo ritorna come singolo oggetto, oppure lancia un print_error
 */
-function select_single($sql) {
+function select_single($sql, $connessione=null) {
     global $con;
-    if ($result = mysqli_query($con, $sql)) {
+    if ($connessione == null) {
+        $connessione = $con;
+    }
+    if ($result = mysqli_query($connessione, $sql)) {
         if ($row = mysqli_fetch_assoc($result))
         {
             return $row;
@@ -134,7 +143,27 @@ function select_single($sql) {
             return null;
         }
     } else {
-        print_error(500, $con ->error);
+        print_error(500, $connessione ->error);
+    }
+}
+
+/*
+Esegue un comado SQL SELECT e si aspetta una singola cella come risultato, oppure lancia un print_error
+*/
+function select_single_value($sql, $connessione=null) {
+    global $con;
+    if ($connessione == null) {
+        $connessione = $con;
+    }
+    if ($result = mysqli_query($connessione, $sql)) {
+        if ($row = mysqli_fetch_array($result))
+        {
+            return $row[0];
+        } else {
+            return null;
+        }
+    } else {
+        print_error(500, $connessione ->error);
     }
 }
 
@@ -142,11 +171,14 @@ function select_single($sql) {
 /*
 Esegue un comado SQL UPDATE/INSERT/DELETE e se serve lancia un print_error
 */
-function execute_update($sql) {
+function execute_update($sql, $connessione=null) {
     global $con;
-    mysqli_query($con, $sql);
-    if ($con ->error) {
-        print_error(500, $con ->error);
+    if ($connessione == null) {
+        $connessione = $con;
+    }
+    mysqli_query($connessione, $sql);
+    if ($connessione ->error) {
+        print_error(500, $connessione ->error);
     }
 }
 
