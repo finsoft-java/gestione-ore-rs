@@ -12,10 +12,9 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 export class ImportazioneLulComponent implements OnInit {
 
   selectedFiles?: FileList;
-  progressInfos: any;
+  progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
-  fileInfos: Observable<any> = new Observable;
 
   constructor(private uploadService: UploadFilesService, private alertService: AlertService) { }
 
@@ -41,7 +40,7 @@ export class ImportazioneLulComponent implements OnInit {
   }
 
   upload(files: FileList) {
-    this.progressInfos = { value: 0, fileName: 'Caricamento' };
+    this.progressInfos.value = 0;
   
     this.uploadService.upload(files).subscribe(
       event => {
@@ -54,8 +53,12 @@ export class ImportazioneLulComponent implements OnInit {
         }
       },
       err => {
-        this.progressInfos.value = 0;        
-        this.message_error = err.error.error.message;
+        if (err && err.error && err.error.error)
+            this.message_error = err.error.error.message;
+        else if (err && err.error)
+            this.message_error = err.error;
+        else
+            this.message_error = err;
       });
   }
 
