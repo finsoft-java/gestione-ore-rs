@@ -1,5 +1,10 @@
 <h5 style="margin-bottom: 30px;text-align:center">Modifica / Inserimento Progetto</h5>
 <div *ngIf="progetto">
+
+    <div style="text-align:right">
+        <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" (click)="report()">Report</button>
+    </div>
+
     <div>
         <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
             <mat-form-field appearance="fill">

@@ -39,7 +39,9 @@ export const MY_FORMATS = {
   {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS}],
 })
 export class GeneraDatiTestComponent implements OnInit {
+
     date = new FormControl(moment());
+
     chosenYearHandler(normalizedYear: Moment) {
       const ctrlValue = this.date.value;
       ctrlValue.year(normalizedYear.year());
@@ -47,7 +49,6 @@ export class GeneraDatiTestComponent implements OnInit {
     }
 
     chosenMonthHandler(normalizedMonth: Moment, datepicker: MatDatepicker<Moment>) {
-      
       const ctrlValue = this.date.value;
       ctrlValue.month(normalizedMonth.month());
       this.date.setValue(ctrlValue);

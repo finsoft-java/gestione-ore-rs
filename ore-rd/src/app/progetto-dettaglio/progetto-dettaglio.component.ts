@@ -199,4 +199,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
   }
 
+  report() {
+    this.router.navigate(["progetto", this.progetto.ID_PROGETTO, "report"]);
+  }
 }

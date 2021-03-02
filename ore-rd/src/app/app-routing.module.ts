@@ -20,8 +20,7 @@ const routes: Routes = [
   { path: 'importazione-lul', component: ImportazioneLulComponent, canActivate:[AuthGuard]},
   { path: 'importazione-rapportini', component: ImportazioneRapportiniComponent, canActivate:[AuthGuard]},
   { path: 'esportazione-rapportini', component: EsportazioneRapportiniComponent, canActivate:[AuthGuard]},
-  { path: 'report-compatto', component: ReportCompattoComponent, canActivate:[AuthGuard]},
-  { path: 'report-completo', component: ReportCompletoComponent, canActivate:[AuthGuard]},
+  { path: 'progetto/:id_progetto/report', component: ReportCompletoComponent, canActivate:[AuthGuard]},
   { path: 'dati-test', component: GeneraDatiTestComponent, canActivate:[AuthGuard]},
   { path: '**', redirectTo: 'progetti' }
 ];
