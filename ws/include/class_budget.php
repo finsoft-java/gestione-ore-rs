@@ -71,7 +71,7 @@ class ReportBudgetManager {
                 $query .= "AND DATA >= '" . $c["DATA_COSTO"] . "' ";
             }
             if (!empty($c["DATA_FINE_COSTO"])) {
-                $query .= "AND DATA >= '" . $c["DATA_COSTO"] . "' ";
+                $query .= "AND DATA <= '" . $c["DATA_FINE_COSTO"] . "' ";
             }
             execute_update($query);
         }
