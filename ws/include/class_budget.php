@@ -86,7 +86,7 @@ class ReportBudgetManager {
         $mancanti = select_column($query);
         $msg = "";
         if (count($mancanti) > 0) {
-            $msg = "Costi su Panthera non trovati i costi per le matricole: " . implode(", ", $mancanti);
+            $msg = "Costi su Panthera non trovati per le matricole: " . implode(", ", $mancanti);
         }
         
         return $msg;
@@ -100,16 +100,19 @@ class ReportBudgetManager {
         
         $progetto = $progettiManager->get_progetto($idprogetto);
         $warning = $this->update_costi_progetto($idprogetto, $anno, $mese);
-        $totali_ore = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese);
+        $totali = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese);
         // TODO decidere quali parziali prendere
         
         if (empty($progetto)) {
             print_error(404, 'Wrong idProgetto');
         }
-        $progetto = $progetto[0]; //FIXME non dovrebbe esserci
 
         global $panthera;
         $nomecognome_super = $panthera->getUtente($progetto['MATRICOLA_SUPERVISOR']);
+        
+        $budget = $progetto["MONTE_ORE_TOT"] * $progetto["COSTO_MEDIO_UOMO"];
+        $scarto_ore = ($totali["ORE_LAVORATE"] - $progetto["MONTE_ORE_TOT"]) / $progetto["MONTE_ORE_TOT"] * 100;
+        $scarto_costi = ($totali["COSTO"] - $budget) / $budget * 100;
 
         $ROW_HEIGHT = 10;
         $COLUMN_WIDTH = 50;
@@ -137,9 +140,14 @@ class ReportBudgetManager {
         $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, $nomecognome_super, 0, 1);
         
         $pdf->SetFont('Arial', 'B', 12);
-        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, 'Da-a:');
+        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, 'Data inizio:');
         $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, $progetto["DATA_INIZIO"] . '-' . $progetto["DATA_FINE"], 0, 1);
+        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, $progetto["DATA_INIZIO"], 0, 1);
+        
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, 'Data fine:');
+        $pdf->SetFont('Arial', '', 12);
+        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, $progetto["DATA_FINE"], 0, 1);
         
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, 'Monte ore:');
@@ -149,7 +157,7 @@ class ReportBudgetManager {
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, 'Budget EUR:');
         $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, sprintf("%.2f", $progetto["MONTE_ORE_TOT"] * $progetto["COSTO_MEDIO_UOMO"]), 0, 1);
+        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, sprintf("%.2f", $budget), 0, 1);
         
         $pdf->Ln();
         
@@ -162,15 +170,26 @@ class ReportBudgetManager {
         
         $pdf->Ln();
         
+        if ($scarto_ore > 0) $scarto_ore = '+' . sprintf("%.2f", $scarto_ore) . '%';
+        else if ($scarto_ore < 0) $scarto_ore = sprintf("%.2f", $scarto_ore) . '%';
+        else $scarto_ore = '';
+        
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, 'Ore lavorate:');
         $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, $totali_ore["ORE_LAVORATE"], 0, 1);
+        $pdf->Cell($COLUMN_WIDTH / 2, $ROW_HEIGHT, $totali["ORE_LAVORATE"], 0, 0);
+        $pdf->Cell($COLUMN_WIDTH / 2, $ROW_HEIGHT, $scarto_ore, 0, 1);
+        
+        if (empty($totali["COSTO"])) { $totali["COSTO"] = '-'; $scarto_costi = ''; }
+        else if ($scarto_costi > 0) $scarto_costi = '+' . sprintf("%.2f", $scarto_costi) . '%';
+        else if ($scarto_costi < 0) $scarto_costi = sprintf("%.2f", $scarto_costi) . '%';
+        else $scarto_costi = '';
         
         $pdf->SetFont('Arial', 'B', 12);
-        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, 'Costo:');
+        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, 'Costo EUR:');
         $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, $totali_ore["COSTO"], 0, 1);
+        $pdf->Cell($COLUMN_WIDTH / 2, $ROW_HEIGHT, $totali["COSTO"], 0, 0);
+        $pdf->Cell($COLUMN_WIDTH / 2, $ROW_HEIGHT, $scarto_costi, 0, 1);
         
         if (!empty($warning)) {
             $pdf->SetFont('Arial', 'B', 12);
