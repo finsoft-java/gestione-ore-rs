@@ -2,18 +2,6 @@
 
 $progettiManager = new ProgettiManager();
 
-class Progetto {
-    private $_progetto;
-    
-    function get_progetto() {
-        global $progettiManager;
-        if (!$this->_progetto) {
-            $this->_progetto = $progettiManager->get_progetto($this->id_progetto);
-        }
-        return $this->_progetto;
-    }
-}
-
 class ProgettiManager {
     
     function get_progetti($top=null, $skip=null, $orderby=null) {
