@@ -16,11 +16,11 @@ class Progetto {
 
 class ProgettiManager {
     
-    function get_progetti($top=null, $skip=null, $orderby=null, $search=null, $mostra_solo_validi=false) {
-        global $con, $STATO_PROGETTO, $BOOLEAN;
-        $arr = array();
-        $sql1 = "SELECT * ";
+    function get_progetti($top=null, $skip=null, $orderby=null) {
+        global $con;
+        
         $sql0 = "SELECT COUNT(*) AS cnt ";
+        $sql1 = "SELECT * ";
         $sql = "FROM progetti p ";
         
         if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
@@ -30,11 +30,7 @@ class ProgettiManager {
             $sql .= " ORDER BY p.id_progetto DESC";
         }
 
-        if($result = mysqli_query($con, $sql0 . $sql)) {
-            $count = mysqli_fetch_assoc($result)["cnt"];
-        } else {
-            print_error(500, $con ->error);
-        }
+        $count = select_single_value($sql0 . $sql);
 
         if ($top){
             if ($skip) {
@@ -43,34 +39,15 @@ class ProgettiManager {
                 $sql .= " LIMIT $top";
             }
         }
-        if($result = mysqli_query($con, $sql1 . $sql)) {
-            $cr = 0;
-            while($row = mysqli_fetch_assoc($result))
-            {
-                $progetto = new Progetto();
-                $progetto->idProgetto        = $row['ID_PROGETTO'];
-                $progetto->acronimo             = $row['ACRONIMO'];
-                $progetto->titolo              = $row['TITOLO'];
-                $progetto->grantNumber          = $row['GRANT_NUMBER'];
-                $progetto->abstract      = $row['ABSTRACT'];
-                $progetto->monteOreTot  = $row['MONTE_ORE_TOT'];
-                $progetto->dataInizio   = $row['DATA_INIZIO'];
-                $progetto->dataFine               = $row['DATA_FINE'];
-                $progetto->costoMedioUomo            = $row['COSTO_MEDIO_UOMO'];
-                $progetto->codTipoCostoPanthera     = $row['COD_TIPO_COSTO_PANTHERA'];
-                $progetto->matricolaSupervisor     = $row['MATRICOLA_SUPERVISOR'];
-                $arr[$cr++] = $progetto;
-            }
-        } else {
-            print_error(500, $con ->error);
-        }
-        return [$arr, $count];
+        
+        $progetti = select_list($sql1 . $sql);
+        
+        return [$progetti, $count];
     }
     
     function get_progetto($id_progetto) {
         $sql = "SELECT * FROM progetti p WHERE id_progetto = '$id_progetto'";
-        // FIXME dovrei restituire select_single($sql)
-        return select_list($sql);
+        return select_single($sql);
     }
     
     function get_progetto_wp($id_progetto, $anno=null, $mese=null) {
