@@ -19,9 +19,23 @@ class ProgettiSpesaManager {
     function get_progetto($id_progetto) {
         global $con, $STATO_PROGETTO, $BOOLEAN;
         $progetto = new Progetto();
+        $arrProgettiSpesa = array();
         $sql = "SELECT * FROM progetti_spese p WHERE id_progetto = '$id_progetto'";
+        $arrProgettiSpesa = select_list($sql);
+        return $this->decodeTipologia($arrProgettiSpesa);
     }   
-
+    function decodeTipologia($arrProgettiSpesa){
+        $tipologia = '';
+        for($i = 0; $i < count($arrProgettiSpesa); $i++){
+            $id_tipologia = $arrProgettiSpesa[$i]["ID_TIPOLOGIA"];
+            $sql = "SELECT DESCRIZIONE FROM tipologie_spesa WHERE ID_TIPOLOGIA = '$id_tipologia'";
+            $tipologia = select_list($sql);
+            $arrProgettiSpesa[$i]["ID_TIPOLOGIA"] = null;
+            $arrProgettiSpesa[$i]["TIPOLOGIA"]["ID_TIPOLOGIA"] = $id_tipologia;
+            $arrProgettiSpesa[$i]["TIPOLOGIA"]["DESCRIZIONE"] = $tipologia[0]["DESCRIZIONE"];
+        }
+        return $arrProgettiSpesa;
+    }
     function crea($json_data) {
         global $con, $logged_user;
         $sql = insert("progetti", ["ID_PROGETTO" => null,
