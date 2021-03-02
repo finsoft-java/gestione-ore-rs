@@ -1,3 +1,5 @@
+import { TipologiaSpesaService } from './../_services/tipospesa.service';
+import { TipologiaSpesaComponent } from './../tipologia-spesa/tipologia-spesa.component';
 import { ProgettiSpesaService } from './../_services/progetti.spesa.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { TipoCosto } from './../_models/tipocosto';
@@ -23,12 +25,14 @@ export class ProgettoDettaglioComponent implements OnInit {
   progetto!: Progetto;
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
   dataSource = new MatTableDataSource<[]>();
+  allTipologie: any;
   allMatricole: any;
   allTipiCosto: any;
   progetto_spesa!: ProgettoSpesa;
   id_progetto!: any;
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
+    private tipologiaSpesaService: TipologiaSpesaService,
     private progettiSpesaService: ProgettiSpesaService,    
     private alertService: AlertService,
     private route: ActivatedRoute,
@@ -51,6 +55,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     if(this.id_progetto != null){
       this.getProgetto();
       this.getProgettoSpesa();
+      this.getTipoSpesa();
     } else{
       this.progetto = new Progetto;
     }
@@ -82,6 +87,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   getRecord(a: ProgettoSpesa){
+    a.isEditable = true;
   }
 
   getMatricole(): void {
@@ -110,6 +116,16 @@ export class ProgettoDettaglioComponent implements OnInit {
       });
   }
 
+  getTipoSpesa(){
+    this.tipologiaSpesaService.getAll()
+        .subscribe(response => {
+          console.log(response["data"]);
+          this.allTipologie = response["data"];
+        },
+        error => {
+        });
+  }
+
   salva() {
     if(this.id_progetto == null){
       this.progettiService.insert(this.progetto)
@@ -131,6 +147,40 @@ export class ProgettoDettaglioComponent implements OnInit {
       });
     }
     
+  }
+
+  saveChange(a:ProgettoSpesa){
+    a.isEditable=false;
+    if(a.ID_TIPOLOGIA == null){
+      this.progettiSpesaService.insert(a)
+      .subscribe(response => {
+        this.alertService.success("Tipologia inserita con successo");
+        this.dataSource.data.splice(-1, 1);
+        this.dataSource.data.push(response["value"][0]);
+        this.dataSource.data = this.dataSource.data;
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    } else {
+      this.progettiSpesaService.update(a)
+      .subscribe(response => {
+        this.alertService.success("Tipologia modificata con successo");
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    }
+  }
+  salvaModifica(a: ProgettoSpesa){
+
+  }
+  undoChange(a:ProgettoSpesa){
+    a.isEditable=false;
+    if(a.ID_PROGETTO == null){
+      this.dataSource.data.splice(-1, 1);
+      this.dataSource.data = this.dataSource.data;
+    }
   }
 
 }

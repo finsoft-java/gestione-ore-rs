@@ -1,5 +1,5 @@
 import { AlertService } from './../_services/alert.service';
-import { TipoSpesaService } from './../_services/tipospesa.service';
+import { TipologiaSpesaService } from './../_services/tipospesa.service';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -16,14 +16,17 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
   dataSource = new MatTableDataSource<Tipologia[]>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   allTipologie: Array<any> = [];
+
   ngOnInit() {
     this.dataSource.paginator = this.paginator;
     this.getAll();
   }
-  constructor(private router: Router, private tipoSpesaService: TipoSpesaService, private alertService: AlertService){
+
+  constructor(private router: Router, private tipologiaSpesaService: TipologiaSpesaService, private alertService: AlertService){
   }
+
   getAll() {
-    this.tipoSpesaService.getAll()
+    this.tipologiaSpesaService.getAll()
         .subscribe(response => {
           console.log(response["data"]);
           this.allTipologie = response["data"];
@@ -37,33 +40,6 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     a.isEditable=true;
   }
 
-  saveChange(a:Tipologia){
-    a.isEditable=false;
-    if(a.ID_TIPOLOGIA == null){
-      this.tipoSpesaService.insert(a)
-      .subscribe(response => {
-        this.alertService.success("Tipologia inserita con successo");
-        this.dataSource.data.splice(-1, 1);
-        this.dataSource.data.push(response["value"][0]);
-        this.dataSource.data = this.dataSource.data;
-
-      },
-      error => {
-        this.alertService.error(error);
-      });
-    } else {
-      this.tipoSpesaService.update(a)
-      .subscribe(response => {
-        this.alertService.success("Tipologia modificata con successo");
-      },
-      error => {
-        this.alertService.error(error);
-      });
-    }
-    
-  }
-
-
   nuovaTipologia() {  
     let tipologia_nuova:any;
     tipologia_nuova = {ID_TIPOLOGIA:null,DESCRIZIONE:"", isEditable:true};
@@ -73,7 +49,31 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     console.log(this.dataSource.data);
     this.dataSource.data = data;
   }
-  
+
+  saveChange(a:Tipologia){
+    a.isEditable=false;
+    if(a.ID_TIPOLOGIA == null){
+      this.tipologiaSpesaService.insert(a)
+      .subscribe(response => {
+        this.alertService.success("Tipologia inserita con successo");
+        this.dataSource.data.splice(-1, 1);
+        this.dataSource.data.push(response["value"][0]);
+        this.dataSource.data = this.dataSource.data;
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    } else {
+      this.tipologiaSpesaService.update(a)
+      .subscribe(response => {
+        this.alertService.success("Tipologia modificata con successo");
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    }
+  }
+
   undoChange(a:Tipologia){
     a.isEditable=false;
     if(a.ID_TIPOLOGIA == null){
@@ -83,8 +83,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
   }
 
   deleteChange(a:Tipologia){
-
-    this.tipoSpesaService.delete(a.ID_TIPOLOGIA)
+    this.tipologiaSpesaService.delete(a.ID_TIPOLOGIA)
         .subscribe(response => {
           this.getAll();
           this.dataSource = new MatTableDataSource<Tipologia[]>(this.allTipologie);
@@ -92,7 +91,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
         error => {
           this.alertService.error("La tipologia è stata già utilizzata per un ProgettoSpesa");
         });
-
   }
+
 }
 

@@ -19,6 +19,7 @@ export class ProgettoSpesa {
     public ID_SPESA?:string,
     public DESCRIZIONE?:string,
     public IMPORTO?:string,
-    public ID_TIPOLOGIA?:string  
+    public ID_TIPOLOGIA?:string,
+    public isEditable: boolean= false
     ) {}   
 }
