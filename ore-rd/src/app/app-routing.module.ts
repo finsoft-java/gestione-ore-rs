@@ -1,6 +1,6 @@
 import { GeneraDatiTestComponent } from './genera-dati-test/genera-dati-test.component';
 import { ReportCompletoComponent } from './report-completo/report-completo.component';
-import { ReportCompattoComponent } from './report-compatto/report-compatto.component';
+import { RaccoltaDateFirmaComponent } from './raccolta-date-firma/raccolta-date-firma.component';
 import { EsportazioneRapportiniComponent } from './esportazione-rapportini/esportazione-rapportini.component';
 import { ImportazioneRapportiniComponent } from './importazione-rapportini/importazione-rapportini.component';
 import { ImportazioneLulComponent } from './importazione-lul/importazione-lul.component';
@@ -20,6 +20,7 @@ const routes: Routes = [
   { path: 'importazione-lul', component: ImportazioneLulComponent, canActivate:[AuthGuard]},
   { path: 'importazione-rapportini', component: ImportazioneRapportiniComponent, canActivate:[AuthGuard]},
   { path: 'esportazione-rapportini', component: EsportazioneRapportiniComponent, canActivate:[AuthGuard]},
+  { path: 'raccolta-date-firma', component: RaccoltaDateFirmaComponent, canActivate:[AuthGuard]},
   { path: 'progetto/:id_progetto/report', component: ReportCompletoComponent, canActivate:[AuthGuard]},
   { path: 'dati-test', component: GeneraDatiTestComponent, canActivate:[AuthGuard]},
   { path: '**', redirectTo: 'progetti' }

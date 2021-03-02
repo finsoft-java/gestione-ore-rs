@@ -15,7 +15,7 @@ import { TipologiaSpesaComponent } from './tipologia-spesa/tipologia-spesa.compo
 import { ImportazioneLulComponent } from './importazione-lul/importazione-lul.component';
 import { ImportazioneRapportiniComponent } from './importazione-rapportini/importazione-rapportini.component';
 import { EsportazioneRapportiniComponent } from './esportazione-rapportini/esportazione-rapportini.component';
-import { ReportCompattoComponent } from './report-compatto/report-compatto.component';
+import { RaccoltaDateFirmaComponent } from './raccolta-date-firma/raccolta-date-firma.component';
 import { ReportCompletoComponent } from './report-completo/report-completo.component';
 import { GeneraDatiTestComponent } from './genera-dati-test/genera-dati-test.component';
 import { ProgettoDettaglioComponent } from './progetto-dettaglio/progetto-dettaglio.component';
@@ -43,7 +43,7 @@ import { MomentUtcDateAdapter } from './_helpers/date.adapter';
     ImportazioneLulComponent,
     ImportazioneRapportiniComponent,
     EsportazioneRapportiniComponent,
-    ReportCompattoComponent,
+    RaccoltaDateFirmaComponent,
     ReportCompletoComponent,
     GeneraDatiTestComponent,
     ProgettoDettaglioComponent,
