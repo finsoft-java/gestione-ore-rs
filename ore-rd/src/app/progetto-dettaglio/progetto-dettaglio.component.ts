@@ -78,8 +78,8 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.progettiService.getById(this.id_progetto)
       .subscribe(response => {
         this.progetto = new Progetto;
-        this.progetto = response["value"][0];
-        this.progetto_old = response["value"][0];
+        this.progetto = response["value"];
+        this.progetto_old = response["value"];
       },
       error => {
         this.alertService.error(error);
@@ -147,8 +147,13 @@ export class ProgettoDettaglioComponent implements OnInit {
   nuovoProgettoSpesa() {  
     let progettoSpesa_nuovo:any;
     progettoSpesa_nuovo = {ID_PROGETTO:this.progetto.ID_PROGETTO,ID_SPESA:null, DESCRIZIONE:null,IMPORTO:null,TIPOLOGIA: {ID_TIPOLOGIA:null, DESCRIZIONE:null},isEditable:true,isInsert:true};
-    const data = this.dataSource.data;
-    data.push(progettoSpesa_nuovo);
+    let data:any[] = [];
+    if(this.dataSource.data == null){
+      data.push(progettoSpesa_nuovo);
+    }else{
+      data = this.dataSource.data;
+      data.push(progettoSpesa_nuovo);
+    }
     this.dataSource.data = data;
   } 
 

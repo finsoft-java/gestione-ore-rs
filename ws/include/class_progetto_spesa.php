@@ -18,7 +18,6 @@ class ProgettiSpesaManager {
     
     function get_progetto($id_progetto) {
         global $con, $STATO_PROGETTO, $BOOLEAN;
-        $progetto = new Progetto();
         $arrProgettiSpesa = array();
         $sql = "SELECT * FROM progetti_spese p WHERE id_progetto = '$id_progetto'";
         $arrProgettiSpesa = select_list($sql);
@@ -26,7 +25,6 @@ class ProgettiSpesaManager {
     }   
     function get_progetto_byspesa($id_spesa) {
         global $con, $STATO_PROGETTO, $BOOLEAN;
-        $progetto = new Progetto();
         $arrProgettiSpesa = array();
         $sql = "SELECT * FROM progetti_spese p WHERE id_spesa = '$id_spesa'";
         $arrProgettiSpesa = select_list($sql);

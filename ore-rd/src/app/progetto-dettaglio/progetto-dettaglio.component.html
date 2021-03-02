@@ -110,25 +110,19 @@
             </td>
         </ng-container>
 
-        <!-- Position Column -->
         <ng-container matColumnDef="importo">
-            <!-- INPUT-->
             <th mat-header-cell *matHeaderCellDef> Importo </th>
             <td mat-cell *matCellDef="let element">
                 <label *ngIf="!element.isEditable"> {{element.IMPORTO}} </label>
-                <!--<input matInput [value]="element.descrizione" [(ngModel)]="element.descrizione">-->
                 <div style="display: block;margin: 0px auto;width: 250px;">
                     <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.IMPORTO">
                 </div>
             </td>
         </ng-container>
-        <!-- Name Column -->
         <ng-container matColumnDef="tipologia">
-            <!-- SELECT su db-->
             <th mat-header-cell *matHeaderCellDef> Tipologia </th>
             <td mat-cell *matCellDef="let element">
                 <label *ngIf="!element.isEditable"> {{element.TIPOLOGIA.DESCRIZIONE}}  </label>
-                <!--<input matInput [value]="element.descrizione" [(ngModel)]="element.descrizione">-->
                 <div style="display: block;margin: 0px auto;width: 250px;">
                     <mat-form-field appearance="fill" *ngIf="element.isEditable">
                         <mat-label>Tipologia Spesa</mat-label>
@@ -156,4 +150,8 @@
     <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
 
     </mat-paginator>
+    <!--
+        tabella WORK PACKAGE
+        id(id_wp) non editabile | titolo- input | descrizione- input | date - datepicker | MonteOre - inp-number | Risorse (multiselect ()dati da GetNomiUtenti.php) | Azioni (crud)
+    -->
 </div>

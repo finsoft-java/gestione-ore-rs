@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         //==========================================================
         $progetto = $progettiSpesaManager->get_progetto($id_progetto);
         if (!$progetto) {
-            print_error(404, 'Not found');
+            $progetto = null;
         }
         header('Content-Type: application/json');
         echo json_encode(['value' => $progetto]);
