@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(); 
 }
 
-require_logged_user_JWT();
+//require_logged_user_JWT();
 
 
 
@@ -39,17 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (! isset($_GET['completo']) or ! $_GET['completo']) {
         $completo = false;
     } else {
-        $completo = $_GET['completo'];
+        $completo = ($_GET['completo'] === 'true');
     }
     
-    $pdffilename = $budget->creaReport($idprogetto, $anno, $mese, $completo);
-    
-    header('Content-Type: application/pdf');
-    header('Content-Disposition: attachment; filename="report.pdf"');
-    header('Content-Length: ' . filesize($pdffilename));
-    flush();
-    readfile($pdffilename);
-    unlink($pdffilename);
+    $budget->sendReport($idprogetto, $anno, $mese, $completo);
     
 } else {
     //==========================================================
