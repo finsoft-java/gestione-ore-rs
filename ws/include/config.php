@@ -23,6 +23,10 @@ define('AD_BASE_DN', "dc=OSAI,dc=LOC");
 
 
 define('MOCK_PANTHERA', 'true');
+define('DB_PTH_HOST', 'tcp:myserver.database.windows.net,1433');
+define('DB_PTH_USER', 'my_user');
+define('DB_PTH_PASS', 'my_pwd');
+define('DB_PTH_NAME', 'PANTH01');
 
 
 ?>

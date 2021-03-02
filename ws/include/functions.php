@@ -12,6 +12,20 @@ function connect() {
   return $connect;
 }
 
+function connect_panthera() {
+  if (MOCK_PANTHERA) {
+    return null;
+  }
+  $connect = sqlsrv_connect(DB_PTH_HOST, array(
+                            "Database" => DB_PTH_NAME,  
+                            "Uid" => DB_PTH_USER,
+                            "PWD" => DB_PTH_PASS));
+  if($connect == false) {
+    die("Failed to connect:" . FormatErrors(sqlsrv_errors()));  
+  }
+  return $connect;
+}
+
 function require_logged_user() {
     global $logged_user;
     $logged_user = $_SESSION['logged_user'];
