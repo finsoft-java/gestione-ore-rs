@@ -22,17 +22,14 @@ export class AuthenticationService {
 
     login(username: string, password: string) {
       
-        const url = environment.wsUrl+`login.php`;
+        const url = environment.wsUrl + `login.php`;
         const body = JSON.stringify({username: username,
                                      password: password});
         return this.http.post<any>(url, body).pipe(map(data => {
           if (data) {
             localStorage.setItem('currentUser', data["value"].username);
             this.changeUsername(username);
-            //if(this.isAuthenticated()){
-            //  this.router.navigate(['/progetti']);
-            //}
-          }else{
+          } else {
             data = 'bho';
           }
           return data;
@@ -49,9 +46,7 @@ export class AuthenticationService {
     }
 
     logout() {
-        // remove user from local storage to log user out
-        localStorage.removeItem('currentUser');
-        window.location.reload()
-        //this.currentUserSubject.next();
+      localStorage.removeItem('currentUser');
+      this.router.navigate(['/login']);
     }
 }
