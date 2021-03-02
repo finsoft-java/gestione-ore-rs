@@ -66,8 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(404, 'Not found');
     }
     $progettiWpManager->aggiorna($progetto_su_db, $json_data);
-    
-    $progetto_su_db = $progettiWpManager->get_progetto_byspesa($json_data->ID_SPESA);
+    $progettiWpManager->aggiornaRisorse($json_data);
     header('Content-Type: application/json');
     echo json_encode(['value' => $progetto_su_db]);
     
@@ -76,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$id_wp) {
         print_error(400, 'Missing id_wp');
     }
-    $progettiWpManager->elimina($id_wp);
+    $progettiWpManager->elimina($id_wp,$id_progetto);
     
 } else {
     //==========================================================

@@ -1,6 +1,6 @@
 import { TipologiaSpesaService } from './../_services/tipospesa.service';
 import { TipologiaSpesaComponent } from './../tipologia-spesa/tipologia-spesa.component';
-import { ProgettiWpService } from './../_services/progetti.WP.service';
+import { ProgettiWpService } from './../_services/progetti.wp.service';
 import { ProgettiSpesaService } from './../_services/progetti.spesa.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { TipoCosto } from './../_models/tipocosto';
@@ -35,7 +35,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   progetto!: Progetto;
   progetto_old!: Progetto;
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
-  displayedColumnsWp: string[] = ['id','titolo', 'descrizione', 'dataInizio', 'dataFine','risorse', 'actions'];
+  displayedColumnsWp: string[] = ['id','titolo', 'descrizione', 'dataInizio', 'dataFine','risorse','monteOre', 'actions'];
   dataSource = new MatTableDataSource<[]>();
   dataSourceWp = new MatTableDataSource<[]>();
   allTipologie: any;
@@ -190,7 +190,18 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   nuovoProgettoWp() {  
     let progettoWp_nuovo:any;
-    progettoWp_nuovo = {ID_PROGETTO:this.progetto.ID_PROGETTO,ID_SPESA:null, DESCRIZIONE:null,IMPORTO:null,TIPOLOGIA: {ID_TIPOLOGIA:null, DESCRIZIONE:null},isEditable:true,isInsert:true};
+    progettoWp_nuovo = {
+      ID_PROGETTO:this.progetto.ID_PROGETTO, 
+      ID_WP:null, 
+      TITOLO:null, 
+      DESCRIZIONE:null, 
+      DATA_INIZIO: null, 
+      DATA_FINE: null , 
+      RISORSE:null, 
+      MONTE_ORE: null, 
+      isEditable:true,
+      isInsert:true
+    };
     let dataWp:any[] = [];
     if(this.dataSourceWp.data == null){
       dataWp.push(progettoWp_nuovo);
@@ -199,19 +210,6 @@ export class ProgettoDettaglioComponent implements OnInit {
       dataWp.push(progettoWp_nuovo);
     }
     this.dataSourceWp.data = dataWp;
-  } 
-
-  nuovoWp() {  
-    let progettoSpesa_nuovo:any;
-    progettoSpesa_nuovo = {ID_PROGETTO:this.progetto.ID_PROGETTO,ID_SPESA:null, DESCRIZIONE:null,IMPORTO:null,TIPOLOGIA: {ID_TIPOLOGIA:null, DESCRIZIONE:null},isEditable:true,isInsert:true};
-    let data:any[] = [];
-    if(this.dataSource.data == null){
-      data.push(progettoSpesa_nuovo);
-    }else{
-      data = this.dataSource.data;
-      data.push(progettoSpesa_nuovo);
-    }
-    this.dataSource.data = data;
   } 
 
   deleteChange(a:any){
@@ -271,7 +269,7 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
     } else {
-      this.progettiSpesaService.update(a)
+      this.progettiWpService.update(a)
       .subscribe(response => {
         this.getProgettowP();
       },

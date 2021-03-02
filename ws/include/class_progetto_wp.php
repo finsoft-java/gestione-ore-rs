@@ -34,6 +34,29 @@ class ProgettiWpManager {
         }
         return $arrProgettiWp;
     }
+    
+    function aggiornaRisorse($json_data) {
+        global $con;
+        $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$json_data->ID_WP' AND id_progetto = '$json_data->ID_PROGETTO'";
+        mysqli_query($con, $sql);
+        if ($con ->error) {
+            print_error(500, $con ->error);
+        }
+        for($i = 0; $i < count($json_data->RISORSE); $i++){
+            $sql = insert("progetti_wp_risorse", 
+                                    ["MATRICOLA_DIPENDENTE" => $json_data->RISORSE[$i],
+                                    "ID_PROGETTO" => $json_data->ID_PROGETTO,
+                                    "ID_WP" => $json_data->ID_WP
+                                    ]);
+            mysqli_query($con, $sql);
+            if ($con ->error) {
+                print_error(500, $con ->error);
+            }
+            $id_progetto = mysqli_insert_id($con);
+        }
+        return $this->get_progetto($id_progetto);
+    }
+    
     function crea($json_data) {
         global $con;
         $sql = insert("progetti_wp", ["TITOLO" => $json_data->TITOLO,
@@ -42,12 +65,13 @@ class ProgettiWpManager {
                                    "DATA_FINE" => $json_data->DATA_FINE,
                                    "MONTE_ORE" => $json_data->MONTE_ORE
                                   ]);
+                                  ECHO $sql;
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
         }
         $id_progetto = mysqli_insert_id($con);
-        return $this->get_progetto_byspesa($id_progetto);
+        return $this->get_progetto($id_progetto);
     }
     
     function aggiorna($progetto, $json_data) {
@@ -63,11 +87,17 @@ class ProgettiWpManager {
         if ($con ->error) {
             print_error(500, $con ->error);
         }
+        return $this->get_progetto($json_data->ID_PROGETTO);
     }
     
-    function elimina($id_spesa) {
+    function elimina($id_wp, $id_progetto) {
         global $con;
-        $sql = "DELETE FROM progetti_spese WHERE id_spesa = '$id_spesa'";  //on delete cascade! (FIXME funziona anche con i questionari?!?)
+        $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
+        mysqli_query($con, $sql);
+        if ($con ->error) {
+            print_error(500, $con ->error);
+        }
+        $sql = "DELETE FROM progetti_wp WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);

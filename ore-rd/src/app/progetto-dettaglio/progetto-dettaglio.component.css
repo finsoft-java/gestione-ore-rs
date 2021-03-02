@@ -11,6 +11,10 @@
     margin-bottom: 15px !important;
 }
 
+label {
+    margin-bottom: 0px;
+}
+
 .mat-paginator {
     background: initial;
 }
