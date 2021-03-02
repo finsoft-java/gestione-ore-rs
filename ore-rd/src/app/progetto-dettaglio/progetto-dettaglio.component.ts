@@ -23,13 +23,16 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   projectSubscription: Subscription;
   progetto!: Progetto;
+  progetto_old!: Progetto;
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
   dataSource = new MatTableDataSource<[]>();
   allTipologie: any;
   allMatricole: any;
   allTipiCosto: any;
+  isNotAnnulable:boolean = false;
   progetto_spesa!: ProgettoSpesa;
   id_progetto!: any;
+
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
     private tipologiaSpesaService: TipologiaSpesaService,
@@ -62,14 +65,10 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.getMatricole();
     this.getSupervisor();
   }
-  nuovoProgettoSpesa() {
-
-  }
   getProgettoSpesa(): void {
     this.progettiSpesaService.getById(this.id_progetto)
       .subscribe(response => {
         this.dataSource = new MatTableDataSource<[]>(response["value"]);
-        console.log(this.dataSource.data);
       },
       error => {
         this.dataSource = new MatTableDataSource<[]>();
@@ -80,6 +79,7 @@ export class ProgettoDettaglioComponent implements OnInit {
       .subscribe(response => {
         this.progetto = new Progetto;
         this.progetto = response["value"][0];
+        this.progetto_old = response["value"][0];
       },
       error => {
         this.alertService.error(error);
@@ -93,10 +93,8 @@ export class ProgettoDettaglioComponent implements OnInit {
   getMatricole(): void {
     this.progettiService.getAllMatricole()
       .subscribe(response => {
-        console.log(response);
         this.allMatricole  = new Matricola;
         this.allMatricole = response["data"];
-        console.log(this.allMatricole);
       },
       error => {
         this.alertService.error(error);
@@ -106,10 +104,8 @@ export class ProgettoDettaglioComponent implements OnInit {
   getSupervisor(): void {
     this.progettiService.getAllTipiCostoPanthera()
       .subscribe(response => {
-        console.log(response);
         this.allTipiCosto  = new TipoCosto;
         this.allTipiCosto = response["data"];
-        console.log(this.allMatricole);
       },
       error => {
         this.alertService.error(error);
@@ -119,7 +115,6 @@ export class ProgettoDettaglioComponent implements OnInit {
   getTipoSpesa(){
     this.tipologiaSpesaService.getAll()
         .subscribe(response => {
-          console.log(response["data"]);
           this.allTipologie = response["data"];
         },
         error => {
@@ -149,9 +144,27 @@ export class ProgettoDettaglioComponent implements OnInit {
     
   }
 
-  saveChange(a:ProgettoSpesa){
+  nuovoProgettoSpesa() {  
+    let progettoSpesa_nuovo:any;
+    progettoSpesa_nuovo = {ID_PROGETTO:this.progetto.ID_PROGETTO,ID_SPESA:null, DESCRIZIONE:null,IMPORTO:null,TIPOLOGIA: {ID_TIPOLOGIA:null, DESCRIZIONE:null},isEditable:true,isInsert:true};
+    const data = this.dataSource.data;
+    data.push(progettoSpesa_nuovo);
+    this.dataSource.data = data;
+  } 
+
+  deleteChange(a:any){
+    this.progettiSpesaService.delete(a.ID_SPESA)
+        .subscribe(response => {
+          this.getProgettoSpesa();
+        },
+        error => {
+          this.alertService.error("La tipologia è stata già utilizzata per un ProgettoSpesa");
+        });
+  }
+
+  salvaModifica(a: ProgettoSpesa){
     a.isEditable=false;
-    if(a.ID_TIPOLOGIA == null){
+    if(a.ID_SPESA == null){
       this.progettiSpesaService.insert(a)
       .subscribe(response => {
         this.alertService.success("Tipologia inserita con successo");
@@ -165,16 +178,14 @@ export class ProgettoDettaglioComponent implements OnInit {
     } else {
       this.progettiSpesaService.update(a)
       .subscribe(response => {
-        this.alertService.success("Tipologia modificata con successo");
+        this.getProgettoSpesa();
       },
       error => {
         this.alertService.error(error);
       });
     }
   }
-  salvaModifica(a: ProgettoSpesa){
 
-  }
   undoChange(a:ProgettoSpesa){
     a.isEditable=false;
     if(a.ID_PROGETTO == null){

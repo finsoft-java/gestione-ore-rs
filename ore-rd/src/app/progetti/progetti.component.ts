@@ -33,7 +33,6 @@ export class ProgettiComponent implements OnInit {
         });
   }
   getRecord(a:any){
-    console.log(a);
     this.router.navigate(['/progetto/'+a.idProgetto]);
   }
   nuovoProgetto(){

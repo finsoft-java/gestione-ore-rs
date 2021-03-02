@@ -46,19 +46,14 @@ export class ImportazioneLulComponent implements OnInit {
     this.uploadService.upload(files).subscribe(
       event => {
         if (event.type === HttpEventType.UploadProgress) {
-          console.log(event);
           if(event.total){
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
-            console.log(this.progressInfos);
           }
         } else if (event instanceof HttpResponse) {
-          console.log('success -> ',event.body.value);
           this.message_error = event.body.value;
-          console.log('success -> ',this.message_error);
         }
       },
       err => {
-        console.log('err', err);
         this.progressInfos.value = 0;        
         this.message_error = err.error.error.message;
       });
