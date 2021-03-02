@@ -163,7 +163,7 @@ export class ProgettoDettaglioComponent implements OnInit {
           this.getProgettoSpesa();
         },
         error => {
-          this.alertService.error("La tipologia è stata già utilizzata per un ProgettoSpesa");
+          this.alertService.error("Impossibile eliminare il record");
         });
   }
 
@@ -172,7 +172,6 @@ export class ProgettoDettaglioComponent implements OnInit {
     if(a.ID_SPESA == null){
       this.progettiSpesaService.insert(a)
       .subscribe(response => {
-        this.alertService.success("Tipologia inserita con successo");
         this.dataSource.data.splice(-1, 1);
         this.dataSource.data.push(response["value"][0]);
         this.dataSource.data = this.dataSource.data;
