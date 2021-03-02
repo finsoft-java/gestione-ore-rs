@@ -93,7 +93,7 @@
 <div style="margin-bottom:30px;">
     <div>
         <h5 style="margin-bottom: 20px;text-align:center">Progetti Spese</h5>
-        <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgettoSpesa()">Nuovo</button>
+        <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgettoWp()">Nuovo</button>
     </div>
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
@@ -150,8 +150,110 @@
     <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
 
     </mat-paginator>
-    <!--
+</div>
+
+
+
+
+
+<!--
         tabella WORK PACKAGE
         id(id_wp) non editabile | titolo- input | descrizione- input | date - datepicker | MonteOre - inp-number | Risorse (multiselect ()dati da GetNomiUtenti.php) | Azioni (crud)
     -->
+<div style="margin-bottom:30px;">
+    <div>
+        <h5 style="margin-bottom: 20px;text-align:center">Work Package</h5>
+        <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoWp()">Nuovo</button>
+    </div>
+    <table mat-table [dataSource]="dataSourceWp" class="mat-elevation-z8">
+        <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> Id </th>
+            <td mat-cell *matCellDef="let element">
+                {{element.ID_WP}}
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="titolo">
+            <th mat-header-cell *matHeaderCellDef> Titolo </th>
+            <td mat-cell *matCellDef="let element">
+                <label *ngIf="!element.isEditable"> {{element.TITOLO}} </label>
+                <div style="display: block;margin: 0px auto;width: 85px;">
+                    <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.TITOLO">
+                </div>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="descrizione">
+            <th mat-header-cell *matHeaderCellDef> Descrizione </th>
+            <td mat-cell *matCellDef="let element">
+                <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}}  </label>
+                <div style="display: block;margin: 0px auto;width: 85px;">
+                    <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
+                </div>
+            </td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="dataInizio">
+            <th mat-header-cell *matHeaderCellDef> Data Inizio </th>
+            <td mat-cell *matCellDef="let element">
+                <label *ngIf="!element.isEditable"> {{element.DATA_INIZIO}}  </label>
+                <div style="display: block;margin: 0px auto;width: 125px;" *ngIf="element.isEditable">
+                    <mat-form-field appearance="fill" style="margin-right: 10px;display: block;">
+                        <mat-label>Data Inizio</mat-label>
+                        <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_INIZIO" [matDatepicker]="picker">
+                        <mat-datepicker-toggle matSuffix [for]="picker">
+                            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                        </mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                        <mat-hint>required</mat-hint>
+                    </mat-form-field>
+                </div>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="dataFine">
+            <th mat-header-cell *matHeaderCellDef> Data File </th>
+            <td mat-cell *matCellDef="let element">
+                <label *ngIf="!element.isEditable"> {{element.DATA_FINE}}  </label>
+                <div style="display: block;margin: 0px auto;width: 125px;" *ngIf="element.isEditable">
+                    <mat-form-field appearance="fill" style="display: block;">
+                        <mat-label>Data Fine</mat-label>
+                        <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_FINE" [matDatepicker]="picker2">
+                        <mat-datepicker-toggle matSuffix [for]="picker2">
+                            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                        </mat-datepicker-toggle>
+                        <mat-datepicker #picker2></mat-datepicker>
+                        <mat-hint>required</mat-hint>
+                    </mat-form-field>
+                </div>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="risorse">
+            <th mat-header-cell *matHeaderCellDef> Risorse </th>
+            <td mat-cell *matCellDef="let element">
+                <label *ngIf="!element.isEditable"> {{element.RISORSE}}  </label>
+                <div>
+                    <mat-form-field appearance="fill" *ngIf="element.isEditable" style="display: block;margin: 0px auto;width: 85px;">
+                        <mat-label>Risorse</mat-label>
+                        <mat-select [(ngModel)]="element.RISORSE" multiple>
+                            <mat-option *ngFor="let matricole of allMatricole" [value]="matricole.MATRICOLA">{{matricole.NOME}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Azione </th>
+            <td mat-cell *matCellDef="let row">
+                <button *ngIf="!row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="getRecordwP(row)">Modifica</button>
+                <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteChangeWp(row)">Elimina</button>
+                <button *ngIf="row.isEditable" mat-raised-button color="primary" (click)="salvaModificaWp(row)">Salva</button>
+            </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsWp"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsWp;"></tr>
+    </table>
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
+
+    </mat-paginator>
 </div>
