@@ -24,3 +24,17 @@ export class ProgettoSpesa {
     public isInsert: boolean= false
     ) {}   
 }
+
+export class ProgettoWp {
+  constructor(
+    public ID_PROGETTO?:number,
+    public ID_WP?:number,
+    public TITOLO?:string,
+    public DESCRIZIONE?:string,
+    public DATA_INIZIO?:string,
+    public DATA_FINE?:string,
+    public MONTE_ORE?:number,
+    public isEditable: boolean= false,
+    public isInsert: boolean= false
+    ) {}   
+}
