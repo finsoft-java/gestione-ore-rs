@@ -5,13 +5,13 @@ $budget = new ReportBudgetManager();
 class ReportBudgetManager {
 
     function get_consuntivi($id_progetto=null, $anno=null, $mese=null) {
-        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese)
+        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
         $sql = "SELECT id_progetto, id_wp, matricola_dipendente, data, ore_lavorate, costo_orario " . $partial;
         return select_list($sql);
     }
 
     function get_consuntivi_per_matricola($id_progetto=null, $anno=null, $mese=null) {
-        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese)
+        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
         $sql = "SELECT id_progetto, matricola_dipendente, sum(ore_lavorate) as ore_lavorate, " .
             "sum(ore_lavorate*costo_orario) as costo " .
             $partial .
@@ -20,7 +20,7 @@ class ReportBudgetManager {
     }
 
     function get_consuntivi_per_wp($id_progetto=null, $anno=null, $mese=null) {
-        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese)
+        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
         $sql = "SELECT id_progetto, id_wp, sum(ore_lavorate) as ore_lavorate, " .
             "sum(ore_lavorate*costo_orario) as costo " .
             $partial .
@@ -29,7 +29,7 @@ class ReportBudgetManager {
     }
 
     function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
-        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese)
+        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
         $sql = "SELECT id_progetto, sum(ore_lavorate) as ore_lavorate, " .
             "sum(ore_lavorate*costo_orario) as costo " .
             $partial .
@@ -40,7 +40,7 @@ class ReportBudgetManager {
     function _create_where_condiction_consuntivi($id_progetto=null, $anno=null, $mese=null) {
         $sql = "FROM ore_consuntivate WHERE 1=1 ";
         if (!empty($id_progetto)) {
-            $sql .= "AND id_progetto = '$id_progetto' "
+            $sql .= "AND id_progetto = '$id_progetto' ";
         }
         if (!empty($anno) and !empty($mese)) {
             $primo = "DATE('$anno-$mese-01')";
