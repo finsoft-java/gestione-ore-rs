@@ -11,12 +11,12 @@ export class ProgettiSpesaService {
         return this.http.get<any>(environment.wsUrl+`ProgettiSpesa.php?id_progetto=${id_progetto}`);
     }
 
-    insert(progetto: ProgettoSpesa) {
-        return this.http.put<any>(environment.wsUrl+`ProgettiSpesa.php`, progetto);
+    insert(progettoSpesa: ProgettoSpesa) {
+        return this.http.put<any>(environment.wsUrl+`ProgettiSpesa.php`, progettoSpesa);
     }
 
-    update(progetto: ProgettoSpesa) {
-        return this.http.post<any>(environment.wsUrl+`ProgettiSpesa.php`, progetto);
+    update(progettoSpesa: ProgettoSpesa) {
+        return this.http.post<any>(environment.wsUrl+`ProgettiSpesa.php`, progettoSpesa);
     }
 
     delete(id_progetto: number) {

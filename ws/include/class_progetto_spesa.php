@@ -30,7 +30,7 @@ class ProgettiSpesaManager {
             $id_tipologia = $arrProgettiSpesa[$i]["ID_TIPOLOGIA"];
             $sql = "SELECT DESCRIZIONE FROM tipologie_spesa WHERE ID_TIPOLOGIA = '$id_tipologia'";
             $tipologia = select_list($sql);
-            $arrProgettiSpesa[$i]["ID_TIPOLOGIA"] = null;
+            unset($arrProgettiSpesa[$i]["ID_TIPOLOGIA"]);
             $arrProgettiSpesa[$i]["TIPOLOGIA"]["ID_TIPOLOGIA"] = $id_tipologia;
             $arrProgettiSpesa[$i]["TIPOLOGIA"]["DESCRIZIONE"] = $tipologia[0]["DESCRIZIONE"];
         }
