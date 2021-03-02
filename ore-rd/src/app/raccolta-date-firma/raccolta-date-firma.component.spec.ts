@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ReportCompattoComponent } from './report-compatto.component';
+import { RaccoltaDateFirmaComponent } from './raccolta-date-firma.component';
 
-describe('ReportCompattoComponent', () => {
-  let component: ReportCompattoComponent;
-  let fixture: ComponentFixture<ReportCompattoComponent>;
+describe('RaccoltaDateFirmaComponent', () => {
+  let component: RaccoltaDateFirmaComponent;
+  let fixture: ComponentFixture<RaccoltaDateFirmaComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ReportCompattoComponent ]
+      declarations: [ RaccoltaDateFirmaComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ReportCompattoComponent);
+    fixture = TestBed.createComponent(RaccoltaDateFirmaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

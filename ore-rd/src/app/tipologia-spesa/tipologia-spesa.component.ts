@@ -52,7 +52,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     if(a.ID_TIPOLOGIA == null){
       this.tipologiaSpesaService.insert(a)
       .subscribe(response => {
-        this.alertService.success("Tipologia inserita con successo");
+        // this.alertService.success("Tipologia inserita");
         this.dataSource.data.splice(-1, 1);
         this.dataSource.data.push(response["value"][0]);
         this.dataSource.data = this.dataSource.data;
@@ -63,7 +63,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     } else {
       this.tipologiaSpesaService.update(a)
       .subscribe(response => {
-        this.alertService.success("Tipologia modificata con successo");
+        // this.alertService.success("Tipologia modificata");
       },
       error => {
         this.alertService.error(error);
@@ -72,7 +72,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
   }
 
   undoChange(a:Tipologia){
-    a.isEditable=false;
+    a.isEditable = false;
     if(a.ID_TIPOLOGIA == null){
       this.dataSource.data.splice(-1, 1);
       this.dataSource.data = this.dataSource.data;
@@ -86,7 +86,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
           this.dataSource = new MatTableDataSource<Tipologia[]>(this.allTipologie);
         },
         error => {
-          this.alertService.error("La tipologia è stata già utilizzata per un ProgettoSpesa");
+          this.alertService.error("Impossibile eliminare questa tipologia. Forse è già stata utilizzata all'interno di un Progetto?");
         });
   }
 

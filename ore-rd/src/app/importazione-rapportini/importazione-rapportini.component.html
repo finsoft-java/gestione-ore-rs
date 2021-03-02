@@ -24,8 +24,18 @@
         <div [innerHtml]="message_error">
         </div>
     </div>
-    <label class="btn btn-default">
-        <input type="file" multiple (change)="selectFiles($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
-    </label>
-    <button class="btn btn-success" [disabled]="!selectedFiles" (click)="uploadFiles()">Carica</button>
+
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-3">
+            <button (click)="fileInput.click()" mat-raised-button color="primary" >
+              <span>Seleziona uno o più file...</span>
+              <input #fileInput type="file" multiple (change)="selectFiles($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" />
+            </button>
+        </div>
+    
+        <div class="col-3">
+            <button mat-raised-button color="warn" [disabled]="!selectedFiles" (click)="uploadFiles()">Carica</button>
+        </div>
+    </div>
 </div>
