@@ -28,7 +28,6 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
   getAll() {
     this.tipologiaSpesaService.getAll()
         .subscribe(response => {
-          console.log(response["data"]);
           this.allTipologie = response["data"];
           this.dataSource = new MatTableDataSource<Tipologia[]>(response["data"]);
         },
@@ -44,9 +43,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     let tipologia_nuova:any;
     tipologia_nuova = {ID_TIPOLOGIA:null,DESCRIZIONE:"", isEditable:true};
     const data = this.dataSource.data;
-    console.log(tipologia_nuova.ID_TIPOLOGIA);
     data.push(tipologia_nuova);
-    console.log(this.dataSource.data);
     this.dataSource.data = data;
   }
 

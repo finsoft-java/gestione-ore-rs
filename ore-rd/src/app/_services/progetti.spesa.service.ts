@@ -19,7 +19,7 @@ export class ProgettiSpesaService {
         return this.http.post<any>(environment.wsUrl+`ProgettiSpesa.php`, progettoSpesa);
     }
 
-    delete(id_progetto: number) {
-        return this.http.delete(environment.wsUrl+`ProgettiSpesa.php?id_progetto=${id_progetto}`);
+    delete(id_spesa: number) {
+        return this.http.delete(environment.wsUrl+`ProgettiSpesa.php?id_spesa=${id_spesa}`);
     }
 }

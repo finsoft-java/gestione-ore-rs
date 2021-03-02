@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_logged_user_JWT();
 
 $id_progetto = isset($_GET['id_progetto']) ? $con->escape_string($_GET['id_progetto']) : null;
+$id_spesa = isset($_GET['id_spesa']) ? $con->escape_string($_GET['id_spesa']) : null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($id_progetto) {
@@ -33,17 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     //==========================================================
     $postdata = file_get_contents("php://input");
     $json_data = json_decode($postdata);
-    $id_progetto = '';
+    $id_spesa = '';
     
-    if(isset($json_data->ID_PROGETTO)){
-        $id_progetto = $json_data->ID_PROGETTO;
+    if(isset($json_data->ID_SPESA)){
+        $id_spesa = $json_data->ID_SPESA;
     }
     
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
-    if ($id_progetto) {
-        print_error(400, "id_progetto must be null when creating new project");
+    if ($id_spesa) {
+        print_error(400, "id_spesa must be null when creating new project");
     }
     $progetto = $progettiSpesaManager->crea($json_data);
     
@@ -54,36 +55,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     //==========================================================
     $postdata = file_get_contents("php://input");
     $json_data = json_decode($postdata);
+    $id_spesa = '';
+    
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
+
     $progetto_su_db = $progettiSpesaManager->get_progetto($json_data->ID_PROGETTO);
     if (!$progetto_su_db) {
         print_error(404, 'Not found');
     }
     $progettiSpesaManager->aggiorna($progetto_su_db, $json_data);
     
-    $progetto_su_db = $progettiSpesaManager->get_progetto($json_data->ID_PROGETTO);
+    $progetto_su_db = $progettiSpesaManager->get_progetto_byspesa($json_data->ID_SPESA);
     header('Content-Type: application/json');
     echo json_encode(['value' => $progetto_su_db]);
     
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     //==========================================================
-    if (!$id_progetto) {
-        print_error(400, 'Missing id_progetto');
+    if (!$id_spesa) {
+        print_error(400, 'Missing id_spesa');
     }
-    $progetto_su_db = $progettiSpesaManager->get_progetto($id_progetto);
-    if (!$progetto_su_db) {
-        print_error(404, 'Not found');
-    }
-    if (!$progetto_su_db->utente_puo_modificarlo()) {
-        print_error(403, "Utente non autorizzato a modificare questo Progetto.");
-    }
-    if ($progetto_su_db->is_gia_compilato()) {
-        print_error(403, "Non e' possibile eliminare un progetto con questionari già compilati.");
-    }
-    
-    $progettiSpesaManager->elimina($id_progetto);
+    $progettiSpesaManager->elimina($id_spesa);
     
 } else {
     //==========================================================

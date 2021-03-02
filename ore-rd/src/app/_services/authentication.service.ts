@@ -35,7 +35,6 @@ export class AuthenticationService {
           }else{
             data = 'bho';
           }
-          console.log('aaa');
           return data;
         }));
     }

@@ -24,6 +24,14 @@ class ProgettiSpesaManager {
         $arrProgettiSpesa = select_list($sql);
         return $this->decodeTipologia($arrProgettiSpesa);
     }   
+    function get_progetto_byspesa($id_spesa) {
+        global $con, $STATO_PROGETTO, $BOOLEAN;
+        $progetto = new Progetto();
+        $arrProgettiSpesa = array();
+        $sql = "SELECT * FROM progetti_spese p WHERE id_spesa = '$id_spesa'";
+        $arrProgettiSpesa = select_list($sql);
+        return $this->decodeTipologia($arrProgettiSpesa);
+    }  
     function decodeTipologia($arrProgettiSpesa){
         $tipologia = '';
         for($i = 0; $i < count($arrProgettiSpesa); $i++){
@@ -37,52 +45,37 @@ class ProgettiSpesaManager {
         return $arrProgettiSpesa;
     }
     function crea($json_data) {
-        global $con, $logged_user;
-        $sql = insert("progetti", ["ID_PROGETTO" => null,
-                                   "TITOLO" => $con->escape_string($json_data->TITOLO),
-                                   "ACRONIMO" => $json_data->ACRONIMO,
-                                   "GRANT_NUMBER" => $json_data->GRANT_NUMBER,
-                                   "ABSTRACT" => $json_data->ABSTRACT,
-                                   "MONTE_ORE_TOT" => $json_data->MONTE_ORE_TOT,
-                                   "DATA_INIZIO" => $json_data->DATA_INIZIO,
-                                   "DATA_FINE" => $json_data->DATA_FINE,
-                                   "COSTO_MEDIO_UOMO" => $json_data->COSTO_MEDIO_UOMO,
-                                   "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
-                                   "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR
+        global $con;
+        $sql = insert("progetti_spese", ["ID_SPESA" => null,
+                                   "ID_PROGETTO" => $json_data->ID_PROGETTO,
+                                   "IMPORTO" => $json_data->IMPORTO,
+                                   "ID_TIPOLOGIA" => $json_data->TIPOLOGIA->ID_TIPOLOGIA,
+                                   "DESCRIZIONE" => $json_data->DESCRIZIONE
                                   ]);
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
         }
         $id_progetto = mysqli_insert_id($con);
-        return $this->get_progetto($id_progetto);
+        return $this->get_progetto_byspesa($id_progetto);
     }
     
     function aggiorna($progetto, $json_data) {
-        global $con, $STATO_PROGETTO;
-        $titolo = $con->escape_string($json_data->TITOLO);
-        
-        $sql = update("progetti", [
-                                    "TITOLO" => $con->escape_string($json_data->TITOLO),
-                                    "ACRONIMO" => $json_data->ACRONIMO,
-                                    "GRANT_NUMBER" => $json_data->GRANT_NUMBER,
-                                    "ABSTRACT" => $json_data->ABSTRACT,
-                                    "MONTE_ORE_TOT" => $json_data->MONTE_ORE_TOT,
-                                    "DATA_INIZIO" => $json_data->DATA_INIZIO,
-                                    "DATA_FINE" => $json_data->DATA_FINE,
-                                    "COSTO_MEDIO_UOMO" => $json_data->COSTO_MEDIO_UOMO,
-                                    "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
-                                    "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR
-                                  ], ["ID_PROGETTO" => $json_data->ID_PROGETTO]);
+        global $con;        
+        $sql = update("progetti_spese", [
+                                    "IMPORTO" => $json_data->IMPORTO,
+                                    "ID_TIPOLOGIA" => $json_data->TIPOLOGIA->ID_TIPOLOGIA,
+                                    "DESCRIZIONE" => $json_data->DESCRIZIONE
+                                  ], ["ID_SPESA" => $json_data->ID_SPESA]);
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
         }
     }
     
-    function elimina($id_progetto) {
+    function elimina($id_spesa) {
         global $con;
-        $sql = "DELETE FROM progetti WHERE id_progetto = '$id_progetto'";  //on delete cascade! (FIXME funziona anche con i questionari?!?)
+        $sql = "DELETE FROM progetti_spese WHERE id_spesa = '$id_spesa'";  //on delete cascade! (FIXME funziona anche con i questionari?!?)
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);

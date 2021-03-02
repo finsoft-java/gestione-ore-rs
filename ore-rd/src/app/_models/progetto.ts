@@ -20,6 +20,7 @@ export class ProgettoSpesa {
     public DESCRIZIONE?:string,
     public IMPORTO?:string,
     public ID_TIPOLOGIA?:string,
-    public isEditable: boolean= false
+    public isEditable: boolean= false,
+    public isInsert: boolean= false
     ) {}   
 }
