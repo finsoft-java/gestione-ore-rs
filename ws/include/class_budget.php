@@ -52,6 +52,9 @@ class ReportBudgetManager {
     function update_costi_progetto($idprogetto, $anno=null, $mese=null) {
         global $panthera;
         
+        $query_tipo_costo = "SELECT COD_TIPO_COSTO_PANTHERA FROM PROGETTI WHERE ID_PROGETTO=$idprogetto";
+        $tipoCosto = execute_single_value($query_tipo_costo);
+
         if (!empty($anno) and !empty($mese)) {
             $dataInizio = "$anno-$mese-01";
             $dataFine = (new DateTime($dataInizio))->format( 'Y-m-t' );
@@ -64,7 +67,7 @@ class ReportBudgetManager {
         $query = "UPDATE consuntivi_ore SET COSTO_ORARIO=NULL WHERE ID_PROGETTO=$idprogetto AND DATA >= '$dataInizio' AND DATA <= '$dataFine' ";
         
         // AGGIORNO I COSTI
-        $costi = $panthera->getMatriceCosti($dataInizio, $dataFine);
+        $costi = $panthera->getMatriceCosti($dataInizio, $dataFine, $tipoCosto);
         foreach ($costi as $c) {
             $query = "UPDATE consuntivi_ore SET COSTO_ORARIO=" . $c["COSTO"] . " WHERE ID_PROGETTO=$idprogetto AND MATRICOLA_DIPENDENTE='" . $c["ID_RISORSA"] . "' ";
             if (!empty($c["DATA_COSTO"])) {
@@ -83,7 +86,7 @@ class ReportBudgetManager {
         $mancanti = select_column($query);
         $msg = "";
         if (count($mancanti) > 0) {
-            $msg = "Impossibile i costi per le matricole: " . implode(", ", $mancanti);
+            $msg = "Costi su Panthera non trovati i costi per le matricole: " . implode(", ", $mancanti);
         }
         
         return $msg;

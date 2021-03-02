@@ -12,7 +12,7 @@ class PantheraManager {
                      ];
         } else {
             $query = "SELECT DISTINCT MATRICOLA,COGNOME||' '||NOME AS NOME FROM THIP.DIPENDENTI_V01 WHERE ID_AZIENDA='001'";
-            $matricole = select_list($query, $conPanthera);
+            $matricole = select_list($query, $connPanthera);
         }
         
         return $matricole;
@@ -23,8 +23,7 @@ class PantheraManager {
             $matricola = 'Rossi Mario';
         } else {
             $query = "SELECT DISTINCT COGNOME||' '||NOME AS NOME FROM THIP.DIPENDENTI_V01 WHERE ID_AZIENDA='001' AND MATRICOLA='$matricola'";
-            $matricola = select_single($query);
-            if ($matricola !== null) $matricola = $matricola['NOME'];
+            $matricola = select_single_value($query, $connPanthera);
         }
         return $matricola;
     }
@@ -37,7 +36,7 @@ class PantheraManager {
                      ];
         } else {
             $query = "SELECT DISTINCT ID_TIPO_COSTO,DESCRIZIONE FROM THIP.TIPI_COSTO WHERE ID_AZIENDA='001' AND STATO='V'";
-            $tipiCosto = select_list($query);
+            $tipiCosto = select_list($query, $connPanthera);
         }
         return $tipiCosto;
     }
@@ -45,7 +44,7 @@ class PantheraManager {
     /**
     * Costi validi alla data specificata
     */
-    function getCosti($data) {
+    function getCosti($data, $tipoCosto) {
         if (MOCK_PANTHERA) {
             $costi = [ [ 'ID_RISORSA' => '1234', 'COSTO' => 8.0 ],
                       [ 'ID_RISORSA' => '4321', 'COSTO' => 9.0 ],
@@ -55,9 +54,10 @@ class PantheraManager {
             $query = "SELECT DISTINCT ID_RISORSA,COSTO " .
                 "FROM THIP.TIPI_COSTO " .
                 "WHERE ID_AZIENDA='001' AND TIPO_RISORSA='U' AND LIVELLO_RISORSA='4' " .
+                "AND R_TIPO_COSTO='$tipoCosto' " .
                 "AND (DATA_COSTO IS NULL OR DATA_COSTO<='$data') " .
                 "AND (DATA_FINE_COSTO IS NULL OR DATA_FINE_COSTO>='$data') ";
-            $costi = select_list($query);
+            $costi = select_list($query, $connPanthera);
         }
         return $costi;
     }
@@ -65,7 +65,7 @@ class PantheraManager {
     /**
     * Restituisce tutti i record di costo nel range specificato
     */
-    function getMatriceCosti($data1, $data2) {
+    function getMatriceCosti($data1, $data2, $tipoCosto) {
         if (MOCK_PANTHERA) {
             $costi = [ [ 'ID_RISORSA' => '1234', 'COSTO' => 8.0, 'DATA_COSTO' => '2020-01-01', 'DATA_FINE_COSTO' => null ],
                       [ 'ID_RISORSA' => '4321', 'COSTO' => 9.0, 'DATA_COSTO' => '200-01-01', 'DATA_FINE_COSTO' => '2010-12-31' ],
@@ -75,9 +75,10 @@ class PantheraManager {
             $query = "SELECT DISTINCT ID_RISORSA,COSTO,DATA_COSTO,DATA_FINE_COSTO " .
                 "FROM THIP.TIPI_COSTO " .
                 "WHERE ID_AZIENDA='001' AND TIPO_RISORSA='U' AND LIVELLO_RISORSA='4' " .
+                "AND R_TIPO_COSTO='$tipoCosto' " .
                 "AND (DATA_COSTO IS NULL OR DATA_COSTO<='$data2') " .
                 "AND (DATA_FINE_COSTO IS NULL OR DATA_FINE_COSTO>='$data1') ";
-            $costi = select_list($query);
+            $costi = select_list($query, $connPanthera);
         }
         return $costi;
     }
