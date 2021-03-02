@@ -345,52 +345,5 @@ class RapportiniManager {
         $message .= 'Fatto.</br>';
     }
 
-    function _select_costo($matricola, $data, $costi) {
-        foreach($costi as $costo) {
-            if ($costo["ID_RISORSA"] == $matricola and $costo["DATA_COSTO"] <= $data and ($costo["DATA_FINE_COSTO"] == null or $costo["DATA_FINE_COSTO"] <= $data)) {
-                return $costo["COSTO"];
-            }
-        }
-        return null;
-    }
-
-    function carica_totali_progetto($progetto, $anno, $mese) {
-        // anno e mese sono facoltativi
-        
-        $query = "SELECT  wp.ID_WP, wp.TITOLO, wp.DESCRIZIONE, wp.DATA_INIZIO, wp.DATA_FINE, " .
-                    "r.MATRICOLA_DIPENDENTE, c. DATA, c.ORE_LAVORATE " .
-                    "FROM progetti p " .
-                    "JOIN progetti_wp wp ON wp.ID_PROGETTO=p.ID_PROGETTO " .
-                    "JOIN progetti_wp_risorse r ON wp.ID_PROGETTO=r.ID_PROGETTO AND wp.ID_WP=r.ID_WP " .
-                    "JOIN ore_consuntivate c ON c.ID_PROGETTO=r.ID_PROGETTO AND c.ID_WP=r.ID_WP AND c.MATRICOLA_DIPENDENTE=r.MATRICOLA_DIPENDENTE" .
-                    "WHERE ID_PROGETTO=" . $progetto["ID_PROGETTO"] . " " .
-                    "ORDER BY wp.ID_WP, r.MATRICOLA_DIPENDENTE";
-
-        if (!empty($anno) and !empty($mese)) {
-            $primo = "DATE('$anno-$mese-01')";
-            $query .= "AND wp.DATA_FINE >= $primo AND wp.DATA_INIZIO <= LAST_DAY($primo)";
-        }
-        
-        $consuntivi = select_list($query);
-
-        if (!empty($anno) and !empty($mese)) {
-            $dataInizio = "$anno-$mese-01";
-            $dataFine = (new DateTime($dataInizio))->format( 'Y-m-t' );
-        } else {
-            $dataInizio = $progetto["DATA_INIZIO"];
-            $dataFine = $progetto["DATA_FINE"];
-        }
-
-        global $panthera;
-        $costi = $panthera->getMatriceCosti($dataInizio, $dataFine);
-
-        foreach($consuntivi as $cons) {
-            // si potrebbe ottimizzare ragionando per range di date costo...
-            $cons["COSTO_ORARIO"] = _select_costo($cons["MATRICOLA_DIPENDENTE"], $cons["MATRICOLA_DIPENDENTE"], $costi);
-            $cons["COSTO"] = $cons["COSTO_ORARIO"] * $cons["ORE_LAVORATE"];
-        }
-        
-        return $consuntivi;
-    }
 }
 ?>

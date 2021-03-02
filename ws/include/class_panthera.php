@@ -69,6 +69,5 @@ class PantheraManager {
                      ];
         return $costi;
     }
-
 }
 ?>
