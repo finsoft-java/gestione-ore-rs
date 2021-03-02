@@ -45,7 +45,7 @@ class TipologiaManager {
         if($result = mysqli_query($con, $sql1 . $sql)) {
             $cr = 0;
             while($row = mysqli_fetch_assoc($result)) {
-                $tipologia = new Progetto();
+                $tipologia = (object)[];
                 $tipologia->ID_TIPOLOGIA = $row['ID_TIPOLOGIA'];
                 $tipologia->DESCRIZIONE  = $row['DESCRIZIONE'];
                 $arr[$cr++] = $tipologia;
