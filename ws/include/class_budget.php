@@ -200,6 +200,53 @@ class ReportBudgetManager {
         
         $pdf->Output('Budget.pdf', 'I'); // Download
     }
+    
+    function getReportData($idprogetto, $anno, $mese, $completo) {
+
+        global $progettiManager, $panthera;
+
+        $report = [];
+
+        $report["progetto"] = $progettiManager->get_progetto($idprogetto);
+
+        if (empty($report["progetto"])) {
+            print_error(404, 'Wrong idProgetto');
+        }
+
+        $report["warning"] = $this->update_costi_progetto($idprogetto, $anno, $mese);
+        $report["progetto"]["NOME_COGNOME_SUPERVISOR"] = $panthera->getUtente($progetto['MATRICOLA_SUPERVISOR']);
+        
+        $report["budget"] = $progetto["MONTE_ORE_TOT"] * $progetto["COSTO_MEDIO_UOMO"];
+
+        $report["consuntivi"] = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese);
+        // ha due campi, ORE_LAVORATE e COSTO
+        
+        if (empty($progetto["MONTE_ORE_TOT"])) {
+            // should not happen
+            $report["consuntivi"]["PCT_SCARTO_TEMPI"] = null;
+        } else {
+            $monte_ore = $report["progetto"]["MONTE_ORE_TOT"];
+            $report["consuntivi"]["PCT_SCARTO_TEMPI"] = ($report["consuntivi"]["ORE_LAVORATE"] - $monte_ore) / $monte_ore * 100;
+        }
+
+        if (empty($report["budget"])) {
+            // this may happen
+            $report["consuntivi"]["SCARTO_COSTI"] = null;
+        } else {
+            $budget = $report["budget"];
+            $report["consuntivi"]["SCARTO_COSTI"] = ($report["consuntivi"]["COSTO"] - $budget) / $budget * 100;
+        }
+        
+        if ($completo) {
+            $dettagli = [];
+            
+            
+            
+            $report["consuntivi"]["dettagli"] = $dettagli;
+        }
+
+        return $report;
+    }
   
 }
 ?>

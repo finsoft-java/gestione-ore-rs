@@ -42,7 +42,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $completo = ($_GET['completo'] === 'true');
     }
     
-    $budget->sendReport($idprogetto, $anno, $mese, $completo);
+    //$budget->sendReport($idprogetto, $anno, $mese, $completo);   // PER IL PDF
+    $report = $budget->getReportData($idprogetto, $anno, $mese, $completo);
+    
+    header('Content-Type: application/json');
+    echo json_encode(['value' => $report]);
     
 } else {
     //==========================================================
