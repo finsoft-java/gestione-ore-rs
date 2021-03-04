@@ -6,7 +6,16 @@ class ReportBudgetManager {
 
     function get_consuntivi($id_progetto=null, $anno=null, $mese=null) {
         $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT ID_PROGETTO, ID_WP, MATRICOLA_DIPENDENTE, DATA, ORE_LAVORATE, costo_orario " . $partial;
+        $sql = "SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, ID_WP, DATA, ORE_LAVORATE, COSTO_ORARIO " . $partial;
+        return select_list($sql);
+    }
+
+    function get_consuntivi_per_matricola_wp($id_progetto=null, $anno=null, $mese=null) {
+        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
+        $sql = "SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, ID_WP, SUM(ORE_LAVORATE) as ORE_LAVORATE, " .
+            "SUM(ORE_LAVORATE*COSTO_ORARIO) as COSTO " .
+            $partial .
+            "GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE, ID_WP";
         return select_list($sql);
     }
 
@@ -15,7 +24,7 @@ class ReportBudgetManager {
         $sql = "SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, SUM(ORE_LAVORATE) as ORE_LAVORATE, " .
             "SUM(ORE_LAVORATE*COSTO_ORARIO) as COSTO " .
             $partial .
-            "GROUP BY MATRICOLA_DIPENDENTE";
+            "GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE";
         return select_list($sql);
     }
 
@@ -49,8 +58,60 @@ class ReportBudgetManager {
         return $sql;
     }
 
-    function update_costi_progetto($idprogetto, $anno=null, $mese=null) {
+    function get_matrice_consuntivi_progetto($progetto, $anno=null, $mese=null) {
+        $idprogetto = $progetto['ID_PROGETTO'];
+        
+        $consuntivi1 = $this->get_consuntivi($idprogetto, $anno, $mese);
+        $consuntivi2 = $this->get_consuntivi_per_matricola_wp($idprogetto, $anno, $mese);
+        $consuntivi3 = $this->get_consuntivi_per_matricola($idprogetto, $anno, $mese);
+        
+        $result = [];
+        
+        foreach($consuntivi1 as $row) {
+            $idprogetto = $row['ID_PROGETTO'];
+            $matricola = $row['MATRICOLA_DIPENDENTE'];
+            $idwp = $row['ID_WP'];
+            $data = $row['DATA'];
+            $ore = $row['ORE_LAVORATE'];
+            $costo = $row['COSTO_ORARIO'];
+            if (!isset($result[$idprogetto])) $result[$idprogetto] = [];
+            if (!isset($result[$idprogetto][$matricola])) $result[$idprogetto][$matricola] = [];
+            if (!isset($result[$idprogetto][$matricola][$idwp])) $result[$idprogetto][$matricola][$idwp] = [];
+            if (!isset($result[$idprogetto][$matricola][$idwp][$data])) $result[$idprogetto][$matricola][$idwp][$data] = [];
+            $result[$idprogetto][$matricola][$idwp][$data]['ORE_LAVORATE'] = $ore;
+            $result[$idprogetto][$matricola][$idwp][$data]['COSTO_ORARIO'] = $costo;
+        }
+        foreach($consuntivi2 as $row) {
+            $idprogetto = $row['ID_PROGETTO'];
+            $matricola = $row['MATRICOLA_DIPENDENTE'];
+            $idwp = $row['ID_WP'];
+            $ore = $row['ORE_LAVORATE'];
+            $costo = $row['COSTO'];
+            if (!isset($result[$idprogetto])) $result[$idprogetto] = [];
+            if (!isset($result[$idprogetto][$matricola])) $result[$idprogetto][$matricola] = [];
+            if (!isset($result[$idprogetto][$matricola][$idwp])) $result[$idprogetto][$matricola][$idwp] = [];
+            if (!isset($result[$idprogetto][$matricola][$idwp]['TOT'])) $result[$idprogetto][$matricola][$idwp] = [];
+            $result[$idprogetto][$matricola][$idwp]['TOT']['ORE_LAVORATE'] = $ore;
+            $result[$idprogetto][$matricola][$idwp]['TOT']['COSTO_ORARIO'] = $costo;
+        }
+        foreach($consuntivi3 as $row) {
+            $idprogetto = $row['ID_PROGETTO'];
+            $matricola = $row['MATRICOLA_DIPENDENTE'];
+            $ore = $row['ORE_LAVORATE'];
+            $costo = $row['COSTO'];
+            if (!isset($result[$idprogetto])) $result[$idprogetto] = [];
+            if (!isset($result[$idprogetto][$matricola])) $result[$idprogetto][$matricola] = [];
+            if (!isset($result[$idprogetto][$matricola]['TOT'])) $result[$idprogetto][$matricola]['TOT'] = [];
+            $result[$idprogetto][$matricola]['TOT']['ORE_LAVORATE'] = $ore;
+            $result[$idprogetto][$matricola]['TOT']['COSTO_ORARIO'] = $costo;
+        }
+
+        return $result;
+    }
+
+    function update_costi_progetto($progetto, $anno=null, $mese=null) {
         global $panthera;
+        $idprogetto = $progetto['ID_PROGETTO'];
         
         $query_tipo_costo = "SELECT COD_TIPO_COSTO_PANTHERA FROM PROGETTI WHERE ID_PROGETTO=$idprogetto";
         $tipoCosto = select_single_value($query_tipo_costo);
@@ -99,7 +160,7 @@ class ReportBudgetManager {
         global $progettiManager;
         
         $progetto = $progettiManager->get_progetto($idprogetto);
-        $warning = $this->update_costi_progetto($idprogetto, $anno, $mese);
+        $warning = $this->update_costi_progetto($progetto, $anno, $mese);
         $totali = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese);
         // TODO decidere quali parziali prendere
         
@@ -213,7 +274,7 @@ class ReportBudgetManager {
             print_error(404, 'Wrong idProgetto');
         }
 
-        $report['warning'] = $this->update_costi_progetto($idprogetto, $anno, $mese);
+        $report['warning'] = $this->update_costi_progetto($report['progetto'], $anno, $mese);
         $report['progetto']['NOME_COGNOME_SUPERVISOR'] = $panthera->getUtente($report['progetto']['MATRICOLA_SUPERVISOR']);
         
         $report['budget'] = $report['progetto']['MONTE_ORE_TOT'] * $report['progetto']['COSTO_MEDIO_UOMO'];
@@ -238,20 +299,66 @@ class ReportBudgetManager {
         }
         
         if ($completo) {
-            $dettagli = [];
-            
-            
-            
-            $report['consuntivi']['dettagli'] = $dettagli;
+            $report['consuntivi']['dettagli'] = $this->get_matrice_consuntivi_progetto($report['progetto'], $anno, $mese);
         }
 
         return $report;
     }
     
+    function get_range_temporale($progetto, $anno=null, $mese=null) {
+        if (!empty($anno) and !empty($mese)) {
+            $dataInizio = new DateTime("$anno-$mese-01");
+            $dataFine = new DateTime($dataInizio->format( 'Y-m-t' ));
+        } else {
+            $dataInizio = new DateTime($progetto["DATA_INIZIO"]);
+            $dataFine = new DateTime($progetto["DATA_FINE"]);
+        }
+        $interval = DateInterval::createFromDateString('1 day');
+        $period = new DatePeriod($dataInizio, $interval, $dataFine);
+        $result = [];
+        foreach($period as $day) {
+            $result[] = $day->format('Y-m-d');
+        }
+        return $result;
+    }
+
     function getReportHtml($idprogetto, $anno, $mese, $completo) {
         $data = $this->getReportData($idprogetto, $anno, $mese, $completo);
         $progetto = $data['progetto'];
         $consuntivi = $data['consuntivi'];
+        
+        $subreport_dettaglio = '';
+        
+        if ($completo) {
+            $datePeriod = $this->get_range_temporale($progetto);
+            
+            $subreport_dettaglio = "
+        <h3>Dettaglio</h3>
+        ";
+            foreach($data['consuntivi']['dettagli'] as $dettagli_progetto) {
+                //SHOULD BE JUST ONE
+                foreach($dettagli_progetto as $matricola => $dettagli_matricola) {
+                    $subreport_dettaglio .= "
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Matricola:
+                </div>
+                <div class='col-md-8'>
+                $matricola
+                </div>
+            </div>
+                    ";
+                    foreach($dettagli_matricola as $idwp => $dettagli_wp) {
+                        $subreport_dettaglio .= "WP $idwp<br/>";
+                        foreach($datePeriod as $date) {
+                            $ore = isset($dettagli_wp[$date]) ? $dettagli_wp[$date]: [ 'ORE_LAVORATE' => null, 'COSTO_ORARIO' => null] ;
+                            $subreport_dettaglio .= "day $date worked? $ore[ORE_LAVORATE]<br/>";
+                        }
+                    }
+                }
+            }
+        }
+        
         $report="<html>
     <head>
         <title>Report $progetto[ACRONIMO]</title>
@@ -335,10 +442,7 @@ class ReportBudgetManager {
                 " . ($consuntivi['PCT_SCARTO_COSTI'] > 0 ? '+' : ''). "$consuntivi[PCT_SCARTO_COSTI]%
                 </div>
             </div>
-            
-            <h3>Dettaglio</h3>
-            <div class='row'>
-            </div>
+$subreport_dettaglio
         </div>
     </body>
 </html>";
