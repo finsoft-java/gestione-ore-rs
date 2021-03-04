@@ -75,7 +75,8 @@ class RapportiniManager {
         foreach ($map_progetti_matricole_wp as $idProgetto => $map_matricole_wp) {
             foreach ($map_matricole_wp as $matr => $map_wp_wp) {
                 $xlsxfilename = $this->creaFileExcel($idProgetto, $matr, $anno, $mese, $map_wp_wp, $map_matr_ore);
-                $xlsxfilename_final = 'Rapportini_' . $idProgetto . '_' . $matr . '.xlsx';
+                $acronimo = $map_wp_wp[array_keys($map_wp_wp)[0]]['ACRONIMO'];
+                $xlsxfilename_final = 'Rapportini_' . $acronimo . '_' . $matr . '.xlsx';
                 $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON esegue il salvataggio
                 $tempfiles[] = $xlsxfilename;
             }
