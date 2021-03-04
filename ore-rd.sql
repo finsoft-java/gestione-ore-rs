@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Feb 24, 2021 alle 16:18
+-- Creato il: Mar 04, 2021 alle 09:15
 -- Versione del server: 10.4.17-MariaDB
 -- Versione PHP: 7.3.27
 
@@ -29,7 +29,8 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `date_firma` (
   `MATRICOLA_DIPENDENTE` varchar(50) NOT NULL,
-  `MENSILITA` varchar(6) NOT NULL,
+  `ANNO_MESE` varchar(7) NOT NULL,
+  `ID_PROGETTO` int(11) NOT NULL,
   `DATA_FIRMA` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -44,8 +45,29 @@ CREATE TABLE `ore_consuntivate` (
   `ID_WP` int(11) NOT NULL,
   `MATRICOLA_DIPENDENTE` varchar(50) NOT NULL,
   `DATA` date NOT NULL,
-  `ORE_LAVORATE` int(11) NOT NULL
+  `ORE_LAVORATE` int(11) NOT NULL,
+  `COSTO_ORARIO` float DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dump dei dati per la tabella `ore_consuntivate`
+--
+
+INSERT INTO `ore_consuntivate` (`ID_PROGETTO`, `ID_WP`, `MATRICOLA_DIPENDENTE`, `DATA`, `ORE_LAVORATE`, `COSTO_ORARIO`) VALUES
+(1, 1, 'PIPPO', '2021-02-02', 3, NULL),
+(1, 1, 'PIPPO', '2021-02-03', 3, NULL),
+(1, 1, 'PIPPO', '2021-02-04', 0, NULL),
+(1, 1, 'PIPPO', '2021-02-05', 0, NULL),
+(1, 1, 'PIPPO', '2021-02-09', 4, NULL),
+(1, 1, 'PIPPO', '2021-02-10', 5, NULL),
+(1, 1, 'PIPPO', '2021-02-11', 5, NULL),
+(1, 1, 'PIPPO', '2021-02-14', 6, NULL),
+(1, 2, 'PIPPO', '2021-02-02', 4, NULL),
+(1, 2, 'PIPPO', '2021-02-03', 4, NULL),
+(1, 2, 'PIPPO', '2021-02-04', 0, NULL),
+(1, 2, 'PIPPO', '2021-02-05', 0, NULL),
+(1, 2, 'PIPPO', '2021-02-12', 6, NULL),
+(1, 2, 'PIPPO', '2021-02-14', 2, NULL);
 
 -- --------------------------------------------------------
 
@@ -58,6 +80,16 @@ CREATE TABLE `ore_presenza_lul` (
   `DATA` date NOT NULL,
   `ORE_PRESENZA_ORDINARIE` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dump dei dati per la tabella `ore_presenza_lul`
+--
+
+INSERT INTO `ore_presenza_lul` (`MATRICOLA_DIPENDENTE`, `DATA`, `ORE_PRESENZA_ORDINARIE`) VALUES
+('PIPPO', '2021-02-02', 8),
+('PIPPO', '2021-02-03', 7),
+('PIPPO', '2021-02-04', 8),
+('PIPPO', '2021-02-05', 7);
 
 -- --------------------------------------------------------
 
@@ -84,7 +116,7 @@ CREATE TABLE `progetti` (
 --
 
 INSERT INTO `progetti` (`ID_PROGETTO`, `ACRONIMO`, `TITOLO`, `GRANT_NUMBER`, `ABSTRACT`, `MONTE_ORE_TOT`, `DATA_INIZIO`, `DATA_FINE`, `COSTO_MEDIO_UOMO`, `COD_TIPO_COSTO_PANTHERA`, `MATRICOLA_SUPERVISOR`) VALUES
-(1, 'xxx', 'prova', 'xxx', 'hello world', 100, '2021-02-01', '2021-02-24', '20.00', 'XXX', '123');
+(1, 'xxx', 'prova', 'yyy', 'hello world', 100, '2021-02-01', '2021-02-24', '20.00', 'A02', '1234');
 
 -- --------------------------------------------------------
 
@@ -99,6 +131,14 @@ CREATE TABLE `progetti_spese` (
   `IMPORTO` decimal(19,2) NOT NULL,
   `ID_TIPOLOGIA` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dump dei dati per la tabella `progetti_spese`
+--
+
+INSERT INTO `progetti_spese` (`ID_PROGETTO`, `ID_SPESA`, `DESCRIZIONE`, `IMPORTO`, `ID_TIPOLOGIA`) VALUES
+(1, 1, '13213', '0.00', 1),
+(1, 2, 'dfsadsf', '222.00', 1);
 
 -- --------------------------------------------------------
 
@@ -116,6 +156,28 @@ CREATE TABLE `progetti_wp` (
   `MONTE_ORE` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Dump dei dati per la tabella `progetti_wp`
+--
+
+INSERT INTO `progetti_wp` (`ID_PROGETTO`, `ID_WP`, `TITOLO`, `DESCRIZIONE`, `DATA_INIZIO`, `DATA_FINE`, `MONTE_ORE`) VALUES
+(1, 1, 'WP1', 'regeavefav', '2021-02-01', '2021-02-17', 40),
+(1, 2, 'WP2', 'vsvfdavfav', '2021-02-10', '2021-02-28', 70);
+
+-- --------------------------------------------------------
+
+--
+-- Struttura stand-in per le viste `progetti_wp_residuo`
+-- (Vedi sotto per la vista effettiva)
+--
+CREATE TABLE `progetti_wp_residuo` (
+`ID_PROGETTO` int(11)
+,`ID_WP` int(11)
+,`DATA_INIZIO` date
+,`DATA_FINE` date
+,`MONTE_ORE_RESIDUO` decimal(33,0)
+);
+
 -- --------------------------------------------------------
 
 --
@@ -127,6 +189,16 @@ CREATE TABLE `progetti_wp_risorse` (
   `ID_WP` int(11) NOT NULL,
   `MATRICOLA_DIPENDENTE` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dump dei dati per la tabella `progetti_wp_risorse`
+--
+
+INSERT INTO `progetti_wp_risorse` (`ID_PROGETTO`, `ID_WP`, `MATRICOLA_DIPENDENTE`) VALUES
+(1, 1, 'PIPPO'),
+(1, 1, 'PLUTO'),
+(1, 2, 'PAPERINO'),
+(1, 2, 'PIPPO');
 
 -- --------------------------------------------------------
 
@@ -140,6 +212,24 @@ CREATE TABLE `tipologie_spesa` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- Dump dei dati per la tabella `tipologie_spesa`
+--
+
+INSERT INTO `tipologie_spesa` (`ID_TIPOLOGIA`, `DESCRIZIONE`) VALUES
+(1, 'pasti'),
+(2, 'trasferte'),
+(3, 'fuffa');
+
+-- --------------------------------------------------------
+
+--
+-- Struttura per vista `progetti_wp_residuo`
+--
+DROP TABLE IF EXISTS `progetti_wp_residuo`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `progetti_wp_residuo`  AS SELECT `wp`.`ID_PROGETTO` AS `ID_PROGETTO`, `wp`.`ID_WP` AS `ID_WP`, `wp`.`DATA_INIZIO` AS `DATA_INIZIO`, `wp`.`DATA_FINE` AS `DATA_FINE`, `wp`.`MONTE_ORE`- ifnull(sum(`oc`.`ORE_LAVORATE`),0) AS `MONTE_ORE_RESIDUO` FROM (`progetti_wp` `wp` left join `ore_consuntivate` `oc` on(`oc`.`ID_PROGETTO` = `wp`.`ID_PROGETTO` and `oc`.`ID_WP` = `wp`.`ID_WP`)) GROUP BY `wp`.`ID_PROGETTO`, `wp`.`ID_WP`, `wp`.`DATA_INIZIO`, `wp`.`DATA_FINE`, `wp`.`MONTE_ORE` ;
+
+--
 -- Indici per le tabelle scaricate
 --
 
@@ -147,7 +237,7 @@ CREATE TABLE `tipologie_spesa` (
 -- Indici per le tabelle `date_firma`
 --
 ALTER TABLE `date_firma`
-  ADD PRIMARY KEY (`MATRICOLA_DIPENDENTE`,`MENSILITA`);
+  ADD PRIMARY KEY (`MATRICOLA_DIPENDENTE`,`ANNO_MESE`,`ID_PROGETTO`);
 
 --
 -- Indici per le tabelle `ore_consuntivate`
@@ -209,19 +299,19 @@ ALTER TABLE `progetti`
 -- AUTO_INCREMENT per la tabella `progetti_spese`
 --
 ALTER TABLE `progetti_spese`
-  MODIFY `ID_SPESA` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_SPESA` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT per la tabella `progetti_wp`
 --
 ALTER TABLE `progetti_wp`
-  MODIFY `ID_WP` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_WP` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT per la tabella `tipologie_spesa`
 --
 ALTER TABLE `tipologie_spesa`
-  MODIFY `ID_TIPOLOGIA` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_TIPOLOGIA` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Limiti per le tabelle scaricate
