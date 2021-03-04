@@ -207,34 +207,34 @@ class ReportBudgetManager {
 
         $report = [];
 
-        $report["progetto"] = $progettiManager->get_progetto($idprogetto);
+        $report['progetto'] = $progettiManager->get_progetto($idprogetto);
 
-        if (empty($report["progetto"])) {
+        if (empty($report['progetto'])) {
             print_error(404, 'Wrong idProgetto');
         }
 
-        $report["warning"] = $this->update_costi_progetto($idprogetto, $anno, $mese);
-        $report["progetto"]["NOME_COGNOME_SUPERVISOR"] = $panthera->getUtente($progetto['MATRICOLA_SUPERVISOR']);
+        $report['warning'] = $this->update_costi_progetto($idprogetto, $anno, $mese);
+        $report['progetto']['NOME_COGNOME_SUPERVISOR'] = $panthera->getUtente($report['progetto']['MATRICOLA_SUPERVISOR']);
         
-        $report["budget"] = $progetto["MONTE_ORE_TOT"] * $progetto["COSTO_MEDIO_UOMO"];
+        $report['budget'] = $report['progetto']['MONTE_ORE_TOT'] * $report['progetto']['COSTO_MEDIO_UOMO'];
 
-        $report["consuntivi"] = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese);
+        $report['consuntivi'] = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese);
         // ha due campi, ORE_LAVORATE e COSTO
         
-        if (empty($progetto["MONTE_ORE_TOT"])) {
+        if (empty($report['progetto']['MONTE_ORE_TOT'])) {
             // should not happen
-            $report["consuntivi"]["PCT_SCARTO_TEMPI"] = null;
+            $report['consuntivi']['PCT_SCARTO_TEMPI'] = null;
         } else {
-            $monte_ore = $report["progetto"]["MONTE_ORE_TOT"];
-            $report["consuntivi"]["PCT_SCARTO_TEMPI"] = ($report["consuntivi"]["ORE_LAVORATE"] - $monte_ore) / $monte_ore * 100;
+            $monte_ore = $report['progetto']['MONTE_ORE_TOT'];
+            $report['consuntivi']['PCT_SCARTO_TEMPI'] = ($report['consuntivi']['ORE_LAVORATE'] - $monte_ore) / $monte_ore * 100;
         }
 
-        if (empty($report["budget"])) {
+        if (empty($report['budget'])) {
             // this may happen
-            $report["consuntivi"]["SCARTO_COSTI"] = null;
+            $report['consuntivi']['PCT_SCARTO_COSTI'] = null;
         } else {
-            $budget = $report["budget"];
-            $report["consuntivi"]["SCARTO_COSTI"] = ($report["consuntivi"]["COSTO"] - $budget) / $budget * 100;
+            $budget = $report['budget'];
+            $report['consuntivi']['PCT_SCARTO_COSTI'] = ($report['consuntivi']['COSTO'] - $budget) / $budget * 100;
         }
         
         if ($completo) {
@@ -242,9 +242,106 @@ class ReportBudgetManager {
             
             
             
-            $report["consuntivi"]["dettagli"] = $dettagli;
+            $report['consuntivi']['dettagli'] = $dettagli;
         }
 
+        return $report;
+    }
+    
+    function getReportHtml($idprogetto, $anno, $mese, $completo) {
+        $data = $this->getReportData($idprogetto, $anno, $mese, $completo);
+        $progetto = $data['progetto'];
+        $consuntivi = $data['consuntivi'];
+        $report="<html>
+    <head>
+        <title>Report $progetto[ACRONIMO]</title>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'/>
+        <style>
+        .title { font-weight: bold  }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <h2>Consuntivo di progetto</h2>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Titolo:
+                </div>
+                <div class='col-md-8'>
+                $progetto[TITOLO]
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Acronimo:
+                </div>
+                <div class='col-md-8'>
+                $progetto[ACRONIMO]
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Grant number:
+                </div>
+                <div class='col-md-8'>
+                $progetto[GRANT_NUMBER]
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Monte ore previsto:
+                </div>
+                <div class='col-md-8'>
+                $progetto[MONTE_ORE_TOT]
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Budget previsto &euro;:
+                </div>
+                <div class='col-md-8'>
+                " . sprintf("%.2f", $data['budget']) . "
+                </div>
+            </div>" . ($data['warning'] ? "
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Warning:
+                </div>
+                <div class='col-md-8'>
+                $data[warning]
+                </div>
+            </div>" : '') . "
+            
+            <h3>Consuntivi" . ((!empty($anno) and !empty($mese)) ? " nel mese $anno-$mese" : '') ."</h3>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Monte ore consumato:
+                </div>
+                <div class='col-md-2'>
+                $consuntivi[ORE_LAVORATE]
+                </div>
+                <div class='col-md-2'>
+                " . ($consuntivi['PCT_SCARTO_TEMPI'] > 0 ? '+' : ''). "$consuntivi[PCT_SCARTO_TEMPI]%
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Costi sostenuti &euro;:
+                </div>
+                <div class='col-md-2'>
+                " . sprintf("%.2f", $consuntivi['COSTO']) . "
+                </div>
+                <div class='col-md-2'>
+                " . ($consuntivi['PCT_SCARTO_COSTI'] > 0 ? '+' : ''). "$consuntivi[PCT_SCARTO_COSTI]%
+                </div>
+            </div>
+            
+            <h3>Dettaglio</h3>
+            <div class='row'>
+            </div>
+        </div>
+    </body>
+</html>";
         return $report;
     }
   
