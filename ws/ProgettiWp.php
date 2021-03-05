@@ -55,8 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     //==========================================================
     $postdata = file_get_contents("php://input");
     $json_data = json_decode($postdata);
-    $id_wp = '';
-    
+
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
@@ -66,7 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(404, 'Not found');
     }
     $progettiWpManager->aggiorna($progetto_su_db, $json_data);
-    $progettiWpManager->aggiornaRisorse($json_data);
+    if($id_wp == null){
+        $id_wp = 0;
+    }else{
+        $id_wp = $id_wp+1;
+    }
+    $progettiWpManager->aggiornaRisorse($json_data,$json_data->ID_WP, $json_data->ID_PROGETTO);
     header('Content-Type: application/json');
     echo json_encode(['value' => $progetto_su_db]);
     

@@ -257,6 +257,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
   salvaModificaWp(a: ProgettoWp){
     a.isEditable=false;
+    console.log(a);
     if(a.ID_WP == null){
       this.progettiWpService.insert(a)
       .subscribe(response => {
