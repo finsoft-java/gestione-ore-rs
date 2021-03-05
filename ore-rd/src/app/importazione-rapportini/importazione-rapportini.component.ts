@@ -15,6 +15,7 @@ export class ImportazioneRapportiniComponent implements OnInit {
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
+  eventoClick?:any;
   nomiFile:string[] = [];
   @ViewChild('fileInput') inputFile?: ElementRef;
 
@@ -24,6 +25,7 @@ export class ImportazioneRapportiniComponent implements OnInit {
   }
 
   reset() {
+    this.eventoClick.srcElement.value = null;
     this.selectedFiles = undefined;
     this.nomiFile = [];
     this.progressInfos = { value: 0, fileName: 'Caricamento' };
@@ -31,7 +33,7 @@ export class ImportazioneRapportiniComponent implements OnInit {
     this.message_success = '';
   }
   selectFiles(event: any) {
-    //far apparire i file caricati in un box
+    this.eventoClick = event;
     this.selectedFiles = event.target.files;
     if(this.selectedFiles){
       for(let i = 0; i < this.selectedFiles.length; i++){
@@ -60,11 +62,14 @@ export class ImportazioneRapportiniComponent implements OnInit {
     this.uploadService.upload(files).subscribe(
       event => {
         if (event.type === HttpEventType.UploadProgress) {
+          console.log("event1");
+          console.log(event);
           if(event.total){
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
           }
         } else if (event instanceof HttpResponse) {
-          this.message_error = event.body.value;
+          this.message_error = event.body.value.error;
+          this.message_success = event.body.value.success;
         }
       },
       err => {
@@ -74,6 +79,8 @@ export class ImportazioneRapportiniComponent implements OnInit {
             this.message_error = err.error;
         else
             this.message_error = err;
+
+        
       });
   }
 
