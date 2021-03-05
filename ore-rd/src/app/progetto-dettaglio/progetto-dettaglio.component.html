@@ -120,7 +120,7 @@
             <td mat-cell *matCellDef="let element">
                 <label *ngIf="!element.isEditable"> {{element.IMPORTO}} </label>
                 <div style="display: block;margin: 0px auto;width: 250px;">
-                    <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.IMPORTO">
+                    <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" required matInput [(ngModel)]="element.IMPORTO">
                 </div>
             </td>
         </ng-container>
@@ -129,7 +129,7 @@
             <td mat-cell *matCellDef="let element">
                 <label *ngIf="!element.isEditable"> {{element.TIPOLOGIA.DESCRIZIONE}}  </label>
                 <div style="display: block;margin: 0px auto;width: 250px;">
-                    <mat-form-field appearance="fill" *ngIf="element.isEditable">
+                    <mat-form-field appearance="fill" *ngIf="element.isEditable" style="margin-top: 1.34375em;">
                         <mat-label>Tipologia Spesa</mat-label>
                         <mat-select [(ngModel)]="element.TIPOLOGIA.ID_TIPOLOGIA">
                             <mat-option *ngFor="let tipologie of allTipologie" [value]="tipologie.ID_TIPOLOGIA">{{tipologie.DESCRIZIONE}}</mat-option>
@@ -202,14 +202,13 @@
             <td mat-cell *matCellDef="let element">
                 <label *ngIf="!element.isEditable"> {{element.DATA_INIZIO}}  </label>
                 <div style="display: block;margin: 0px auto;width: 125px;" *ngIf="element.isEditable">
-                    <mat-form-field appearance="fill" style="margin-right: 10px;display: block;">
+                    <mat-form-field appearance="fill" style="margin-right: 10px;display: block;margin-top: 1.34375em;">
                         <mat-label>Data Inizio</mat-label>
                         <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_INIZIO" [matDatepicker]="picker">
                         <mat-datepicker-toggle matSuffix [for]="picker">
                             <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                         </mat-datepicker-toggle>
                         <mat-datepicker #picker></mat-datepicker>
-                        <mat-hint>required</mat-hint>
                     </mat-form-field>
                 </div>
             </td>
@@ -220,14 +219,13 @@
             <td mat-cell *matCellDef="let element">
                 <label *ngIf="!element.isEditable"> {{element.DATA_FINE}}  </label>
                 <div style="display: block;margin: 0px auto;width: 125px;" *ngIf="element.isEditable">
-                    <mat-form-field appearance="fill" style="display: block;">
+                    <mat-form-field appearance="fill" style="display: block;margin-top: 1.34375em;">
                         <mat-label>Data Fine</mat-label>
                         <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_FINE" [matDatepicker]="picker2">
                         <mat-datepicker-toggle matSuffix [for]="picker2">
                             <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                         </mat-datepicker-toggle>
                         <mat-datepicker #picker2></mat-datepicker>
-                        <mat-hint>required</mat-hint>
                     </mat-form-field>
                 </div>
             </td>
@@ -238,7 +236,7 @@
             <td mat-cell *matCellDef="let element">
                 <label *ngIf="!element.isEditable" [title]="element.RISORSE" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 85px;"> {{element.RISORSE}}  </label>
                 <div>
-                    <mat-form-field appearance="fill" *ngIf="element.isEditable" style="display: block;margin: 0px auto;width: 85px;">
+                    <mat-form-field appearance="fill" *ngIf="element.isEditable" style="display: block;margin: 0px auto;width: 85px;margin-top: 1.34375em;">
                         <mat-label>Risorse</mat-label>
                         <mat-select [(ngModel)]="element.RISORSE" multiple>
                             <mat-option *ngFor="let matricole of allMatricole" [value]="matricole.NOME">{{matricole.NOME}}</mat-option>

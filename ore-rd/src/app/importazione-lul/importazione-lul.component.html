@@ -2,7 +2,16 @@
 
 <div style="border: 1px;border-style: dashed;padding: 30px;text-align: center;">
 
-    <div class="mb-2" *ngIf="progressInfos">
+    <div class="card mt-3" style="margin-bottom: 30px;">
+        <div class="card-header">File Caricati</div>
+        <ul class="list-group list-group-flush" *ngFor="let file of nomiFile">
+            <li class="list-group-item">
+                {{ file }}
+            </li>
+        </ul>
+    </div>
+
+    <div class="mb-2" *ngIf="progressInfos" style="margin-bottom: 30px !important;">
         <span>{{ progressInfos.fileName }}</span>
         <div class="progress">
             <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" attr.aria-valuenow="{{ progressInfos.value }}" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{ width: progressInfos.value + '%' }">
@@ -28,14 +37,15 @@
     <div class="row">
         <div class="col-3"></div>
         <div class="col-3">
-            <button (click)="fileInput.click()" mat-raised-button color="primary" >
+            <button (click)="fileInput.click()" mat-raised-button color="primary">
               <span>Seleziona uno o più file...</span>
               <input #fileInput type="file" multiple (change)="selectFiles($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" />
             </button>
         </div>
-    
+
         <div class="col-3">
-            <button mat-raised-button color="warn" [disabled]="!selectedFiles" (click)="uploadFiles()">Carica</button>
+            <button mat-raised-button color="warn" [disabled]="!selectedFiles" (click)="uploadFiles()" style="margin-right:15px;">Carica</button>
+            <button mat-raised-button color="primary" [disabled]="!selectedFiles" (click)="reset()">Reset</button>
         </div>
     </div>
 </div>

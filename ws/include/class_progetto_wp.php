@@ -35,9 +35,9 @@ class ProgettiWpManager {
         return $arrProgettiWp;
     }
     
-    function aggiornaRisorse($json_data) {
+    function aggiornaRisorse($json_data, $id_wp, $id_progetto) {
         global $con;
-        $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$json_data->ID_WP' AND id_progetto = '$json_data->ID_PROGETTO'";
+        $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$id_wp' AND id_progetto = '$json_data->ID_PROGETTO'";
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
@@ -46,7 +46,7 @@ class ProgettiWpManager {
             $sql = insert("progetti_wp_risorse", 
                                     ["MATRICOLA_DIPENDENTE" => $json_data->RISORSE[$i],
                                     "ID_PROGETTO" => $json_data->ID_PROGETTO,
-                                    "ID_WP" => $json_data->ID_WP
+                                    "ID_WP" => $id_wp
                                     ]);
             mysqli_query($con, $sql);
             if ($con ->error) {
@@ -59,18 +59,35 @@ class ProgettiWpManager {
     
     function crea($json_data) {
         global $con;
+        //select max per id_wp 
+        $id_wp = select_single_value("Select max(ID_WP) FROM progetti_wp WHERE id_progetto = '$json_data->ID_PROGETTO'");
+        if($id_wp == null){
+            $id_wp = 0;
+        }else{
+            $id_wp = $id_wp+1;
+        }
+        echo $id_wp;
         $sql = insert("progetti_wp", ["TITOLO" => $json_data->TITOLO,
+                                    "ID_PROGETTO" => $json_data->ID_PROGETTO,
+                                    "ID_WP" => $id_wp,
                                    "DESCRIZIONE" => $json_data->DESCRIZIONE,
                                    "DATA_INIZIO" => $json_data->DATA_INIZIO,
                                    "DATA_FINE" => $json_data->DATA_FINE,
                                    "MONTE_ORE" => $json_data->MONTE_ORE
                                   ]);
-                                  ECHO $sql;
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
         }
-        $id_progetto = mysqli_insert_id($con);
+        $id_wp_risorse = select_single_value("Select max(ID_WP) FROM progetti_wp_risorse WHERE id_progetto = '$json_data->ID_PROGETTO'");
+        if($id_wp_risorse == null){
+            $id_wp_risorse = 0;
+        }else{
+            $id_wp_risorse = $id_wp_risorse+1;
+        }
+
+        $this->aggiornaRisorse($json_data, $id_wp_risorse, $json_data->ID_PROGETTO);
+
         return $this->get_progetto($id_progetto);
     }
     
