@@ -15,14 +15,25 @@ export class ImportazioneLulComponent implements OnInit {
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
+  nomiFile:string[] = [];
 
   constructor(private uploadService: UploadFilesService, private alertService: AlertService) { }
 
   ngOnInit(){
   }
 
+  reset() {
+    this.selectedFiles = undefined;
+    this.nomiFile = [];
+  }
+  
   selectFiles(event: any) {
     this.selectedFiles = event.target.files;
+    if(this.selectedFiles){
+      for(let i = 0; i < this.selectedFiles.length; i++){
+          this.nomiFile.push(this.selectedFiles[i].name);
+      }
+    }
   }
 
   resetAlertSuccess() {    

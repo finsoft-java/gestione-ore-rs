@@ -34,7 +34,6 @@ table {
     justify-content: center;
 }
 
-.mat-form-field-wrapper {
-    padding-bottom: 1.34375em;
-    margin-top: 1.34375em;
+.mat-dialog-container {
+    padding: 0px
 }
