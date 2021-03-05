@@ -41,7 +41,8 @@ export const MY_FORMATS = {
   {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS}],
 })
 export class ReportCompletoComponent implements OnInit {
-
+    
+    isCompleto = false;
     date = new FormControl(moment());
     idProgetto: number = -1;
 
@@ -73,7 +74,7 @@ export class ReportCompletoComponent implements OnInit {
 
     download() {
       if(this.date.value != null){
-        this.reportService.downloadReportBudget(this.idProgetto, formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe(response => {
+        this.reportService.downloadReportBudget(this.idProgetto, formatDate(this.date.value,"YYYY-MM","en-GB"), this.isCompleto).subscribe(response => {
             this.downloadFile(response);
         },
         error => {
@@ -88,6 +89,7 @@ export class ReportCompletoComponent implements OnInit {
         var anchor = document.createElement("a");
         anchor.download = "ReportBudget.html";
         anchor.href = url;
+        anchor.target="_blank";
         anchor.click();
     }
 
