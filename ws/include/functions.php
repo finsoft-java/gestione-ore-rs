@@ -291,49 +291,4 @@ function random_probability($probabilities) {
     return null; // tutti zeri!!!
 }
 
-/**
- * Trasforma un array ottenuto da JOIN in una struttura
- * Crea record per ogni gruppo, e ciascun record avrà il campo 'details' per i subrecord
- * Non è in grado di calcolare funzioni aggregate (es. SUM).
- * @param col_arrays es. [[ID_PROGETTO,TITOLO], [ID_WP, TITOLO_WP]]
- */
-function array_group_by($array, $col_arrays) {
-    define(DETAILS, 'details');
-    if (count($col_arrays) == 0) {
-        // should not happen
-        return $array;
-    }
-    $key_columns = $col_arrays[0];
-    $result = [];
-    $keys = []; // array of strings
-    foreach($array as $row) {
-        $key = '';
-        $group_row = [DETAILS => []];
-        $detail_row = [];
-        foreach($row as $column => $value) {
-            if (in_array($column, $key_columns)) {
-                $key .= "$value/";
-                $group_row[$column] = $value;
-            } else {
-                $detail_row[$column] = $value;
-            }
-            if (!isset($keys[$key])) {
-                $keys[$key] = $group_row;
-                $result[] = $group_row;
-            } else {
-                $group_row = $keys[$key];
-            }
-            $group_row[DETAILS][] = $detail_row;
-        }
-    }
-    if (count($col_arrays) > 1) {
-        $next_col_arrays = array_slice ($col_arrays, 1);
-        foreach($result as $group_row) {
-            $group_row['detail'] = array_group_by($group_row['detail'], $next_col_arrays);
-        }
-        return $array;
-    }
-    return $result;
-}
-
 ?>

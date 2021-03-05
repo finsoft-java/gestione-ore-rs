@@ -66,7 +66,6 @@ class ReportBudgetManager {
         $consuntivi3 = $this->get_consuntivi_per_matricola($idprogetto, $anno, $mese);
         
         $result = [];
-        
         foreach($consuntivi1 as $row) {
             $idprogetto = $row['ID_PROGETTO'];
             $matricola = $row['MATRICOLA_DIPENDENTE'];
