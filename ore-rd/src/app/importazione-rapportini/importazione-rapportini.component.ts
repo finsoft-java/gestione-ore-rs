@@ -26,17 +26,18 @@ export class ImportazioneRapportiniComponent implements OnInit {
   reset() {
     this.selectedFiles = undefined;
     this.nomiFile = [];
+    this.progressInfos = { value: 0, fileName: 'Caricamento' };
+    this.message_error = '';
+    this.message_success = '';
   }
   selectFiles(event: any) {
     //far apparire i file caricati in un box
-    console.log(this.selectedFiles);
     this.selectedFiles = event.target.files;
     if(this.selectedFiles){
       for(let i = 0; i < this.selectedFiles.length; i++){
           this.nomiFile.push(this.selectedFiles[i].name);
       }
     }
-    console.log();
   }
 
   resetAlertSuccess() {    
