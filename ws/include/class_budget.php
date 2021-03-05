@@ -10,7 +10,7 @@ class ReportBudgetManager {
         return select_list($sql);
     }
 
-    function get_consuntivi_per_matricola_wp($id_progetto=null, $anno=null, $mese=null) {
+    /*function get_consuntivi_per_matricola_wp($id_progetto=null, $anno=null, $mese=null) {
         $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
         $sql = "SELECT c.ID_PROGETTO, p.TITOLO, c.MATRICOLA_DIPENDENTE, c.ID_WP, wp.TITOLO as TITOLO_WP, SUM(c.ORE_LAVORATE) as ORE_LAVORATE, " .
             "SUM(c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
@@ -35,7 +35,7 @@ class ReportBudgetManager {
             $partial .
             "GROUP BY c.ID_PROGETTO, c.ID_WP";
         return select_list($sql);
-    }
+    }*/
 
     function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
         $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
@@ -61,55 +61,70 @@ class ReportBudgetManager {
         return $sql;
     }
 
-    function get_matrice_consuntivi_progetto($progetto, $anno=null, $mese=null) {
-        $idprogetto = $progetto['ID_PROGETTO'];
-        
-        $consuntivi1 = $this->get_consuntivi($idprogetto, $anno, $mese);
-        $consuntivi2 = $this->get_consuntivi_per_matricola_wp($idprogetto, $anno, $mese);
-        $consuntivi3 = $this->get_consuntivi_per_matricola($idprogetto, $anno, $mese);
-        
-        //pippo 9 febbraio 4 ore
-        $result = [];
-        foreach($consuntivi1 as $row) {
-            $idprogetto = $row['ID_PROGETTO'];
-            $matricola = $row['MATRICOLA_DIPENDENTE'];
-            $idwp = $row['ID_WP'];
-            $data = $row['DATA'];
-            $ore = $row['ORE_LAVORATE'];
-            $costo = $row['COSTO_ORARIO'];
-            if (!isset($result[$idprogetto])) $result[$idprogetto] = [];
-            if (!isset($result[$idprogetto][$matricola])) $result[$idprogetto][$matricola] = [];
-            if (!isset($result[$idprogetto][$matricola][$idwp])) $result[$idprogetto][$matricola][$idwp] = [];
-            if (!isset($result[$idprogetto][$matricola][$idwp][$data])) $result[$idprogetto][$matricola][$idwp][$data] = [];
-            $result[$idprogetto][$matricola][$idwp][$data]['ORE_LAVORATE'] = $ore;
-            $result[$idprogetto][$matricola][$idwp][$data]['COSTO_ORARIO'] = $costo;
-        }
-        foreach($consuntivi2 as $row) {
-            $idprogetto = $row['ID_PROGETTO'];
-            $matricola = $row['MATRICOLA_DIPENDENTE'];
-            $idwp = $row['ID_WP'];
-            $ore = $row['ORE_LAVORATE'];
-            $costo = $row['COSTO'];
-            if (!isset($result[$idprogetto])) $result[$idprogetto] = [];
-            if (!isset($result[$idprogetto][$matricola])) $result[$idprogetto][$matricola] = [];
-            if (!isset($result[$idprogetto][$matricola][$idwp])) $result[$idprogetto][$matricola][$idwp] = [];
-            if (!isset($result[$idprogetto][$matricola][$idwp]['TOT'])) $result[$idprogetto][$matricola][$idwp]['TOT'] = [];
-            $result[$idprogetto][$matricola][$idwp]['TOT']['ORE_LAVORATE'] = $ore;
-            $result[$idprogetto][$matricola][$idwp]['TOT']['COSTO_ORARIO'] = $costo;
-        }
-        foreach($consuntivi3 as $row) {
-            $idprogetto = $row['ID_PROGETTO'];
-            $matricola = $row['MATRICOLA_DIPENDENTE'];
-            $ore = $row['ORE_LAVORATE'];
-            $costo = $row['COSTO'];
-            if (!isset($result[$idprogetto])) $result[$idprogetto] = [];
-            if (!isset($result[$idprogetto][$matricola])) $result[$idprogetto][$matricola] = [];
-            if (!isset($result[$idprogetto][$matricola]['TOT'])) $result[$idprogetto][$matricola]['TOT'] = [];
-            $result[$idprogetto][$matricola]['TOT']['ORE_LAVORATE'] = $ore;
-            $result[$idprogetto][$matricola]['TOT']['COSTO_ORARIO'] = $costo;
-        }
+    function get_matricole_progetto($id_progetto) {
+        $sql = "SELECT MATRICOLA_DIPENDENTE FROM progetti_wp_risorse WHERE ID_PROGETTO = '$id_progetto' ORDER BY 1";
+        return select_list($sql); // voglio proprio una lista di oggetti, non una colonna
+    }
 
-        return $result;
+    function get_wp_matricola($id_progetto, $matricola) {
+        $sql = "SELECT wp.ID_WP, wp.TITOLO FROM progetti_wp wp " .
+                "JOIN progetti_wp_risorse r ON r.id_progetto=wp.id_progetto AND r.id_wp=wp.id_wp " .
+                "WHERE wp.ID_PROGETTO = '$id_progetto' AND r.MATRICOLA_DIPENDENTE='$matricola' " .
+                "ORDER BY wp.ID_WP";
+        return select_list($sql);
+    }
+
+    function get_consuntivi_matricola_wp($id_progetto, $matricola, $id_wp, $anno=null, $mese=null) {
+        $sql = "SELECT c.DATA, c.ORE_LAVORATE, (c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
+                "FROM ore_consuntivate c " .
+                "WHERE ID_PROGETTO=$id_progetto AND MATRICOLA_DIPENDENTE='$matricola' AND ID_WP=$id_wp ";
+        if (!empty($anno) and !empty($mese)) {
+            $primo = "DATE('$anno-$mese-01')";
+            $sql .= "AND c.DATA >= $primo AND c.DATA <= LAST_DAY($primo) ";
+        }
+        $sql .= "ORDER BY c.DATA";
+        return select_list($sql);
+    }
+
+    function get_matrice_consuntivi_progetto($progetto, $anno=null, $mese=null) {
+        
+        $lista_matricole = $this->get_matricole_progetto($progetto['ID_PROGETTO']);
+        // TODO dovrei decodificarle, in $lista_nomi_utenti
+
+        foreach($lista_matricole as $key => $matricola) {
+            $lista_wp = $this->get_wp_matricola($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE']);
+            $totali_per_data = [];
+            $totali_per_matricola = [ 'ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
+            foreach ($lista_wp as $key_wp => $wp) {
+                $consuntivi = $this->get_consuntivi_matricola_wp($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE'], $wp['ID_WP']);
+                $lista_wp[$key_wp]['DETTAGLI'] = $consuntivi;
+                
+                // totali riga
+                $tot_ore = 0;
+                $tot_costo = 0.0;
+                foreach($consuntivi as $c) {
+                    $tot_ore += $c['ORE_LAVORATE'];
+                    $tot_costo += $c['COSTO'];
+                }
+                $lista_wp[$key_wp]['DETTAGLI']['TOT'] = [ 'ORE_LAVORATE' => $tot_ore, 'COSTO' => $tot_costo ];
+                
+                // totali colonna
+                foreach($consuntivi as $c) {
+                    if (!isset($totali_per_data[$c['DATA']])) $totali_per_data[$c['DATA']] = [ 'ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
+                    $totali_per_data[$c['DATA']]['ORE_LAVORATE'] += $c['ORE_LAVORATE'];
+                    $totali_per_data[$c['DATA']]['COSTO'] += $c['COSTO'];
+                }
+                
+                // totali matricola
+                foreach($consuntivi as $c) {
+                    $totali_per_matricola['ORE_LAVORATE'] += $c['ORE_LAVORATE'];
+                    $totali_per_matricola['COSTO'] += $c['COSTO'];
+                }
+            }
+            $lista_matricole[$key]['WP'] = $lista_wp;
+            $lista_matricole[$key]['WP']['TOT'] = $totali_per_data;
+            $lista_matricole['TOT'] = $totali_per_matricola;
+        }
     }
 
     function update_costi_progetto($progetto, $anno=null, $mese=null) {
