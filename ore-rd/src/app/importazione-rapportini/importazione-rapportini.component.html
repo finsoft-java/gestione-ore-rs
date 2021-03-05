@@ -3,7 +3,7 @@
 <div style="border: 1px;border-style: dashed;padding: 30px;text-align: center;">
 
 
-    <div class="card mt-3" style="margin-bottom: 30px;">
+    <div class="card mt-3" style="margin-bottom: 30px;" *ngIf="nomiFile[0] != null">
         <div class="card-header">File Caricati</div>
         <ul class="list-group list-group-flush" *ngFor="let file of nomiFile">
             <li class="list-group-item">

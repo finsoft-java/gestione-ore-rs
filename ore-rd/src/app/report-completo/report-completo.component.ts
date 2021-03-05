@@ -72,12 +72,14 @@ export class ReportCompletoComponent implements OnInit {
     }
 
     download() {
+      if(this.date.value != null){
         this.reportService.downloadReportBudget(this.idProgetto, formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe(response => {
             this.downloadFile(response);
         },
         error => {
             // TODO
         });
+      }
     }
   
     downloadFile(data: any) {

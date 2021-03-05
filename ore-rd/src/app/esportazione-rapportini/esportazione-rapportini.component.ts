@@ -59,12 +59,14 @@ export class EsportazioneRapportiniComponent implements OnInit {
     }
 
     download() {
+      if(this.date.value != null){
         this.uploadRapportiniService.download(formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe(response => {
             this.downloadFile(response);
         },
         error => {
             // TODO
         });
+      }
     }
   
     downloadFile(data: any) {

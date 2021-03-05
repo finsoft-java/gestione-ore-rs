@@ -213,14 +213,11 @@ class RapportiniManager {
             $sheet->getStyle('A' . $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
             // In mezzo, le ore consuntivate
             if (isset($wp["ORE_LAVORATE"]) && ! empty($wp["ORE_LAVORATE"])) {
-                $OFFSET2 = 1;
+                $OFFSET2 = $OFFSET - 1;
                 for ($i = 0; $i <= $num_days; ++$i) {
                     $sheet->getStyleByColumnAndRow($i + $OFFSET2, $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
                     if (isset($wp["ORE_LAVORATE"][$i])) {
                         $val = $wp["ORE_LAVORATE"][$i];
-                        //$asd = $i + $OFFSET2;
-                        //echo 'colonna -> '.$asd.'<-';
-                        //echo 'VALORE -> '.$val.'<-';
                         $sheet->setCellValueByColumnAndRow($i + $OFFSET2, $curRow, $val);
                     }
                 }
