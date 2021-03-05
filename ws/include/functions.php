@@ -294,6 +294,7 @@ function random_probability($probabilities) {
 /**
  * Trasforma un array ottenuto da JOIN in una struttura
  * Crea record per ogni gruppo, e ciascun record avrà il campo 'details' per i subrecord
+ * Non è in grado di calcolare funzioni aggregate (es. SUM).
  * @param col_arrays es. [[ID_PROGETTO,TITOLO], [ID_WP, TITOLO_WP]]
  */
 function array_group_by($array, $col_arrays) {
