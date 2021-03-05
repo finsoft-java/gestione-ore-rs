@@ -62,11 +62,10 @@ class ProgettiWpManager {
         //select max per id_wp 
         $id_wp = select_single_value("Select max(ID_WP) FROM progetti_wp WHERE id_progetto = '$json_data->ID_PROGETTO'");
         if($id_wp == null){
-            $id_wp = 0;
+            $id_wp = 1;
         }else{
             $id_wp = $id_wp+1;
         }
-        echo $id_wp;
         $sql = insert("progetti_wp", ["TITOLO" => $json_data->TITOLO,
                                     "ID_PROGETTO" => $json_data->ID_PROGETTO,
                                     "ID_WP" => $id_wp,
@@ -81,14 +80,14 @@ class ProgettiWpManager {
         }
         $id_wp_risorse = select_single_value("Select max(ID_WP) FROM progetti_wp_risorse WHERE id_progetto = '$json_data->ID_PROGETTO'");
         if($id_wp_risorse == null){
-            $id_wp_risorse = 0;
+            $id_wp_risorse = 1;
         }else{
             $id_wp_risorse = $id_wp_risorse+1;
         }
 
         $this->aggiornaRisorse($json_data, $id_wp_risorse, $json_data->ID_PROGETTO);
 
-        return $this->get_progetto($id_progetto);
+        return $this->get_progetto($json_data->ID_PROGETTO);
     }
     
     function aggiorna($progetto, $json_data) {

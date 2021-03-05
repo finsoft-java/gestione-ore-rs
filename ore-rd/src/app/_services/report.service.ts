@@ -12,8 +12,8 @@ export class ReportService {
 
   constructor(private http: HttpClient) { }
   
-  downloadReportBudget(id_progetto: number, periodo: string) {
-    return this.http.get(`${this.baseUrl}/ReportBudget.php?id_progetto=${id_progetto}&periodo=${periodo}`, {
+  downloadReportBudget(id_progetto: number, periodo: string, isCompleto : boolean) {
+    return this.http.get(`${this.baseUrl}/ReportBudget.php?id_progetto=${id_progetto}&periodo=${periodo}&completo=${isCompleto}`, {
       responseType: 'arraybuffer'
     });
   }

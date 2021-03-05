@@ -1,7 +1,11 @@
 <h5 style="margin-bottom: 30px;text-align:center">
     Generazione reportistica</h5>
 <div>
+    <section class="example-section">
+
+    </section>
     <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+        <mat-checkbox class="example-margin" [(ngModel)]="isCompleto" style="margin-right:10px;">Completo</mat-checkbox>
         <mat-form-field appearance="fill" style="margin-right: 10px;">
             <mat-label>Data</mat-label>
             <input matInput [matDatepicker]="picker" [formControl]="date" required>
