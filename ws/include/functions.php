@@ -106,6 +106,9 @@ Esegue un comado SQL SELECT e lo ritorna come array di oggetti, oppure lancia un
 */
 function select_list($sql, $connessione=null) {
     global $con;
+    
+    // SE TI SERVE FARE DEBUG: print_r($sql); print("\n");
+    
     if ($connessione == null) {
         $connessione = $con;
     }

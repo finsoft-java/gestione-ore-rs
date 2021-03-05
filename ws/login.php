@@ -5,6 +5,11 @@
 include("./include/all.php");
 use Firebase\JWT\JWT;
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    //do nothing, HTTP 200
+    exit();
+}
+
 
 $user = '';
 $postdata = file_get_contents("php://input");
