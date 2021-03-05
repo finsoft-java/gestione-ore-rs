@@ -6,54 +6,57 @@ class ReportBudgetManager {
 
     function get_consuntivi($id_progetto=null, $anno=null, $mese=null) {
         $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, ID_WP, DATA, ORE_LAVORATE, COSTO_ORARIO " . $partial;
+        $sql = "SELECT c.ID_PROGETTO, p.TITOLO, c.MATRICOLA_DIPENDENTE, c.ID_WP, wp.TITOLO as TITOLO_WP, c.DATA, c.ORE_LAVORATE, c.COSTO_ORARIO " . $partial;
         return select_list($sql);
     }
 
     function get_consuntivi_per_matricola_wp($id_progetto=null, $anno=null, $mese=null) {
         $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, ID_WP, SUM(ORE_LAVORATE) as ORE_LAVORATE, " .
-            "SUM(ORE_LAVORATE*COSTO_ORARIO) as COSTO " .
+        $sql = "SELECT c.ID_PROGETTO, p.TITOLO, c.MATRICOLA_DIPENDENTE, c.ID_WP, wp.TITOLO as TITOLO_WP, SUM(c.ORE_LAVORATE) as ORE_LAVORATE, " .
+            "SUM(c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
             $partial .
-            "GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE, ID_WP";
+            "GROUP BY c.ID_PROGETTO, c.MATRICOLA_DIPENDENTE, c.ID_WP";
         return select_list($sql);
     }
 
     function get_consuntivi_per_matricola($id_progetto=null, $anno=null, $mese=null) {
         $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, SUM(ORE_LAVORATE) as ORE_LAVORATE, " .
-            "SUM(ORE_LAVORATE*COSTO_ORARIO) as COSTO " .
+        $sql = "SELECT c.ID_PROGETTO, p.TITOLO, c.MATRICOLA_DIPENDENTE, SUM(c.ORE_LAVORATE) as ORE_LAVORATE, " .
+            "SUM(c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
             $partial .
-            "GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE";
+            "GROUP BY c.ID_PROGETTO, c.MATRICOLA_DIPENDENTE";
         return select_list($sql);
     }
 
     function get_consuntivi_per_wp($id_progetto=null, $anno=null, $mese=null) {
         $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT ID_PROGETTO, ID_WP, sum(ORE_LAVORATE) as ORE_LAVORATE, " .
-            "SUM(ORE_LAVORATE*COSTO_ORARIO) as COSTO " .
+        $sql = "SELECT c.ID_PROGETTO, c.ID_WP, sum(c.ORE_LAVORATE) as ORE_LAVORATE, " .
+            "SUM(c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
             $partial .
-            "GROUP BY ID_PROGETTO, ID_WP";
+            "GROUP BY c.ID_PROGETTO, c.ID_WP";
         return select_list($sql);
     }
 
     function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
         $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT ID_PROGETTO, SUM(ORE_LAVORATE) as ORE_LAVORATE, " .
-            "SUM(ORE_LAVORATE*COSTO_ORARIO) as COSTO " .
+        $sql = "SELECT c.ID_PROGETTO, SUM(c.ORE_LAVORATE) as ORE_LAVORATE, " .
+            "SUM(c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
             $partial .
-            "GROUP BY ID_PROGETTO";
+            "GROUP BY c.ID_PROGETTO";
         return select_single($sql);
     }
 
     function _create_where_condiction_consuntivi($id_progetto=null, $anno=null, $mese=null) {
-        $sql = "FROM ore_consuntivate WHERE 1=1 ";
+        $sql = "FROM ore_consuntivate c " .
+                "JOIN PROGETTI_WP wp ON wp.id_progetto=c.id_progetto AND wp.id_wp=c.id_wp ".
+                "JOIN PROGETTI p ON wp.id_progetto=p.id_progetto " .
+                "WHERE 1=1 ";
         if (!empty($id_progetto)) {
-            $sql .= "AND ID_PROGETTO = '$id_progetto' ";
+            $sql .= "AND p.ID_PROGETTO = '$id_progetto' ";
         }
         if (!empty($anno) and !empty($mese)) {
             $primo = "DATE('$anno-$mese-01')";
-            $sql .= "AND DATA >= $primo AND DATA <= LAST_DAY($primo) ";
+            $sql .= "AND c.DATA >= $primo AND c.DATA <= LAST_DAY($primo) ";
         }
         return $sql;
     }
@@ -65,6 +68,7 @@ class ReportBudgetManager {
         $consuntivi2 = $this->get_consuntivi_per_matricola_wp($idprogetto, $anno, $mese);
         $consuntivi3 = $this->get_consuntivi_per_matricola($idprogetto, $anno, $mese);
         
+        //pippo 9 febbraio 4 ore
         $result = [];
         foreach($consuntivi1 as $row) {
             $idprogetto = $row['ID_PROGETTO'];
@@ -89,7 +93,7 @@ class ReportBudgetManager {
             if (!isset($result[$idprogetto])) $result[$idprogetto] = [];
             if (!isset($result[$idprogetto][$matricola])) $result[$idprogetto][$matricola] = [];
             if (!isset($result[$idprogetto][$matricola][$idwp])) $result[$idprogetto][$matricola][$idwp] = [];
-            if (!isset($result[$idprogetto][$matricola][$idwp]['TOT'])) $result[$idprogetto][$matricola][$idwp] = [];
+            if (!isset($result[$idprogetto][$matricola][$idwp]['TOT'])) $result[$idprogetto][$matricola][$idwp]['TOT'] = [];
             $result[$idprogetto][$matricola][$idwp]['TOT']['ORE_LAVORATE'] = $ore;
             $result[$idprogetto][$matricola][$idwp]['TOT']['COSTO_ORARIO'] = $costo;
         }
@@ -152,6 +156,10 @@ class ReportBudgetManager {
         return $msg;
     }
     
+    /**
+    Genera report PDF
+    ATTUALMENTE NON USATA!!!!!!!!!!!!!!!!!!!!!!!!
+    */
     function sendReport($idprogetto, $anno, $mese, $completo) {
         // anno e mese sono facoltativi
         // see http://www.fpdf.org/en/doc/index.php
@@ -348,11 +356,21 @@ class ReportBudgetManager {
             </div>
                     ";
                     foreach($dettagli_matricola as $idwp => $dettagli_wp) {
-                        $subreport_dettaglio .= "WP $idwp<br/>";
+                        $subreport_dettaglio .= "
+            <div class='row'>
+                <div class='title calendario'>
+                $idwp
+                </div>";
                         foreach($datePeriod as $date) {
-                            $ore = isset($dettagli_wp[$date]) ? $dettagli_wp[$date]: [ 'ORE_LAVORATE' => null, 'COSTO_ORARIO' => null] ;
-                            $subreport_dettaglio .= "day $date worked? $ore[ORE_LAVORATE]<br/>";
+                            $ore = isset($dettagli_wp[$date]) ? $dettagli_wp[$date]['ORE_LAVORATE'] : '-';
+                            $subreport_dettaglio .= "
+                <div class='calendario'>
+                $ore
+                </div>";
                         }
+                        $subreport_dettaglio .= "
+            </div><!-- row -->
+";
                     }
                 }
             }
@@ -364,6 +382,7 @@ class ReportBudgetManager {
         <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'/>
         <style>
         .title { font-weight: bold  }
+        .calendario { width: 3%; float: left }
         </style>
     </head>
     <body>
