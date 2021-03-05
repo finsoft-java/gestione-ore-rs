@@ -83,10 +83,10 @@ export class ReportCompletoComponent implements OnInit {
     }
   
     downloadFile(data: any) {
-        const blob = new Blob([data], { type: 'applicazion/pdf' });
+        const blob = new Blob([data], { type: 'text/html' });
         const url = window.URL.createObjectURL(blob);
         var anchor = document.createElement("a");
-        anchor.download = "ReportBudget.pdf";
+        anchor.download = "ReportBudget.html";
         anchor.href = url;
         anchor.click();
     }
