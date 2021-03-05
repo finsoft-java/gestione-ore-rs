@@ -39,6 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $spreadSheetAry = $excelSheet->toArray();
         $numRows = count($spreadSheetAry);
 
+        $message = (object) [
+            'error' => '',
+            'success' => '',
+          ];
         // IPOTIZZO (completamente a caso) che il foglio excel contiene matricola, data, ore
 
         for ($i = 0; $i <= $numRows; $i ++) {
@@ -59,11 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!empty($matricola) && !empty($data) && $ore > 0) {
                 $query = "insert into ore_presenza_lul(MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) values('$matricola','$data',$ore)";
                 execute_update($query);
+                $message->success = "Caricamento Effettuato correttamente.<br/>"
             }
         }
     } else {
-        print_error(400, "Invalid File Type. Upload Excel File.");
+        $message->error .= "Invalid File Type. Upload Excel File.<br/>";
     }
+    header('Content-Type: application/json');
+    echo json_encode(['value' => $message]);
     
 } else {
     //==========================================================

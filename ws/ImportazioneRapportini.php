@@ -29,14 +29,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         print_error(400, "You have to upload at least 1 file.");
     }
     
-    $message = "";
+    $message = (object) [
+        'error' => '',
+        'success' => '',
+      ];
     for ($filenum = 0; $filenum < count($_FILES["file"]["name"]); ++$filenum) {
-        $message .= "Analysing file " . $_FILES["file"]["name"][$filenum] . "...<br/>";
+        $message->success .= "Analysing file " . $_FILES["file"]["name"][$filenum] . "...<br/>";
         $filename =  $_FILES["file"]["tmp_name"][$filenum];
         if (in_array($_FILES["file"]["type"][$filenum], $allowedFileType)) {
             $rapportini->importExcel($filename, $message);
         } else {
-            $message .= "Invalid File Type. Upload Excel File.<br/>";
+            $message->error .= "Invalid File Type. Upload Excel File.<br/>";
         }
     }
 

@@ -279,23 +279,23 @@ class RapportiniManager {
         if(isset($spreadSheetAry[0][7])){
             $titolo_progetto = $spreadSheetAry[0][7];
         } else {
-            $message .= 'Bad file. Non riesco a identificare le corrette colonne del file.<br/>';
+            $message->error .= 'Bad file. Non riesco a identificare le corrette colonne del file.<br/>';
             return;
         }
         $id_progetto = select_single_value("SELECT ID_PROGETTO FROM PROGETTI WHERE TITOLO='$titolo_progetto'"); // FIXME chiave unica?!?        
         if (empty($id_progetto)) {
-            $message .= 'Bad file. Non riesco a identificare il titolo del progetto.<br/>';
+            $message->error .= 'Bad file. Non riesco a identificare il titolo del progetto.<br/>';
             return;
         }
         
         $anno = $spreadSheetAry[2][9];
         if (empty($anno)) {
-            $message .= 'Bad file. Non riesco a identificare l\'anno del rapportino.<br/>';
+            $message->error .= 'Bad file. Non riesco a identificare l\'anno del rapportino.<br/>';
             return;
         }
         $mese = $spreadSheetAry[2][13]; // e.g. February
         if (empty($mese)) {
-            $message .= 'Bad file. Non riesco a identificare il mes del rapportino.<br/>';
+            $message->error .= 'Bad file. Non riesco a identificare il mes del rapportino.<br/>';
             return;
         }
         $mese = date_parse($mese)['month'];
@@ -309,13 +309,13 @@ class RapportiniManager {
         }
         
         if ($i == $numRows) {
-            $message .= 'Bad file. Non trovo la stringa "Activity details".<br/>';
+            $message->error .= 'Bad file. Non trovo la stringa "Activity details".<br/>';
             return;
         }
         
         $matricola = $spreadSheetAry[$i][23];
         if (empty($matricola)) {
-            $message .= 'Bad file. Non riesco a identificare la matricola utente.</br>';
+            $message->error .= 'Bad file. Non riesco a identificare la matricola utente.</br>';
             return;
         }
         
@@ -347,7 +347,7 @@ class RapportiniManager {
             }
         }
         
-        $message .= 'Fatto.</br>';
+        $message->success .= 'Caricamento Effettuato correttamente.</br>';
     }
 
 }

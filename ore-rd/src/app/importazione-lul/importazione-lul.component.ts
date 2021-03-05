@@ -15,6 +15,7 @@ export class ImportazioneLulComponent implements OnInit {
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
+  eventoClick?:any;
   nomiFile:string[] = [];
 
   constructor(private uploadService: UploadFilesService, private alertService: AlertService) { }
@@ -23,11 +24,16 @@ export class ImportazioneLulComponent implements OnInit {
   }
 
   reset() {
+    this.eventoClick.srcElement.value = null;
     this.selectedFiles = undefined;
     this.nomiFile = [];
+    this.progressInfos = { value: 0, fileName: 'Caricamento' };
+    this.message_error = '';
+    this.message_success = '';
   }
   
   selectFiles(event: any) {
+    this.eventoClick = event;
     this.selectedFiles = event.target.files;
     if(this.selectedFiles){
       for(let i = 0; i < this.selectedFiles.length; i++){
@@ -60,7 +66,8 @@ export class ImportazioneLulComponent implements OnInit {
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
           }
         } else if (event instanceof HttpResponse) {
-          this.message_error = event.body.value;
+          this.message_error = event.body.value.error;
+          this.message_success = event.body.value.success;
         }
       },
       err => {
