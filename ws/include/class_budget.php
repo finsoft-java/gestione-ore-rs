@@ -93,8 +93,8 @@ class ReportBudgetManager {
 
         foreach($lista_matricole as $key => $matricola) {
             $lista_wp = $this->get_wp_matricola($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE']);
-            $totali_per_data = [];
-            $totali_per_matricola = [ 'ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
+            $totali_per_data = [ 'TITOLO' => 'TOT.' ];
+            $totali_per_matricola = [ 'MATRICOLA_DIPENDENTE' => 'TOT.', 'ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
             foreach ($lista_wp as $key_wp => $wp) {
                 $consuntivi = $this->get_consuntivi_matricola_wp($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE'], $wp['ID_WP']);
                 $lista_wp[$key_wp]['DETTAGLI'] = $consuntivi;
@@ -125,6 +125,9 @@ class ReportBudgetManager {
             $lista_matricole[$key]['WP']['TOT'] = $totali_per_data;
             $lista_matricole['TOT'] = $totali_per_matricola;
         }
+        
+        // var_dump($lista_matricole); die();
+        return $lista_matricole;
     }
 
     function update_costi_progetto($progetto, $anno=null, $mese=null) {
@@ -357,24 +360,23 @@ class ReportBudgetManager {
             $subreport_dettaglio = "
         <h3>Dettaglio</h3>
         ";
-            foreach($data['consuntivi']['dettagli'] as $dettagli_progetto) {
-                //SHOULD BE JUST ONE
-                foreach($dettagli_progetto as $matricola => $dettagli_matricola) {
-                    $subreport_dettaglio .= "
+            foreach($data['consuntivi']['dettagli'] as $dettagli_matricola) {
+                $subreport_dettaglio .= "
             <div class='row'>
                 <div class='col-md-2 title'>
                 Matricola:
                 </div>
                 <div class='col-md-8'>
-                $matricola
+                $dettagli_matricola[MATRICOLA_DIPENDENTE]
                 </div>
             </div>
-                    ";
-                    foreach($dettagli_matricola as $idwp => $dettagli_wp) {
+";
+                if (isset($dettagli_matricola['WP'])) {
+                    foreach($dettagli_matricola['WP'] as $dettagli_wp) {
                         $subreport_dettaglio .= "
             <div class='row'>
                 <div class='title calendario'>
-                $idwp
+                $dettagli_wp[TITOLO]
                 </div>";
                         foreach($datePeriod as $date) {
                             $ore = isset($dettagli_wp[$date]) ? $dettagli_wp[$date]['ORE_LAVORATE'] : '-';
