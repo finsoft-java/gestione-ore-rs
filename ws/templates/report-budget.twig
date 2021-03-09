@@ -5,7 +5,7 @@
         <style>
         .title { font-weight: bold  }
         .table-calendario { width:100%; border:solid 1px }
-        .calendario { width: 3%; float: left }
+        .calendario { width: 3% }
         .rotate { transform: rotate(270deg); }
         </style>
     </head>
@@ -141,7 +141,7 @@
                     {{ WP.TITOLO }}
                     </td>
 {% for d in WP.DETTAGLI %}
-                    <td class='calendario'>
+                    <td class='calendario {% if WP.ID_WP == null or d.DATE is null %}title{% endif %}'>
                     {{ d.ORE_LAVORATE }}&nbsp;
                     </td>
 {% endfor %}

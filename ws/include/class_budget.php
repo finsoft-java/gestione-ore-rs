@@ -78,7 +78,6 @@ class ReportBudgetManager {
         foreach($lista_matricole as $key => $matricola) {
             $lista_wp = $this->get_wp_matricola($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE']);
             $totali_per_data = [ ];
-            $totali_per_matricola = [ 'MATRICOLA_DIPENDENTE' => 'TOT.', 'ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
             foreach ($lista_wp as $key_wp => $wp) {
                 $consuntivi = $this->get_consuntivi_matricola_wp($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE'], $wp['ID_WP']);
 
@@ -119,16 +118,9 @@ class ReportBudgetManager {
                     $totali_per_data[$date_key]['ORE_LAVORATE'] += $c['ORE_LAVORATE'];
                     $totali_per_data[$date_key]['COSTO'] += $c['COSTO'];
                 }
-                
-                // totali matricola
-                foreach($consuntivi as $c) {
-                    $totali_per_matricola['ORE_LAVORATE'] += $c['ORE_LAVORATE'];
-                    $totali_per_matricola['COSTO'] += $c['COSTO'];
-                }
             }
             $lista_matricole[$key]['WP'] = $lista_wp;
-            $lista_matricole[$key]['WP'][] = $totali_per_data;
-            $lista_matricole[] = $totali_per_matricola;
+            $lista_matricole[$key]['WP'][] = [ 'ID_WP' => null, 'TITOLO' => 'TOT.', 'DETTAGLI' => $totali_per_data];
         }
         
         // var_dump($lista_matricole); die();
