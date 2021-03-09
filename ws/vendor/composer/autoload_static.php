@@ -67,6 +67,7 @@ class ComposerStaticInit45f4297866fc3f7e46fcd115642353c4
         '8d37dad4703fab45bfec9dd0bbf3278e' => __DIR__ . '/..' . '/markbaker/matrix/classes/src/Operations/multiply.php',
         '4888a6f58c08148ebe17682f9ce9b2a8' => __DIR__ . '/..' . '/markbaker/matrix/classes/src/Operations/divideby.php',
         'eef6fa3879d3efa347cd24d5eb348f85' => __DIR__ . '/..' . '/markbaker/matrix/classes/src/Operations/divideinto.php',
+        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -74,9 +75,14 @@ class ComposerStaticInit45f4297866fc3f7e46fcd115642353c4
         array (
             'ZipStream\\' => 10,
         ),
+        'T' => 
+        array (
+            'Twig\\' => 5,
+        ),
         'S' => 
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Polyfill\\Ctype\\' => 23,
         ),
         'P' => 
         array (
@@ -105,9 +111,17 @@ class ComposerStaticInit45f4297866fc3f7e46fcd115642353c4
         array (
             0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',
         ),
+        'Twig\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/twig/twig/src',
+        ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
+        'Symfony\\Polyfill\\Ctype\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
         ),
         'Psr\\SimpleCache\\' => 
         array (
@@ -145,13 +159,6 @@ class ComposerStaticInit45f4297866fc3f7e46fcd115642353c4
     );
 
     public static $prefixesPsr0 = array (
-        'M' => 
-        array (
-            'Mustache' => 
-            array (
-                0 => __DIR__ . '/..' . '/mustache/mustache/src',
-            ),
-        ),
         'H' => 
         array (
             'HTMLPurifier' => 

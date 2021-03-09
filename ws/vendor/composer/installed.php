@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '45fb27da75d3a58291c37f16c71561db7fe71a7c',
+    'reference' => 'f3ec8c5a90525cc33bd3853fb6112b4210d6a3a9',
     'name' => '__root__',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '45fb27da75d3a58291c37f16c71561db7fe71a7c',
+      'reference' => 'f3ec8c5a90525cc33bd3853fb6112b4210d6a3a9',
     ),
     'ezyang/htmlpurifier' => 
     array (
@@ -64,15 +64,6 @@
       array (
       ),
       'reference' => '361c0f545c3172ee26c3d596a0aa03f0cef65e6a',
-    ),
-    'mustache/mustache' => 
-    array (
-      'pretty_version' => 'v2.13.0',
-      'version' => '2.13.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'e95c5a008c23d3151d59ea72484d4f72049ab7f4',
     ),
     'myclabs/php-enum' => 
     array (
@@ -137,6 +128,15 @@
       ),
       'reference' => 'd77904018090c17dc9f3ab6e944679a7a47e710a',
     ),
+    'symfony/polyfill-ctype' => 
+    array (
+      'pretty_version' => 'v1.22.1',
+      'version' => '1.22.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'c6c942b1ac76c82448322025e084cadc56048b4e',
+    ),
     'symfony/polyfill-mbstring' => 
     array (
       'pretty_version' => 'v1.22.1',
@@ -145,6 +145,15 @@
       array (
       ),
       'reference' => '5232de97ee3b75b0360528dae24e73db49566ab1',
+    ),
+    'twig/twig' => 
+    array (
+      'pretty_version' => 'v3.3.0',
+      'version' => '3.3.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '1f3b7e2c06cc05d42936a8ad508ff1db7975cdc5',
     ),
   ),
 );

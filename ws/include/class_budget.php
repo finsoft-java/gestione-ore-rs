@@ -1,5 +1,8 @@
 <?php
 
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+
 $budget = new ReportBudgetManager();
 
 class ReportBudgetManager {
@@ -74,7 +77,19 @@ class ReportBudgetManager {
             $totali_per_matricola = [ 'MATRICOLA_DIPENDENTE' => 'TOT.', 'ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
             foreach ($lista_wp as $key_wp => $wp) {
                 $consuntivi = $this->get_consuntivi_matricola_wp($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE'], $wp['ID_WP']);
-                $lista_wp[$key_wp]['DETTAGLI'] = $consuntivi;
+
+                // completo le date con quelle del range temporale
+                $dates = $this->get_range_temporale($progetto);
+                foreach ($dates as $date_key => $date) {
+                    foreach($consuntivi as $c) {
+                        if ($c['DATA'] == $date) {
+                            $dates[$date_key]['ORE_LAVORATE'] = $c['ORE_LAVORATE'];
+                            $dates[$date_key]['COSTO'] = $c['COSTO'];
+                            break;
+                        }
+                    }
+                }
+                $lista_wp[$key_wp]['DETTAGLI'] = $dates;
                 
                 // totali riga
                 $tot_ore = 0;
@@ -83,7 +98,7 @@ class ReportBudgetManager {
                     $tot_ore += $c['ORE_LAVORATE'];
                     $tot_costo += $c['COSTO'];
                 }
-                $lista_wp[$key_wp]['DETTAGLI']['TOT'] = [ 'ORE_LAVORATE' => $tot_ore, 'COSTO' => $tot_costo ];
+                $lista_wp[$key_wp]['DETTAGLI'][] = [ 'ORE_LAVORATE' => $tot_ore, 'COSTO' => $tot_costo ];
                 
                 // totali colonna
                 foreach($consuntivi as $c) {
@@ -99,8 +114,8 @@ class ReportBudgetManager {
                 }
             }
             $lista_matricole[$key]['WP'] = $lista_wp;
-            $lista_matricole[$key]['WP']['TOT'] = $totali_per_data;
-            $lista_matricole['TOT'] = $totali_per_matricola;
+            $lista_matricole[$key]['WP'][] = $totali_per_data;
+            $lista_matricole[] = $totali_per_matricola;
         }
         
         // var_dump($lista_matricole); die();
@@ -322,34 +337,37 @@ class ReportBudgetManager {
         foreach($period as $day) {
             $result[] = $day->format('Y-m-d');
         }
-        return $result;
+        return array_map(function($x) { return ['date'=>$x, 'day'=>(new DateTime($x))->format('d')]; }, $result);
     }
 
     function getReportHtml($idprogetto, $anno, $mese, $completo) {
         $data = $this->getReportData($idprogetto, $anno, $mese, $completo);
-        $date_period = $this->get_range_temporale($data['progetto']);
-        $days = array_map(function($x) { return (new DateTime($x))->format('d'); }, $date_period);
-        
-        Mustache_Autoloader::register();
-        $mustache = new Mustache_Engine([
-            'entity_flags' => ENT_QUOTES,
-           'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . DIRECTORY_SEPARATOR  . '..' . DIRECTORY_SEPARATOR  . 'templates')
-        ]);
-        $template = $mustache->loadTemplate('report-budget');
-        return $template->render([
+        $dates = $this->get_range_temporale($data['progetto']);
+        $context = [
             'completo' => $completo,
             'data' => $data,
             'progetto' => $data['progetto'],
             'consuntivi' =>  $data['consuntivi'],
+            'dates' => $dates,
             'titolo_consuntivi' => ((!empty($anno) && !(empty($mese))) ? "Consuntivi per il periodo $anno-$mese" : ''),
             'format_pct' => function($text, Mustache_LambdaHelper $helper) {
                 $number = $helper->render($text);
                 if ($number == null) return '-';
                 return ($number > 0 ? '+' : '') . sprintf("%.2f", $number) . '%';
             },
-            'date_period' => $date_period,
-            'days' => $days
-        ]);
+            'format_eur' => function($text, Mustache_LambdaHelper $helper) {
+                $number = $helper->render($text);
+                if ($number == null) return '-';
+                return sprintf("%.2f", $number) . '&euro;';
+            }
+        ];
+        
+        // print_r($data['consuntivi']['dettagli'][0]['WP']); die();
+
+        $loader = new FilesystemLoader(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'templates');
+        $twig = new Environment($loader);
+
+        return $twig->render('report-budget.twig', $context);
     }
 
 }

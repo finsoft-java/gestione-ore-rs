@@ -1,0 +1,151 @@
+<html>
+    <head>
+        <title>Report {{ progetto.ACRONIMO }}</title>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'/>
+        <style>
+        .title { font-weight: bold  }
+        .table-calendario { width:100%; border:solid 1px }
+        .calendario { width: 3%; float: left }
+        .rotate { transform: rotate(270deg); }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <h2>Consuntivo di progetto</h2>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Titolo:
+                </div>
+                <div class='col-md-8'>
+                {{ progetto.TITOLO }}
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Acronimo:
+                </div>
+                <div class='col-md-8'>
+                {{ progetto.ACRONIMO }}
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Grant number:
+                </div>
+                <div class='col-md-8'>
+                {{ progetto.GRANT_NUMBER }}
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Data inizio:
+                </div>
+                <div class='col-md-8'>
+                {{ progetto.DATA_INIZIO }}
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Data fine:
+                </div>
+                <div class='col-md-8'>
+                {{ progetto.DATA_FINE }}
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Monte ore previsto:
+                </div>
+                <div class='col-md-8'>
+                {{ progetto.MONTE_ORE_TOT }}
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Budget previsto:
+                </div>
+                <div class='col-md-8'>
+                {{ data.budget }} <-- FORMAT EUR
+                </div>
+            </div>
+{% if data.warning %}
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Warning:
+                </div>
+                <div class='col-md-8'>
+                {{ data.warning }}
+                </div>
+            </div>
+{% endif %}
+
+            <h3>{{ titolo_consuntivi }}</h3>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Monte ore consumato:
+                </div>
+                <div class='col-md-2'>
+                {{ consuntivi.ORE_LAVORATE }}
+                </div>
+                <div class='col-md-2'>
+                {{ consuntivi.PCT_SCARTO_TEMPI }} <-- FORMAT PCT
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Costi sostenuti:
+                </div>
+                <div class='col-md-2'>
+                }{{ consuntivi.COSTO }} <-- FORMAT EUR
+                </div>
+                <div class='col-md-2'>
+                {{ consuntivi.PCT_SCARTO_COSTI }} <-- FORMAT PCT
+                </div>
+            </div>
+
+{% if completo %}
+            <h3>Dettaglio</h3>
+{% for m in consuntivi.dettagli %}
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Matricola:
+                </div>
+                <div class='col-md-8'>
+                {{ m.MATRICOLA_DIPENDENTE }}
+                </div>
+            </div>
+                
+{% if m.WP %}
+            <table class='table-calendario'>
+                <tr>
+                    <td class='title calendario'>
+                    &nbsp;
+                    </td>
+                    <td class='title calendario'>
+                    &nbsp;
+                    </td>
+{% for d in dates %}
+                    <td class='calendario'>
+                    {{ d.day }}
+                    </td>
+{% endfor %}
+                </tr>
+{% for WP in m.WP %}
+                <tr>
+                    <td class='title calendario'>
+                    {{ WP.TITOLO }}
+                    </td>
+{% for d in WP.DETTAGLI %}
+                    <td class='calendario'>
+                    {{ d.ORE_LAVORATE }}&nbsp;
+                    </td>
+{% endfor %}
+                </tr>
+{% endfor %}
+            </table>
+{% endif %}
+{% endfor %}
+{% endif %}
+        </div>
+    </body>
+</html>
