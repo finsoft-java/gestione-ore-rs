@@ -145,6 +145,13 @@ class ComposerStaticInit45f4297866fc3f7e46fcd115642353c4
     );
 
     public static $prefixesPsr0 = array (
+        'M' => 
+        array (
+            'Mustache' => 
+            array (
+                0 => __DIR__ . '/..' . '/mustache/mustache/src',
+            ),
+        ),
         'H' => 
         array (
             'HTMLPurifier' => 

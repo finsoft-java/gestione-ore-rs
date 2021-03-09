@@ -30,7 +30,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'c65f7caeda78a904b4636027c78a7f5b254e6eb0',
+    'reference' => '45fb27da75d3a58291c37f16c71561db7fe71a7c',
     'name' => '__root__',
   ),
   'versions' => 
@@ -42,7 +42,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'c65f7caeda78a904b4636027c78a7f5b254e6eb0',
+      'reference' => '45fb27da75d3a58291c37f16c71561db7fe71a7c',
     ),
     'ezyang/htmlpurifier' => 
     array (
@@ -88,6 +88,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '361c0f545c3172ee26c3d596a0aa03f0cef65e6a',
+    ),
+    'mustache/mustache' => 
+    array (
+      'pretty_version' => 'v2.13.0',
+      'version' => '2.13.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'e95c5a008c23d3151d59ea72484d4f72049ab7f4',
     ),
     'myclabs/php-enum' => 
     array (

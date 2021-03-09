@@ -3,6 +3,7 @@
     "require": {
         "phpoffice/phpspreadsheet": "^1.16",
         "firebase/php-jwt": "^5.2",
-        "setasign/fpdf": "^1.8"
+        "setasign/fpdf": "^1.8",
+        "mustache/mustache": "^2.13"
     }
 }
