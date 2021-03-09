@@ -200,7 +200,7 @@
         <ng-container matColumnDef="dataInizio">
             <th mat-header-cell *matHeaderCellDef> Data Inizio </th>
             <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.DATA_INIZIO}}  </label>
+                <label *ngIf="!element.isEditable"> {{element.DATA_INIZIO | date: 'dd-MM-yyyy'}}  </label>
                 <div style="display: block;margin: 0px auto;width: 125px;" *ngIf="element.isEditable">
                     <mat-form-field appearance="fill" style="margin-right: 10px;display: block;margin-top: 1.34375em;">
                         <mat-label>Data Inizio</mat-label>
@@ -217,7 +217,7 @@
         <ng-container matColumnDef="dataFine">
             <th mat-header-cell *matHeaderCellDef> Data File </th>
             <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.DATA_FINE}}  </label>
+                <label *ngIf="!element.isEditable"> {{element.DATA_FINE | date: 'dd-MM-yyyy'}}  </label>
                 <div style="display: block;margin: 0px auto;width: 125px;" *ngIf="element.isEditable">
                     <mat-form-field appearance="fill" style="display: block;margin-top: 1.34375em;">
                         <mat-label>Data Fine</mat-label>

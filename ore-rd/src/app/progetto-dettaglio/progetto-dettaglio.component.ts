@@ -156,8 +156,8 @@ export class ProgettoDettaglioComponent implements OnInit {
     if(this.id_progetto == null){
       this.progettiService.insert(this.progetto)
       .subscribe(response => {
-        this.router.navigate(['/progetto/'+response["value"][0]["ID_PROGETTO"]]);
         this.alertService.success("Progetto inserito con successo");
+        this.router.navigate(['/progetto/'+response["value"][0]["ID_PROGETTO"]]);
       },
       error => {
         this.alertService.error(error);
@@ -165,8 +165,8 @@ export class ProgettoDettaglioComponent implements OnInit {
     } else {
       this.progettiService.update(this.progetto)
       .subscribe(response => {
-        this.router.navigate(['/progetto/'+response["value"][0]["ID_PROGETTO"]]);
         this.alertService.success("Progetto modificato con successo");
+        this.router.navigate(['/progetto/'+response["value"][0]["ID_PROGETTO"]]);
       },
       error => {
         this.alertService.error(error);
@@ -241,6 +241,7 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.dataSource.data.splice(-1, 1);
         this.dataSource.data.push(response["value"][0]);
         this.dataSource.data = this.dataSource.data;
+        this.alertService.success("Spesa salvata con successo");
       },
       error => {
         this.alertService.error(error);
@@ -248,6 +249,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     } else {
       this.progettiSpesaService.update(a)
       .subscribe(response => {
+        this.alertService.success("Spesa modificata con successo");
         this.getProgettoSpesa();
       },
       error => {
@@ -272,6 +274,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     } else {
       this.progettiWpService.update(a)
       .subscribe(response => {
+        this.alertService.success("Work Package modificato con successo");
         this.getProgettowP();
       },
       error => {

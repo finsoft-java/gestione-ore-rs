@@ -18,14 +18,18 @@ require_logged_user_JWT();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //==========================================================
 
+    $message = (object) [
+    'error' => '',
+    'success' => '',
+    ];
     $allowedFileType = [
         'application/vnd.ms-excel',
         'text/xls',
         'text/xlsx',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel'
     ];
-
-    if (in_array($_FILES["file"]["type"], $allowedFileType)) {
+    if (in_array($_FILES["file"]["type"][0], $allowedFileType)) {
 
         //$targetPath = 'uploads/' . $_FILES['file']['name'];
         //move_uploaded_file($_FILES['file']['tmp_name'], $targetPath);
@@ -34,18 +38,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $Reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
 
-        $spreadSheet = $Reader->load($_FILES['file']['tmp_name']);
+        $spreadSheet = $Reader->load($_FILES['file']['tmp_name'][0]);
         $excelSheet = $spreadSheet->getActiveSheet();
         $spreadSheetAry = $excelSheet->toArray();
         $numRows = count($spreadSheetAry);
 
-        $message = (object) [
-            'error' => '',
-            'success' => '',
-          ];
         // IPOTIZZO (completamente a caso) che il foglio excel contiene matricola, data, ore
 
         for ($i = 0; $i <= $numRows; $i ++) {
+            var_dump($spreadSheetAry[$i]);
+            return false;
+            /*
             $matricola = "";
             if (isset($spreadSheetAry[$i][0])) {
                 $matricola = mysqli_real_escape_string($conn, $spreadSheetAry[$i][0]);
@@ -65,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 execute_update($query);
                 $message->success = "Caricamento Effettuato correttamente.<br/>"
             }
+            */
         }
     } else {
         $message->error .= "Invalid File Type. Upload Excel File.<br/>";
