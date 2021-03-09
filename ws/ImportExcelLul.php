@@ -17,7 +17,6 @@ require_logged_user_JWT();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //==========================================================
-
     $message = (object) [
     'error' => '',
     'success' => '',
@@ -29,26 +28,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/vnd.ms-excel'
     ];
-    if (in_array($_FILES["file"]["type"][0], $allowedFileType)) {
 
-        //$targetPath = 'uploads/' . $_FILES['file']['name'];
-        //move_uploaded_file($_FILES['file']['tmp_name'], $targetPath);
+    for ($filenum = 0; $filenum < count($_FILES["file"]["name"]); ++$filenum) {
+        $message->success .= "Analysing file " . $_FILES["file"]["name"][$filenum] . "...<br/>";
+        $filename =  $_FILES["file"]["tmp_name"][$filenum];
+        if (in_array($_FILES["file"]["type"][$filenum], $allowedFileType)) {
+            echo 'filename->'.$filename;
+            $lul->importExcel($filename, $message);
+        } else {
+            $message->error .= "Invalid File Type. Upload Excel File.<br/>";
+        }
+    }
 
-        //TODO ELIMINARE I DATI PREESISTENTI
+    header('Content-Type: application/json');
+    echo json_encode(['value' => $message]);
+    
+} else {
+    //==========================================================
+    print_error(400, "Unsupported method in request: " . $_SERVER['REQUEST_METHOD']);
+}
 
-        $Reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
 
-        $spreadSheet = $Reader->load($_FILES['file']['tmp_name'][0]);
-        $excelSheet = $spreadSheet->getActiveSheet();
-        $spreadSheetAry = $excelSheet->toArray();
-        $numRows = count($spreadSheetAry);
 
         // IPOTIZZO (completamente a caso) che il foglio excel contiene matricola, data, ore
 
+        /*
         for ($i = 0; $i <= $numRows; $i ++) {
-            var_dump($spreadSheetAry[$i]);
-            return false;
-            /*
             $matricola = "";
             if (isset($spreadSheetAry[$i][0])) {
                 $matricola = mysqli_real_escape_string($conn, $spreadSheetAry[$i][0]);
@@ -68,17 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 execute_update($query);
                 $message->success = "Caricamento Effettuato correttamente.<br/>"
             }
-            */
         }
-    } else {
-        $message->error .= "Invalid File Type. Upload Excel File.<br/>";
-    }
-    header('Content-Type: application/json');
-    echo json_encode(['value' => $message]);
-    
-} else {
-    //==========================================================
-    print_error(400, "Unsupported method in request: " . $_SERVER['REQUEST_METHOD']);
-}
+        */
 
 ?>

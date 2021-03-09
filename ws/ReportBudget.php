@@ -23,10 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(400, "Missing parameter: id_progetto");
     }
     $idprogetto = (int) $_GET['id_progetto'];
-    
     if (! isset($_GET['periodo']) or ! $_GET['periodo']) {
         $anno = null;
-        $periodo = null;
+        $mese = null;
     } else {
         $periodo = $_GET['periodo'];
         if (strlen($periodo) != 7) {

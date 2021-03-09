@@ -62,8 +62,6 @@ export class ImportazioneRapportiniComponent implements OnInit {
     this.uploadService.upload(files).subscribe(
       event => {
         if (event.type === HttpEventType.UploadProgress) {
-          console.log("event1");
-          console.log(event);
           if(event.total){
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
           }
@@ -79,8 +77,6 @@ export class ImportazioneRapportiniComponent implements OnInit {
             this.message_error = err.error;
         else
             this.message_error = err;
-
-        
       });
   }
 
