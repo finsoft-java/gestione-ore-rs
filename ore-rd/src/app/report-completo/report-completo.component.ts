@@ -42,7 +42,7 @@ export const MY_FORMATS = {
 })
 export class ReportCompletoComponent implements OnInit {
     
-    isCompleto = false;
+    isCompleto = true;
     date = new FormControl(moment());
     idProgetto: number = -1;
 
