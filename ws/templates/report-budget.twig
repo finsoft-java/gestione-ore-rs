@@ -141,8 +141,49 @@
                     {{ WP.TITOLO }}
                     </td>
 {% for d in WP.DETTAGLI %}
-                    <td class='calendario {% if WP.ID_WP == null or d.DATE is null %}title{% endif %}'>
+                    <td class='calendario {% if (WP.ID_WP == null)or(d.DATA is null) %}title{% endif %}'>
                     {{ d.ORE_LAVORATE }}&nbsp;
+                    </td>
+{% endfor %}
+                </tr>
+{% endfor %}
+            </table>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if completo %}
+
+            <h3>Dettaglio costi</h3>
+{% for m in consuntivi.dettagli %}
+            <div class='row'>
+                <div class='col-md-2 title'>
+                Dipendente:
+                </div>
+                <div class='col-md-8'>
+                {{ m.MATRICOLA_DIPENDENTE }} {{m.COGNOME_NOME }}
+                </div>
+            </div>
+                
+{% if m.WP %}
+            <table class='table-calendario'>
+                <tr>
+                    <td class='title calendario'>
+                    &nbsp;
+                    </td>
+{% for d in dates %}
+                    <td class='calendario'>
+                    {{ d.DAY }}
+                    </td>
+{% endfor %}
+                </tr>
+{% for WP in m.WP %}
+                <tr>
+                    <td class='title calendario'>
+                    {{ WP.TITOLO }}
+                    </td>
+{% for d in WP.DETTAGLI %}
+                    <td class='calendario {% if (WP.ID_WP == null)or(d.DATA is null) %}title{% endif %}'>
+                    {{ d.COSTO | number_format(2, ',', '.') }}&nbsp;
                     </td>
 {% endfor %}
                 </tr>
