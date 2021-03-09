@@ -51,7 +51,15 @@ export class ReportCompletoComponent implements OnInit {
       private route: ActivatedRoute) { }
 
     chosenYearHandler(normalizedYear: Moment) {
-      const ctrlValue = this.date.value;
+      console.log('1');
+      console.log(this.date.value);
+      console.log(normalizedYear.year());
+      let ctrlValue;
+      if(this.date.value == null){
+        ctrlValue = moment();
+      }else{
+        ctrlValue = this.date.value;
+      }
       ctrlValue.year(normalizedYear.year());
       this.date.setValue(ctrlValue);
     }
@@ -73,14 +81,17 @@ export class ReportCompletoComponent implements OnInit {
     }
 
     download() {
+
+      let dateRapportini = '';
       if(this.date.value != null){
-        this.reportService.downloadReportBudget(this.idProgetto, formatDate(this.date.value,"YYYY-MM","en-GB"), this.isCompleto).subscribe(response => {
-            this.openHtmlPage(response);
-        },
-        error => {
-            // TODO
-        });
-      }
+        dateRapportini = formatDate(this.date.value,"YYYY-MM","en-GB");
+      }   
+      this.reportService.downloadReportBudget(this.idProgetto, dateRapportini, this.isCompleto).subscribe(response => {
+          this.openHtmlPage(response);
+      },
+      error => {
+          // TODO
+      });
     }
   
     openHtmlPage(data: any) {
