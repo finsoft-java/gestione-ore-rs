@@ -75,7 +75,7 @@ export class ReportCompletoComponent implements OnInit {
     download() {
       if(this.date.value != null){
         this.reportService.downloadReportBudget(this.idProgetto, formatDate(this.date.value,"YYYY-MM","en-GB"), this.isCompleto).subscribe(response => {
-            this.downloadFile(response);
+            this.openHtmlPage(response);
         },
         error => {
             // TODO
@@ -83,14 +83,10 @@ export class ReportCompletoComponent implements OnInit {
       }
     }
   
-    downloadFile(data: any) {
+    openHtmlPage(data: any) {
         const blob = new Blob([data], { type: 'text/html' });
         const url = window.URL.createObjectURL(blob);
-        var anchor = document.createElement("a");
-        anchor.download = "ReportBudget.html";
-        anchor.href = url;
-        anchor.target="_blank";
-        anchor.click();
+        window.open(url);
     }
 
 }
