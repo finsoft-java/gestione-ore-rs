@@ -65,7 +65,7 @@
                 Budget previsto:
                 </div>
                 <div class='col-md-8'>
-                {{ data.budget }} <-- FORMAT EUR
+                {{ data.budget | number_format(2, ',', '.')  }}&euro;
                 </div>
             </div>
 {% if data.warning %}
@@ -88,7 +88,7 @@
                 {{ consuntivi.ORE_LAVORATE }}
                 </div>
                 <div class='col-md-2'>
-                {{ consuntivi.PCT_SCARTO_TEMPI }} <-- FORMAT PCT
+                {% if consuntivi.PCT_SCARTO_TEMPI>0 %}+{% endif %}{{ consuntivi.PCT_SCARTO_TEMPI | number_format(0) }}%
                 </div>
             </div>
             <div class='row'>
@@ -96,10 +96,10 @@
                 Costi sostenuti:
                 </div>
                 <div class='col-md-2'>
-                }{{ consuntivi.COSTO }} <-- FORMAT EUR
+                {{ consuntivi.COSTO | number_format(2, ',', '.')  }}&euro;
                 </div>
                 <div class='col-md-2'>
-                {{ consuntivi.PCT_SCARTO_COSTI }} <-- FORMAT PCT
+                {% if consuntivi.PCT_SCARTO_TEMPI>0 %}+{% endif %}{{ consuntivi.PCT_SCARTO_COSTI | number_format(0) }}%
                 </div>
             </div>
 

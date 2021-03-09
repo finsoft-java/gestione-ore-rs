@@ -328,8 +328,8 @@ class ReportBudgetManager {
             $dataInizio = new DateTime("$anno-$mese-01");
             $dataFine = new DateTime($dataInizio->format( 'Y-m-t' ));
         } else {
-            $dataInizio = new DateTime($progetto["DATA_INIZIO"]);
-            $dataFine = new DateTime($progetto["DATA_FINE"]);
+            $dataInizio = new DateTime($progetto['DATA_INIZIO']);
+            $dataFine = new DateTime($progetto['DATA_FINE']);
         }
         $interval = DateInterval::createFromDateString('1 day');
         $period = new DatePeriod($dataInizio, $interval, $dataFine);
@@ -349,24 +349,14 @@ class ReportBudgetManager {
             'progetto' => $data['progetto'],
             'consuntivi' =>  $data['consuntivi'],
             'dates' => $dates,
-            'titolo_consuntivi' => ((!empty($anno) && !(empty($mese))) ? "Consuntivi per il periodo $anno-$mese" : ''),
-            'format_pct' => function($text, Mustache_LambdaHelper $helper) {
-                $number = $helper->render($text);
-                if ($number == null) return '-';
-                return ($number > 0 ? '+' : '') . sprintf("%.2f", $number) . '%';
-            },
-            'format_eur' => function($text, Mustache_LambdaHelper $helper) {
-                $number = $helper->render($text);
-                if ($number == null) return '-';
-                return sprintf("%.2f", $number) . '&euro;';
-            }
+            'titolo_consuntivi' => ((!empty($anno) && !(empty($mese))) ? "Consuntivi per il periodo $anno-$mese" : '')
         ];
         
         // print_r($data['consuntivi']['dettagli'][0]['WP']); die();
 
         $loader = new FilesystemLoader(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'templates');
         $twig = new Environment($loader);
-
+        
         return $twig->render('report-budget.twig', $context);
     }
 
