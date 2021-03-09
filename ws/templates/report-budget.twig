@@ -54,6 +54,14 @@
             </div>
             <div class='row'>
                 <div class='col-md-2 title'>
+                Supervisor:
+                </div>
+                <div class='col-md-8'>
+                {{ progetto.MATRICOLA_SUPERVISOR }} {{ progetto.COGNOME_NOME_SUPERVISOR }}
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-2 title'>
                 Monte ore previsto:
                 </div>
                 <div class='col-md-8'>
@@ -108,10 +116,10 @@
 {% for m in consuntivi.dettagli %}
             <div class='row'>
                 <div class='col-md-2 title'>
-                Matricola:
+                Dipendente:
                 </div>
                 <div class='col-md-8'>
-                {{ m.MATRICOLA_DIPENDENTE }}
+                {{ m.MATRICOLA_DIPENDENTE }} {{m.COGNOME_NOME }}
                 </div>
             </div>
                 
@@ -121,12 +129,9 @@
                     <td class='title calendario'>
                     &nbsp;
                     </td>
-                    <td class='title calendario'>
-                    &nbsp;
-                    </td>
 {% for d in dates %}
                     <td class='calendario'>
-                    {{ d.day }}
+                    {{ d.DAY }}
                     </td>
 {% endfor %}
                 </tr>
