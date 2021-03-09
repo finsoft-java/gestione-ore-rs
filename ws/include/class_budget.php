@@ -327,67 +327,9 @@ class ReportBudgetManager {
 
     function getReportHtml($idprogetto, $anno, $mese, $completo) {
         $data = $this->getReportData($idprogetto, $anno, $mese, $completo);
-/*        $progetto = $data['progetto'];
-        $consuntivi = $data['consuntivi'];
+        $date_period = $this->get_range_temporale($data['progetto']);
+        $days = array_map(function($x) { return (new DateTime($x))->format('d'); }, $date_period);
         
-        $subreport_dettaglio = '';
-        
-        if ($completo) {
-            $datePeriod = $this->get_range_temporale($progetto);
-            
-            $subreport_dettaglio = "
-        <h3>Dettaglio</h3>
-        ";
-            foreach($data['consuntivi']['dettagli'] as $dettagli_matricola) {
-                $subreport_dettaglio .= "
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Matricola:
-                </div>
-                <div class='col-md-8'>
-                $dettagli_matricola[MATRICOLA_DIPENDENTE]
-                </div>
-            </div>
-";
-                if (isset($dettagli_matricola['WP'])) {
-                    // header date
-                    $subreport_dettaglio .= "
-            <div class='row'>
-                <div class='title calendario'>
-                </div>
-                <div class='title calendario'>
-                </div>";
-                    foreach($datePeriod as $date) {
-                        // header date
-                        $day = (new DateTime($date))->format('d');
-                        $subreport_dettaglio .= "
-                <div class='calendario'>
-                    $day
-                </div>";
-                    }
-                    $subreport_dettaglio .= "
-            </div>";
-                    foreach($dettagli_matricola['WP'] as $dettagli_wp) {
-                        $subreport_dettaglio .= "
-            <div class='row'>
-                <div class='title calendario'>
-                $dettagli_wp[TITOLO]
-                </div>";
-                        foreach($datePeriod as $date) {
-                            $ore = isset($dettagli_wp[$date]) ? $dettagli_wp[$date]['ORE_LAVORATE'] : '-';
-                            $subreport_dettaglio .= "
-                <div class='calendario'>
-                $ore
-                </div>";
-                        }
-                        $subreport_dettaglio .= "
-            </div><!-- row -->
-";
-                    }
-                }
-            }
-        }
-*/
         Mustache_Autoloader::register();
         $mustache = new Mustache_Engine([
             'entity_flags' => ENT_QUOTES,
@@ -395,6 +337,7 @@ class ReportBudgetManager {
         ]);
         $template = $mustache->loadTemplate('report-budget');
         return $template->render([
+            'completo' => $completo,
             'data' => $data,
             'progetto' => $data['progetto'],
             'consuntivi' =>  $data['consuntivi'],
@@ -403,7 +346,9 @@ class ReportBudgetManager {
                 $number = $helper->render($text);
                 if ($number == null) return '-';
                 return ($number > 0 ? '+' : '') . sprintf("%.2f", $number) . '%';
-            }
+            },
+            'date_period' => $date_period,
+            'days' => $days
         ]);
     }
 
