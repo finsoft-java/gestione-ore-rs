@@ -51,9 +51,6 @@ export class ReportCompletoComponent implements OnInit {
       private route: ActivatedRoute) { }
 
     chosenYearHandler(normalizedYear: Moment) {
-      console.log('1');
-      console.log(this.date.value);
-      console.log(normalizedYear.year());
       let ctrlValue;
       if(this.date.value == null){
         ctrlValue = moment();
