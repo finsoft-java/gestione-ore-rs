@@ -16,7 +16,7 @@
                 Titolo:
                 </div>
                 <div class='col-md-8'>
-                {{ progetto.ACRONIMO }}$progetto[TITOLO]
+                {{ progetto.TITOLO }}
                 </div>
             </div>
             <div class='row'>
@@ -66,7 +66,8 @@
                 <div class='col-md-8'>
                 {{ data.budget }}
                 </div>
-            </div>" . ($data['warning'] ? "
+            </div>
+{{# data.warning }}
             <div class='row'>
                 <div class='col-md-2 title'>
                 Warning:
@@ -75,7 +76,8 @@
                 {{ data.warning }}
                 </div>
             </div>
-            
+{{/ data.warning }}
+
             <h3>{{ titolo_consuntivi }}</h3>
             <div class='row'>
                 <div class='col-md-2 title'>
@@ -85,7 +87,7 @@
                 {{ consuntivi.ORE_LAVORATE }}
                 </div>
                 <div class='col-md-2'>
-                {{ consuntivi.PCT_SCARTO_TEMPI > 0 ? +' : '' }}{{ consuntivi.PCT_SCARTO_TEMPI }} %
+                {{# format_pct }}{{ consuntivi.PCT_SCARTO_TEMPI }}{{/ format_pct }}
                 </div>
             </div>
             <div class='row'>
@@ -96,7 +98,7 @@
                 {{ consuntivi.COSTO }}
                 </div>
                 <div class='col-md-2'>
-                {{ consuntivi.PCT_SCARTO_COSTI > 0 ? +' : '' }}{{ consuntivi.PCT_SCARTO_COSTI }} %
+                {{# format_pct }}{{ consuntivi.PCT_SCARTO_COSTI }}{{/ format_pct }}
                 </div>
             </div>
 --->subreport_dettaglio<---

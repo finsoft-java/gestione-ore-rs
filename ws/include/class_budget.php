@@ -4,46 +4,10 @@ $budget = new ReportBudgetManager();
 
 class ReportBudgetManager {
 
-    function get_consuntivi($id_progetto=null, $anno=null, $mese=null) {
+    /*function get_consuntivi($id_progetto=null, $anno=null, $mese=null) {
         $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
         $sql = "SELECT c.ID_PROGETTO, p.TITOLO, c.MATRICOLA_DIPENDENTE, c.ID_WP, wp.TITOLO as TITOLO_WP, c.DATA, c.ORE_LAVORATE, c.COSTO_ORARIO " . $partial;
         return select_list($sql);
-    }
-
-    /*function get_consuntivi_per_matricola_wp($id_progetto=null, $anno=null, $mese=null) {
-        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT c.ID_PROGETTO, p.TITOLO, c.MATRICOLA_DIPENDENTE, c.ID_WP, wp.TITOLO as TITOLO_WP, SUM(c.ORE_LAVORATE) as ORE_LAVORATE, " .
-            "SUM(c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
-            $partial .
-            "GROUP BY c.ID_PROGETTO, c.MATRICOLA_DIPENDENTE, c.ID_WP";
-        return select_list($sql);
-    }
-
-    function get_consuntivi_per_matricola($id_progetto=null, $anno=null, $mese=null) {
-        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT c.ID_PROGETTO, p.TITOLO, c.MATRICOLA_DIPENDENTE, SUM(c.ORE_LAVORATE) as ORE_LAVORATE, " .
-            "SUM(c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
-            $partial .
-            "GROUP BY c.ID_PROGETTO, c.MATRICOLA_DIPENDENTE";
-        return select_list($sql);
-    }
-
-    function get_consuntivi_per_wp($id_progetto=null, $anno=null, $mese=null) {
-        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT c.ID_PROGETTO, c.ID_WP, sum(c.ORE_LAVORATE) as ORE_LAVORATE, " .
-            "SUM(c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
-            $partial .
-            "GROUP BY c.ID_PROGETTO, c.ID_WP";
-        return select_list($sql);
-    }*/
-
-    function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
-        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT c.ID_PROGETTO, SUM(c.ORE_LAVORATE) as ORE_LAVORATE, " .
-            "SUM(c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
-            $partial .
-            "GROUP BY c.ID_PROGETTO";
-        return select_single($sql);
     }
 
     function _create_where_condiction_consuntivi($id_progetto=null, $anno=null, $mese=null) {
@@ -59,6 +23,19 @@ class ReportBudgetManager {
             $sql .= "AND c.DATA >= $primo AND c.DATA <= LAST_DAY($primo) ";
         }
         return $sql;
+    } */
+
+    function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
+        $sql = "SELECT NVL(SUM(c.ORE_LAVORATE),0) as ORE_LAVORATE, NVL(SUM(c.ORE_LAVORATE * c.COSTO_ORARIO),0.0) as COSTO " .
+            "FROM PROGETTI p " .
+            "JOIN PROGETTI_WP wp ON wp.id_progetto=p.id_progetto ".
+            "LEFT JOIN ore_consuntivate c ON wp.id_progetto=c.id_progetto AND wp.id_wp=c.id_wp ";
+        if (!empty($anno) and !empty($mese)) {
+            $sql .= "AND c.DATA >= DATE('$anno-$mese-01') AND c.DATA <= LAST_DAY(DATE('$anno-$mese-01')) ";
+        }
+        $sql .= "WHERE p.ID_PROGETTO = $id_progetto " .
+            "GROUP BY c.ID_PROGETTO";
+        return select_single($sql);
     }
 
     function get_matricole_progetto($id_progetto) {
@@ -306,6 +283,7 @@ class ReportBudgetManager {
 
         $report['consuntivi'] = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese);
         // ha due campi, ORE_LAVORATE e COSTO
+        // var_dump($report['consuntivi']); die();
         
         if (empty($report['progetto']['MONTE_ORE_TOT'])) {
             // should not happen
@@ -349,7 +327,7 @@ class ReportBudgetManager {
 
     function getReportHtml($idprogetto, $anno, $mese, $completo) {
         $data = $this->getReportData($idprogetto, $anno, $mese, $completo);
-        $progetto = $data['progetto'];
+/*        $progetto = $data['progetto'];
         $consuntivi = $data['consuntivi'];
         
         $subreport_dettaglio = '';
@@ -372,6 +350,23 @@ class ReportBudgetManager {
             </div>
 ";
                 if (isset($dettagli_matricola['WP'])) {
+                    // header date
+                    $subreport_dettaglio .= "
+            <div class='row'>
+                <div class='title calendario'>
+                </div>
+                <div class='title calendario'>
+                </div>";
+                    foreach($datePeriod as $date) {
+                        // header date
+                        $day = (new DateTime($date))->format('d');
+                        $subreport_dettaglio .= "
+                <div class='calendario'>
+                    $day
+                </div>";
+                    }
+                    $subreport_dettaglio .= "
+            </div>";
                     foreach($dettagli_matricola['WP'] as $dettagli_wp) {
                         $subreport_dettaglio .= "
             <div class='row'>
@@ -392,97 +387,25 @@ class ReportBudgetManager {
                 }
             }
         }
-        
-        $report="<html>
-    <head>
-        <title>Report $progetto[ACRONIMO]</title>
-        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'/>
-        <style>
-        .title { font-weight: bold  }
-        .calendario { width: 3%; float: left }
-        </style>
-    </head>
-    <body>
-        <div class='container'>
-            <h2>Consuntivo di progetto</h2>
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Titolo:
-                </div>
-                <div class='col-md-8'>
-                $progetto[TITOLO]
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Acronimo:
-                </div>
-                <div class='col-md-8'>
-                $progetto[ACRONIMO]
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Grant number:
-                </div>
-                <div class='col-md-8'>
-                $progetto[GRANT_NUMBER]
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Monte ore previsto:
-                </div>
-                <div class='col-md-8'>
-                $progetto[MONTE_ORE_TOT]
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Budget previsto &euro;:
-                </div>
-                <div class='col-md-8'>
-                " . sprintf("%.2f", $data['budget']) . "
-                </div>
-            </div>" . ($data['warning'] ? "
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Warning:
-                </div>
-                <div class='col-md-8'>
-                $data[warning]
-                </div>
-            </div>" : '') . "
-            
-            <h3>Consuntivi" . ((!empty($anno) and !empty($mese)) ? " nel mese $anno-$mese" : '') ."</h3>
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Monte ore consumato:
-                </div>
-                <div class='col-md-2'>
-                $consuntivi[ORE_LAVORATE]
-                </div>
-                <div class='col-md-2'>
-                " . ($consuntivi['PCT_SCARTO_TEMPI'] > 0 ? '+' : ''). "$consuntivi[PCT_SCARTO_TEMPI]%
-                </div>
-            </div>
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Costi sostenuti &euro;:
-                </div>
-                <div class='col-md-2'>
-                " . sprintf("%.2f", $consuntivi['COSTO']) . "
-                </div>
-                <div class='col-md-2'>
-                " . ($consuntivi['PCT_SCARTO_COSTI'] > 0 ? '+' : ''). "$consuntivi[PCT_SCARTO_COSTI]%
-                </div>
-            </div>
-$subreport_dettaglio
-        </div>
-    </body>
-</html>";
-        return $report;
+*/
+        Mustache_Autoloader::register();
+        $mustache = new Mustache_Engine([
+            'entity_flags' => ENT_QUOTES,
+           'loader' => new Mustache_Loader_FilesystemLoader(dirname(__FILE__) . DIRECTORY_SEPARATOR  . '..' . DIRECTORY_SEPARATOR  . 'templates')
+        ]);
+        $template = $mustache->loadTemplate('report-budget');
+        return $template->render([
+            'data' => $data,
+            'progetto' => $data['progetto'],
+            'consuntivi' =>  $data['consuntivi'],
+            'titolo_consuntivi' => ((!empty($anno) && !(empty($mese))) ? "Consuntivi per il periodo $anno-$mese" : ''),
+            'format_pct' => function($text, Mustache_LambdaHelper $helper) {
+                $number = $helper->render($text);
+                if ($number == null) return '-';
+                return ($number > 0 ? '+' : '') . sprintf("%.2f", $number) . '%';
+            }
+        ]);
     }
-  
+
 }
 ?>
