@@ -2,7 +2,7 @@
 <div *ngIf="progetto">
 
     <div style="text-align:right">
-        <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" (click)="report()">Report</button>
+        <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" (click)="report()" disabled="disabled">Report</button>
     </div>
 
     <div>

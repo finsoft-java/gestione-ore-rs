@@ -56,8 +56,8 @@ class LULManager {
             return;
         }
         
-        $data_lul = $anno."-".$mese;
-        $data_lul = new DateTime($data_lul);
+        $dataLul = $anno."-".$mese;
+        $data_lul = new DateTime($dataLul);
         $data_lul->modify('last day of this month');
         $ultimoGiornoMese = $data_lul->format('d');
         
@@ -65,13 +65,13 @@ class LULManager {
         $contatoreOreDipendenti = 5;
 
         for($e= 1; ;$e++){
-            //delete
+
             if($e != 1){
                 $contatoreDipendenti = $contatoreDipendenti + 10;
                 $contatoreOreDipendenti = $contatoreOreDipendenti + 10;
             }
 
-            $this->elimina($anno."-".$mese,$spreadSheetAry[$contatoreDipendenti][1]);
+            $this->elimina($dataLul,$spreadSheetAry[$contatoreDipendenti][1]);
 
             if($spreadSheetAry[$contatoreDipendenti][0] == 'Matricola'){
                 for($a= 1; $a <= $ultimoGiornoMese; $a++){
@@ -91,14 +91,10 @@ class LULManager {
                                    "DATA" => $data,
                                    "ORE_PRESENZA_ORDINARIE" => $ore
                                   ]);
-                                  
-        //echo '<br/>INSERIMENTO<br/>';
-        //echo '<br/>'.$sql.'<br/>';
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
         }
-        return "ok";
     }
         
     function elimina($data,$matricola) {
@@ -110,8 +106,6 @@ class LULManager {
         $ultimoGiornoMese = $datafine->format('d');
         $primoGiornoMese = $datainizio->format('d');
         $sql = "DELETE FROM ore_presenza_lul WHERE MATRICOLA_DIPENDENTE = '$matricola' and DATA >= CAST('$data-$primoGiornoMese' AS DATE) AND DATA <= CAST('$data-$ultimoGiornoMese' AS DATE)";
-        //echo '<br/>Eliminazione<br/>';
-        //echo '<br/>'.$sql.'<br/>';
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);

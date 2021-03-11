@@ -60,7 +60,6 @@ function check_and_load_user($username, $pwd) {
     $ldaprdn = $username . "@" . AD_DOMAIN;
     
     $bind = @ldap_bind($ldap, $ldaprdn, $pwd);
-
     if ($bind) {
         $filter="(SamAccountName=$username)";
         $result = ldap_search($ldap, AD_BASE_DN, $filter);
