@@ -1,8 +1,9 @@
 import { User } from './_models';
 import { AuthenticationService } from './_services/authentication.service';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, Event, RouterEvent, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -16,8 +17,9 @@ export class AppComponent implements OnInit {
   isLogged: boolean = false;
   _subscription: Subscription = new Subscription;
   currentUserSubject: User = new User;
+  menuDisabled = true;
 
-  constructor(private route: ActivatedRoute, private router: Router,private authenticationService: AuthenticationService) {
+  constructor(private route: ActivatedRoute, private router: Router, private authenticationService: AuthenticationService) {
     this.router_frontend = router;
   }
 
@@ -32,11 +34,15 @@ export class AppComponent implements OnInit {
       token = '';
     }
     this.currentUserSubject.username = token;
-    if(!url) {
+    if (!url) {
       this.isLogged = true;
-    }else{
+    } else {
       this.isLogged = false;
     }
+    
+    this.router.events.pipe(filter((evt: Event) => evt instanceof NavigationEnd)).subscribe((evt: Event) => {
+        this.menuDisabled = ((<NavigationEnd>evt).url == '/login');
+    });
   }
 
   logout(){
