@@ -93,6 +93,8 @@ class RapportiniManager {
         
         $wp = $map_wp_wp[array_keys($map_wp_wp)[0]]; // uno a caso
         
+        $data_firma = $this->get_data_firma($idProgetto, $matr, $anno, $mese);
+
         global $panthera;
         $nomecognome = $panthera->getUtente($matr);
         $nomecognome_super = $panthera->getUtente($wp['MATRICOLA_SUPERVISOR']);
@@ -105,7 +107,7 @@ class RapportiniManager {
         $this->creaIntestazione($sheet, $curRow, $wp, $anno, $mese, $matr, $nomecognome);
         $this->creaLegenda($sheet, $curRow, $map_wp_wp);
         $this->creaTabella($sheet, $curRow, $map_wp_wp, $anno, $mese, $matr, $nomecognome, $map_matr_ore);
-        $this->creaFooter($sheet, $curRow, $wp, $nomecognome, $nomecognome_super);
+        $this->creaFooter($sheet, $curRow, $wp, $nomecognome, $nomecognome_super, $data_firma);
 
         $sheet->getPageSetup()->setPrintArea('A1:AH' . $curRow);
         
@@ -114,6 +116,11 @@ class RapportiniManager {
         $writer->save($xlsxfilename);
         
         return $xlsxfilename;
+    }
+    
+    function get_data_firma($idProgetto, $matr, $anno, $mese) {
+        $sql = "SELECT DATA_FIRMA FROM date_firma WHERE MATRICOLA_DIPENDENTE='$matr' AND ANNO_MESE='$anno-$mese' AND ID_PROGETTO='$idProgetto'";
+        return select_single_value($sql);
     }
 
     function creaIntestazione($sheet, &$curRow, $wp, $anno, $mese, $matr, $nomecognome) {
@@ -251,16 +258,16 @@ class RapportiniManager {
         $curRow += 3;
     }
 
-    function creaFooter($sheet, &$curRow, $wp, $nomecognome, $nomecognome_super) {
+    function creaFooter($sheet, &$curRow, $wp, $nomecognome, $nomecognome_super, $data_firma) {
         $sheet->setCellValue('E' . $curRow, 'Working person:');
         $sheet->setCellValue('J' . $curRow, $nomecognome);
         $sheet->setCellValue('P' . $curRow, 'Signature');
-        $sheet->setCellValue('S' . $curRow, '(FIXME Data firma)');
+        $sheet->setCellValue('S' . $curRow, $data_firma);
         $curRow++;
         $sheet->setCellValue('E' . $curRow, 'Supervisor:');
         $sheet->setCellValue('J' . $curRow, $nomecognome_super);
         $sheet->setCellValue('P' . $curRow, 'Signature');
-        $sheet->setCellValue('S' . $curRow, '(FIXME Data firma)');
+        $sheet->setCellValue('S' . $curRow, $data_firma);
         $curRow += 2;
     }
 
