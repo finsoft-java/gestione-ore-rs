@@ -31,88 +31,91 @@ class LULManager {
         return $map_matr_ore;
     }
 
-    function importExcel($filename, &$message) {
+    function importExcel($filename, &$message, $typeFile) {
         global $con;
-        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        if($typeFile == 'application/vnd.ms-excel' || $typeFile ==  'text/xls'){
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+        } else {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        }
+        
         $spreadSheet = $reader->load($filename);
-
         $excelSheet = $spreadSheet->getActiveSheet();
         $spreadSheetAry = $excelSheet->toArray();
-        
         $numRows = count($spreadSheetAry);
-        return false;
-        if(isset($spreadSheetAry[0][7])){
-            $titolo_progetto = $spreadSheetAry[0][7];
-        } else {
-            $message->error .= 'Bad file. Non riesco a identificare le corrette colonne del file.<br/>';
+
+        $mese = $spreadSheetAry[1][3];
+        if (empty($mese)) {
+            $message->error .= 'Bad file. Non riesco a identificare il mese del rapportino.<br/>';
             return;
         }
-        $id_progetto = select_single_value("SELECT ID_PROGETTO FROM PROGETTI WHERE TITOLO='$titolo_progetto'"); // FIXME chiave unica?!?        
-        if (empty($id_progetto)) {
-            $message->error .= 'Bad file. Non riesco a identificare il titolo del progetto.<br/>';
-            return;
-        }
-        
-        $anno = $spreadSheetAry[2][9];
+
+        $anno = $spreadSheetAry[1][4];
         if (empty($anno)) {
             $message->error .= 'Bad file. Non riesco a identificare l\'anno del rapportino.<br/>';
             return;
         }
-        $mese = $spreadSheetAry[2][13]; // e.g. February
-        if (empty($mese)) {
-            $message->error .= 'Bad file. Non riesco a identificare il mes del rapportino.<br/>';
-            return;
-        }
-        $mese = date_parse($mese)['month'];
+        
+        $data_lul = $anno."-".$mese;
+        $data_lul = new DateTime($data_lul);
+        $data_lul->modify('last day of this month');
+        $ultimoGiornoMese = $data_lul->format('d');
+        
+        $contatoreDipendenti = 3;
+        $contatoreOreDipendenti = 5;
 
-        $matricola = '';
-        // skip first rows
-        for ($i = 0; $i <= $numRows; ++$i) {
-            if (strpos($spreadSheetAry[$i][0], 'Activity details') !== false) {
+        for($e= 1; ;$e++){
+            //delete
+            if($e != 1){
+                $contatoreDipendenti = $contatoreDipendenti + 10;
+                $contatoreOreDipendenti = $contatoreOreDipendenti + 10;
+            }
+
+            $this->elimina($anno."-".$mese,$spreadSheetAry[$contatoreDipendenti][1]);
+
+            if($spreadSheetAry[$contatoreDipendenti][0] == 'Matricola'){
+                for($a= 1; $a <= $ultimoGiornoMese; $a++){
+                    $ora_lavorata = $spreadSheetAry[$contatoreOreDipendenti][$a];
+                    $this->crea($spreadSheetAry[$contatoreDipendenti][1],$anno."-".$mese."-".$a,$ora_lavorata);
+                }
+            } else {
                 break;
             }
         }
-        
-        if ($i == $numRows) {
-            $message->error .= 'Bad file. Non trovo la stringa "Activity details".<br/>';
-            return;
-        }
-        
-        $matricola = $spreadSheetAry[$i][23];
-        if (empty($matricola)) {
-            $message->error .= 'Bad file. Non riesco a identificare la matricola utente.</br>';
-            return;
-        }
-        
-        ++$i;
-        $riga_date = $i;
-        ++$i;
-        
-        for ( ; $i <= $numRows; ++$i) {
-            if (empty($spreadSheetAry[$i][0])) {
-                continue;
-            }
-            if ($spreadSheetAry[$i][0] === 'TOT') {
-                break;
-            }
-            $titolo_wp = mysqli_real_escape_string($con, $spreadSheetAry[$i][0]);
-            $id_wp = select_single_value("SELECT ID_WP FROM PROGETTI_WP WHERE ID_PROGETTO=$id_progetto AND TITOLO='$titolo_wp'");
-            
-            for ($day = 1; $day < count($spreadSheetAry[$riga_date]); ++$day) { // OFFSET == 0
-                if ($spreadSheetAry[$riga_date][$day] === 'TOT') {
-                    break;
-                }
-                $data = "$anno-$mese-$day";
-                $ore = $spreadSheetAry[$i][$day];
-
-                if ($ore > 0) {
-                    $query = "replace into ore_consuntivate(MATRICOLA_DIPENDENTE,DATA,ID_PROGETTO,ID_WP,ORE_LAVORATE) values('$matricola','$data',$id_progetto,$id_wp,$ore)";
-                    execute_update($query);
-                }
-            }
-        }
-        
         $message->success .= 'Caricamento Effettuato correttamente.</br>';
+    }
+
+    function crea($matricola,$data,$ore) {
+        global $con, $logged_user;
+        $sql = insert("ore_presenza_lul", ["MATRICOLA_DIPENDENTE" => $matricola,
+                                   "DATA" => $data,
+                                   "ORE_PRESENZA_ORDINARIE" => $ore
+                                  ]);
+                                  
+        //echo '<br/>INSERIMENTO<br/>';
+        //echo '<br/>'.$sql.'<br/>';
+        mysqli_query($con, $sql);
+        if ($con ->error) {
+            print_error(500, $con ->error);
+        }
+        return "ok";
+    }
+        
+    function elimina($data,$matricola) {
+        global $con;
+        $datafine = new DateTime($data);
+        $datainizio = new DateTime($data);
+        $datafine->modify('last day of this month');
+        $datainizio->modify('first day of this month');
+        $ultimoGiornoMese = $datafine->format('d');
+        $primoGiornoMese = $datainizio->format('d');
+        $sql = "DELETE FROM ore_presenza_lul WHERE MATRICOLA_DIPENDENTE = '$matricola' and DATA >= CAST('$data-$primoGiornoMese' AS DATE) AND DATA <= CAST('$data-$ultimoGiornoMese' AS DATE)";
+        //echo '<br/>Eliminazione<br/>';
+        //echo '<br/>'.$sql.'<br/>';
+        mysqli_query($con, $sql);
+        if ($con ->error) {
+            print_error(500, $con ->error);
+        }
     }
 }
 ?>
