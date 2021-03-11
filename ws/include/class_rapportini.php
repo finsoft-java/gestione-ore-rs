@@ -279,7 +279,7 @@ class RapportiniManager {
             $message->error .= 'Bad file. Non riesco a identificare le corrette colonne del file.<br/>';
             return;
         }
-        $id_progetto = select_single_value("SELECT ID_PROGETTO FROM PROGETTI WHERE TITOLO='$titolo_progetto'"); // FIXME chiave unica?!?        
+        $id_progetto = select_single_value("SELECT ID_PROGETTO FROM progetti WHERE TITOLO='$titolo_progetto'"); // FIXME chiave unica?!?        
         if (empty($id_progetto)) {
             $message->error .= 'Bad file. Non riesco a identificare il titolo del progetto.<br/>';
             return;

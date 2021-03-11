@@ -7,30 +7,9 @@ $budget = new ReportBudgetManager();
 
 class ReportBudgetManager {
 
-    /*function get_consuntivi($id_progetto=null, $anno=null, $mese=null) {
-        $partial = $this->_create_where_condiction_consuntivi($id_progetto, $anno, $mese);
-        $sql = "SELECT c.ID_PROGETTO, p.TITOLO, c.MATRICOLA_DIPENDENTE, c.ID_WP, wp.TITOLO as TITOLO_WP, c.DATA, c.ORE_LAVORATE, c.COSTO_ORARIO " . $partial;
-        return select_list($sql);
-    }
-
-    function _create_where_condiction_consuntivi($id_progetto=null, $anno=null, $mese=null) {
-        $sql = "FROM ore_consuntivate c " .
-                "JOIN PROGETTI_WP wp ON wp.id_progetto=c.id_progetto AND wp.id_wp=c.id_wp ".
-                "JOIN PROGETTI p ON wp.id_progetto=p.id_progetto " .
-                "WHERE 1=1 ";
-        if (!empty($id_progetto)) {
-            $sql .= "AND p.ID_PROGETTO = '$id_progetto' ";
-        }
-        if (!empty($anno) and !empty($mese)) {
-            $primo = "DATE('$anno-$mese-01')";
-            $sql .= "AND c.DATA >= $primo AND c.DATA <= LAST_DAY($primo) ";
-        }
-        return $sql;
-    } */
-
     function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
         $sql = "SELECT NVL(SUM(c.ORE_LAVORATE),0) as ORE_LAVORATE, NVL(SUM(c.ORE_LAVORATE * c.COSTO_ORARIO),0.0) as COSTO " .
-            "FROM PROGETTI p " .
+            "FROM progetti p " .
             "JOIN PROGETTI_WP wp ON wp.id_progetto=p.id_progetto ".
             "LEFT JOIN ore_consuntivate c ON wp.id_progetto=c.id_progetto AND wp.id_wp=c.id_wp ";
         if (!empty($anno) and !empty($mese)) {
@@ -131,7 +110,7 @@ class ReportBudgetManager {
         global $panthera;
         $idprogetto = $progetto['ID_PROGETTO'];
         
-        $query_tipo_costo = "SELECT COD_TIPO_COSTO_PANTHERA FROM PROGETTI WHERE ID_PROGETTO=$idprogetto";
+        $query_tipo_costo = "SELECT COD_TIPO_COSTO_PANTHERA FROM progetti WHERE ID_PROGETTO=$idprogetto";
         $tipoCosto = select_single_value($query_tipo_costo);
 
         if (!empty($anno) and !empty($mese)) {
