@@ -11,7 +11,7 @@ class PantheraManager {
                       [ 'MATRICOLA' => '6666', 'NOME' => 'Bianchi Gianni' ]
                      ];
         } else {
-            $query = "SELECT DISTINCT MATRICOLA,COGNOME||' '||NOME AS NOME FROM THIP.DIPENDENTI_V01 WHERE ID_AZIENDA='001'";
+            $query = "SELECT DISTINCT ID_UTENTE AS MATRICOLA,DENOMINAZIONE AS NOME FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001'";
             $matricole = select_list($query, $connPanthera);
         }
         
@@ -22,7 +22,7 @@ class PantheraManager {
         if (MOCK_PANTHERA) {
             $matricola = 'Rossi Mario';
         } else {
-            $query = "SELECT DISTINCT COGNOME||' '||NOME AS NOME FROM THIP.DIPENDENTI_V01 WHERE ID_AZIENDA='001' AND MATRICOLA='$matricola'";
+            $query = "SELECT DISTINCT DENOMINAZIONE FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' AND ID_UTENTE='$matricola'";
             $matricola = select_single_value($query, $connPanthera);
         }
         return $matricola;
@@ -51,7 +51,7 @@ class PantheraManager {
                       [ 'ID_RISORSA' => '6666', 'COSTO' => 10.0 ]
                      ];
         } else {
-            $query = "SELECT DISTINCT ID_RISORSA,COSTO " .
+            $query = "SELECT DISTINCT ID_RISORSA AS MATRICOLA,COSTO " .
                 "FROM THIP.TIPI_COSTO " .
                 "WHERE ID_AZIENDA='001' AND TIPO_RISORSA='U' AND LIVELLO_RISORSA='4' " .
                 "AND R_TIPO_COSTO='$tipoCosto' " .
