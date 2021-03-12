@@ -21,7 +21,7 @@ export class AuthenticationService {
     }
 
     login(username: string, password: string) {
-      
+        console.log(environment.wsUrl);
         const url = environment.wsUrl + `login.php`;
         const body = JSON.stringify({username: username,
                                      password: password});

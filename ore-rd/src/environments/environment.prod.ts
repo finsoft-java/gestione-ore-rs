@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  wsUrl:'DAFARE'
+  wsUrl:'http://svr-rd.osai.loc/ws/'
 };
