@@ -1,1 +1,14 @@
-<p>raccolta-date-firma works!</p>
+<h5 style="margin-bottom: 30px;text-align:center">
+    Raccolta Date Firma</h5>
+<div>
+    <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+        <mat-form-field appearance="fill" style="margin-right: 10px;">
+            <mat-label>Data</mat-label>
+            <input matInput [matDatepicker]="picker" [formControl]="date">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker startView="multi-year" (yearSelected)="chosenYearHandler($event)" (monthSelected)="chosenMonthHandler($event, picker)" panelClass="example-month-picker">
+            </mat-datepicker>
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="run()">RUN HERE</button>
+    </p>
+</div>
