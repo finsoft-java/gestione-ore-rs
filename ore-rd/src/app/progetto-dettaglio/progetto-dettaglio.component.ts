@@ -1,3 +1,4 @@
+import { filter } from 'rxjs/operators';
 import { TipologiaSpesaService } from './../_services/tipospesa.service';
 import { TipologiaSpesaComponent } from './../tipologia-spesa/tipologia-spesa.component';
 import { ProgettiWpService } from './../_services/progetti.wp.service';
@@ -38,9 +39,9 @@ export class ProgettoDettaglioComponent implements OnInit {
   displayedColumnsWp: string[] = ['id','titolo', 'descrizione', 'dataInizio', 'dataFine','risorse','monteOre', 'actions'];
   dataSource = new MatTableDataSource<[]>();
   dataSourceWp = new MatTableDataSource<[]>();
-  allTipologie: any;
-  allMatricole: any;
-  allTipiCosto: any;
+  allTipologie: any[] = [];
+  allMatricole: any[] = [];
+  allTipiCosto: any[] = [];
   isNotAnnulable:boolean = false;
   progetto_spesa!: ProgettoSpesa;
   progetto_wp!: ProgettoWp;
@@ -124,18 +125,27 @@ export class ProgettoDettaglioComponent implements OnInit {
   getMatricole(): void {
     this.progettiService.getAllMatricole()
       .subscribe(response => {
-        this.allMatricole  = new Matricola;
         this.allMatricole = response["data"];
       },
       error => {
         this.alertService.error(error);
       });
   }
-
+ stampaRisorse(risorse: string[]){
+    console.log(risorse);
+    let arrayRisorse:any[] = [];
+    risorse.forEach(element => {
+      console.log(element);
+      console.log(this.allMatricole);      
+      let  u  = this.allMatricole.find(x => x.MATRICOLA == element);
+      if(this.allMatricole.find(x => x.MATRICOLA == element) != null)
+        arrayRisorse.push(this.allMatricole.find(x => x.MATRICOLA == element).NOME);
+    });
+    return arrayRisorse;
+ }
   getSupervisor(): void {
     this.progettiService.getAllTipiCostoPanthera()
       .subscribe(response => {
-        this.allTipiCosto  = new TipoCosto;
         this.allTipiCosto = response["data"];
       },
       error => {

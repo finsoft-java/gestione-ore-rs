@@ -1,3 +1,4 @@
+import { AlertService } from './../_services/alert.service';
 import { DataFirma } from './../_models/matricola';
 import { Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
@@ -39,7 +40,7 @@ export class RaccoltaDateFirmaComponent implements OnInit {
 
   date = new FormControl(moment());
   step2=false;
-  displayedColumns: string[] = ['titolo','matr_supervisor', 'matr_dipendente','dataFirma', 'actions'];
+  displayedColumns: string[] = ['titolo','matr_supervisor', 'matr_dipendente','dataFirma'];
   dataSource = new MatTableDataSource<DataFirma[]>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;
@@ -57,7 +58,7 @@ export class RaccoltaDateFirmaComponent implements OnInit {
     datepicker.close();
   }
 
-  constructor(private datitestService: DatitestService) { }
+  constructor(private datitestService: DatitestService, private alertService: AlertService) { }
 
   ngOnInit(): void {
     this.dataSource.paginator = this.paginator;
@@ -72,5 +73,28 @@ export class RaccoltaDateFirmaComponent implements OnInit {
       });
   }
   getRecord(a:any){
+    a.isEditable=true;
   }
+
+  
+  saveChange(a:DataFirma){
+    a.isEditable=false;
+    
+      this.datitestService.salvaDataFirma(a)
+      .subscribe(response => {
+        // this.alertService.success("Tipologia inserita");
+        this.dataSource.data.splice(-1, 1);
+        this.dataSource.data.push(response["value"][0]);
+        this.dataSource.data = this.dataSource.data;
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    
+  }
+
+  undoChange(a:DataFirma){
+    a.isEditable = false;
+  }
+
 }

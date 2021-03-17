@@ -9,6 +9,7 @@ export class DataFirma {
     public TITOLO?:number,
     public MATRICOLA_SUPERVISOR?:string,
     public MATRICOLA_DIPENDENTE?:string,
-    public DATA_FIRMA?:string 
+    public DATA_FIRMA?:string,
+    public isEditable: boolean= false
     ) {}    
 }

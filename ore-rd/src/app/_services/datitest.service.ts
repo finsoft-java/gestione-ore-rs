@@ -1,3 +1,4 @@
+import { DataFirma } from './../_models/matricola';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from './../../environments/environment';
@@ -20,6 +21,12 @@ export class DatitestService {
   runDateFirma(periodo: string) {
     return this.http.post<any>(`${this.baseUrl}/GeneraDateFirma.php`, {
       periodo: periodo
+    });
+  }
+
+  salvaDataFirma(dataFirma: DataFirma) {
+    return this.http.put<any>(`${this.baseUrl}/GeneraDateFirma.php`, {
+      data_firma: dataFirma
     });
   }
   
