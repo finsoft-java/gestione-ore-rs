@@ -16,5 +16,11 @@ export class DatitestService {
       periodo: periodo
     });
   }
+
+  runDateFirma(periodo: string) {
+    return this.http.post<any>(`${this.baseUrl}/GeneraDateFirma.php`, {
+      periodo: periodo
+    });
+  }
   
 }

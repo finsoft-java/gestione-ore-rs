@@ -2,34 +2,29 @@
     <mat-drawer #drawer class="example-sidenav" mode="side">
         <nav style="padding:15px;">
             <button mat-menu-item (click)="router_frontend.navigate(['progetti']); drawer.toggle()">
-          <span>Progetti</span>
-      </button>
+                <span>Progetti</span>
+            </button>
             <button mat-menu-item (click)="router_frontend.navigate(['tipologie-spesa']); drawer.toggle()">
-        <span>Tipologia Spesa</span>
-      </button>
-
+                <span>Tipologia Spesa</span>
+            </button>
             <button mat-menu-item (click)="router_frontend.navigate(['importazione-lul']); drawer.toggle()">
-        <span>Importazione LUL</span>
-      </button>
-
+                <span>Importazione LUL</span>
+            </button>
             <button mat-menu-item (click)="router_frontend.navigate(['importazione-rapportini']); drawer.toggle()">
-        <span>Importazione Rapportini</span>
-      </button>
-
+                <span>Importazione Rapportini</span>
+            </button>
             <button mat-menu-item (click)="router_frontend.navigate(['esportazione-rapportini']); drawer.toggle()">
-        <span>Esportazione Rapportini</span>
-      </button>
-
+                <span>Esportazione Rapportini</span>
+            </button>
             <button mat-menu-item (click)="router_frontend.navigate(['raccolta-date-firma']); drawer.toggle()">
-        <span>Raccolta date firma</span>
-      </button>
-
+                <span>Raccolta date firma</span>
+            </button>
             <button mat-menu-item (click)="router_frontend.navigate(['dati-test']); drawer.toggle()">
-        <span>Dati Test</span>
-      </button>
+                <span>Dati Test</span>
+            </button>
             <button mat-menu-item (click)="logout(); drawer.toggle()">
-        <span>Logout</span>
-      </button>
+                <span>Logout</span>
+            </button>
         </nav>
     </mat-drawer>
 
@@ -38,7 +33,7 @@
             <div class="navbar-header">
                 <nav style="padding:15px;">
                     <div class="example-sidenav-content">
-                        <button mat-icon-button (click)="drawer.toggle()" aria-label="Example icon-button with a menu">
+                      <button mat-icon-button (click)="drawer.toggle()" aria-label="Example icon-button with a menu">
                         <mat-icon>menu</mat-icon>
                       </button>
                     </div>

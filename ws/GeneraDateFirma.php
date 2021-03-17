@@ -1,0 +1,51 @@
+<?php
+
+// Mi aspetto un solo parametro, il periodo di lancio, nel formato YYYY-MM
+
+include("include/all.php");    
+$con = connect();
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    //do nothing, HTTP 200
+    exit();
+}
+    
+require_logged_user_JWT();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //==========================================================
+
+    // CONTROLLO PARAMETRI
+
+    $postdata = file_get_contents("php://input");
+    $json_data = json_decode($postdata);
+    if (!$json_data) {
+        print_error(400, "Missing JSON data");
+    }
+    $periodo = $json_data->periodo;
+    if (! $periodo) {
+        print_error(400, "Missing parameter: periodo");
+    }
+    if (strlen($periodo) != 7) {
+        print_error(400, "Bad parameter: Il periodo di lancio deve essere nella forma YYYY-MM");
+    }
+    $anno = substr($periodo, 0, 4);
+    $mese = substr($periodo, 5, 2);
+
+    // REPERIRE DATI DA DB
+    $primo = "DATE('$anno-$mese-01')";
+
+
+    
+    $query = "SELECT p.TITOLO,p.MATRICOLA_SUPERVISOR,pwr.MATRICOLA_DIPENDENTE from progetti p inner join progetti_wp_risorse pwr on p.ID_PROGETTO = pwr.ID_PROGETTO WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo) group by 1,2,3";
+            
+    $dateFirma = select_list($query);
+    header('Content-Type: application/json');
+    echo json_encode(['data' => $dateFirma]);
+    
+} else {
+    //==========================================================
+    print_error(400, "Unsupported method in request: " . $_SERVER['REQUEST_METHOD']);
+}
+
+?>
