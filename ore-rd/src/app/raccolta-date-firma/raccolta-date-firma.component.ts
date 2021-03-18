@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { DatitestService } from './../_services/datitest.service';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
@@ -12,6 +12,8 @@ import {MatDatepicker} from '@angular/material/datepicker';
 import {Moment} from 'moment';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
+
+
 const moment = _moment;
 export const MY_FORMATS = {
   parse: {
@@ -39,8 +41,6 @@ export const MY_FORMATS = {
 export class RaccoltaDateFirmaComponent implements OnInit {
 
   date = new FormControl(moment());
-  step2=false;
-  displayedColumns: string[] = ['titolo','matr_supervisor', 'matr_dipendente','dataFirma'];
   dataSource = new MatTableDataSource<DataFirma[]>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;
@@ -66,16 +66,20 @@ export class RaccoltaDateFirmaComponent implements OnInit {
 
   run() {
       this.datitestService.runDateFirma(formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe(response => {
+        console.log(response);
+        for(let i = 0; i < response["data"].length; i++){
+          response["data"][i]["DATA_FIRMA"] = '';
+        }
+        console.log(response["data"]);
         this.dataSource = new MatTableDataSource<DataFirma[]>(response["data"]);
-        this.step2 = true;
       },
       error => {
       });
   }
+
   getRecord(a:any){
     a.isEditable=true;
   }
-
   
   saveChange(a:DataFirma){
     a.isEditable=false;

@@ -36,6 +36,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MomentUtcDateAdapter } from './_helpers/date.adapter';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { TabellaDateFirmaComponent } from './tabella-date-firma/tabella-date-firma.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     GeneraDatiTestComponent,
     ProgettoDettaglioComponent,
     LoginComponent,
-    AlertComponent
+    AlertComponent,
+    TabellaDateFirmaComponent
   ],
   imports: [
     HttpClientModule,

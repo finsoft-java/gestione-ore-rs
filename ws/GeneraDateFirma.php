@@ -34,12 +34,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // REPERIRE DATI DA DB
     $primo = "DATE('$anno-$mese-01')";
+    $metaMese = "DATE('$anno-$mese-15')";
 
 
     
     $query = "SELECT p.TITOLO,p.MATRICOLA_SUPERVISOR,pwr.MATRICOLA_DIPENDENTE from progetti p inner join progetti_wp_risorse pwr on p.ID_PROGETTO = pwr.ID_PROGETTO WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo) group by 1,2,3";
             
     $dateFirma = select_list($query);
+/**
+ *  ciclo precompilazione Data_firma
+ */
+    for(){
+        //SELECT min(a.DATA) FROM ore_presenza_lul a join ore_presenza_lul b on a.DATA= b.DATA AND b.MATRICOLA_DIPENDENTE = '$dateFirma[$i]['MATRICOLA_SUPERVISOR']'  AND b.ORE_PRESENZA_ORDINARIE > 0 where a.ORE_PRESENZA_ORDINARIE > 0 AND a.MATRICOLA_DIPENDENTE = '$dateFirma[$i]['MATRICOLA_DIPENDENTE']' AND a.DATA >= $metaMese
+        
+
+    }
+
     header('Content-Type: application/json');
     echo json_encode(['data' => $dateFirma]);
     
