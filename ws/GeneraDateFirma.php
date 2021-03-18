@@ -44,12 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /**
  *  ciclo precompilazione Data_firma
  */
-    for(){
-        //SELECT min(a.DATA) FROM ore_presenza_lul a join ore_presenza_lul b on a.DATA= b.DATA AND b.MATRICOLA_DIPENDENTE = '$dateFirma[$i]['MATRICOLA_SUPERVISOR']'  AND b.ORE_PRESENZA_ORDINARIE > 0 where a.ORE_PRESENZA_ORDINARIE > 0 AND a.MATRICOLA_DIPENDENTE = '$dateFirma[$i]['MATRICOLA_DIPENDENTE']' AND a.DATA >= $metaMese
-        
-
+    for($i = 0 ; $i < count($dateFirma); $i++){
+        $matr_sup = $dateFirma[$i]['MATRICOLA_SUPERVISOR'];
+        $matr_dip = $dateFirma[$i]['MATRICOLA_DIPENDENTE'];
+        $query = "SELECT min(a.DATA) FROM ore_presenza_lul a join ore_presenza_lul b on a.DATA= b.DATA AND b.MATRICOLA_DIPENDENTE = '$matr_sup' AND b.ORE_PRESENZA_ORDINARIE > 0 where a.ORE_PRESENZA_ORDINARIE > 0 AND a.MATRICOLA_DIPENDENTE = '$matr_dip' AND a.DATA >= $metaMese";
+        $dataDefault = select_column($query);
+        $dateFirma[$i]['DATA_FIRMA'] = $dataDefault;
     }
-
     header('Content-Type: application/json');
     echo json_encode(['data' => $dateFirma]);
     
