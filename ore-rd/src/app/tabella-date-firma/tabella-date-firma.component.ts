@@ -1,3 +1,5 @@
+import { AlertService } from './../_services/alert.service';
+import { DatitestService } from './../_services/datitest.service';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { DataFirma } from './../_models/matricola';
@@ -35,14 +37,26 @@ export const MY_FORMATS = {
 })
 export class TabellaDateFirmaComponent implements OnInit {
   @Input() dataSourceFiglio: any;
+  @Input() annoMese:any;
 
   displayedColumns: string[] = ['titolo','matr_supervisor', 'matr_dipendente','dataFirma'];
-  constructor() { }
+  constructor(private datitestService: DatitestService, private alertService: AlertService) { }
 
   ngOnInit(): void {
   }
 
   salvaDateFirma(){
-    console.log(this.dataSourceFiglio);
+    let objAnnoMese = { "ANNO_MESE" : this.annoMese}
+    this.dataSourceFiglio.data.push(objAnnoMese);
+    this.datitestService.salvaDataFirma(this.dataSourceFiglio.data)
+      .subscribe(response => {
+        
+        this.alertService.success("Caricamento eseguito con successo");
+        this.dataSourceFiglio.data = this.dataSourceFiglio.data.slice(0,-1);
+      },
+      error => {
+        this.alertService.error(error);
+        this.dataSourceFiglio.data = this.dataSourceFiglio.data.slice(0,-1);
+      });
   }
 }

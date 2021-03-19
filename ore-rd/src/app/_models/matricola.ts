@@ -6,6 +6,7 @@
 }
 export class DataFirma {
   constructor(
+    public ID_PROGETTO?:number,
     public TITOLO?:number,
     public MATRICOLA_SUPERVISOR?:string,
     public MATRICOLA_DIPENDENTE?:string,

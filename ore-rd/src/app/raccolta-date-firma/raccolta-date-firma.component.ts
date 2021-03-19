@@ -44,6 +44,7 @@ export class RaccoltaDateFirmaComponent implements OnInit {
   dataSource = new MatTableDataSource<DataFirma[]>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;
+  annoMese:string = '';
 
   chosenYearHandler(normalizedYear: Moment) {
     const ctrlValue = this.date.value;
@@ -65,12 +66,8 @@ export class RaccoltaDateFirmaComponent implements OnInit {
   }
 
   run() {
-      this.datitestService.runDateFirma(formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe(response => {
-        console.log(response);
-        for(let i = 0; i < response["data"].length; i++){
-          response["data"][i]["DATA_FIRMA"] = '';
-        }
-        console.log(response["data"]);
+      this.annoMese = formatDate(this.date.value,"YYYY-MM","en-GB");
+      this.datitestService.runDateFirma(this.annoMese).subscribe(response => {
         this.dataSource = new MatTableDataSource<DataFirma[]>(response["data"]);
       },
       error => {
@@ -82,19 +79,7 @@ export class RaccoltaDateFirmaComponent implements OnInit {
   }
   
   saveChange(a:DataFirma){
-    a.isEditable=false;
-    
-      this.datitestService.salvaDataFirma(a)
-      .subscribe(response => {
-        // this.alertService.success("Tipologia inserita");
-        this.dataSource.data.splice(-1, 1);
-        this.dataSource.data.push(response["value"][0]);
-        this.dataSource.data = this.dataSource.data;
-      },
-      error => {
-        this.alertService.error(error);
-      });
-    
+        
   }
 
   undoChange(a:DataFirma){
