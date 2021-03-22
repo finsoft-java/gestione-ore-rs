@@ -160,6 +160,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   salva() {
+    
     if(this.id_progetto == null){
       this.progettiService.insert(this.progetto)
       .subscribe(response => {
@@ -170,14 +171,20 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
     } else {
-      this.progettiService.update(this.progetto)
-      .subscribe(response => {
-        this.alertService.success("Progetto modificato con successo");
-        this.router.navigate(['/progetto/'+response["value"][0]["ID_PROGETTO"]]);
-      },
-      error => {
-        this.alertService.error(error);
-      });
+      let no_error = true;
+      for(let i = 0; i < this.dataSourceWp.data.length; i++){
+        no_error = this.controlliDate(this.dataSourceWp.data[i]);
+      }
+      if(no_error){
+        this.progettiService.update(this.progetto)
+        .subscribe(response => {
+          this.alertService.success("Progetto modificato con successo");
+          this.router.navigate(['/progetto/'+response["value"]["ID_PROGETTO"]]);
+        },
+        error => {
+          this.alertService.error(error);
+        });
+      }
     }
     
   }
@@ -265,7 +272,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
   }
 
-  controlliDate(wp:ProgettoWp){
+  controlliDate(wp:any){
     let datePrIniziale = '';
     let datePrFinale = '';
     let dateWpIniziale = '';
