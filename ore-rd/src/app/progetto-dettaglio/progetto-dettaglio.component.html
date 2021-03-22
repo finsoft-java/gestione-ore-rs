@@ -215,7 +215,7 @@
         </ng-container>
 
         <ng-container matColumnDef="dataFine">
-            <th mat-header-cell *matHeaderCellDef> Data File </th>
+            <th mat-header-cell *matHeaderCellDef> Data Fine </th>
             <td mat-cell *matCellDef="let element">
                 <label *ngIf="!element.isEditable"> {{element.DATA_FINE | date: 'dd-MM-yyyy'}}  </label>
                 <div style="display: block;margin: 0px auto;width: 125px;" *ngIf="element.isEditable">

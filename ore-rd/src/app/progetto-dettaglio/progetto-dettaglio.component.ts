@@ -132,11 +132,8 @@ export class ProgettoDettaglioComponent implements OnInit {
       });
   }
  stampaRisorse(risorse: string[]){
-    console.log(risorse);
     let arrayRisorse:any[] = [];
     risorse.forEach(element => {
-      console.log(element);
-      console.log(this.allMatricole);      
       let  u  = this.allMatricole.find(x => x.MATRICOLA == element);
       if(this.allMatricole.find(x => x.MATRICOLA == element) != null)
         arrayRisorse.push(this.allMatricole.find(x => x.MATRICOLA == element).NOME);
@@ -267,9 +264,37 @@ export class ProgettoDettaglioComponent implements OnInit {
       });
     }
   }
+
+  controlliDate(wp:ProgettoWp){
+    let datePrIniziale = '';
+    let datePrFinale = '';
+    let dateWpIniziale = '';
+    let dateWpFinale = '';
+
+    if(this.progetto.DATA_INIZIO)
+      datePrIniziale = formatDate(this.progetto.DATA_INIZIO,'yyyy-MM-dd','en_US');
+
+    if(this.progetto.DATA_FINE)
+      datePrFinale = formatDate(this.progetto.DATA_FINE,'yyyy-MM-dd','en_US');
+
+    if(wp.DATA_INIZIO)
+      dateWpIniziale = formatDate(wp.DATA_INIZIO,'yyyy-MM-dd','en_US');
+
+    if(wp.DATA_FINE)
+      dateWpFinale = formatDate(wp.DATA_FINE,'yyyy-MM-dd','en_US');
+
+    if(datePrIniziale < dateWpIniziale){
+      this.alertService.error("La data Iniziale del Progetto non può essere minore di quella del Wp");
+    }
+    if(datePrFinale > dateWpFinale){
+      this.alertService.error("La data Finale del Progetto non può essere maggiore di quella del Wp");
+    }
+  }
+
   salvaModificaWp(a: ProgettoWp){
     a.isEditable=false;
-    console.log(a);
+    this.controlliDate(a);
+    return false;
     if(a.ID_WP == null){
       this.progettiWpService.insert(a)
       .subscribe(response => {

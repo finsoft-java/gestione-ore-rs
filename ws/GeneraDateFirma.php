@@ -58,14 +58,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     for($i=0; $i < count($json_data->data_firma)-1; $i++){
         if($json_data->data_firma[$i] != null){
-            $sql = insert("date_firma", ["ANNO_MESE" => $annoMese,
-                                        "ID_PROGETTO" => $json_data->data_firma[$i]->ID_PROGETTO,
-                                        "DATA_FIRMA" => $json_data->data_firma[$i]->DATA_FIRMA,
-                                        "MATRICOLA_DIPENDENTE" => $json_data->data_firma[$i]->MATRICOLA_DIPENDENTE
-                                        ]);                    
-            mysqli_query($con, $sql);
-            if ($con ->error) {
-                print_error(500, $con ->error);
+            if($json_data->data_firma[$i]->DATA_FIRMA != null){
+                $sql = insert("date_firma", ["ANNO_MESE" => $annoMese,
+                                            "ID_PROGETTO" => $json_data->data_firma[$i]->ID_PROGETTO,
+                                            "DATA_FIRMA" => $json_data->data_firma[$i]->DATA_FIRMA,
+                                            "MATRICOLA_DIPENDENTE" => $json_data->data_firma[$i]->MATRICOLA_DIPENDENTE
+                                            ]);                    
+                mysqli_query($con, $sql);
+                if ($con ->error) {
+                    print_error(500, $con ->error);
+                }
             }
         }
     }
