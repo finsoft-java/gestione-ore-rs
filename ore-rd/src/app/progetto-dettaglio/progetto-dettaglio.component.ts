@@ -285,36 +285,43 @@ export class ProgettoDettaglioComponent implements OnInit {
 
     if(datePrIniziale < dateWpIniziale){
       this.alertService.error("La data Iniziale del Progetto non può essere minore di quella del Wp");
+      return false;
     }
     if(datePrFinale > dateWpFinale){
       this.alertService.error("La data Finale del Progetto non può essere maggiore di quella del Wp");
+      return false;
     }
+    return true;
   }
 
   salvaModificaWp(a: ProgettoWp){
     a.isEditable=false;
     this.controlliDate(a);
-    return false;
     if(a.ID_WP == null){
-      this.progettiWpService.insert(a)
-      .subscribe(response => {
-        this.alertService.success("Work Package inserito con successo");
-        this.dataSourceWp.data.splice(-1, 1);
-        this.dataSourceWp.data.push(response["value"][0]);
-        this.dataSourceWp.data = this.dataSourceWp.data;
-      },
-      error => {
-        this.alertService.error(error);
-      });
+      
+      if(this.controlliDate(a)){
+        this.progettiWpService.insert(a)
+        .subscribe(response => {
+          this.alertService.success("Work Package inserito con successo");
+          this.dataSourceWp.data.splice(-1, 1);
+          this.dataSourceWp.data.push(response["value"][0]);
+          this.dataSourceWp.data = this.dataSourceWp.data;
+        },
+        error => {
+          this.alertService.error(error);
+        });
+      }
     } else {
-      this.progettiWpService.update(a)
-      .subscribe(response => {
-        this.alertService.success("Work Package modificato con successo");
-        this.getProgettowP();
-      },
-      error => {
-        this.alertService.error(error);
-      });
+      if(this.controlliDate(a)){
+        this.progettiWpService.update(a)
+        .subscribe(response => {
+          this.alertService.success("Work Package modificato con successo");
+          this.getProgettowP();
+        },
+        error => {
+          this.alertService.error(error);
+        });
+      }
     }
   }
   
