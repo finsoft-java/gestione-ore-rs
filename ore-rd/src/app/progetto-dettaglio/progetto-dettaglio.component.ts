@@ -24,11 +24,28 @@ import {MatDatepicker} from '@angular/material/datepicker';
 import {Moment} from 'moment';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
+export const MY_FORMATS = {
+  parse: {
+      dateInput: 'LL'
+  },
+  display: {
+      dateInput: 'DD-MM-YYYY',
+      monthYearLabel: 'YYYY',
+      dateA11yLabel: 'LL',
+      monthYearA11yLabel: 'YYYY'
+  }
+};
 
 @Component({
   selector: 'app-progetto-dettaglio',
   templateUrl: './progetto-dettaglio.component.html',
-  styleUrls: ['./progetto-dettaglio.component.css']
+  styleUrls: ['./progetto-dettaglio.component.css'],
+  providers: [{
+    provide: DateAdapter,
+    useClass: MomentDateAdapter,
+    deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS]
+  },
+  {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS}]
 })
 export class ProgettoDettaglioComponent implements OnInit {
 
@@ -160,6 +177,11 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   salva() {
+      if(this.progetto.DATA_FINE)
+        this.progetto.DATA_FINE = formatDate(this.progetto.DATA_FINE,"YYYY-MM-dd","en-GB");
+
+      if(this.progetto.DATA_INIZIO)
+        this.progetto.DATA_INIZIO = formatDate(this.progetto.DATA_INIZIO,"YYYY-MM-dd","en-GB");
     
     if(this.id_progetto == null){
       this.progettiService.insert(this.progetto)
@@ -290,12 +312,12 @@ export class ProgettoDettaglioComponent implements OnInit {
     if(wp.DATA_FINE)
       dateWpFinale = formatDate(wp.DATA_FINE,'yyyy-MM-dd','en_US');
 
-    if(datePrIniziale < dateWpIniziale){
-      this.alertService.error("La data Iniziale del Progetto non può essere minore di quella del Wp");
+    if(datePrIniziale > dateWpIniziale){
+      this.alertService.error("Un WP non può iniziare prima del Progetto");
       return false;
     }
-    if(datePrFinale > dateWpFinale){
-      this.alertService.error("La data Finale del Progetto non può essere maggiore di quella del Wp");
+    if(datePrFinale < dateWpFinale){
+      this.alertService.error("Un WP non può finire dopo il Progetto");
       return false;
     }
     return true;
@@ -304,6 +326,14 @@ export class ProgettoDettaglioComponent implements OnInit {
   salvaModificaWp(a: ProgettoWp){
     a.isEditable=false;
     this.controlliDate(a);
+    
+    if(a.DATA_FINE)
+      a.DATA_FINE = formatDate(a.DATA_FINE,"YYYY-MM-dd","en-GB");
+
+    if(a.DATA_INIZIO)
+      a.DATA_INIZIO = formatDate(a.DATA_INIZIO,"YYYY-MM-dd","en-GB");
+
+    
     if(a.ID_WP == null){
       
       if(this.controlliDate(a)){
