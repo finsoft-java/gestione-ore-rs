@@ -5,7 +5,7 @@
     public TITOLO?:string,
     public GRANT_NUMBER?:string,
     public ABSTRACT?:string,
-    public MONTE_ORE_TOT?:string,
+    public MONTE_ORE_TOT:number = 0,
     public DATA_INIZIO?:string,
     public DATA_FINE?:string,
     public COSTO_MEDIO_UOMO?:string,
@@ -33,7 +33,7 @@ export class ProgettoWp {
     public DESCRIZIONE?:string,
     public DATA_INIZIO?:string,
     public DATA_FINE?:string,
-    public MONTE_ORE?:number,
+    public MONTE_ORE:number = 0,
     public isEditable: boolean= false,
     public isInsert: boolean= false
     ) {}   

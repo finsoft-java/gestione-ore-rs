@@ -51,6 +51,7 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   projectSubscription: Subscription;
   progetto!: Progetto;
+  progettoWp!: ProgettoWp[];
   progetto_old!: Progetto;
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
   displayedColumnsWp: string[] = ['id','titolo', 'descrizione', 'dataInizio', 'dataFine','risorse','monteOre', 'actions'];
@@ -60,8 +61,6 @@ export class ProgettoDettaglioComponent implements OnInit {
   allMatricole: any[] = [];
   allTipiCosto: any[] = [];
   isNotAnnulable:boolean = false;
-  progetto_spesa!: ProgettoSpesa;
-  progetto_wp!: ProgettoWp;
   id_progetto!: any;
 
   constructor(private authenticationService: AuthenticationService,
@@ -103,6 +102,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   getProgettowP(): void {
     this.progettiWpService.getById(this.id_progetto)
       .subscribe(response => {
+        this.progettoWp = response["value"];
         this.dataSourceWp = new MatTableDataSource<[]>(response["value"]);
       },
       error => {
@@ -177,11 +177,12 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   salva() {
-      if(this.progetto.DATA_FINE)
-        this.progetto.DATA_FINE = formatDate(this.progetto.DATA_FINE,"YYYY-MM-dd","en-GB");
+    
+    if(this.progetto.DATA_FINE)
+      this.progetto.DATA_FINE = formatDate(this.progetto.DATA_FINE,"YYYY-MM-dd","en-GB");
 
-      if(this.progetto.DATA_INIZIO)
-        this.progetto.DATA_INIZIO = formatDate(this.progetto.DATA_INIZIO,"YYYY-MM-dd","en-GB");
+    if(this.progetto.DATA_INIZIO)
+      this.progetto.DATA_INIZIO = formatDate(this.progetto.DATA_INIZIO,"YYYY-MM-dd","en-GB");
     
     if(this.id_progetto == null){
       this.progettiService.insert(this.progetto)
@@ -194,8 +195,14 @@ export class ProgettoDettaglioComponent implements OnInit {
       });
     } else {
       let no_error = true;
-      for(let i = 0; i < this.dataSourceWp.data.length; i++){
-        no_error = this.controlliDate(this.dataSourceWp.data[i]);
+      let monte_totale_wp:number = 0;
+      for(let i = 0; i < this.progettoWp.length; i++){
+        no_error = this.controlliDate(this.progettoWp[i]);
+        monte_totale_wp = (Number(monte_totale_wp) + Number(this.progettoWp[i].MONTE_ORE));
+      }
+      if(this.progetto.MONTE_ORE_TOT < monte_totale_wp){
+        this.alertService.error("Il MonteOre dei WP supera quello del Progetto");
+        no_error = false;
       }
       if(no_error){
         this.progettiService.update(this.progetto)
@@ -240,6 +247,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     };
     let dataWp:any[] = [];
     if(this.dataSourceWp.data == null){
+      this
       dataWp.push(progettoWp_nuovo);
     }else{
       dataWp = this.dataSourceWp.data;
@@ -333,10 +341,20 @@ export class ProgettoDettaglioComponent implements OnInit {
     if(a.DATA_INIZIO)
       a.DATA_INIZIO = formatDate(a.DATA_INIZIO,"YYYY-MM-dd","en-GB");
 
-    
+    let error = false;
     if(a.ID_WP == null){
-      
-      if(this.controlliDate(a)){
+      let monte_totale_wp = 0;
+      if(this.progettoWp.length > 1){
+        for(let i = 0; i < this.progettoWp.length; i++){
+          monte_totale_wp = (Number(monte_totale_wp) + Number(this.progettoWp[i].MONTE_ORE));
+        }
+        if(this.progetto.MONTE_ORE_TOT < monte_totale_wp){
+          this.alertService.error("Il MonteOre dei WP supera quello del Progetto");
+          error = true;
+        }
+      }
+
+      if(this.controlliDate(a) && !error){
         this.progettiWpService.insert(a)
         .subscribe(response => {
           this.alertService.success("Work Package inserito con successo");
@@ -349,7 +367,17 @@ export class ProgettoDettaglioComponent implements OnInit {
         });
       }
     } else {
-      if(this.controlliDate(a)){
+      let monte_totale_wp = 0;
+      if(this.progettoWp.length > 1){
+        for(let i = 0; i < this.progettoWp.length; i++){
+          monte_totale_wp = (Number(monte_totale_wp) + Number(this.progettoWp[i].MONTE_ORE));
+        }
+        if(this.progetto.MONTE_ORE_TOT < monte_totale_wp){
+          this.alertService.error("Il MonteOre dei WP supera quello del Progetto");
+          error = true;
+        }
+      }
+      if(this.controlliDate(a) && !error){
         this.progettiWpService.update(a)
         .subscribe(response => {
           this.alertService.success("Work Package modificato con successo");
