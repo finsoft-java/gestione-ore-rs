@@ -332,7 +332,6 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   salvaModificaWp(a: ProgettoWp){
-    a.isEditable=false;
     this.controlliDate(a);
     
     if(a.DATA_FINE)
@@ -361,6 +360,7 @@ export class ProgettoDettaglioComponent implements OnInit {
           this.dataSourceWp.data.splice(-1, 1);
           this.dataSourceWp.data.push(response["value"][0]);
           this.dataSourceWp.data = this.dataSourceWp.data;
+          a.isEditable=false;
         },
         error => {
           this.alertService.error(error);
@@ -382,6 +382,7 @@ export class ProgettoDettaglioComponent implements OnInit {
         .subscribe(response => {
           this.alertService.success("Work Package modificato con successo");
           this.getProgettowP();
+          a.isEditable=false;
         },
         error => {
           this.alertService.error(error);
