@@ -62,6 +62,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   allTipiCosto: any[] = [];
   isNotAnnulable:boolean = false;
   id_progetto!: any;
+  errore_stringa= '';
 
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
@@ -131,12 +132,12 @@ export class ProgettoDettaglioComponent implements OnInit {
       });
   }
 
-  getRecord(a: ProgettoSpesa){
-    a.isEditable = true;
+  getRecord(prgSpesa: ProgettoSpesa){
+    prgSpesa.isEditable = true;
   }
 
-  getRecordwP(a: ProgettoWp){
-    a.isEditable = true;
+  getRecordwP(prgWp: ProgettoWp){
+    prgWp.isEditable = true;
   }
 
   getMatricole(): void {
@@ -256,8 +257,8 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.dataSourceWp.data = dataWp;
   } 
 
-  deleteChange(a:any){
-    this.progettiSpesaService.delete(a.ID_SPESA)
+  deleteChange(prgSpesa:any){
+    this.progettiSpesaService.delete(prgSpesa.ID_SPESA)
         .subscribe(response => {
           this.getProgettoSpesa();
         },
@@ -266,8 +267,8 @@ export class ProgettoDettaglioComponent implements OnInit {
         });
   }
 
-  deleteChangeWp(a:any){
-    this.progettiWpService.delete(a.ID_WP,a.ID_PROGETTO)
+  deleteChangeWp(prgWp:any){
+    this.progettiWpService.delete(prgWp.ID_WP,prgWp.ID_PROGETTO)
         .subscribe(response => {
           this.getProgettowP();
         },
@@ -277,10 +278,10 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
   
 
-  salvaModifica(a: ProgettoSpesa){
-    a.isEditable=false;
-    if(a.ID_SPESA == null){
-      this.progettiSpesaService.insert(a)
+  salvaModifica(prgSpesa: ProgettoSpesa){
+    prgSpesa.isEditable=false;
+    if(prgSpesa.ID_SPESA == null){
+      this.progettiSpesaService.insert(prgSpesa)
       .subscribe(response => {
         this.dataSource.data.splice(-1, 1);
         this.dataSource.data.push(response["value"][0]);
@@ -291,7 +292,7 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
     } else {
-      this.progettiSpesaService.update(a)
+      this.progettiSpesaService.update(prgSpesa)
       .subscribe(response => {
         this.alertService.success("Spesa modificata con successo");
         this.getProgettoSpesa();
@@ -307,41 +308,62 @@ export class ProgettoDettaglioComponent implements OnInit {
     let datePrFinale = '';
     let dateWpIniziale = '';
     let dateWpFinale = '';
+    this.errore_stringa = '';
 
-    if(this.progetto.DATA_INIZIO)
+    if(this.progetto.DATA_INIZIO){
       datePrIniziale = formatDate(this.progetto.DATA_INIZIO,'yyyy-MM-dd','en_US');
-
-    if(this.progetto.DATA_FINE)
-      datePrFinale = formatDate(this.progetto.DATA_FINE,'yyyy-MM-dd','en_US');
-
-    if(wp.DATA_INIZIO)
-      dateWpIniziale = formatDate(wp.DATA_INIZIO,'yyyy-MM-dd','en_US');
-
-    if(wp.DATA_FINE)
-      dateWpFinale = formatDate(wp.DATA_FINE,'yyyy-MM-dd','en_US');
-
-    if(datePrIniziale > dateWpIniziale){
-      this.alertService.error("Un WP non può iniziare prima del Progetto");
-      return false;
+    }else{
+      this.errore_stringa += "Inserire la Data Inizio Progetto <br/>";
     }
-    if(datePrFinale < dateWpFinale){
-      this.alertService.error("Un WP non può finire dopo il Progetto");
+    if(this.progetto.DATA_FINE){
+      datePrFinale = formatDate(this.progetto.DATA_FINE,'yyyy-MM-dd','en_US');
+    }else{
+        this.errore_stringa += "Inserire la Data Fine Progetto <br/>";
+    }
+
+    if(wp.DATA_INIZIO != ''){
+      dateWpIniziale = formatDate(wp.DATA_INIZIO,'yyyy-MM-dd','en_US');
+    }else{
+      this.errore_stringa += "Inserire la Data Inizio Wp <br/>";
+    }
+
+    if(wp.DATA_FINE != ''){
+      dateWpFinale = formatDate(wp.DATA_FINE,'yyyy-MM-dd','en_US');
+    }else{
+        this.errore_stringa += "Inserire la Data Fine Wp <br/>";
+    }
+    console.log(datePrIniziale+" > "+dateWpIniziale);
+    if(datePrIniziale != '' && dateWpIniziale != ''){
+      if(datePrIniziale > dateWpIniziale){
+        this.errore_stringa = "Un WP non può iniziare prima del Progetto <br/>";
+        wp.DATA_INIZIO = '';
+      }
+    }
+    
+    if(datePrFinale != '' && dateWpFinale != ''){
+      if(datePrFinale < dateWpFinale){
+        this.errore_stringa += "Un WP non può finire dopo il Progetto <br/>";
+        wp.DATA_FINE = '';
+      }
+    }
+
+    if( wp.DATA_INIZIO == '' || wp.DATA_FINE == ''){
+      this.alertService.error(this.errore_stringa);
       return false;
     }
     return true;
   }
 
-  salvaModificaWp(a: ProgettoWp){
-    this.controlliDate(a);
-    
-    if(a.DATA_FINE)
-      a.DATA_FINE = formatDate(a.DATA_FINE,"YYYY-MM-dd","en-GB");
+  salvaModificaWp(prgWp: ProgettoWp){    
+    console.log(prgWp);
+    if(prgWp.DATA_FINE)
+      prgWp.DATA_FINE = formatDate(prgWp.DATA_FINE,"YYYY-MM-dd","en-GB");
 
-    if(a.DATA_INIZIO)
-      a.DATA_INIZIO = formatDate(a.DATA_INIZIO,"YYYY-MM-dd","en-GB");
+    if(prgWp.DATA_INIZIO)
+      prgWp.DATA_INIZIO = formatDate(prgWp.DATA_INIZIO,"YYYY-MM-dd","en-GB");
 
     let error = false;
-    if(a.ID_WP == null){
+    if(prgWp.ID_WP == null){
       let monte_totale_wp = 0;
       if(this.progettoWp.length > 1){
         for(let i = 0; i < this.progettoWp.length; i++){
@@ -353,14 +375,14 @@ export class ProgettoDettaglioComponent implements OnInit {
         }
       }
 
-      if(this.controlliDate(a) && !error){
-        this.progettiWpService.insert(a)
+      if(this.controlliDate(prgWp) && !error){
+        this.progettiWpService.insert(prgWp)
         .subscribe(response => {
           this.alertService.success("Work Package inserito con successo");
           this.dataSourceWp.data.splice(-1, 1);
           this.dataSourceWp.data.push(response["value"][0]);
           this.dataSourceWp.data = this.dataSourceWp.data;
-          a.isEditable=false;
+          prgWp.isEditable=false;
         },
         error => {
           this.alertService.error(error);
@@ -377,12 +399,11 @@ export class ProgettoDettaglioComponent implements OnInit {
           error = true;
         }
       }
-      if(this.controlliDate(a) && !error){
-        this.progettiWpService.update(a)
+      if(this.controlliDate(prgWp) && !error){
+        this.progettiWpService.update(prgWp)
         .subscribe(response => {
           this.alertService.success("Work Package modificato con successo");
-          this.getProgettowP();
-          a.isEditable=false;
+          prgWp.isEditable=false;
         },
         error => {
           this.alertService.error(error);
@@ -392,9 +413,9 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
   
 
-  undoChange(a:ProgettoSpesa){
-    a.isEditable=false;
-    if(a.ID_PROGETTO == null){
+  undoChange(prgSpesa:ProgettoSpesa){
+    prgSpesa.isEditable=false;
+    if(prgSpesa.ID_PROGETTO == null){
       this.dataSource.data.splice(-1, 1);
       this.dataSource.data = this.dataSource.data;
     }
