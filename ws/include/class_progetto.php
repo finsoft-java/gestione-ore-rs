@@ -4,7 +4,7 @@ $progettiManager = new ProgettiManager();
 
 class ProgettiManager {
     
-    function get_progetti($top=null, $skip=null, $orderby=null) {
+    function get_progetti($skip=null, $top=null, $orderby=null) {
         global $con;
         
         $sql0 = "SELECT COUNT(*) AS cnt ";
@@ -20,14 +20,13 @@ class ProgettiManager {
 
         $count = select_single_value($sql0 . $sql);
 
-        if ($top){
-            if ($skip) {
+        if ($top != null){
+            if ($skip != null) {
                 $sql .= " LIMIT $skip,$top";
             } else {
                 $sql .= " LIMIT $top";
             }
-        }
-        
+        }        
         $progetti = select_list($sql1 . $sql);
         
         return [$progetti, $count];

@@ -24,6 +24,7 @@ import {MatDatepicker} from '@angular/material/datepicker';
 import {Moment} from 'moment';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
+import { PageEvent } from '@angular/material/paginator';
 export const MY_FORMATS = {
   parse: {
       dateInput: 'LL'
@@ -98,7 +99,6 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.getSupervisor();
     this.getProgettowP();
   }
-
   
   getProgettowP(): void {
     this.progettiWpService.getById(this.id_progetto)

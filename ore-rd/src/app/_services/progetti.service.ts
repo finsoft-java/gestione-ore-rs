@@ -7,8 +7,8 @@ import { environment } from './../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class ProgettiService {
     constructor(private http: HttpClient) { }
-    getAll() {
-        return this.http.get<any>(environment.wsUrl+`Progetti.php`);
+    getAll(top:number, skip:number) {
+        return this.http.get<any>(environment.wsUrl+`Progetti.php?top=${top}&skip=${skip}`);
     }
     
     getById(id_progetto: number) {
