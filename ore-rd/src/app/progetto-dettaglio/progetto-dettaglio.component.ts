@@ -279,27 +279,32 @@ export class ProgettoDettaglioComponent implements OnInit {
   
 
   salvaModifica(prgSpesa: ProgettoSpesa){
-    prgSpesa.isEditable=false;
     if(prgSpesa.ID_SPESA == null){
-      this.progettiSpesaService.insert(prgSpesa)
-      .subscribe(response => {
-        this.dataSource.data.splice(-1, 1);
-        this.dataSource.data.push(response["value"][0]);
-        this.dataSource.data = this.dataSource.data;
-        this.alertService.success("Spesa salvata con successo");
-      },
-      error => {
-        this.alertService.error(error);
-      });
+      if(prgSpesa.IMPORTO != '' || prgSpesa.IMPORTO != null){
+        this.progettiSpesaService.insert(prgSpesa)
+        .subscribe(response => {
+          this.dataSource.data.splice(-1, 1);
+          this.dataSource.data.push(response["value"][0]);
+          this.dataSource.data = this.dataSource.data;
+          this.alertService.success("Spesa salvata con successo");
+          prgSpesa.isEditable=false;
+        },
+        error => {
+          this.alertService.error(error);
+        });
+      }
     } else {
-      this.progettiSpesaService.update(prgSpesa)
-      .subscribe(response => {
-        this.alertService.success("Spesa modificata con successo");
-        this.getProgettoSpesa();
-      },
-      error => {
-        this.alertService.error(error);
-      });
+      if(prgSpesa.IMPORTO != '' || prgSpesa.IMPORTO != null){
+        this.progettiSpesaService.update(prgSpesa)
+        .subscribe(response => {
+          this.alertService.success("Spesa modificata con successo");
+          this.getProgettoSpesa();
+          prgSpesa.isEditable=false;
+        },
+        error => {
+          this.alertService.error(error);
+        });
+      }
     }
   }
 

@@ -6,19 +6,19 @@ define('DB_USER', 'user');
 define('DB_PASS', 'user');
 define('DB_NAME', 'questionari');
 */
-/* sviluppo
+/* sviluppo */
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'ore-rd');
-*/
 
-/* produzione */
+
+/* produzione 
 define('DB_HOST', 'localhost');
 define('DB_USER', 'rd');
 define('DB_PASS', 'Wn#5OHGt');
 define('DB_NAME', 'rd');
-
+*/
 define('JWT_SECRET_KEY', 'OSAISECRET2021');
 
 define('AD_SERVER', 'ldap://osai.loc');
