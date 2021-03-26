@@ -40,6 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $matr_sup = $dateFirma[$i]['MATRICOLA_SUPERVISOR'];
         $matr_dip = $dateFirma[$i]['MATRICOLA_DIPENDENTE'];
         $query = "SELECT min(a.DATA) FROM ore_presenza_lul a join ore_presenza_lul b on a.DATA= b.DATA AND b.MATRICOLA_DIPENDENTE = '$matr_sup' AND b.ORE_PRESENZA_ORDINARIE > 0 where a.ORE_PRESENZA_ORDINARIE > 0 AND a.MATRICOLA_DIPENDENTE = '$matr_dip' AND a.DATA >= $metaMese";
+        
+        $matr_dipendente = $panthera->getUtente($matr_dip);
+        $matr_supervisor = $panthera->getUtente($matr_sup);
+        $dateFirma[$i]['MATRICOLA_DIPENDENTE'] = $matr_dipendente;
+        $dateFirma[$i]['MATRICOLA_SUPERVISOR'] = $matr_supervisor;
         $dataDefault = select_single_value($query);
         $dateFirma[$i]['DATA_FIRMA'] = $dataDefault;
     }
