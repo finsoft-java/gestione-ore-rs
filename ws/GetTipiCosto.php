@@ -1,7 +1,6 @@
 <?php
 
-include("include/all.php");    
-$con = connect();
+include("include/all.php");
 $panthera->connect();
 
 

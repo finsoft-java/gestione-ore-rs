@@ -4,24 +4,21 @@ $panthera = new PantheraManager();
 
 class PantheraManager {
 
-    function connect() {
-        ini_set('error_reporting', E_ALL);
+    function __construct() {
         $this->mock = (MOCK_PANTHERA == 'true');
-        if ($this->mock) {
-            $this->conn = null;
-        } else {
-            echo "Connecting..." . DB_PTH_HOST;
-            try {
-                $this->conn = sqlsrv_connect(DB_PTH_HOST, array(
+        $this->conn = null;
+    }
+
+    function connect() {
+        if (!$this->mock) {
+            // echo "Connecting..." . DB_PTH_HOST;
+            $this->conn = sqlsrv_connect(DB_PTH_HOST, array(
                                     "Database" => DB_PTH_NAME,  
                                     "UID" => DB_PTH_USER,
                                     "PWD" => DB_PTH_PASS));
-            } catch (Exception $e) {
-                echo $e->getMessage();
-            }
-            echo "Done.";
-            var_dump($this->conn);
-            if($this->conn == false) {
+            // echo "Done.";
+            // var_dump($this->conn);
+            if ($this->conn == false) {
                 die("Failed to connect: " . FormatErrors(sqlsrv_errors()));  
             }
         }
