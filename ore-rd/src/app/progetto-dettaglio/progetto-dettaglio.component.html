@@ -120,7 +120,7 @@
             <td mat-cell *matCellDef="let element">
                 <label *ngIf="!element.isEditable"> {{element.IMPORTO}} </label>
                 <div style="display: block;margin: 0px auto;width: 250px;">
-                    <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" required matInput [(ngModel)]="element.IMPORTO">
+                    <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.IMPORTO" required>
                 </div>
             </td>
         </ng-container>
