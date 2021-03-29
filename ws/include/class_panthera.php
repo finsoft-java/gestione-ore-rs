@@ -8,6 +8,16 @@ class PantheraManager {
         $this->mock = (MOCK_PANTHERA == 'true');
         $this->conn = null;
     }
+    
+    function fmt_errors() {
+        $errors = sqlsrv_errors();
+        if (count($errors) >= 1) {
+            $error = $errors[0]; // ne prendo uno a caso
+            return "[SQLSTATE $error[SQLSTATE]] [SQLCODE $error[code]] $error[message]"; 
+        } else {
+            return "No error";
+        }
+    }
 
     function connect() {
         if (!$this->mock) {
@@ -19,7 +29,7 @@ class PantheraManager {
             // echo "Done.";
             // var_dump($this->conn);
             if ($this->conn == false) {
-                die("Failed to connect: " . FormatErrors(sqlsrv_errors()));  
+                print_error(500, "Failed to connect: " . $this->fmt_errors());
             }
         }
     }
@@ -39,7 +49,7 @@ class PantheraManager {
             }
             return $arr;
         } else {
-            print_error(500, FormatErrors(sqlsrv_errors()));
+            print_error(500, $this->fmt_errors());
         }
     }
 
@@ -55,7 +65,7 @@ class PantheraManager {
             }
             return $arr;
         } else {
-            print_error(500, FormatErrors(sqlsrv_errors()));
+            print_error(500, $this->fmt_errors());
         }
     }
 
@@ -71,7 +81,7 @@ class PantheraManager {
                 return null;
             }
         } else {
-            print_error(500, FormatErrors(sqlsrv_errors()));
+            print_error(500, $this->fmt_errors());
         }
     }
 
@@ -87,7 +97,7 @@ class PantheraManager {
                 return null;
             }
         } else {
-            print_error(500, FormatErrors(sqlsrv_errors()));
+            print_error(500, $this->fmt_errors());
         }
     }
 
@@ -98,7 +108,7 @@ class PantheraManager {
     function execute_update($sql) {
         $result = sqlsrv_query($this->conn, $sql);
         if ($result === false) {
-            print_error(500, FormatErrors(sqlsrv_errors()));
+            print_error(500, $this->fmt_errors());
         }
     }
 
