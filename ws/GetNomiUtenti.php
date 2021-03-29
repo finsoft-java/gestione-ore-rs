@@ -2,6 +2,7 @@
 
 include("include/all.php");    
 $con = connect();
+$panthera->connect();
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {

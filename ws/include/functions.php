@@ -13,7 +13,7 @@ function connect() {
 }
 
 function connect_panthera() {
-  if (MOCK_PANTHERA) {
+  if (MOCK_PANTHERA == 'true') {
     return null;
   }
   $connect = sqlsrv_connect(DB_PTH_HOST, array(
