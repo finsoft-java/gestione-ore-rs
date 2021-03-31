@@ -43,7 +43,7 @@ class PantheraManager {
         
         if ($result = sqlsrv_query($this->conn, $sql)) {
             $arr = array();
-            while ($row = sqlsrv_fetch_assoc($result))
+            while ($row = sqlsrv_fetch_array($result))
             {
                 $arr[] = $row;
             }
@@ -74,7 +74,7 @@ class PantheraManager {
     */
     function select_single($sql) {
         if ($result = sqlsrv_query($this->conn, $sql)) {
-            if ($row = sqlsrv_fetch_assoc($result))
+            if ($row = sqlsrv_fetch_array($result))
             {
                 return $row;
             } else {
