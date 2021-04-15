@@ -1,81 +1,112 @@
 <h5 style="margin-bottom: 30px;text-align:center">Modifica / Inserimento Progetto</h5>
 <div *ngIf="progetto">
+    <div>
 
-    <div style="text-align:right">
-        <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" (click)="report()" disabled="disabled">Report</button>
-    </div>
+        <div style="text-align:right">
+            <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" (click)="report()" disabled="disabled">Report</button>
+        </div>
 
-    <div>
-        <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
-            <mat-form-field appearance="fill">
-                <mat-label>Titolo</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.TITOLO" placeholder="Inserisci il Titolo">
-                <mat-hint>required</mat-hint>
-            </mat-form-field>
-        </p>
-    </div>
+        <div>
+            <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
+                <mat-form-field appearance="fill">
+                    <mat-label>Titolo</mat-label>
+                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.TITOLO" placeholder="Inserisci il Titolo">
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
+            </p>
+        </div>
 
-    <div>
-        <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
-            <mat-form-field appearance="fill" style="margin-right: 10px;">
-                <mat-label>Acronimo</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ACRONIMO" placeholder="Inserisci l'acronimo">
-                <mat-hint>required</mat-hint>
-            </mat-form-field>
+        <div>
+            <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+                <mat-form-field appearance="fill" style="margin-right: 10px;">
+                    <mat-label>Acronimo</mat-label>
+                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ACRONIMO" placeholder="Inserisci l'acronimo">
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
 
-            <mat-form-field appearance="fill">
-                <mat-label>Grant Number</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.GRANT_NUMBER" placeholder="Inserisci il Grant Number">
-                <mat-hint>required</mat-hint>
-            </mat-form-field>
-        </p>
-    </div>
-    <div>
-        <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
-            <mat-form-field appearance="fill" style="float:right">
-                <mat-label>Abstract</mat-label>
-                <textarea matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ABSTRACT" placeholder="Inserisci l'Abstract"></textarea>
-            </mat-form-field>
-        </p>
-    </div>
-    <div>
-        <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
-            <mat-form-field appearance="fill" style="margin-right: 10px;">
-                <mat-label>Data Inizio</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker">
-                <mat-datepicker-toggle matSuffix [for]="picker">
-                    <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-                </mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-                <mat-hint>required</mat-hint>
-            </mat-form-field>
-            <mat-form-field appearance="fill">
-                <mat-label>Data Fine</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_FINE" [matDatepicker]="picker2">
-                <mat-datepicker-toggle matSuffix [for]="picker2">
-                    <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-                </mat-datepicker-toggle>
-                <mat-datepicker #picker2></mat-datepicker>
-                <mat-hint>required</mat-hint>
-            </mat-form-field>
-        </p>
-    </div>
-    <div>
-        <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
-            <mat-form-field appearance="fill" style="margin-right: 10px;">
-                <mat-label>Monte Ore Totale</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.MONTE_ORE_TOT" placeholder="Inserisci il Monte Ore Totale">
-                <mat-hint>required</mat-hint>
-            </mat-form-field>
-            <mat-form-field appearance="fill">
-                <mat-label>Costo Medio Uomo</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.COSTO_MEDIO_UOMO" placeholder="Inserisci il Costo Medio Uomo">
-                <mat-hint>required</mat-hint>
-            </mat-form-field>
-        </p>
+                <mat-form-field appearance="fill">
+                    <mat-label>Grant Number</mat-label>
+                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.GRANT_NUMBER" placeholder="Inserisci il Grant Number">
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
+            </p>
+        </div>
+        <div>
+            <p style="width: 50%;display: block;margin: 0px auto;" class="max_width">
+                <mat-form-field appearance="fill" style="float:right">
+                    <mat-label>Abstract</mat-label>
+                    <textarea matInput maxlength="2000" [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ABSTRACT" placeholder="Inserisci l'Abstract"></textarea>
+                </mat-form-field>
+            </p>
+        </div>
+        <div>
+            <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+                <mat-form-field appearance="fill" style="margin-right: 10px;">
+                    <mat-label>Data Inizio</mat-label>
+                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker">
+                    <mat-datepicker-toggle matSuffix [for]="picker">
+                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                    </mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label>Data Fine</mat-label>
+                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_FINE" [matDatepicker]="picker2">
+                    <mat-datepicker-toggle matSuffix [for]="picker2">
+                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                    </mat-datepicker-toggle>
+                    <mat-datepicker #picker2></mat-datepicker>
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
+            </p>
+        </div>
+        <div>
+            <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+                <mat-form-field appearance="fill">
+                    <mat-label>Matricola Supervisor</mat-label>
+                    <mat-select [(ngModel)]="progetto.MATRICOLA_SUPERVISOR">
+                        <mat-option *ngFor="let competence of allMatricole" [value]="competence.MATRICOLA">{{competence.NOME}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </p>
+        </div>
     </div>
 
-    <div style="margin-bottom:30px;">
+
+
+    <div style="margin-top:30px;margin-bottom:30px;">
+        <div>
+            <h5 style="margin-bottom: 20px;text-align:center">Budget</h5>
+        </div>
+        <div>
+            <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+                <mat-form-field appearance="fill" style="margin-right: 10px;">
+                    <mat-label>Monte Ore Totale</mat-label>
+                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.MONTE_ORE_TOT" placeholder="Inserisci il Monte Ore Totale">
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label>Costo orario Medio Uomo &euro;</mat-label>
+                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.COSTO_MEDIO_UOMO" placeholder="Inserisci il Costo Medio Uomo">
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
+            </p>
+        </div>
+        <div>
+            <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
+                <mat-form-field appearance="fill" style="margin-right: 10px;">
+                    <mat-label>Mesi uomo totali</mat-label>
+                    <input matInput disabled [value]="monteOreMensile(progetto.MONTE_ORE_TOT)">
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label>Costo Uomo Mensile &euro;</mat-label>
+                    <input matInput disabled [value]="costoMensile(progetto.COSTO_MEDIO_UOMO)">
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
+            </p>
+        </div>
         <div style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
             <mat-form-field appearance="fill">
                 <mat-label>Tipo Costo Panthera</mat-label>
@@ -83,189 +114,193 @@
                     <mat-option *ngFor="let tipoCosto of allTipiCosto" [value]="tipoCosto.ID_TIPO_COSTO">{{tipoCosto.DESCRIZIONE}}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field appearance="fill" style="float:right">
-                <mat-label>Matricola Supervisor</mat-label>
-                <mat-select [(ngModel)]="progetto.MATRICOLA_SUPERVISOR">
-                    <mat-option *ngFor="let competence of allMatricole" [value]="competence.MATRICOLA">{{competence.NOME}}</mat-option>
-                </mat-select>
-            </mat-form-field>
             <div style="display: inline-block; position: relative; text-align: left; margin: 0px auto; width: calc(50% + 33px);">
                 <button mat-raised-button color="primary" style="float:right" (click)="salva()">Salva</button>
             </div>
         </div>
     </div>
-</div>
-<div style="margin-bottom:30px;">
-    <div>
-        <h5 style="margin-bottom: 20px;text-align:center">Progetti Spese</h5>
-        <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgettoSpesa()">Nuovo</button>
+
+
+    <div style="margin-bottom:30px;">
+        <div>
+            <h5 style="margin-bottom: 20px;text-align:center">Budget Spese</h5>
+            <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgettoSpesa()">Nuovo</button>
+        </div>
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+            <!-- Position Column -->
+            <ng-container matColumnDef="descrizione">
+                <!-- INPUT-->
+                <th mat-header-cell *matHeaderCellDef> Descrizione </th>
+                <td mat-cell *matCellDef="let element">
+                    <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}} </label>
+                    <!--<input matInput [value]="element.descrizione" [(ngModel)]="element.descrizione">-->
+                    <div style="display: block;margin: 0px auto;width: 250px;">
+                        <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
+                    </div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="importo">
+                <th mat-header-cell *matHeaderCellDef> Importo &euro;</th>
+                <td mat-cell *matCellDef="let element">
+                    <label *ngIf="!element.isEditable"> {{element.IMPORTO}} </label>
+                    <div style="display: block;margin: 0px auto;width: 250px;">
+                        <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.IMPORTO" required>
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="tipologia">
+                <th mat-header-cell *matHeaderCellDef> Tipologia </th>
+                <td mat-cell *matCellDef="let element">
+                    <label *ngIf="!element.isEditable"> {{element.TIPOLOGIA.DESCRIZIONE}}  </label>
+                    <div style="display: block;margin: 0px auto;width: 250px;">
+                        <mat-form-field appearance="fill" *ngIf="element.isEditable" style="margin-top: 1.34375em;">
+                            <mat-label>Tipologia Spesa</mat-label>
+                            <mat-select [(ngModel)]="element.TIPOLOGIA.ID_TIPOLOGIA">
+                                <mat-option *ngFor="let tipologie of allTipologie" [value]="tipologie.ID_TIPOLOGIA">{{tipologie.DESCRIZIONE}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </td>
+
+
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> Azione </th>
+                <td mat-cell *matCellDef="let row">
+                    <button *ngIf="!row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="getRecord(row)">Modifica</button>
+                    <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteChange(row)">Elimina</button>
+                    <button *ngIf="row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="salvaModifica(row)">Salva</button>
+                    <button *ngIf="row.isEditable" mat-raised-button color="secondary" (click)="annullaModifica(row)">Annulla</button>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
+
+        </mat-paginator>
     </div>
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-
-        <!-- Position Column -->
-        <ng-container matColumnDef="descrizione">
-            <!-- INPUT-->
-            <th mat-header-cell *matHeaderCellDef> Descrizione </th>
-            <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}} </label>
-                <!--<input matInput [value]="element.descrizione" [(ngModel)]="element.descrizione">-->
-                <div style="display: block;margin: 0px auto;width: 250px;">
-                    <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
-                </div>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="importo">
-            <th mat-header-cell *matHeaderCellDef> Importo </th>
-            <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.IMPORTO}} </label>
-                <div style="display: block;margin: 0px auto;width: 250px;">
-                    <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.IMPORTO" required>
-                </div>
-            </td>
-        </ng-container>
-        <ng-container matColumnDef="tipologia">
-            <th mat-header-cell *matHeaderCellDef> Tipologia </th>
-            <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.TIPOLOGIA.DESCRIZIONE}}  </label>
-                <div style="display: block;margin: 0px auto;width: 250px;">
-                    <mat-form-field appearance="fill" *ngIf="element.isEditable" style="margin-top: 1.34375em;">
-                        <mat-label>Tipologia Spesa</mat-label>
-                        <mat-select [(ngModel)]="element.TIPOLOGIA.ID_TIPOLOGIA">
-                            <mat-option *ngFor="let tipologie of allTipologie" [value]="tipologie.ID_TIPOLOGIA">{{tipologie.DESCRIZIONE}}</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </div>
-            </td>
-
-
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef> Azione </th>
-            <td mat-cell *matCellDef="let row">
-                <button *ngIf="!row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="getRecord(row)">Modifica</button>
-                <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteChange(row)">Elimina</button>
-                <button *ngIf="row.isEditable" mat-raised-button color="primary" (click)="salvaModifica(row)">Salva</button>
-            </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
-
-    </mat-paginator>
-</div>
 
 
 
 
 
-<!--
-        tabella WORK PACKAGE
-        id(id_wp) non editabile | titolo- input | descrizione- input | date - datepicker | MonteOre - inp-number | Risorse (multiselect ()dati da GetNomiUtenti.php) | Azioni (crud)
-    -->
-<div style="margin-bottom:30px;">
-    <div>
-        <h5 style="margin-bottom: 20px;text-align:center">Work Package</h5>
-        <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgettoWp()">Nuovo</button>
+    <!--
+            tabella WORK PACKAGE
+            id(id_wp) non editabile | titolo- input | descrizione- input | date - datepicker | MonteOre - inp-number | Risorse (multiselect ()dati da GetNomiUtenti.php) | Azioni (crud)
+        -->
+    <div style="margin-bottom:30px;">
+        <div>
+            <h5 style="margin-bottom: 20px;text-align:center">Work Package</h5>
+            <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgettoWp()">Nuovo</button>
+        </div>
+        <table mat-table [dataSource]="dataSourceWp" class="mat-elevation-z8">
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef> Id </th>
+                <td mat-cell *matCellDef="let element">
+                    {{element.ID_WP}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="titolo">
+                <th mat-header-cell *matHeaderCellDef> Titolo </th>
+                <td mat-cell *matCellDef="let element">
+                    <label *ngIf="!element.isEditable"> {{element.TITOLO}} </label>
+                    <div style="display: block;margin: 0px auto;width: 85px;">
+                        <input class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.TITOLO">
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="descrizione">
+                <th mat-header-cell *matHeaderCellDef> Descrizione </th>
+                <td mat-cell *matCellDef="let element">
+                    <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}}  </label>
+                    <div style="display: block;margin: 0px auto;width: 85px;">
+                        <input class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
+                    </div>
+                </td>
+            </ng-container>
+
+
+            <ng-container matColumnDef="dataInizio">
+                <th mat-header-cell *matHeaderCellDef> Data Inizio </th>
+                <td mat-cell *matCellDef="let element">
+                    <label *ngIf="!element.isEditable"> {{element.DATA_INIZIO | date: 'dd-MM-yyyy'}}  </label>
+                    <div style="display: block;margin: 0px auto;width: 140px;" *ngIf="element.isEditable">
+                        <mat-form-field appearance="fill" style="margin-right: 10px;display: block;margin-top: 1.34375em;">
+                            <mat-label>Data Inizio</mat-label>
+                            <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_INIZIO" [matDatepicker]="picker" required>
+                            <mat-datepicker-toggle matSuffix [for]="picker">
+                                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                            </mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="dataFine">
+                <th mat-header-cell *matHeaderCellDef> Data Fine </th>
+                <td mat-cell *matCellDef="let element">
+                    <label *ngIf="!element.isEditable"> {{element.DATA_FINE | date: 'dd-MM-yyyy'}}  </label>
+                    <div style="display: block;margin: 0px auto;width: 140px;" *ngIf="element.isEditable">
+                        <mat-form-field appearance="fill" style="display: block;margin-top: 1.34375em;">
+                            <mat-label>Data Fine</mat-label>
+                            <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_FINE" [matDatepicker]="picker2" required>
+                            <mat-datepicker-toggle matSuffix [for]="picker2">
+                                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                            </mat-datepicker-toggle>
+                            <mat-datepicker #picker2></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="risorse">
+                <th mat-header-cell *matHeaderCellDef> Risorse </th>
+                <td mat-cell *matCellDef="let element">
+                    <label *ngIf="!element.isEditable" [title]="stampaRisorse(element.RISORSE)" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 85px;"> {{stampaRisorse(element.RISORSE)}}  </label>
+                    <div>
+                        <mat-form-field appearance="fill" *ngIf="element.isEditable" style="display: block;margin: 0px auto;width: 85px;margin-top: 1.34375em;">
+                            <mat-label>Risorse</mat-label>
+                            <mat-select [(ngModel)]="element.RISORSE" multiple>
+                                <mat-option *ngFor="let matricole of allMatricole" [value]="matricole.MATRICOLA">{{matricole.NOME}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="monteOre">
+                <th mat-header-cell *matHeaderCellDef> Monte Ore Totale </th>
+                <td mat-cell *matCellDef="let element">
+                    <label *ngIf="!element.isEditable"> {{element.MONTE_ORE}}  </label>
+                    <div style="display: block;margin: 0px auto;width: 47px;">
+                        <input type="number" class="form-control" style="width: 100%;margin: 0px auto;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.MONTE_ORE">
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="mesiUomo">
+                <th mat-header-cell *matHeaderCellDef> Mesi uomo </th>
+                <td mat-cell *matCellDef="let element">
+                    <label> {{ monteOreMensile(element.MONTE_ORE) }} </label>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> Azione </th>
+                <td mat-cell *matCellDef="let row" style="width:200px">
+                    <button *ngIf="!row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="getRecordwP(row)">Modifica</button>
+                    <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteChangeWp(row)">Elimina</button>
+                    <button *ngIf="row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="salvaModificaWp(row)">Salva</button>
+                    <button *ngIf="row.isEditable" mat-raised-button color="secondary" (click)="annullaModificaWp(row)">Annulla</button>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsWp"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsWp;"></tr>
+        </table>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
+
+        </mat-paginator>
     </div>
-    <table mat-table [dataSource]="dataSourceWp" class="mat-elevation-z8">
-        <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef> Id </th>
-            <td mat-cell *matCellDef="let element">
-                {{element.ID_WP}}
-            </td>
-        </ng-container>
-        <ng-container matColumnDef="titolo">
-            <th mat-header-cell *matHeaderCellDef> Titolo </th>
-            <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.TITOLO}} </label>
-                <div style="display: block;margin: 0px auto;width: 85px;">
-                    <input class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.TITOLO">
-                </div>
-            </td>
-        </ng-container>
-        <ng-container matColumnDef="descrizione">
-            <th mat-header-cell *matHeaderCellDef> Descrizione </th>
-            <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}}  </label>
-                <div style="display: block;margin: 0px auto;width: 85px;">
-                    <input class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
-                </div>
-            </td>
-        </ng-container>
-
-
-        <ng-container matColumnDef="dataInizio">
-            <th mat-header-cell *matHeaderCellDef> Data Inizio </th>
-            <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.DATA_INIZIO | date: 'dd-MM-yyyy'}}  </label>
-                <div style="display: block;margin: 0px auto;width: 140px;" *ngIf="element.isEditable">
-                    <mat-form-field appearance="fill" style="margin-right: 10px;display: block;margin-top: 1.34375em;">
-                        <mat-label>Data Inizio</mat-label>
-                        <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_INIZIO" [matDatepicker]="picker" required>
-                        <mat-datepicker-toggle matSuffix [for]="picker">
-                            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-                        </mat-datepicker-toggle>
-                        <mat-datepicker #picker></mat-datepicker>
-                    </mat-form-field>
-                </div>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="dataFine">
-            <th mat-header-cell *matHeaderCellDef> Data Fine </th>
-            <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.DATA_FINE | date: 'dd-MM-yyyy'}}  </label>
-                <div style="display: block;margin: 0px auto;width: 140px;" *ngIf="element.isEditable">
-                    <mat-form-field appearance="fill" style="display: block;margin-top: 1.34375em;">
-                        <mat-label>Data Fine</mat-label>
-                        <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_FINE" [matDatepicker]="picker2" required>
-                        <mat-datepicker-toggle matSuffix [for]="picker2">
-                            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-                        </mat-datepicker-toggle>
-                        <mat-datepicker #picker2></mat-datepicker>
-                    </mat-form-field>
-                </div>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="risorse">
-            <th mat-header-cell *matHeaderCellDef> Risorse </th>
-            <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable" [title]="stampaRisorse(element.RISORSE)" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 85px;"> {{stampaRisorse(element.RISORSE)}}  </label>
-                <div>
-                    <mat-form-field appearance="fill" *ngIf="element.isEditable" style="display: block;margin: 0px auto;width: 85px;margin-top: 1.34375em;">
-                        <mat-label>Risorse</mat-label>
-                        <mat-select [(ngModel)]="element.RISORSE" multiple>
-                            <mat-option *ngFor="let matricole of allMatricole" [value]="matricole.MATRICOLA">{{matricole.NOME}}</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </div>
-            </td>
-        </ng-container>
-        <ng-container matColumnDef="monteOre">
-            <th mat-header-cell *matHeaderCellDef> Monte Ore Totale </th>
-            <td mat-cell *matCellDef="let element">
-                <label *ngIf="!element.isEditable"> {{element.MONTE_ORE}}  </label>
-                <div style="display: block;margin: 0px auto;width: 47px;">
-                    <input type="number" class="form-control" style="width: 100%;margin: 0px auto;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.MONTE_ORE">
-                </div>
-            </td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef> Azione </th>
-            <td mat-cell *matCellDef="let row" style="width:200px">
-                <button *ngIf="!row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="getRecordwP(row)">Modifica</button>
-                <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteChangeWp(row)">Elimina</button>
-                <button *ngIf="row.isEditable" mat-raised-button color="primary" (click)="salvaModificaWp(row)">Salva</button>
-            </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumnsWp"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumnsWp;"></tr>
-    </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
-
-    </mat-paginator>
 </div>

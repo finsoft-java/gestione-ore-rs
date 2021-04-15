@@ -13,7 +13,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 })
 export class TipologiaSpesaComponent /*implements OnInit*/ {
   displayedColumns: string[] = ['id', 'descrizione', 'actions'];
-  dataSource = new MatTableDataSource<Tipologia[]>();
+  dataSource = new MatTableDataSource<Tipologia>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   allTipologie: Array<any> = [];
 
@@ -28,8 +28,8 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
   getAll() {
     this.tipologiaSpesaService.getAll()
         .subscribe(response => {
-          this.allTipologie = response["data"];
-          this.dataSource = new MatTableDataSource<Tipologia[]>(response["data"]);
+          this.allTipologie = response.data;
+          this.dataSource = new MatTableDataSource<Tipologia>(response.data);
         },
         error => {
         });
@@ -54,7 +54,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
       .subscribe(response => {
         // this.alertService.success("Tipologia inserita");
         this.dataSource.data.splice(-1, 1);
-        this.dataSource.data.push(response["value"][0]);
+        this.dataSource.data.push(response.value);
         this.dataSource.data = this.dataSource.data;
       },
       error => {
@@ -83,7 +83,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     this.tipologiaSpesaService.delete(a.ID_TIPOLOGIA)
         .subscribe(response => {
           this.getAll();
-          this.dataSource = new MatTableDataSource<Tipologia[]>(this.allTipologie);
+          this.dataSource = new MatTableDataSource<Tipologia>(this.allTipologie);
         },
         error => {
           this.alertService.error("Impossibile eliminare questa tipologia. Forse è già stata utilizzata all'interno di un Progetto?");

@@ -301,18 +301,6 @@ ALTER TABLE `progetti`
   MODIFY `ID_PROGETTO` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT per la tabella `progetti_spese`
---
-ALTER TABLE `progetti_spese`
-  MODIFY `ID_SPESA` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT per la tabella `progetti_wp`
---
-ALTER TABLE `progetti_wp`
-  MODIFY `ID_WP` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
 -- AUTO_INCREMENT per la tabella `tipologie_spesa`
 --
 ALTER TABLE `tipologie_spesa`

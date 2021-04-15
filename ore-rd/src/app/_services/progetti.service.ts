@@ -1,37 +1,37 @@
-import { Matricola } from './../_models/matricola';
-import { Progetto } from './../_models/progetto';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from './../../environments/environment';
+import { ValueBean, Progetto, ListBean } from '../_models';
 
 @Injectable({ providedIn: 'root' })
 export class ProgettiService {
     constructor(private http: HttpClient) { }
-    getAll(top:number, skip:number) {
-        return this.http.get<any>(environment.wsUrl+`Progetti.php?top=${top}&skip=${skip}`);
+
+    getAll(top: number, skip: number) {
+        return this.http.get<ListBean<Progetto>>(environment.wsUrl + `Progetti.php?top=${top}&skip=${skip}`);
     }
     
     getById(id_progetto: number) {
-        return this.http.get<any>(environment.wsUrl+`Progetti.php?id_progetto=${id_progetto}`);
+        return this.http.get<ValueBean<Progetto>>(environment.wsUrl + `Progetti.php?id_progetto=${id_progetto}`);
     }
 
     insert(progetto: Progetto) {
-        return this.http.put<any>(environment.wsUrl+`Progetti.php`, progetto);
+        return this.http.post<ValueBean<Progetto>>(environment.wsUrl + `Progetti.php`, progetto);
     }
 
     update(progetto: Progetto) {
-        return this.http.post<any>(environment.wsUrl+`Progetti.php`, progetto);
+        return this.http.put<ValueBean<Progetto>>(environment.wsUrl + `Progetti.php`, progetto);
     }
 
     delete(id_progetto: number) {
-        return this.http.delete(environment.wsUrl+`Progetti.php?id_progetto=${id_progetto}`);
+        return this.http.delete<void>(environment.wsUrl + `Progetti.php?id_progetto=${id_progetto}`);
     }
 
     getAllTipiCostoPanthera() {
-        return this.http.get<any>(environment.wsUrl+`GetTipiCosto.php`);;
+        return this.http.get<ListBean<any>>(environment.wsUrl + `GetTipiCosto.php`);;
     }
 
     getAllMatricole() {
-        return this.http.get<any>(environment.wsUrl+`GetNomiUtenti.php`);;
+        return this.http.get<ListBean<string>>(environment.wsUrl + `GetNomiUtenti.php`);;
     }
 }

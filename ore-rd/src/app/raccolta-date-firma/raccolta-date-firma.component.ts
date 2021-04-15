@@ -68,7 +68,7 @@ export class RaccoltaDateFirmaComponent implements OnInit {
   run() {
       this.annoMese = formatDate(this.date.value,"YYYY-MM","en-GB");
       this.datitestService.runDateFirma(this.annoMese).subscribe(response => {
-        this.dataSource = new MatTableDataSource<DataFirma[]>(response["data"]);
+        this.dataSource = new MatTableDataSource<DataFirma[]>(response.data);
       },
       error => {
       });

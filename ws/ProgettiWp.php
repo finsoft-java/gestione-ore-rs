@@ -23,35 +23,35 @@ $id_wp = isset($_GET['id_wp']) ? $con->escape_string($_GET['id_wp']) : null;
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($id_progetto) {
         //==========================================================
-        $progetto = $progettiWpManager->get_progetto($id_progetto);
-        if (!$progetto) {
-            $progetto = null;
+        $lista_wp = $progettiWpManager->get_wp_progetto($id_progetto);
+        if (!$lista_wp) {
+            $lista_wp = [];
         }
         header('Content-Type: application/json');
-        echo json_encode(['value' => $progetto]);
+        echo json_encode(['data' => $lista_wp]);
     }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //==========================================================
     $postdata = file_get_contents("php://input");
     $json_data = json_decode($postdata);
     $id_wp = '';
     
-    if(isset($json_data->ID_SPESA)){
-        $id_wp = $json_data->ID_SPESA;
-    }
-    
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
+    
+    if(isset($json_data->ID_WP)) {
+        $id_wp = $json_data->ID_WP;
+    }
     if ($id_wp) {
-        print_error(400, "id_wp must be null when creating new project");
+        print_error(400, "id_wp must be null when creating new object");
     }
     $progetto = $progettiWpManager->crea($json_data);
     
     header('Content-Type: application/json');
     echo json_encode(['value' => $progetto]);
     
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+} elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     //==========================================================
     $postdata = file_get_contents("php://input");
     $json_data = json_decode($postdata);
@@ -60,26 +60,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(400, "Missing JSON data");
     }
 
-    $progetto_su_db = $progettiWpManager->get_progetto($json_data->ID_PROGETTO);
-    if (!$progetto_su_db) {
+    $wp_su_db = $progettiWpManager->get_wp($json_data->ID_PROGETTO, $json_data->ID_WP);
+    if (!$wp_su_db) {
         print_error(404, 'Not found');
     }
-    $progettiWpManager->aggiorna($progetto_su_db, $json_data);
-    if($id_wp == null){
-        $id_wp = 0;
-    }else{
-        $id_wp = $id_wp+1;
-    }
-    $progettiWpManager->aggiornaRisorse($json_data,$json_data->ID_WP, $json_data->ID_PROGETTO);
+    $wp = $progettiWpManager->aggiorna($wp_su_db, $json_data);
+
     header('Content-Type: application/json');
-    echo json_encode(['value' => $progetto_su_db]);
+    echo json_encode(['value' => $wp]);
     
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     //==========================================================
+    if (!$id_progetto) {
+        print_error(400, 'Missing id_progetto');
+    }
     if (!$id_wp) {
         print_error(400, 'Missing id_wp');
     }
-    $progettiWpManager->elimina($id_wp,$id_progetto);
+    $progettiWpManager->elimina($id_wp, $id_progetto);
     
 } else {
     //==========================================================

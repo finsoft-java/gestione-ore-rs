@@ -8,7 +8,7 @@ class ProgettoWp {
     function get_progetto() {
         global $progettiWpManager;
         if (!$this->_progetto) {
-            $this->_progetto = $progettiWpManager->get_progetto($this->id_progetto);
+            $this->_progetto = $progettiManager->get_progetto($this->id_progetto);
         }
         return $this->_progetto;
     }
@@ -16,12 +16,22 @@ class ProgettoWp {
 
 class ProgettiWpManager {
     
-    function get_progetto($id_progetto) {
+    function get_wp_progetto($id_progetto) {
         $arrProgettiWp = array();
         $sql = "SELECT * FROM progetti_wp WHERE id_progetto = '$id_progetto'";
         $arrProgettiWp = select_list($sql);
         return $this->addRisorse($arrProgettiWp);
-    }   
+    }
+    
+    function get_wp($id_progetto, $id_wp) {
+        $arrProgettiWp = array();
+        $sql = "SELECT * FROM progetti_wp WHERE id_progetto = '$id_progetto' and id_wp=$id_wp";
+        $arrProgettiWp = select_list($sql); // lista con max 1 elemento
+        if ($arrProgettiWp == null || count($arrProgettiWp) == 0) {
+            return null;
+        }
+        return $this->addRisorse($arrProgettiWp)[0];
+    }
 
     function addRisorse($arrProgettiWp){
         $risorse = '';
@@ -35,88 +45,89 @@ class ProgettiWpManager {
         return $arrProgettiWp;
     }
     
-    function aggiornaRisorse($json_data, $id_wp, $id_progetto) {
-        global $con;
-        $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$id_wp' AND id_progetto = '$json_data->ID_PROGETTO'";
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
-        for($i = 0; $i < count($json_data->RISORSE); $i++){
-            $sql = insert("progetti_wp_risorse", 
-                                    ["MATRICOLA_DIPENDENTE" => $json_data->RISORSE[$i],
-                                    "ID_PROGETTO" => $json_data->ID_PROGETTO,
-                                    "ID_WP" => $id_wp
-                                    ]);
-            mysqli_query($con, $sql);
-            if ($con ->error) {
-                print_error(500, $con ->error);
+    function aggiornaRisorse($id_wp, $id_progetto, $json_data_wp) {
+        $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
+        execute_update($sql);
+
+        $risorse = $json_data_wp->RISORSE;
+
+        if ($risorse) {
+            for($i = 0; $i < count($risorse); $i++) {
+                $sql = insert("progetti_wp_risorse", 
+                                        [
+                                            "MATRICOLA_DIPENDENTE" => $risorse[$i],
+                                            "ID_PROGETTO" => $id_progetto,
+                                            "ID_WP" => $id_wp
+                                        ]);
+                execute_update($sql);
             }
-            $id_progetto = mysqli_insert_id($con);
         }
-        return $this->get_progetto($id_progetto);
     }
     
     function crea($json_data) {
-        global $con;
-        //select max per id_wp 
-        $id_wp = select_single_value("Select max(ID_WP) FROM progetti_wp WHERE id_progetto = '$json_data->ID_PROGETTO'");
-        if($id_wp == null){
-            $id_wp = 1;
-        }else{
-            $id_wp = $id_wp+1;
-        }
-        $sql = insert("progetti_wp", ["TITOLO" => $json_data->TITOLO,
+        $this->controllo_date($json_data->DATA_INIZIO, $json_data->DATA_FINE);
+        $this->controllo_ore($json_data->MONTE_ORE);
+
+        //select max per id_wp
+        $id_wp = select_single_value("Select nvl(max(ID_WP)+1,1) FROM progetti_wp WHERE id_progetto = '$json_data->ID_PROGETTO'");
+        $sql = insert("progetti_wp", [
                                     "ID_PROGETTO" => $json_data->ID_PROGETTO,
                                     "ID_WP" => $id_wp,
-                                   "DESCRIZIONE" => $json_data->DESCRIZIONE,
-                                   "DATA_INIZIO" => $json_data->DATA_INIZIO,
-                                   "DATA_FINE" => $json_data->DATA_FINE,
-                                   "MONTE_ORE" => $json_data->MONTE_ORE
+                                    "TITOLO" => $json_data->TITOLO,
+                                    "DESCRIZIONE" => $json_data->DESCRIZIONE,
+                                    "DATA_INIZIO" => $json_data->DATA_INIZIO,
+                                    "DATA_FINE" => $json_data->DATA_FINE,
+                                    "MONTE_ORE" => $json_data->MONTE_ORE
                                   ]);
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
-        $id_wp_risorse = select_single_value("Select max(ID_WP) FROM progetti_wp_risorse WHERE id_progetto = '$json_data->ID_PROGETTO'");
-        if($id_wp_risorse == null){
-            $id_wp_risorse = 1;
-        }else{
-            $id_wp_risorse = $id_wp_risorse+1;
-        }
+        execute_update($sql);
 
-        $this->aggiornaRisorse($json_data, $id_wp_risorse, $json_data->ID_PROGETTO);
+        $this->aggiornaRisorse($id_wp, $json_data->ID_PROGETTO, $json_data);
 
-        return $this->get_progetto($json_data->ID_PROGETTO);
+        return $this->get_wp($json_data->ID_PROGETTO, $id_wp);
     }
     
     function aggiorna($progetto, $json_data) {
-        global $con;        
+        $this->controllo_date($json_data->DATA_INIZIO, $json_data->DATA_FINE);
+        $this->controllo_ore($json_data->MONTE_ORE);
+
         $sql = update("progetti_wp", ["TITOLO" => $json_data->TITOLO,
                                         "DESCRIZIONE" => $json_data->DESCRIZIONE,
                                         "DATA_INIZIO" => $json_data->DATA_INIZIO,
                                         "DATA_FINE" => $json_data->DATA_FINE,
                                         "MONTE_ORE" => $json_data->MONTE_ORE
-                                  ], ["ID_WP" => $json_data->ID_WP,
-                                  "ID_PROGETTO" => $json_data->ID_PROGETTO]);
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
-        return $this->get_progetto($json_data->ID_PROGETTO);
+                                  ], [
+                                        "ID_PROGETTO" => $json_data->ID_PROGETTO,
+                                        "ID_WP" => $json_data->ID_WP
+                                  ]);
+        execute_update($sql);        
+
+        $this->aggiornaRisorse($json_data->ID_WP, $json_data->ID_PROGETTO, $json_data);
+
+        return $this->get_wp($json_data->ID_PROGETTO, $json_data->ID_WP);
     }
     
     function elimina($id_wp, $id_progetto) {
-        global $con;
         $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
+        execute_update($sql);
         $sql = "DELETE FROM progetti_wp WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
+        execute_update($sql);
+    }
+
+    function controllo_date($data_inizio, $data_fine) {
+        if ($data_inizio == null) {
+            print_error(400, 'DATA_INIZIO non valorizzata');
+        }
+        if ($data_fine == null) {
+            print_error(400, 'DATA_FINE non valorizzata');
+        }
+        if ($data_inizio > $data_fine) {
+            print_error(400, 'La DATA_INIZIO non puo\' essere successiva alla DATA_FINE');
+        }
+    }
+
+    function controllo_ore($monte_ore) {
+        if ($monte_ore < 0) {
+            print_error(400, 'Il monte ore non puo\' essere negativo');
         }
     }
 

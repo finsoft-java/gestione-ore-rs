@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         header('Content-Type: application/json');
         echo json_encode(['data' => $progetti, 'count' => $count]);
     }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //==========================================================
     $postdata = file_get_contents("php://input");
     $json_data = json_decode($postdata);
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     header('Content-Type: application/json');
     echo json_encode(['value' => $progetto]);
     
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+} elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     //==========================================================
     $postdata = file_get_contents("php://input");
     $json_data = json_decode($postdata);
