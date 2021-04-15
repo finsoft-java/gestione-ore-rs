@@ -53,9 +53,9 @@ class ProgettiManager {
         global $con, $logged_user;
         $sql = insert("progetti", ["ID_PROGETTO" => null,
                                    "TITOLO" => $con->escape_string($json_data->TITOLO),
-                                   "ACRONIMO" => $json_data->ACRONIMO,
-                                   "GRANT_NUMBER" => $json_data->GRANT_NUMBER,
-                                   "ABSTRACT" => $json_data->ABSTRACT,
+                                   "ACRONIMO" => $con->escape_string($json_data->ACRONIMO),
+                                   "GRANT_NUMBER" => $con->escape_string($json_data->GRANT_NUMBER),
+                                   "ABSTRACT" => $con->escape_string($json_data->ABSTRACT),
                                    "MONTE_ORE_TOT" => $json_data->MONTE_ORE_TOT,
                                    "DATA_INIZIO" => $json_data->DATA_INIZIO,
                                    "DATA_FINE" => $json_data->DATA_FINE,
@@ -63,10 +63,7 @@ class ProgettiManager {
                                    "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
                                    "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR
                                   ]);
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
+        execute_update($sql);
         $id_progetto = mysqli_insert_id($con);
         return $this->get_progetto($id_progetto);
     }
@@ -77,9 +74,9 @@ class ProgettiManager {
         
         $sql = update("progetti", [
                                     "TITOLO" => $con->escape_string($json_data->TITOLO),
-                                    "ACRONIMO" => $json_data->ACRONIMO,
-                                    "GRANT_NUMBER" => $json_data->GRANT_NUMBER,
-                                    "ABSTRACT" => $json_data->ABSTRACT,
+                                    "ACRONIMO" => $con->escape_string($json_data->ACRONIMO),
+                                    "GRANT_NUMBER" => $con->escape_string($json_data->GRANT_NUMBER),
+                                    "ABSTRACT" => $con->escape_string($json_data->ABSTRACT),
                                     "MONTE_ORE_TOT" => $json_data->MONTE_ORE_TOT,
                                     "DATA_INIZIO" => $json_data->DATA_INIZIO,
                                     "DATA_FINE" => $json_data->DATA_FINE,
@@ -87,10 +84,7 @@ class ProgettiManager {
                                     "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
                                     "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR
                                   ], ["ID_PROGETTO" => $json_data->ID_PROGETTO]);
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
+        execute_update($sql);
     }
     
     function elimina($id_progetto) {

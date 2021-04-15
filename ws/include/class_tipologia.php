@@ -65,31 +65,26 @@ class TipologiaManager {
 
     function crea($json_data) {
         global $con, $logged_user;
-        $sql = insert("tipologie_spesa", ["ID_TIPOLOGIA" => null, "DESCRIZIONE" => $json_data->DESCRIZIONE ]);
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
+        $sql = insert("tipologie_spesa", [
+                            "ID_TIPOLOGIA" => null,
+                            "DESCRIZIONE" => $con->escape_string($json_data->DESCRIZIONE)
+                        ]);
+        execute_update($sql);
         $id_tipologia = mysqli_insert_id($con);
         return $this->get_tipologia($id_tipologia);
     }
     
     function aggiorna($progetto, $json_data) {
         global $con;
-        $sql = update("tipologie_spesa", [ "DESCRIZIONE" => $json_data->DESCRIZIONE ], ["ID_TIPOLOGIA" => $json_data->ID_TIPOLOGIA]);
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
+        $sql = update("tipologie_spesa", [ "DESCRIZIONE" => $con->escape_string($json_data->DESCRIZIONE) ],
+                                        ["ID_TIPOLOGIA" => $json_data->ID_TIPOLOGIA]);
+        execute_update($sql);
     }
     
     function elimina($id_tipologia) {
         global $con;
         $sql = "DELETE FROM tipologie_spesa WHERE id_tipologia = '$id_tipologia'";  //on delete cascade! (FIXME funziona anche con i questionari?!?)
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
+        execute_update($sql);
     }
 }
 ?>

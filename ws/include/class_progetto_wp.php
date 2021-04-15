@@ -65,6 +65,7 @@ class ProgettiWpManager {
     }
     
     function crea($json_data) {
+        global $con;
         $this->controllo_date($json_data->DATA_INIZIO, $json_data->DATA_FINE);
         $this->controllo_ore($json_data->MONTE_ORE);
 
@@ -73,8 +74,8 @@ class ProgettiWpManager {
         $sql = insert("progetti_wp", [
                                     "ID_PROGETTO" => $json_data->ID_PROGETTO,
                                     "ID_WP" => $id_wp,
-                                    "TITOLO" => $json_data->TITOLO,
-                                    "DESCRIZIONE" => $json_data->DESCRIZIONE,
+                                    "TITOLO" => $con->escape_string($json_data->TITOLO),
+                                    "DESCRIZIONE" => $con->escape_string($json_data->DESCRIZIONE),
                                     "DATA_INIZIO" => $json_data->DATA_INIZIO,
                                     "DATA_FINE" => $json_data->DATA_FINE,
                                     "MONTE_ORE" => $json_data->MONTE_ORE
@@ -87,11 +88,12 @@ class ProgettiWpManager {
     }
     
     function aggiorna($progetto, $json_data) {
+        global $con;
         $this->controllo_date($json_data->DATA_INIZIO, $json_data->DATA_FINE);
         $this->controllo_ore($json_data->MONTE_ORE);
 
-        $sql = update("progetti_wp", ["TITOLO" => $json_data->TITOLO,
-                                        "DESCRIZIONE" => $json_data->DESCRIZIONE,
+        $sql = update("progetti_wp", ["TITOLO" => $con->escape_string($json_data->TITOLO),
+                                        "DESCRIZIONE" => $con->escape_string($json_data->DESCRIZIONE),
                                         "DATA_INIZIO" => $json_data->DATA_INIZIO,
                                         "DATA_FINE" => $json_data->DATA_FINE,
                                         "MONTE_ORE" => $json_data->MONTE_ORE

@@ -49,6 +49,7 @@ class ProgettiSpesaManager {
     }
 
     function crea($json_data) {
+        global $con;
         $sql = "SELECT nvl(max(ID_SPESA)+1,1) FROM progetti_spese WHERE id_progetto=$json_data->ID_PROGETTO";
         $id_spesa = select_single_value($sql);
 
@@ -56,17 +57,18 @@ class ProgettiSpesaManager {
                                         "ID_SPESA" => $id_spesa,
                                         "IMPORTO" => $json_data->IMPORTO,
                                         "ID_TIPOLOGIA" => $json_data->TIPOLOGIA->ID_TIPOLOGIA,
-                                        "DESCRIZIONE" => $json_data->DESCRIZIONE
+                                        "DESCRIZIONE" => $con->escape_string($json_data->DESCRIZIONE)
                                   ]);
         execute_update($sql);
         return $this->get_spesa_by_id($json_data->ID_PROGETTO, $id_spesa);
     }
     
     function aggiorna($progetto, $json_data) {
+        global $con;
         $sql = update("progetti_spese", [
                                     "IMPORTO" => $json_data->IMPORTO,
                                     "ID_TIPOLOGIA" => $json_data->TIPOLOGIA->ID_TIPOLOGIA,
-                                    "DESCRIZIONE" => $json_data->DESCRIZIONE
+                                    "DESCRIZIONE" => $con->escape_string($json_data->DESCRIZIONE)
                                   ], [
                                      "ID_PROGETTO" => $json_data->ID_PROGETTO,
                                      "ID_SPESA" => $json_data->ID_SPESA
