@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$id_spesa) {
         print_error(400, "Missing id_spesa");
     }
-    $spesa_old = $progettiSpesaManager->get_progetto_byspesa($json_data->ID_PROGETTO, $json_data->ID_SPESA);
+    $spesa_old = $progettiSpesaManager->get_spesa_by_id($json_data->ID_PROGETTO, $json_data->ID_SPESA);
     if (!$spesa_old) {
         print_error(404, "La spesa non esiste");
     }

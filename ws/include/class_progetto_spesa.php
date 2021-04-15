@@ -24,7 +24,7 @@ class ProgettiSpesaManager {
         return $this->decodeTipologia($arrProgettiSpesa);
     }
 
-    function get_progetto_byspesa($id_progetto, $id_spesa) {
+    function get_spesa_by_id($id_progetto, $id_spesa) {
         global $con, $STATO_PROGETTO, $BOOLEAN;
         $arrProgettiSpesa = array();
         $sql = "SELECT * FROM progetti_spese p WHERE id_progetto=$id_progetto AND id_spesa = '$id_spesa'";
@@ -59,7 +59,7 @@ class ProgettiSpesaManager {
                                         "DESCRIZIONE" => $json_data->DESCRIZIONE
                                   ]);
         execute_update($sql);
-        return $this->get_progetto_byspesa($json_data->ID_PROGETTO, $id_spesa);
+        return $this->get_spesa_by_id($json_data->ID_PROGETTO, $id_spesa);
     }
     
     function aggiorna($progetto, $json_data) {
@@ -72,6 +72,7 @@ class ProgettiSpesaManager {
                                      "ID_SPESA" => $json_data->ID_SPESA
                                   ]);
         execute_update($sql);
+        return $this->get_spesa_by_id($json_data->ID_PROGETTO, $json_data->ID_SPESA);
     }
     
     function elimina($id_progetto, $id_spesa) {
