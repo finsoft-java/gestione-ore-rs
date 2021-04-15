@@ -4,7 +4,7 @@ import { ErrorInterceptor } from './_helpers/error.interceptor';
 import { HttpClient, HttpClientModule, HttpHandler, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -37,6 +37,10 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MomentUtcDateAdapter } from './_helpers/date.adapter';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { TabellaDateFirmaComponent } from './tabella-date-firma/tabella-date-firma.component';
+import { registerLocaleData } from '@angular/common';
+import localeIt from '@angular/common/locales/it';
+
+registerLocaleData(localeIt);
 
 @NgModule({
   declarations: [
@@ -81,7 +85,9 @@ import { TabellaDateFirmaComponent } from './tabella-date-firma/tabella-date-fir
   ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
               { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-              { provide: DateAdapter, useClass: MomentUtcDateAdapter }],
+              { provide: DateAdapter, useClass: MomentUtcDateAdapter },
+              { provide: LOCALE_ID, useValue: 'it-IT'}
+            ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
