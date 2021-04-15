@@ -290,7 +290,7 @@ export class ProgettoDettaglioComponent implements OnInit {
           this.dataSource.data.push(response.value);
           this.dataSource.data = this.dataSource.data;
           this.alertService.success("Spesa salvata con successo");
-          prgSpesa.isEditable=false;
+          prgSpesa.isEditable = false;
         },
         error => {
           this.alertService.error(error);
@@ -302,8 +302,6 @@ export class ProgettoDettaglioComponent implements OnInit {
         .subscribe(response => {
           this.alertService.success("Spesa modificata con successo");
           this.getProgettoSpesa();
-          prgSpesa.isEditable = false;
-          prgSpesa.TIPOLOGIA = response.value.TIPOLOGIA;
         },
         error => {
           this.alertService.error(error);
@@ -454,5 +452,23 @@ export class ProgettoDettaglioComponent implements OnInit {
       return null;
     }
     return Math.round(costoOrario * this.MONTE_ORE_MENSILE_PREVISTO);
+  }
+
+  setCostoMedioFmt($event: Event) {
+    const value = ($event.target as HTMLInputElement).value;
+    if (value != null && value != '') {
+      this.progetto.COSTO_MEDIO_UOMO = parseFloat(value.replace('.', '').replace(',', '.'));
+    } else {
+      this.progetto.COSTO_MEDIO_UOMO = null;
+    }
+  }
+
+  setImportoFmt($event: Event, progSpesa: ProgettoSpesa) {
+    const value = ($event.target as HTMLInputElement).value;
+    if (value != null && value != '') {
+      progSpesa.IMPORTO = parseFloat(value.replace('.', '').replace(',', '.'));
+    } else {
+      progSpesa.IMPORTO = null;
+    }
   }
 }

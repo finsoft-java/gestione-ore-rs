@@ -1,4 +1,4 @@
-<h5 style="margin-bottom: 30px;text-align:center">Modifica / Inserimento Progetto</h5>
+<h5 style="margin-bottom: 30px;text-align:center">Anagrafica Progetto</h5>
 <div *ngIf="progetto">
     <div>
 
@@ -88,7 +88,10 @@
                 </mat-form-field>
                 <mat-form-field appearance="fill">
                     <mat-label>Costo orario Medio Uomo &euro;</mat-label>
-                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.COSTO_MEDIO_UOMO" placeholder="Inserisci il Costo Medio Uomo">
+                    <input matInput 
+                        [value]="this.progetto.COSTO_MEDIO_UOMO|number:'1.2'"
+                        (change)="setCostoMedioFmt($event)"
+                        placeholder="Inserisci il Costo Medio Uomo">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
             </p>
@@ -102,7 +105,7 @@
                 </mat-form-field>
                 <mat-form-field appearance="fill">
                     <mat-label>Costo Uomo Mensile &euro;</mat-label>
-                    <input matInput disabled [value]="costoMensile(progetto.COSTO_MEDIO_UOMO)">
+                    <input matInput disabled [value]="costoMensile(progetto.COSTO_MEDIO_UOMO)|number:'1.2'">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
             </p>
@@ -128,13 +131,10 @@
         </div>
         <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
-            <!-- Position Column -->
             <ng-container matColumnDef="descrizione">
-                <!-- INPUT-->
                 <th mat-header-cell *matHeaderCellDef> Descrizione </th>
                 <td mat-cell *matCellDef="let element">
                     <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}} </label>
-                    <!--<input matInput [value]="element.descrizione" [(ngModel)]="element.descrizione">-->
                     <div style="display: block;margin: 0px auto;width: 250px;">
                         <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
                     </div>
@@ -144,9 +144,12 @@
             <ng-container matColumnDef="importo">
                 <th mat-header-cell *matHeaderCellDef> Importo &euro;</th>
                 <td mat-cell *matCellDef="let element">
-                    <label *ngIf="!element.isEditable"> {{element.IMPORTO}} </label>
+                    <label *ngIf="!element.isEditable"> {{element.IMPORTO|number:'1.2'}} </label>
                     <div style="display: block;margin: 0px auto;width: 250px;">
-                        <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.IMPORTO" required>
+                        <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput 
+                        [value]="element.IMPORTO|number:'1.2'"
+                        (change)="setImportoFmt($event, element)"
+                        required>
                     </div>
                 </td>
             </ng-container>
@@ -222,7 +225,6 @@
                     </div>
                 </td>
             </ng-container>
-
 
             <ng-container matColumnDef="dataInizio">
                 <th mat-header-cell *matHeaderCellDef> Data Inizio </th>
