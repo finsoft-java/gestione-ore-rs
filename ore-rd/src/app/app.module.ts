@@ -39,6 +39,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { TabellaDateFirmaComponent } from './tabella-date-firma/tabella-date-firma.component';
 import { registerLocaleData } from '@angular/common';
 import localeIt from '@angular/common/locales/it';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+
 
 registerLocaleData(localeIt);
 
@@ -81,7 +83,8 @@ registerLocaleData(localeIt);
     TextFieldModule,
     MatDatepickerModule,
     MatMomentDateModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatAutocompleteModule
   ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
               { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

@@ -3,7 +3,7 @@
     <div>
 
         <div style="text-align:right">
-            <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" (click)="report()" disabled="disabled">Report</button>
+            <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" (click)="report()">Report</button>
         </div>
 
         <div>
@@ -43,7 +43,7 @@
             <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Data Inizio</mat-label>
-                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker">
+                    <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker">
                     <mat-datepicker-toggle matSuffix [for]="picker">
                         <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                     </mat-datepicker-toggle>
@@ -52,7 +52,7 @@
                 </mat-form-field>
                 <mat-form-field appearance="fill">
                     <mat-label>Data Fine</mat-label>
-                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_FINE" [matDatepicker]="picker2">
+                    <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_FINE" [matDatepicker]="picker2">
                     <mat-datepicker-toggle matSuffix [for]="picker2">
                         <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                     </mat-datepicker-toggle>
@@ -83,7 +83,7 @@
             <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Monte Ore Totale</mat-label>
-                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.MONTE_ORE_TOT" placeholder="Inserisci il Monte Ore Totale">
+                    <input matInput [value]="this.progetto.MONTE_ORE_TOT|number:'1.0'" (change)="setMonteOreFmt($event)" placeholder="Inserisci il Monte Ore Totale">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
                 <mat-form-field appearance="fill">
@@ -100,7 +100,7 @@
             <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Mesi uomo totali</mat-label>
-                    <input matInput disabled [value]="monteOreMensile(progetto.MONTE_ORE_TOT)">
+                    <input matInput disabled [value]="monteOreMensile(progetto.MONTE_ORE_TOT)|number:'1.2'">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
                 <mat-form-field appearance="fill">
@@ -208,7 +208,7 @@
                 </td>
             </ng-container>
             <ng-container matColumnDef="titolo">
-                <th mat-header-cell *matHeaderCellDef> Titolo </th>
+                <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 80px;"> Titolo </th>
                 <td mat-cell *matCellDef="let element">
                     <label *ngIf="!element.isEditable"> {{element.TITOLO}} </label>
                     <div style="display: block;margin: 0px auto;width: 85px;">
@@ -219,7 +219,7 @@
             <ng-container matColumnDef="descrizione">
                 <th mat-header-cell *matHeaderCellDef> Descrizione </th>
                 <td mat-cell *matCellDef="let element">
-                    <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}}  </label>
+                    <label *ngIf="!element.isEditable" style="overflow: hidden;text-overflow: ellipsis;max-width: 150px;"> {{element.DESCRIZIONE}}  </label>
                     <div style="display: block;margin: 0px auto;width: 85px;">
                         <input class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
                     </div>
@@ -233,7 +233,7 @@
                     <div style="display: block;margin: 0px auto;width: 140px;" *ngIf="element.isEditable">
                         <mat-form-field appearance="fill" style="margin-right: 10px;display: block;margin-top: 1.34375em;">
                             <mat-label>Data Inizio</mat-label>
-                            <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_INIZIO" [matDatepicker]="picker" required>
+                            <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_INIZIO" [matDatepicker]="picker" required>
                             <mat-datepicker-toggle matSuffix [for]="picker">
                                 <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                             </mat-datepicker-toggle>
@@ -250,7 +250,7 @@
                     <div style="display: block;margin: 0px auto;width: 140px;" *ngIf="element.isEditable">
                         <mat-form-field appearance="fill" style="display: block;margin-top: 1.34375em;">
                             <mat-label>Data Fine</mat-label>
-                            <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_FINE" [matDatepicker]="picker2" required>
+                            <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="element.DATA_FINE" [matDatepicker]="picker2" required>
                             <mat-datepicker-toggle matSuffix [for]="picker2">
                                 <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                             </mat-datepicker-toggle>
@@ -263,7 +263,7 @@
             <ng-container matColumnDef="risorse">
                 <th mat-header-cell *matHeaderCellDef> Risorse </th>
                 <td mat-cell *matCellDef="let element">
-                    <label *ngIf="!element.isEditable" [title]="stampaRisorse(element.RISORSE)" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 85px;"> {{stampaRisorse(element.RISORSE)}}  </label>
+                    <label *ngIf="!element.isEditable" [title]="stampaRisorse(element.RISORSE)" style="overflow: hidden;text-overflow: ellipsis;max-width: 85px;"> {{stampaRisorse(element.RISORSE)}}  </label>
                     <div>
                         <mat-form-field appearance="fill" *ngIf="element.isEditable" style="display: block;margin: 0px auto;width: 85px;margin-top: 1.34375em;">
                             <mat-label>Risorse</mat-label>
@@ -286,7 +286,7 @@
             <ng-container matColumnDef="mesiUomo">
                 <th mat-header-cell *matHeaderCellDef> Mesi uomo </th>
                 <td mat-cell *matCellDef="let element">
-                    <label> {{ monteOreMensile(element.MONTE_ORE) }} </label>
+                    <label> {{ monteOreMensile(element.MONTE_ORE)|number:'1.2' }} </label>
                 </td>
             </ng-container>
             <ng-container matColumnDef="actions">

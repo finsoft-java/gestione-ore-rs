@@ -444,14 +444,23 @@ export class ProgettoDettaglioComponent implements OnInit {
     if (monteOre === null) {
       return null;
     }
-    return Math.round(monteOre / this.MONTE_ORE_MENSILE_PREVISTO);
+    return Math.round((monteOre / this.MONTE_ORE_MENSILE_PREVISTO)*100) / 100;
   }
 
   costoMensile(costoOrario: number|null) {
     if (costoOrario === null) {
       return null;
     }
-    return Math.round(costoOrario * this.MONTE_ORE_MENSILE_PREVISTO);
+    return Math.round((costoOrario * this.MONTE_ORE_MENSILE_PREVISTO)*100) / 100;
+  }
+
+  setMonteOreFmt($event: Event) {
+    const value = ($event.target as HTMLInputElement).value;
+    if (value != null && value != '') {
+      this.progetto.MONTE_ORE_TOT = parseFloat(value.replace('.', '').replace(',', '.'));
+    } else {
+      this.progetto.MONTE_ORE_TOT = 0;
+    }
   }
 
   setCostoMedioFmt($event: Event) {

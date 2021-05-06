@@ -59,7 +59,7 @@ class TipologiaManager {
     function get_tipologia($id_tipologia) {
         global $con, $BOOLEAN;
         $sql = "SELECT * FROM tipologie_spesa p WHERE ID_TIPOLOGIA = '$id_tipologia'";
-        return select_list($sql);
+        return select_single($sql);
     }
     
 

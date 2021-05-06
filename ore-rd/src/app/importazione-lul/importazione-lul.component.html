@@ -39,7 +39,7 @@
         <div class="col-3">
             <button (click)="fileInput.click()" mat-raised-button color="primary">
               <span>Seleziona uno o più file...</span>
-              <input #fileInput type="file" multiple (change)="selectFiles($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" />
+              <input #fileInput type="file" multiple (change)="selectFiles($event)" accept=".xlsx,.xls" style="display:none;" />
             </button>
         </div>
 

@@ -57,8 +57,8 @@ export class ImportazioneLulComponent implements OnInit {
   }
 
   upload(files: FileList) {
-    this.progressInfos.value = 0;
-  
+    this.selectedFiles = undefined;
+    this.progressInfos.value = 0;  
     this.uploadService.upload(files).subscribe(
       event => {
         if (event.type === HttpEventType.UploadProgress) {

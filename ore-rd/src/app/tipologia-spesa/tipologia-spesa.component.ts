@@ -47,14 +47,17 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     this.dataSource.data = data;
   }
 
-  saveChange(a:Tipologia){
+  saveChange(a:Tipologia) : any{
     a.isEditable=false;
     if(a.ID_TIPOLOGIA == null){
       this.tipologiaSpesaService.insert(a)
       .subscribe(response => {
-        // this.alertService.success("Tipologia inserita");
+        console.log(this.dataSource.data);
+        console.log(response.value);
+        this.alertService.success("Tipologia inserita");
         this.dataSource.data.splice(-1, 1);
         this.dataSource.data.push(response.value);
+        console.log(this.dataSource.data);
         this.dataSource.data = this.dataSource.data;
       },
       error => {
@@ -63,7 +66,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     } else {
       this.tipologiaSpesaService.update(a)
       .subscribe(response => {
-        // this.alertService.success("Tipologia modificata");
+        this.alertService.success("Tipologia modificata");
       },
       error => {
         this.alertService.error(error);
