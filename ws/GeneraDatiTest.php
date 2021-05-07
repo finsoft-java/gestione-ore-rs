@@ -34,16 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // REPERIRE DATI DA DB
     $primo = "DATE('$anno-$mese-01')";
-    $query_matr = "SELECT DISTINCT MATRICOLA_DIPENDENTE from ORE_PRESENZA_LUL " .
+    $query_matr = "SELECT DISTINCT MATRICOLA_DIPENDENTE from ore_presenza_lul " .
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
     $query_wp = "SELECT ID_PROGETTO, ID_WP, DATA_INIZIO, DATA_FINE, MONTE_ORE_RESIDUO " . 
                 "FROM progetti_wp_residuo ".
                 "WHERE DATA_FINE >= $primo AND DATA_INIZIO <= LAST_DAY($primo) AND MONTE_ORE_RESIDUO > 0";
-    $query_date = "SELECT DISTINCT DATA FROM ORE_PRESENZA_LUL " .
+    $query_date = "SELECT DISTINCT DATA FROM ore_presenza_lul " .
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
-    $query_lul = "SELECT DATA,MATRICOLA_DIPENDENTE,ORE_PRESENZA_ORDINARIE FROM ORE_PRESENZA_LUL " .
+    $query_lul = "SELECT DATA,MATRICOLA_DIPENDENTE,ORE_PRESENZA_ORDINARIE FROM ore_presenza_lul " .
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_PRESENZA_ORDINARIE > 0";
-    $query_pregresso = "SELECT ID_PROGETTO,ID_WP,DATA,MATRICOLA_DIPENDENTE,ORE_LAVORATE FROM ORE_CONSUNTIVATE " .
+    $query_pregresso = "SELECT ID_PROGETTO,ID_WP,DATA,MATRICOLA_DIPENDENTE,ORE_LAVORATE FROM ore_consuntivate " .
                 "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo) AND ORE_LAVORATE > 0";
     
     // TODO selezionare anche i dati preesistenti
