@@ -1,5 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
+@import "~@ng-select/ng-select/themes/default.theme.css";
 
+/*@import "~@ng-select/ng-select/themes/material.theme.css";*/
 @import "~bootstrap/dist/css/bootstrap.css";
 html,
 body {
@@ -15,7 +17,14 @@ body {
     float: none;
     text-align: center;
 }
-
+::ng-deep .ng-select .ng-select-container {
+    color: #333;
+    background-color: #fff;
+    border-radius: 0px;
+    border: 1px solid #ccc;
+    min-height: 36px;
+    align-items: center;
+}
 
 /* top bar */
 

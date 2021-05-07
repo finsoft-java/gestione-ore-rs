@@ -63,12 +63,19 @@
         </div>
         <div>
             <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
-                <mat-form-field appearance="fill">
-                    <mat-label>Matricola Supervisor</mat-label>
-                    <mat-select [(ngModel)]="progetto.MATRICOLA_SUPERVISOR">
-                        <mat-option *ngFor="let competence of allMatricole" [value]="competence.MATRICOLA">{{competence.NOME}}</mat-option>
-                    </mat-select>
-                </mat-form-field>
+                    <mat-label style="
+                    font-size: 12px;
+                    width: 100%;
+                    float: left;
+                    background-color: rgba(0, 0, 0, 0.04);
+                    padding: 10px 10px 0px 10px;color:rgba(0, 0, 0, 0.6)
+                ">Matricola Supervisor</mat-label>
+                    <ng-select [items]="allMatricole" 
+                        bindLabel="NOME" 
+                        bindValue="MATRICOLA" 
+                        [(ngModel)]="progetto.MATRICOLA_SUPERVISOR">
+                    </ng-select>
+                
             </p>
         </div>
     </div>

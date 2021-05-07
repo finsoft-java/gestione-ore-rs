@@ -40,6 +40,7 @@ import { TabellaDateFirmaComponent } from './tabella-date-firma/tabella-date-fir
 import { registerLocaleData } from '@angular/common';
 import localeIt from '@angular/common/locales/it';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 
 registerLocaleData(localeIt);
@@ -84,7 +85,8 @@ registerLocaleData(localeIt);
     MatDatepickerModule,
     MatMomentDateModule,
     MatCheckboxModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    NgSelectModule
   ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
               { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
