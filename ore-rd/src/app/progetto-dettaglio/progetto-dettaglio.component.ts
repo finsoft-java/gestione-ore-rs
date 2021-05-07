@@ -384,9 +384,6 @@ export class ProgettoDettaglioComponent implements OnInit {
         for(let i = 0; i < this.progettoWp.length; i++) {
           monte_totale_wp = (Number(monte_totale_wp) + Number(this.progettoWp[i].MONTE_ORE));
         }
-        console.log("monte_totale_wp");
-        console.log(monte_totale_wp);
-        console.log("monte_totale_wp");
         if (this.progetto.MONTE_ORE_TOT < monte_totale_wp) {
           this.alertService.error("Il monte ore dei WP supera quello del progetto");
           error = true;
@@ -412,9 +409,6 @@ export class ProgettoDettaglioComponent implements OnInit {
         for(let i = 0; i < this.progettoWp.length; i++) {
           monte_totale_wp = (Number(monte_totale_wp) + Number(this.progettoWp[i].MONTE_ORE));
         }
-        console.log("monte_totale_wp");
-        console.log(monte_totale_wp);
-        console.log("monte_totale_wp");
         if (this.progetto.MONTE_ORE_TOT < monte_totale_wp) {
           this.alertService.error("Il MonteOre dei WP supera quello del Progetto");
           error = true;
