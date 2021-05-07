@@ -42,6 +42,17 @@ export class GeneraDatiTestComponent implements OnInit {
 
     date = new FormControl(moment());
 
+    message_success = '';
+    message_error = '';
+    
+    resetAlertSuccess() {    
+      this.message_success = '';
+    }
+    
+    resetAlertDanger() {
+      this.message_error = '';
+    }
+
     chosenYearHandler(normalizedYear: Moment) {
       const ctrlValue = this.date.value;
       ctrlValue.year(normalizedYear.year());
@@ -61,6 +72,11 @@ export class GeneraDatiTestComponent implements OnInit {
     }
 
     run() {
-        this.datitestService.run(formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe();
+        this.datitestService.run(formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe(response => {
+          this.message_success = 'Fatto';
+        },
+        error => {
+          this.message_error = 'Errore durante l\'elaborazione';
+        });
     }
 }

@@ -154,7 +154,7 @@ export class ProgettoDettaglioComponent implements OnInit {
       if (this.allMatricole.find(x => x.MATRICOLA == element) != null)
         arrayRisorse.push(this.allMatricole.find(x => x.MATRICOLA == element).NOME);
     });
-    return arrayRisorse;
+    return arrayRisorse.join(', ');
  }
 
   getSupervisor(): void {

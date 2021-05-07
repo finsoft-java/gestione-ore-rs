@@ -1,6 +1,7 @@
 <h5 style="margin-bottom: 30px;text-align:center">
     Genera dati Test</h5>
 <div>
+
     <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
         <mat-form-field appearance="fill" style="margin-right: 10px;">
             <mat-label>Data</mat-label>
@@ -11,4 +12,19 @@
         </mat-form-field>
         <button mat-raised-button color="primary" (click)="run()">RUN HERE</button>
     </p>
+    
+    <div class="alert alert-success" role="alert" *ngIf="message_success">
+        <button type="button" class="close" (click)="resetAlertSuccess()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <div [innerHtml]="message_success">
+        </div>
+    </div>
+    <div class="alert alert-danger" role="alert" *ngIf="message_error">
+        <button type="button" class="close" (click)="resetAlertDanger()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <div [innerHtml]="message_error">
+        </div>
+    </div>
 </div>
