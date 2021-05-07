@@ -12,4 +12,14 @@
         <button mat-raised-button color="primary" (click)="run()">RUN HERE</button>
     </p>
 </div>
+
+
+<div class="alert alert-danger" role="alert" *ngIf="message_error">
+    <button type="button" class="close" (click)="resetAlertDanger()">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <div [innerHtml]="message_error">
+    </div>
+</div>
+
 <app-tabella-date-firma [dataSourceFiglio]="dataSource" [annoMese]="annoMese"></app-tabella-date-firma>

@@ -44,7 +44,8 @@ export class RaccoltaDateFirmaComponent implements OnInit {
   dataSource = new MatTableDataSource<DataFirma[]>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;
-  annoMese:string = '';
+  annoMese: string = '';
+  message_error: string = '';
 
   chosenYearHandler(normalizedYear: Moment) {
     const ctrlValue = this.date.value;
@@ -69,8 +70,12 @@ export class RaccoltaDateFirmaComponent implements OnInit {
       this.annoMese = formatDate(this.date.value,"YYYY-MM","en-GB");
       this.datitestService.runDateFirma(this.annoMese).subscribe(response => {
         this.dataSource = new MatTableDataSource<DataFirma[]>(response.data);
+        if (response.data == null || response.data.length == 0) {
+          this.message_error = 'Nessun progetto nel periodo selezionato';
+        }
       },
       error => {
+        this.message_error = error;
       });
   }
 
@@ -84,6 +89,10 @@ export class RaccoltaDateFirmaComponent implements OnInit {
 
   undoChange(a:DataFirma){
     a.isEditable = false;
+  }
+
+  resetAlertDanger() {
+    this.message_error = '';
   }
 
 }
