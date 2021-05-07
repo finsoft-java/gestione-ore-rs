@@ -46,13 +46,13 @@ class LULManager {
 
         $mese = $spreadSheetAry[1][3];
         if (empty($mese)) {
-            $message->error .= 'Bad file. Non riesco a identificare il mese del rapportino.<br/>';
+            $message->error .= 'Bad file. Non riesco a identificare il mese del documento.<br/>';
             return;
         }
 
         $anno = $spreadSheetAry[1][4];
         if (empty($anno)) {
-            $message->error .= 'Bad file. Non riesco a identificare l\'anno del rapportino.<br/>';
+            $message->error .= 'Bad file. Non riesco a identificare l\'anno del documento.<br/>';
             return;
         }
         
