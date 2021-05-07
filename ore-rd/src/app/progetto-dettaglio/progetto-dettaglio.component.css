@@ -59,3 +59,10 @@ table {
 ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option{
     background:rgba(0, 0, 0, 0.04);
 }
+.label_mat {
+    font-size: 12px;
+    width: 100%;
+    float: left;
+    background-color: rgba(0, 0, 0, 0.04);
+    padding: 10px 10px 0px 10px;color:rgba(0, 0, 0, 0.6)
+}
