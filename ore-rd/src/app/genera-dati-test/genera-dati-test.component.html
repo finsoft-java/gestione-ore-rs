@@ -4,7 +4,7 @@
     <p style="width: 50%;display: block;margin: 0px auto;" class="fraz2_width">
         <mat-form-field appearance="fill" style="margin-right: 10px;">
             <mat-label>Data</mat-label>
-            <input matInput [matDatepicker]="picker" [formControl]="date">
+            <input matInput readonly [matDatepicker]="picker" [formControl]="date">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker startView="multi-year" (yearSelected)="chosenYearHandler($event)" (monthSelected)="chosenMonthHandler($event, picker)" panelClass="example-month-picker">
             </mat-datepicker>
