@@ -109,6 +109,11 @@ class ProgettiWpManager {
     }
     
     function elimina($id_wp, $id_progetto) {
+        $sql = "SELECT count(*) FROM ore_consuntivate WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
+        $cnt = select_single_value($sql);
+        if ($cnt > 0) {
+            print_error(400, "Esistono dei consuntivi su questa attivita'");
+        }
         $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
         execute_update($sql);
         $sql = "DELETE FROM progetti_wp WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
