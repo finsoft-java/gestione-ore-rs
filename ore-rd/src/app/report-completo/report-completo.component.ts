@@ -14,6 +14,7 @@ import { Moment } from 'moment';
 // the `default as` syntax.
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 // tslint:disable-next-line:no-duplicate-imports
 
 const moment = _moment;
@@ -43,6 +44,7 @@ export const MY_FORMATS = {
 export class ReportCompletoComponent implements OnInit {
     
     isCompleto = true;
+    singoloMese = true;
     date = new FormControl(moment());
     idProgetto: number = -1;
 
@@ -52,9 +54,9 @@ export class ReportCompletoComponent implements OnInit {
 
     chosenYearHandler(normalizedYear: Moment) {
       let ctrlValue;
-      if(this.date.value == null){
+      if (this.date.value == null) {
         ctrlValue = moment();
-      }else{
+      } else {
         ctrlValue = this.date.value;
       }
       ctrlValue.year(normalizedYear.year());
@@ -97,4 +99,10 @@ export class ReportCompletoComponent implements OnInit {
         window.open(url);
     }
 
+    changeSingoloMese($event: MatCheckboxChange) {
+      console.log($event);
+      this.singoloMese = $event.checked;
+      this.date.setValue(null);
+      console.log('HERE', this.date.value)
+    }
 }
