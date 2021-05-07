@@ -281,7 +281,7 @@ class RapportiniManager {
         
         $numRows = count($spreadSheetAry);
         if(isset($spreadSheetAry[0][7])){
-            $titolo_progetto = $spreadSheetAry[0][7];
+            $titolo_progetto = $con->escape_string($spreadSheetAry[0][7]);
         } else {
             $message->error .= 'Bad file. Non riesco a identificare le corrette colonne del file.<br/>';
             return;
@@ -291,8 +291,7 @@ class RapportiniManager {
             $message->error .= 'Bad file. Non riesco a identificare il titolo del progetto.<br/>';
             return;
         }
-        
-        $anno = $spreadSheetAry[2][9];
+        $anno = $con->escape_string($spreadSheetAry[2][9]);
         if (empty($anno)) {
             $message->error .= 'Bad file. Non riesco a identificare l\'anno del rapportino.<br/>';
             return;
@@ -317,7 +316,7 @@ class RapportiniManager {
             return;
         }
         
-        $matricola = $spreadSheetAry[$i][23];
+        $matricola = $con->escape_string($spreadSheetAry[$i][23]);
         if (empty($matricola)) {
             $message->error .= 'Bad file. Non riesco a identificare la matricola utente.</br>';
             return;
@@ -334,9 +333,9 @@ class RapportiniManager {
             if ($spreadSheetAry[$i][0] === 'TOT') {
                 break;
             }
-            $titolo_wp = mysqli_real_escape_string($con, $spreadSheetAry[$i][0]);
+            $titolo_wp = $con->escape_string($spreadSheetAry[$i][0]);
             $id_wp = select_single_value("SELECT ID_WP FROM PROGETTI_WP WHERE ID_PROGETTO=$id_progetto AND TITOLO='$titolo_wp'");
-            
+
             for ($day = 1; $day < count($spreadSheetAry[$riga_date]); ++$day) { // OFFSET == 0
                 if ($spreadSheetAry[$riga_date][$day] === 'TOT') {
                     break;
@@ -353,6 +352,5 @@ class RapportiniManager {
         
         $message->success .= 'Caricamento Effettuato correttamente.</br>';
     }
-
 }
 ?>
