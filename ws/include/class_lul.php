@@ -87,10 +87,11 @@ class LULManager {
 
     function crea($matricola,$data,$ore) {
         global $con, $logged_user;
-        $sql = insert("ore_presenza_lul", ["MATRICOLA_DIPENDENTE" => $matricola,
-                                   "DATA" => $data,
-                                   "ORE_PRESENZA_ORDINARIE" => $ore
-                                  ]);
+        #$sql = insert("ore_presenza_lul", ["MATRICOLA_DIPENDENTE" => $matricola,
+        #                           "DATA" => $data,
+        #                           "ORE_PRESENZA_ORDINARIE" => $ore
+        #                          ]);
+        $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,ORE,ORE_PRESENZA_ORDINARIE) VALUES ('$matricola','$data',$ore)";
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
