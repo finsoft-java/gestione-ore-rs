@@ -83,8 +83,8 @@ class LULManager {
 
     function leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, &$spreadSheetAry) {
         $pezzi_comando_sql = [];
+        $matricola = $spreadSheetAry[$primaRiga][1];
         for($a= 1; $a <= $ultimoGiornoMese; $a++){
-            $matricola = $spreadSheetAry[$primaRiga][1];
             $data = "$annoMese-$a";
             $ore = $spreadSheetAry[$primaRiga+2][$a];
             $pezzi_comando_sql[] = "('$matricola','$data',$ore)";
