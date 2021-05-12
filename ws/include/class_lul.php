@@ -43,41 +43,14 @@ class LULManager {
         $excelSheet = $spreadSheet->getActiveSheet();
         $spreadSheetAry = $excelSheet->toArray();
         $numRows = count($spreadSheetAry);
-
-        $mese = $spreadSheetAry[1][3];
-        if (empty($mese)) {
-            $message->error .= 'Bad file. Non riesco a identificare il mese del documento.<br/>';
-            return;
-        }
-
-        $anno = $spreadSheetAry[1][4];
-        if (empty($anno)) {
-            $message->error .= 'Bad file. Non riesco a identificare l\'anno del documento.<br/>';
-            return;
-        }
-        
-        $dataLul = $anno."-".$mese;
-        $data_lul = new DateTime($dataLul);
-        $data_lul->modify('last day of this month');
-        $ultimoGiornoMese = $data_lul->format('d');
-        
-        $contatoreDipendenti = 3;
-        $contatoreOreDipendenti = 5;
-
-        for($e= 1; ;$e++){
-
-            if($e != 1){
-                $contatoreDipendenti = $contatoreDipendenti + 10;
-                $contatoreOreDipendenti = $contatoreOreDipendenti + 10;
-            }
-
-            $this->elimina($dataLul,$spreadSheetAry[$contatoreDipendenti][1]);
-
-            if($spreadSheetAry[$contatoreDipendenti][0] == 'Matricola'){
-                for($a= 1; $a <= $ultimoGiornoMese; $a++){
-                    $ora_lavorata = $spreadSheetAry[$contatoreOreDipendenti][$a];
-                    $this->crea($spreadSheetAry[$contatoreDipendenti][1],$anno."-".$mese."-".$a,$ora_lavorata);
-                }
+        $primaRiga = 0;
+        while ($primaRiga < $numRows) {
+            if($spreadSheetAry[$primaRiga][0] == 'Azienda'){
+                [$annoMese, $ultimoGiornoMese] = $this->leggiAzienda($primaRiga,$spreadSheetAry);                
+                $primaRiga = $primaRiga + 3;
+            }else if($spreadSheetAry[$primaRiga][0] == 'Matricola'){
+                $this->leggiOreDipendente($primaRiga,$annoMese,$ultimoGiornoMese,$spreadSheetAry);
+                $primaRiga = $primaRiga + 10;
             } else {
                 break;
             }
@@ -85,28 +58,46 @@ class LULManager {
         $message->success .= 'Caricamento Effettuato correttamente.</br>';
     }
 
+    function leggiAzienda($primaRiga,$spreadSheetAry) {
+        $mese = $spreadSheetAry[$primaRiga+1][3];
+        if (empty($mese)) {
+            $message->error .= 'Bad file. Non riesco a identificare il mese del documento.<br/>';
+            return;
+        }
+
+        $anno = $spreadSheetAry[$primaRiga+1][4];
+        if (empty($anno)) {
+            $message->error .= 'Bad file. Non riesco a identificare l\'anno del documento.<br/>';
+            return;
+        }
+        $dataLul = $anno."-".$mese;
+        $data_lul = new DateTime($dataLul);
+        $data_lul->modify('last day of this month');
+        $ultimoGiornoMese = $data_lul->format('d');
+        $this->elimina($anno,$mese);
+        return [$anno.'-'.$mese, $ultimoGiornoMese];
+    }
+
+    function leggiOreDipendente($primaRiga,$annoMese,$ultimoGiornoMese,$spreadSheetAry) {
+        for($a= 1; $a <= $ultimoGiornoMese; $a++){
+            $ora_lavorata = $spreadSheetAry[$primaRiga+2][$a];
+            $this->crea($spreadSheetAry[$primaRiga][1],$annoMese."-".$a,$ora_lavorata);
+        }
+
+    }
+
     function crea($matricola,$data,$ore) {
-        global $con, $logged_user;
-        #$sql = insert("ore_presenza_lul", ["MATRICOLA_DIPENDENTE" => $matricola,
-        #                           "DATA" => $data,
-        #                           "ORE_PRESENZA_ORDINARIE" => $ore
-        #                          ]);
-        $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,ORE,ORE_PRESENZA_ORDINARIE) VALUES ('$matricola','$data',$ore)";
+        global $con;
+        $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES ('$matricola','$data',$ore)";
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
         }
     }
         
-    function elimina($data,$matricola) {
+    function elimina($anno, $mese) {
         global $con;
-        $datafine = new DateTime($data);
-        $datainizio = new DateTime($data);
-        $datafine->modify('last day of this month');
-        $datainizio->modify('first day of this month');
-        $ultimoGiornoMese = $datafine->format('d');
-        $primoGiornoMese = $datainizio->format('d');
-        $sql = "DELETE FROM ore_presenza_lul WHERE MATRICOLA_DIPENDENTE = '$matricola' and DATA >= CAST('$data-$primoGiornoMese' AS DATE) AND DATA <= CAST('$data-$ultimoGiornoMese' AS DATE)";
+        $sql = "DELETE FROM ore_presenza_lul WHERE YEAR(DATA)=$anno AND MONTH(DATA)=$mese";
         mysqli_query($con, $sql);
         if ($con ->error) {
             print_error(500, $con ->error);
