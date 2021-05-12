@@ -57,10 +57,16 @@ export class ImportazioneLulComponent implements OnInit {
   }
 
   upload(files: FileList) {
+    this.message_error = '';
+    this.message_success = '';
     this.selectedFiles = undefined;
     this.progressInfos.value = 0;  
     this.uploadService.upload(files).subscribe(
       event => {
+        this.eventoClick.srcElement.value = null;
+        this.selectedFiles = undefined;
+        this.nomiFile = [];
+        this.progressInfos = { value: 0, fileName: 'Caricamento' };
         if (event.type === HttpEventType.UploadProgress) {
           if(event.total){
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
@@ -71,6 +77,10 @@ export class ImportazioneLulComponent implements OnInit {
         }
       },
       err => {
+        this.eventoClick.srcElement.value = null;
+        this.selectedFiles = undefined;
+        this.nomiFile = [];
+        this.progressInfos = { value: 0, fileName: 'Caricamento' };
         if (err && err.error && err.error.error)
             this.message_error = err.error.error.message;
         else if (err && err.error)
