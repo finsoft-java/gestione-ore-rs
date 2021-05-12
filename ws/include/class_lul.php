@@ -90,7 +90,7 @@ class LULManager {
             $pezzi_comando_sql[] = "('$matricola','$data',$ore)";
         }
         $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES " .
-            implode(',', $pezzi_comando_sql_insert);
+            implode(',', $pezzi_comando_sql);
         execute_update($sql);
     }
         
