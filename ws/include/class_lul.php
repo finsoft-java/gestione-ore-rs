@@ -33,6 +33,7 @@ class LULManager {
 
     function importExcel($filename, &$message, $typeFile) {
         global $con;
+        set_time_limit(400);
         if($typeFile == 'application/vnd.ms-excel' || $typeFile ==  'text/xls'){
             $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
         } else {
@@ -87,7 +88,7 @@ class LULManager {
         for($a= 1; $a <= $ultimoGiornoMese; $a++){
             $data = "$annoMese-$a";
             $ore = $spreadSheetAry[$primaRiga+2][$a];
-            $pezzi_comando_sql[] = "('$matricola','$data',$ore)";
+            $pezzi_comando_sql[] = "('$matricola','$data','$ore')";
         }
         $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES " .
             implode(',', $pezzi_comando_sql);
