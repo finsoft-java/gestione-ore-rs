@@ -2,7 +2,7 @@
     Generazione reportistica progetto n. {{ idProgetto }}</h5>
 <div>
 
-    <p style="width: 50%;display: block;margin: 0px auto; text-align:center" class="fraz2_width">
+    <p style="width: 75%;display: block;margin: 0px auto; text-align:center" class="fraz2_width">
         <mat-checkbox class="example-margin" title="Nel report Completo sono riportati i dettagli di matricole e date" [(ngModel)]="isCompleto" style="margin-right:10px;">Completo</mat-checkbox>
         <mat-checkbox class="example-margin" title="Scegliere se il report si riferisce all'intero progetto o alla singola mensilit&agrave;" [checked]="singoloMese" (change)="changeSingoloMese($event)" style="margin-right:10px;">Singolo mese</mat-checkbox>
         <mat-form-field appearance="fill" style="margin-right: 10px;" [style.visibility]="singoloMese ? 'visible' : 'hidden'">

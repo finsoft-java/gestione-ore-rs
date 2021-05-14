@@ -21,13 +21,12 @@ class PantheraManager {
 
     function connect() {
         if (!$this->mock) {
-            // echo "Connecting..." . DB_PTH_HOST;
+            
             $this->conn = sqlsrv_connect(DB_PTH_HOST, array(
                                     "Database" => DB_PTH_NAME,  
                                     "UID" => DB_PTH_USER,
                                     "PWD" => DB_PTH_PASS));
             // echo "Done.";
-            // var_dump($this->conn);
             if ($this->conn == false) {
                 print_error(500, "Failed to connect: " . $this->fmt_errors());
             }
@@ -39,8 +38,13 @@ class PantheraManager {
     */
     function select_list($sql) {
         
-        // SE TI SERVE FARE DEBUG: print_r($sql); print("\n");
-        
+        // SE TI SERVE FARE DEBUG: 
+        //print_r("Connecting..." . DB_PTH_HOST);
+        //print_r("DB_PTH_NAME..." . DB_PTH_NAME);
+        //print_r("DB_PTH_USER..." . DB_PTH_USER);
+        //print_r("DB_PTH_PASS..." . DB_PTH_PASS);
+        //var_dump($this->conn); print("\n");
+        //print_r($sql); print("\n");
         if ($result = sqlsrv_query($this->conn, $sql)) {
             $arr = array();
             while ($row = sqlsrv_fetch_array($result))
@@ -89,7 +93,7 @@ class PantheraManager {
     Esegue un comado SQL SELECT e si aspetta una singola cella come risultato, oppure lancia un print_error
     */
     function select_single_value($sql) {
-        if ($result = sqlsrv_query($connessione, $sql)) {
+        if ($result = sqlsrv_query($this->conn, $sql)) {
             if ($row = sqlsrv_fetch_array($result))
             {
                 return $row[0];
@@ -121,8 +125,7 @@ class PantheraManager {
         } else {
             $query = "SELECT DISTINCT ID_UTENTE AS MATRICOLA,DENOMINAZIONE AS NOME FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001'";
             $matricole = $this->select_list($query);
-        }
-        
+        }        
         return $matricole;
     }
 
@@ -181,11 +184,11 @@ class PantheraManager {
                      ];
         } else {
             $query = "SELECT DISTINCT ID_RISORSA,COSTO,DATA_COSTO,DATA_FINE_COSTO " .
-                "FROM THIP.TIPI_COSTO " .
+                "FROM THIP.RISORSE_COSTI " .
                 "WHERE ID_AZIENDA='001' AND TIPO_RISORSA='U' AND LIVELLO_RISORSA='4' " .
                 "AND R_TIPO_COSTO='$tipoCosto' " .
-                "AND (DATA_COSTO IS NULL OR DATA_COSTO<='$data2') " .
-                "AND (DATA_FINE_COSTO IS NULL OR DATA_FINE_COSTO>='$data1') ";
+                "AND (DATA_COSTO IS NULL OR DATA_COSTO<=$data2) " .
+                "AND (DATA_FINE_COSTO IS NULL OR DATA_FINE_COSTO>=$data1) ";
             $costi = $this->select_list($query);
         }
         return $costi;

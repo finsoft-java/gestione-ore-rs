@@ -10,7 +10,7 @@ class ReportBudgetManager {
     function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
         $sql = "SELECT NVL(SUM(c.ORE_LAVORATE),0) as ORE_LAVORATE, NVL(SUM(c.ORE_LAVORATE * c.COSTO_ORARIO),0.0) as COSTO " .
             "FROM progetti p " .
-            "JOIN PROGETTI_WP wp ON wp.id_progetto=p.id_progetto ".
+            "JOIN progetti_wp wp ON wp.id_progetto=p.id_progetto ".
             "LEFT JOIN ore_consuntivate c ON wp.id_progetto=c.id_progetto AND wp.id_wp=c.id_wp ";
         if (!empty($anno) and !empty($mese)) {
             $sql .= "AND c.DATA >= DATE('$anno-$mese-01') AND c.DATA <= LAST_DAY(DATE('$anno-$mese-01')) ";
@@ -25,7 +25,7 @@ class ReportBudgetManager {
         $sql = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_wp_risorse WHERE ID_PROGETTO = '$id_progetto' ORDER BY 1";
         $matricole = select_list($sql); // voglio proprio una lista di oggetti, non una colonna
         foreach ($matricole as $key => $m) {
-            $matricole[$key]['COGNOME_NOME'] = $panthera->getUtente($m);
+            $matricole[$key]['COGNOME_NOME'] = $panthera->getUtente($m['MATRICOLA_DIPENDENTE']);
         }
         return $matricole;
     }
