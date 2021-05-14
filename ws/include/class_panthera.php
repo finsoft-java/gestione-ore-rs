@@ -123,7 +123,7 @@ class PantheraManager {
                       [ 'MATRICOLA' => '6666', 'NOME' => 'Bianchi Gianni' ]
                      ];
         } else {
-            $query = "SELECT DISTINCT ID_UTENTE AS MATRICOLA,DENOMINAZIONE AS NOME FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001'";
+            $query = "SELECT DISTINCT ID_UTENTE AS MATRICOLA,DENOMINAZIONE AS NOME FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' ORDER BY DENOMINAZIONE ASC";
             $matricole = $this->select_list($query);
         }        
         return $matricole;

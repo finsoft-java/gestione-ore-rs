@@ -33,6 +33,7 @@ class LULManager {
 
     function importExcel($filename, &$message, $typeFile) {
         global $con;
+        ini_set('memory_limit', '-1');
         set_time_limit(400);
         if($typeFile == 'application/vnd.ms-excel' || $typeFile ==  'text/xls'){
             $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
@@ -85,14 +86,20 @@ class LULManager {
     function leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, &$spreadSheetAry) {
         $pezzi_comando_sql = [];
         $matricola = $spreadSheetAry[$primaRiga][1];
-        for($a= 1; $a <= $ultimoGiornoMese; $a++){
-            $data = "$annoMese-$a";
-            $ore = $spreadSheetAry[$primaRiga+2][$a];
-            $pezzi_comando_sql[] = "('$matricola','$data','$ore')";
+        if($matricola != 0){
+            for($a= 1; $a <= $ultimoGiornoMese; $a++){
+                $data = "$annoMese-$a";
+                $ore = $spreadSheetAry[$primaRiga+2][$a];
+                if($ore == ''){
+                    $ore = 0;
+                }
+                $pezzi_comando_sql[] = "('$matricola','$data','$ore')";
+            }
+        
+            $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES " .
+                implode(',', $pezzi_comando_sql);
+            execute_update($sql);
         }
-        $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES " .
-            implode(',', $pezzi_comando_sql);
-        execute_update($sql);
     }
         
     function elimina($anno, $mese) {
