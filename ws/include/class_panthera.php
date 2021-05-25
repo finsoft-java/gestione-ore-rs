@@ -139,6 +139,16 @@ class PantheraManager {
         return $matricola;
     }
 
+    function getMatricolaByName($denominazione) {
+        if ($this->mock) {
+            $matricola = 'PIPPO'; // or 1234
+        } else {
+            $query = "SELECT DISTINCT ID_UTENTE FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' AND DENOMINAZIONE='$denominazione'";
+            $matricola = $this->select_single_value($query);
+        }
+        return $matricola;
+    }
+
     function getTipiCosto() {
         if ($this->mock) {
             $tipiCosto = [ [ 'ID_TIPO_COSTO' => 'A01', 'DESCRIZIONE' => 'Prova 1' ],

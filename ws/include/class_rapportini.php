@@ -371,22 +371,22 @@ class RapportiniManager {
         $numRows = count($spreadSheetAry);
         $anno = '';
         $mese = '';
-        if(isset($spreadSheetAry[3][0])){
-            $data = $con->escape_string($spreadSheetAry[3][0]);
-            $data = new DateTime(strtodate($data, '%F %Y'));
-            print($data); die();
-            $anno = $data->format('%Y');
-            $mese = $data->format('%M');
+        if (isset($spreadSheetAry[2][0])){
+            $data = $con->escape_string($spreadSheetAry[2][0]);
+            $data = DateTime::createFromFormat('F Y', $data);
+            $anno = $data->format('Y');
+            $mese = $data->format('m');
         }
         if (empty($anno) || empty ($mese)) {
             $message->error .= 'Bad file. Non riesco a identificare la data del rapportino (cella A3).<br/>';
             return;
         }
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $mese, $anno);
 
         // Attenzione sto usando nome cognome anzichè matricola
         $matr = '';
-        if(isset($spreadSheetAry[0][2])) {
-            $nomecognome = $spreadSheetAry[0][2];
+        if (isset($spreadSheetAry[0][1])) {
+            $nomecognome = $spreadSheetAry[0][1];
             $matr = $panthera->getMatricolaByName($nomecognome);
         }
         if (empty($matr)) {
@@ -394,71 +394,44 @@ class RapportiniManager {
             return;
         }
 
-
-        $id_progetto = select_single_value("SELECT ID_PROGETTO FROM progetti WHERE TITOLO='$titolo_progetto'"); // FIXME chiave unica?!?        
-        if (empty($id_progetto)) {
-            $message->error .= 'Bad file. Non riesco a identificare il titolo del progetto.<br/>';
-            return;
-        }
-        $anno = $con->escape_string($spreadSheetAry[2][9]);
-        if (empty($anno)) {
-            $message->error .= 'Bad file. Non riesco a identificare l\'anno del rapportino.<br/>';
-            return;
-        }
-        $mese = $spreadSheetAry[2][13]; // e.g. February
-        if (empty($mese)) {
-            $message->error .= 'Bad file. Non riesco a identificare il mes del rapportino.<br/>';
-            return;
-        }
-        $mese = date_parse($mese)['month'];
-
-        $matricola = '';
-        // skip first rows
-        for ($i = 0; $i <= $numRows; ++$i) {
-            if (strpos($spreadSheetAry[$i][0], 'Activity details') !== false) {
-                break;
-            }
-        }
-        
-        if ($i == $numRows) {
-            $message->error .= 'Bad file. Non trovo la stringa "Activity details".<br/>';
-            return;
-        }
-        
-        $matricola = $con->escape_string($spreadSheetAry[$i][23]);
-        if (empty($matricola)) {
-            $message->error .= 'Bad file. Non riesco a identificare la matricola utente.</br>';
-            return;
-        }
-        
-        ++$i;
-        $riga_date = $i;
-        ++$i;
-        
-        for ( ; $i <= $numRows; ++$i) {
-            if (empty($spreadSheetAry[$i][0])) {
+        for ($curRow = 8; $curRow < $numRows; ++$curRow) {
+    
+            if(!isset($spreadSheetAry[$curRow][0])) {
                 continue;
             }
-            if ($spreadSheetAry[$i][0] === 'TOT') {
-                break;
+            $pieces = explode(' - ', $spreadSheetAry[$curRow][0]);
+            if (count($pieces) < 2 || $pieces[0] === 'TOT') {
+                continue;
             }
-            $titolo_wp = $con->escape_string($spreadSheetAry[$i][0]);
-            $id_wp = select_single_value("SELECT ID_WP FROM PROGETTI_WP WHERE ID_PROGETTO=$id_progetto AND TITOLO='$titolo_wp'");
 
-            for ($day = 1; $day < count($spreadSheetAry[$riga_date]); ++$day) { // OFFSET == 0
-                if ($spreadSheetAry[$riga_date][$day] === 'TOT') {
-                    break;
-                }
+            // Sto assumnedo che l'acronimo non possa contenere " - ", mentre il titolo WP sì
+            $acronimo = $pieces[0];
+            array_shift($pieces);
+            $titolo_wp = implode(' - ', $pieces);
+
+            $id_progetto = select_single_value("SELECT ID_PROGETTO FROM progetti WHERE ACRONIMO='$acronimo'"); // chiave unica
+            if (empty($id_progetto)) {
+                $message->error .= "Bad file. Non trovo un progetto con acronimo '$acronimo'<br/>";
+                return;
+            }
+
+            $id_wp = select_single_value("SELECT ID_WP FROM PROGETTI_WP WHERE ID_PROGETTO=$id_progetto AND TITOLO='$titolo_wp'");
+            if (empty($id_wp)) {
+                $message->error .= "Bad file. Non trovo l'attività con titolo '$titolo_wp'<br/>";
+                return;
+            }
+
+            for ($day = 1; $day < $daysInMonth; ++$day) {
                 $data = "$anno-$mese-$day";
-                $ore = $spreadSheetAry[$i][$day];
+                $ore = $spreadSheetAry[$curRow][$day+1];
 
                 if ($ore > 0) {
-                    $query = "replace into ore_consuntivate(MATRICOLA_DIPENDENTE,DATA,ID_PROGETTO,ID_WP,ORE_LAVORATE) values('$matricola','$data',$id_progetto,$id_wp,$ore)";
+                    $query = "replace into ore_consuntivate(MATRICOLA_DIPENDENTE,DATA,ID_PROGETTO,ID_WP,ORE_LAVORATE) values('$matr','$data',$id_progetto,$id_wp,$ore)";
                     execute_update($query);
                 }
             }
+
         }
-        
         $message->success .= 'Caricamento Effettuato correttamente.</br>';
     }
 
