@@ -362,11 +362,18 @@ class RapportiniManager {
     }
 
     function importExcel($filename, &$message) {
+        $spreadSheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
+        $numOfSheets = $spreadSheet->getSheetCount();
+
+        // Un file di solito contiene solo il mese corrente, ma per l'importazione iniziale potrebbe contenere più mesi
+        for ($i = 0; $i < $numOfSheets; ++$i) {
+            $this->importSheet($spreadSheet->getSheet($i), $message);
+        }
+    }
+
+    function importSheet($excelSheet, &$message) {
         global $con, $panthera;
 
-        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-        $spreadSheet = $reader->load($filename);
-        $excelSheet = $spreadSheet->getActiveSheet();
         $spreadSheetAry = $excelSheet->toArray();
         
         $numRows = count($spreadSheetAry);
