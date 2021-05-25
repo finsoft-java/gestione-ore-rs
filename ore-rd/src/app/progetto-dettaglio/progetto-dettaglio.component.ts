@@ -275,7 +275,7 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.getProgettowP();
       },
       error => {
-        this.alertService.error("La tipologia è stata già utilizzata per un ProgettoSpesa");
+        this.alertService.error(error);
       });
     }
   }
