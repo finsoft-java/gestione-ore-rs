@@ -46,21 +46,34 @@ class ProgettiWpManager {
     }
     
     function aggiornaRisorse($id_wp, $id_progetto, $json_data_wp) {
-        $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
-        execute_update($sql);
+
+        // La cosa più semplice sarebbe eliminare tutto e poi inserire. Se ci sono vincoli però non funziona.
+
+        $sql = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_wp_risorse WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto'";
+        $oldRisorse = select_column($sql);
 
         $risorse = $json_data_wp->RISORSE;
+        if ($risorse === null) {
+            $risorse =  [];
+        }
 
-        if ($risorse) {
-            for($i = 0; $i < count($risorse); $i++) {
-                $sql = insert("progetti_wp_risorse", 
-                                        [
-                                            "MATRICOLA_DIPENDENTE" => $risorse[$i],
-                                            "ID_PROGETTO" => $id_progetto,
-                                            "ID_WP" => $id_wp
-                                        ]);
-                execute_update($sql);
-            }
+        $risorseDaInserire = array_diff($risorse, $oldRisorse);
+        $risorseDaEliminare = array_diff($oldRisorse, $risorse);
+
+        for($i = 0; $i < count($risorseDaInserire); $i++) {
+            $sql = insert("progetti_wp_risorse", 
+                                    [
+                                        "MATRICOLA_DIPENDENTE" => $risorseDaInserire[$i],
+                                        "ID_PROGETTO" => $id_progetto,
+                                        "ID_WP" => $id_wp
+                                    ]);
+            execute_update($sql);
+        }
+
+        if (!empty($risorseDaEliminare)) {
+            $impl = implode("','", $risorseDaEliminare);
+            $sql = "DELETE FROM progetti_wp_risorse WHERE id_wp = '$id_wp' AND id_progetto = '$id_progetto' AND MATRICOLA_DIPENDENTE IN ('$impl')";
+            execute_update($sql);
         }
     }
     
