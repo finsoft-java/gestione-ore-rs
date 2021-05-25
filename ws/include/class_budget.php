@@ -341,7 +341,7 @@ class ReportBudgetManager {
 
         $loader = new FilesystemLoader(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'templates');
         $twig = new Environment($loader);
-        
+        //print_r($context);
         return $twig->render('report-budget.twig', $context);
     }
 

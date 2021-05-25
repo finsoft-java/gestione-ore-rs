@@ -4,7 +4,8 @@
         <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'/>
         <style>
         .title { font-weight: bold  }
-        .table-calendario { width:100%; border:solid 1px }
+        .table-calendario { width: 250px; }
+        .div_style{ padding: 10px; border: 1px solid; width: 250px; margin: 10px 0px;}
         .calendario { width: 3% }
         .rotate { transform: rotate(270deg); }
         </style>
@@ -112,28 +113,23 @@
             </div>
 
 {% if completo %}
-            <h3>Dettaglio</h3>
+            <h3>Dettaglio ore</h3>
 {% for m in consuntivi.dettagli %}
             <div class='row'>
                 <div class='col-md-2 title'>
                 Dipendente:
                 </div>
                 <div class='col-md-8'>
-                {{ m.MATRICOLA_DIPENDENTE }} {{m.COGNOME_NOME }}
+                {{m.COGNOME_NOME }}
                 </div>
             </div>
                 
 {% if m.WP %}
+<div class='div_style'>
             <table class='table-calendario'>
                 <tr>
                     <td class='title calendario'>
-                    &nbsp;
-                    </td>
-{% for d in dates %}
-                    <td class='calendario'>
-                    {{ d.DAY }}
-                    </td>
-{% endfor %}        
+                    </td>    
                     <td class='calendario'>
                     
                     </td>
@@ -144,13 +140,16 @@
                     {{ WP.TITOLO }}
                     </td>
 {% for d in WP.DETTAGLI %}
-                    <td class='calendario {% if (WP.ID_WP == null)or(d.DATA is null) %}title{% endif %}'>
+    {% if(d.DATA is null) %}
+                    <td class='calendario title'>
                     {{ d.ORE_LAVORATE }}&nbsp;
                     </td>
+    {% endif %}
 {% endfor %}
                 </tr>
 {% endfor %}
             </table>
+            </div>
 {% endif %}
 {% endfor %}
 {% endif %}
@@ -163,21 +162,16 @@
                 Dipendente:
                 </div>
                 <div class='col-md-8'>
-                {{ m.MATRICOLA_DIPENDENTE }} {{m.COGNOME_NOME }}
+                {{m.COGNOME_NOME }}
                 </div>
             </div>
                 
 {% if m.WP %}
+    <div class='div_style'>
             <table class='table-calendario'>
                 <tr>
                     <td class='title calendario'>
-                    &nbsp;
                     </td>
-{% for d in dates %}
-                    <td class='calendario'>
-                    {{ d.DAY }}
-                    </td>
-{% endfor %}
                     <td class='calendario'>
                     
                     </td>
@@ -188,13 +182,16 @@
                     {{ WP.TITOLO }}
                     </td>
 {% for d in WP.DETTAGLI %}
-                    <td class='calendario {% if (WP.ID_WP == null)or(d.DATA is null) %}title{% endif %}'>
+    {% if(d.DATA is null) %}
+                    <td class='calendario title'>
                     {{ d.COSTO | number_format(2, ',', '.') }}&nbsp;
                     </td>
+    {% endif %}
 {% endfor %}
                 </tr>
 {% endfor %}
             </table>
+    </div>
 {% endif %}
 {% endfor %}
 {% endif %}
