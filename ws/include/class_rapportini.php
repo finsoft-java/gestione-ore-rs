@@ -81,6 +81,7 @@ class RapportiniManager {
         // MAIN LOOP
         foreach ($map_progetti_matricole_wp as $matr => $map_matricole_wp) {
             $xlsxfilename = $this->creaFileExcel($matr, $anno, $mese, $map_matricole_wp, $map_matr_ore);
+            $matr = trim($matr);
             $xlsxfilename_final = "Rapportini_${matr}_$anno$mese.xlsx";
             $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON salva su disco
             $tempfiles[] = $xlsxfilename;
