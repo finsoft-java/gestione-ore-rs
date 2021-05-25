@@ -94,7 +94,7 @@ class RapportiniManager {
         return $zipfilename;
     }
 
-    function creaFileExcel($matr, $anno, $mese, $map_matricole_wp/*$map_wp_wp*/, $map_matr_ore) {
+    function creaFileExcel($matr, $anno, $mese, $map_matricole_wp, $map_matr_ore) {
         
         // Sto assumento che ci sia un unico supervisor per tutti i progetti...
         // E le stesse data firma!
@@ -104,6 +104,8 @@ class RapportiniManager {
         $unWpACaso = $map_matricole_wp[$unIdProgettoACaso][$unIdWpACaso];
         
         $data_firma = $this->get_data_firma($unIdProgettoACaso, $matr, $anno, $mese);
+
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $mese, $anno);
 
         global $panthera;
         $nomecognome = $panthera->getUtente($matr);
@@ -120,15 +122,13 @@ class RapportiniManager {
 
         $this->adjustWidth($sheet);
         $this->creaIntestazione($sheet, $curRow, $anno, $mese, $matr, $nomecognome, $nomecognome_super);
-        $this->creaTabellaPresenze($sheet, $curRow, $anno, $mese, $matr, $map_matr_ore, $rigaTotali);
-
-        //$this->creaLegenda($sheet, $curRow, $map_wp_wp);
+        $this->creaTabellaPresenze($sheet, $curRow, $anno, $mese, $matr, $map_matr_ore, $rigaTotali, $daysInMonth);
 
         foreach ($map_matricole_wp as $idProgetto => $map_wp) {
-            $this->creaTabella($sheet, $curRow, $idProgetto, $map_wp, $anno, $mese, $matr, $nomecognome, $map_matr_ore, $data_inizio_progetto);
+            $this->creaTabella($sheet, $curRow, $idProgetto, $map_wp, $anno, $mese, $matr, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth);
         }
 
-        $this->aggiornaRigaTotali($sheet, $curRow, $rigaTotali);
+        $this->aggiornaRigaTotali($sheet, $curRow, $rigaTotali, $daysInMonth);
 
         $this->creaFooter($sheet, $curRow, $nomecognome, $nomecognome_super, $data_firma);
 
@@ -177,7 +177,7 @@ class RapportiniManager {
         $curRow ++;
     }
 
-    function creaTabellaPresenze($sheet, &$curRow, $anno, $mese, $matr, $map_matr_ore, &$rigaTotali) {
+    function creaTabellaPresenze($sheet, &$curRow, $anno, $mese, $matr, $map_matr_ore, &$rigaTotali, $daysInMonth) {
 
         $first_row = $curRow;
         // In alto i giorni
@@ -185,7 +185,7 @@ class RapportiniManager {
         $sheet->setCellValue('A' . $curRow, "$mese $anno");
         $sheet->setCellValue('B' . $curRow, 'day');
 
-        for ($i = 1; $i <= 31; ++$i) {
+        for ($i = 1; $i <= $daysInMonth; ++$i) {
             $curCol = $i + 2;
             $sheet->setCellValueByColumnAndRow($curCol, $curRow, $i);
         }
@@ -200,7 +200,7 @@ class RapportiniManager {
         $sheet->setCellValue('A' . $curRow, "Working hours *");
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->setCellValue('B' . $curRow, "=SUM(C$curRow:AG$curRow)");
-        for ($i = 1; $i <= 31; ++$i) {
+        for ($i = 1; $i <= $daysInMonth; ++$i) {
             $curCol = $i + 2;
             if (isset($map_matr_ore[$matr][$i])) {
                 $ore = $map_matr_ore[$matr][$i];
@@ -220,10 +220,10 @@ class RapportiniManager {
         $curRow++;
 
         // RIGA TOTALI
-        $sheet->setCellValue('A' . $curRow, "TOTAL PROJECTS");
+        $sheet->setCellValue('A' . $curRow, 'TOTAL PROJECTS');
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->setCellValue('B' . $curRow, "=SUM(C$curRow:AG$curRow)");
-        for ($i = 1; $i <= 31; ++$i) {
+        for ($i = 1; $i <= $daysInMonth; ++$i) {
             $curCol = $i + 2;
             $sheet->setCellValueByColumnAndRow($curCol, $curRow, "=0");
         }
@@ -236,15 +236,29 @@ class RapportiniManager {
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFCCECFF');
         $sheet->getStyle("A$first_row:AG$curRow")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
+        // Riga differenza
         $curRow++;
+        $sheet->setCellValue('A' . $curRow, 'remaining hours');
+        $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $rowLul = $curRow - 2;
+        $rowTot = $curRow - 1;
+        for ($i = 1; $i <= $daysInMonth; ++$i) {
+            $curCol = $i + 2;
+            $letter = Coordinate::stringFromColumnIndex($curCol, $curRow);
+            $sheet->setCellValueByColumnAndRow($curCol, $curRow, "=IFERROR($letter$rowLul-$letter$rowTot,\"\")");
+        }
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setSize(10);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setItalic(true);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->getColor()->setARGB('FF777777');
+
         $curRow++;
     }
 
-    function aggiornaRigaTotali($sheet, $curRow, $rigaTotali) {
+    function aggiornaRigaTotali($sheet, $curRow, $rigaTotali, $daysInMonth) {
         $startRow = $rigaTotali + 2;
-        for ($i = 1; $i <= 31; ++$i) {
+        for ($i = 1; $i <= $daysInMonth; ++$i) {
             $curCol = $i + 2;
-            $letter = Coordinate::stringFromColumnIndex($i + 2, $curRow);;
+            $letter = Coordinate::stringFromColumnIndex($i + 2, $curRow);
             // Divido per due perchè ci sono anche i totali 
             $sheet->setCellValueByColumnAndRow($curCol, $rigaTotali, "=SUM($letter$startRow:$letter$curRow)/2");
         }
@@ -261,7 +275,7 @@ class RapportiniManager {
         $drawing->setWorksheet($sheet);
     }
 
-    function creaTabella($sheet, &$curRow, $idProgetto, $map_wp, $anno, $mese, $matricola, $nomecognome, $map_matr_ore, $data_inizio_progetto) {
+    function creaTabella($sheet, &$curRow, $idProgetto, $map_wp, $anno, $mese, $matricola, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth) {
 
         // la riga azzurra piccola
         $sheet->getStyle("A$curRow:AG$curRow")->getFill()
@@ -271,8 +285,8 @@ class RapportiniManager {
         $curRow++;
 
         // prima riga intestazione di progetto
-        $nummese = $this->getMeseProgetto($anno, $mese, $data_inizio_progetto);
-        $sheet->setCellValue('A' . $curRow, "M$nummese");
+        $numMese = $this->getMeseProgetto($anno, $mese, $data_inizio_progetto);
+        $sheet->setCellValue('A' . $curRow, "M$numMese");
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         $unaWpACaso = $map_wp[array_keys($map_wp)[0]];
@@ -312,7 +326,7 @@ class RapportiniManager {
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $formula = "=SUM(C$curRow:AG$curRow)";
         $sheet->setCellValue('B' . $curRow, $formula);
-        for ($i = 1; $i <= 31; ++$i) {
+        for ($i = 1; $i <= $daysInMonth; ++$i) {
             $letter = Coordinate::stringFromColumnIndex($i + 2, $curRow);
             $formula = '=SUM('.$letter.$row_prima_riga.':'.$letter.$row_ultima_riga.')';
             $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $formula);
@@ -347,7 +361,7 @@ class RapportiniManager {
     }
 
     function importExcel($filename, &$message) {
-        global $con;
+        global $con, $panthera;
 
         $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
         $spreadSheet = $reader->load($filename);
@@ -355,12 +369,32 @@ class RapportiniManager {
         $spreadSheetAry = $excelSheet->toArray();
         
         $numRows = count($spreadSheetAry);
-        if(isset($spreadSheetAry[0][7])){
-            $titolo_progetto = $con->escape_string($spreadSheetAry[0][7]);
-        } else {
-            $message->error .= 'Bad file. Non riesco a identificare le corrette colonne del file.<br/>';
+        $anno = '';
+        $mese = '';
+        if(isset($spreadSheetAry[3][0])){
+            $data = $con->escape_string($spreadSheetAry[3][0]);
+            $data = new DateTime(strtodate($data, '%F %Y'));
+            print($data); die();
+            $anno = $data->format('%Y');
+            $mese = $data->format('%M');
+        }
+        if (empty($anno) || empty ($mese)) {
+            $message->error .= 'Bad file. Non riesco a identificare la data del rapportino (cella A3).<br/>';
             return;
         }
+
+        // Attenzione sto usando nome cognome anzichè matricola
+        $matr = '';
+        if(isset($spreadSheetAry[0][2])) {
+            $nomecognome = $spreadSheetAry[0][2];
+            $matr = $panthera->getMatricolaByName($nomecognome);
+        }
+        if (empty($matr)) {
+            $message->error .= 'Bad file. Non riesco a identificare la matricola del dipendente (cella B1).<br/>';
+            return;
+        }
+
+
         $id_progetto = select_single_value("SELECT ID_PROGETTO FROM progetti WHERE TITOLO='$titolo_progetto'"); // FIXME chiave unica?!?        
         if (empty($id_progetto)) {
             $message->error .= 'Bad file. Non riesco a identificare il titolo del progetto.<br/>';
