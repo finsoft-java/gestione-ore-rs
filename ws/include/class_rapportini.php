@@ -14,39 +14,47 @@ class RapportiniManager {
     function carica_wp_da_db($anno, $mese) {
         $primo = "DATE('$anno-$mese-01')";
 
-        $query_matr_wp = "SELECT p.ID_PROGETTO, p.ACRONIMO, p.TITOLO AS TITOLO_P, p.GRANT_NUMBER, p.MATRICOLA_SUPERVISOR, " .
-                    "wp.ID_WP, wp.TITOLO, wp.DESCRIZIONE, wp.DATA_INIZIO, wp.DATA_FINE, " .
-                    "r.MATRICOLA_DIPENDENTE " .
+        // Con questa query cerco di stampare solo i rapportini dei dipendenti che mi interessano
+        $query_dipendenti = "SELECT DISTINCT r.MATRICOLA_DIPENDENTE " .
+            "FROM progetti p " .
+            "JOIN progetti_wp wp ON wp.ID_PROGETTO=p.ID_PROGETTO " .
+            "JOIN progetti_wp_risorse r ON wp.ID_PROGETTO=r.ID_PROGETTO AND wp.ID_WP=r.ID_WP " .
+            "WHERE wp.DATA_FINE >= $primo AND wp.DATA_INIZIO <= LAST_DAY($primo)";
+        $matricole = select_column($query_dipendenti);
+
+        // Per questi dipendenti, però, voglio vedere tutti i progetti e tutte le WP
+        $query_wp = "SELECT p.ID_PROGETTO, p.ACRONIMO, p.TITOLO AS TITOLO_P, p.GRANT_NUMBER, p.DATA_INIZIO as DATA_INIZIO_P, p.MATRICOLA_SUPERVISOR, " .
+                    "wp.ID_WP, wp.TITOLO, wp.DESCRIZIONE, wp.DATA_INIZIO, wp.DATA_FINE " .
                     "FROM progetti p " .
                     "JOIN progetti_wp wp ON wp.ID_PROGETTO=p.ID_PROGETTO " .
-                    "JOIN progetti_wp_risorse r ON wp.ID_PROGETTO=r.ID_PROGETTO AND wp.ID_WP=r.ID_WP " .
                     "WHERE wp.DATA_FINE >= $primo AND wp.DATA_INIZIO <= LAST_DAY($primo)";
-        $matricole_wp = select_list($query_matr_wp);
+        $array_wp = select_list($query_wp);
 
         $query_consuntivo = "SELECT ID_PROGETTO,ID_WP,MATRICOLA_DIPENDENTE,DATA,ORE_LAVORATE " .
                     "FROM ore_consuntivate " .
                     "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
         $consuntivo = select_list($query_consuntivo);
         
-        // trasformo i due array $matricole_wp e $consuntivo in una struttura $map_progetti_matricole_wp
+        // trasformo i vari array in una struttura $map_progetti_matricole_wp
         $map_progetti_matricole_wp = array();
-        foreach($matricole_wp as $row) {
-            $idprogetto = $row["ID_PROGETTO"];
-            $matr = $row["MATRICOLA_DIPENDENTE"];
-            $idwp = $row["ID_WP"];
-            if (! array_key_exists($idprogetto, $map_progetti_matricole_wp)) $map_progetti_matricole_wp[$idprogetto] = array();
-            if (! array_key_exists($matr, $map_progetti_matricole_wp[$idprogetto])) $map_progetti_matricole_wp[$idprogetto][$matr] = array();
-            $map_progetti_matricole_wp[$idprogetto][$matr][$idwp] = $row;
+        foreach($matricole as $matr) {
+            $map_progetti_matricole_wp[$matr] = array();
+            foreach($array_wp as $row) {
+                $idprogetto = $row["ID_PROGETTO"];
+                $idwp = $row["ID_WP"];
+                if (! array_key_exists($idprogetto, $map_progetti_matricole_wp[$matr])) $map_progetti_matricole_wp[$matr][$idprogetto] = array();
+                $map_progetti_matricole_wp[$matr][$idprogetto][$idwp] = $row;
+            }
         }
         foreach ($consuntivo as $row) {
             $idprogetto = $row["ID_PROGETTO"];
-            $matr = $row["MATRICOLA_DIPENDENTE"];
             $idwp = $row["ID_WP"];
+            $matr = $row["MATRICOLA_DIPENDENTE"];
             $data = new DateTime($row["DATA"]);
-            $wp = $map_progetti_matricole_wp[$idprogetto][$matr][$idwp];
+            $wp = $map_progetti_matricole_wp[$matr][$idprogetto][$idwp];
             if (! isset($wp["ORE_LAVORATE"])) $wp["ORE_LAVORATE"] = array();
             $wp["ORE_LAVORATE"][$data->format('j')] = $row["ORE_LAVORATE"];
-            $map_progetti_matricole_wp[$idprogetto][$matr][$idwp] = $wp;
+            $map_progetti_matricole_wp[$matr][$idprogetto][$idwp] = $wp;
         }
         return $map_progetti_matricole_wp;
     }
@@ -71,17 +79,14 @@ class RapportiniManager {
         $tempfiles = [];
         
         // MAIN LOOP
-        foreach ($map_progetti_matricole_wp as $idProgetto => $map_matricole_wp) {
-            foreach ($map_matricole_wp as $matr => $map_wp_wp) {
-                $xlsxfilename = $this->creaFileExcel($idProgetto, $matr, $anno, $mese, $map_wp_wp, $map_matr_ore);
-                $acronimo = $map_wp_wp[array_keys($map_wp_wp)[0]]['ACRONIMO'];
-                $xlsxfilename_final = 'Rapportini_' . $acronimo . '_' . $matr . '.xlsx';
-                $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON esegue il salvataggio
-                $tempfiles[] = $xlsxfilename;
-            }
+        foreach ($map_progetti_matricole_wp as $matr => $map_matricole_wp) {
+            $xlsxfilename = $this->creaFileExcel($matr, $anno, $mese, $map_matricole_wp, $map_matr_ore);
+            $xlsxfilename_final = "Rapportini_${matr}_$anno$mese.xlsx";
+            $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON salva su disco
+            $tempfiles[] = $xlsxfilename;
         }
 
-        $zip->close();
+        $zip->close(); // Questo esegue il salvataggio su disco
         
         // ELIMINO FILE TEMPORANEI (tutti tranne lo zip!)
         foreach($tempfiles as $t) unlink($t);
@@ -89,25 +94,43 @@ class RapportiniManager {
         return $zipfilename;
     }
 
-    function creaFileExcel($idProgetto, $matr, $anno, $mese, $map_wp_wp, $map_matr_ore) {
+    function creaFileExcel($matr, $anno, $mese, $map_matricole_wp/*$map_wp_wp*/, $map_matr_ore) {
         
-        $wp = $map_wp_wp[array_keys($map_wp_wp)[0]]; // uno a caso
+        // Sto assumento che ci sia un unico supervisor per tutti i progetti...
+        // E le stesse data firma!
+        // cfr. email Gabriele / Alice del 25/05/2021
+        $unIdProgettoACaso = array_keys($map_matricole_wp)[0];
+        $unIdWpACaso = array_keys($map_matricole_wp[$unIdProgettoACaso])[0];
+        $unWpACaso = $map_matricole_wp[$unIdProgettoACaso][$unIdWpACaso];
         
-        $data_firma = $this->get_data_firma($idProgetto, $matr, $anno, $mese);
+        $data_firma = $this->get_data_firma($unIdProgettoACaso, $matr, $anno, $mese);
 
         global $panthera;
         $nomecognome = $panthera->getUtente($matr);
-        $nomecognome_super = $panthera->getUtente($wp['MATRICOLA_SUPERVISOR']);
+        $nomecognome_super = $panthera->getUtente($unWpACaso['MATRICOLA_SUPERVISOR']);
+
+        $data_inizio_progetto = $unWpACaso['DATA_INIZIO_P'];
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle(date('M', strtotime("$anno-$mese-01")));
         
         $curRow = 1;
-        
-        $this->creaIntestazione($sheet, $curRow, $wp, $anno, $mese, $matr, $nomecognome);
-        $this->creaLegenda($sheet, $curRow, $map_wp_wp);
-        $this->creaTabella($sheet, $curRow, $map_wp_wp, $anno, $mese, $matr, $nomecognome, $map_matr_ore);
-        $this->creaFooter($sheet, $curRow, $wp, $nomecognome, $nomecognome_super, $data_firma);
+        $rigaTotali = 1;
+
+        $this->adjustWidth($sheet);
+        $this->creaIntestazione($sheet, $curRow, $anno, $mese, $matr, $nomecognome, $nomecognome_super);
+        $this->creaTabellaPresenze($sheet, $curRow, $anno, $mese, $matr, $map_matr_ore, $rigaTotali);
+
+        //$this->creaLegenda($sheet, $curRow, $map_wp_wp);
+
+        foreach ($map_matricole_wp as $idProgetto => $map_wp) {
+            $this->creaTabella($sheet, $curRow, $idProgetto, $map_wp, $anno, $mese, $matr, $nomecognome, $map_matr_ore, $data_inizio_progetto);
+        }
+
+        $this->aggiornaRigaTotali($sheet, $curRow, $rigaTotali);
+
+        $this->creaFooter($sheet, $curRow, $nomecognome, $nomecognome_super, $data_firma);
 
         $sheet->getPageSetup()->setPrintArea('A1:AH' . $curRow);
         
@@ -123,32 +146,103 @@ class RapportiniManager {
         return select_single_value($sql);
     }
 
-    function creaIntestazione($sheet, &$curRow, $wp, $anno, $mese, $matr, $nomecognome) {
+    function adjustWidth($sheet) {
+        // see https://phpspreadsheet.readthedocs.io/en/latest/topics/recipes/#setting-a-columns-width
+        $sheet->getColumnDimensionByColumn(1)->setWidth(35);
+        $sheet->getColumnDimensionByColumn(2)->setWidth(5);
+        for ($i = 1; $i <= 31; ++$i) {
+            $sheet->getColumnDimensionByColumn($i + 2)->setWidth(4);
+        }
+    }
+
+    function creaIntestazione($sheet, &$curRow, $anno, $mese, $matr, $nomecognome, $nomecognome_super) {
         
         $data = new DateTime("$anno-$mese-01");
         
-        $sheet->setCellValue('H' . $curRow, $wp['TITOLO_P']);
-        $sheet->getStyle('H' . $curRow)->getFont()->setBold(true);
-        $sheet->getStyle('H' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('I' . $curRow, 'project');
-        $sheet->setCellValue('O' . $curRow, 'Grant');
+        $sheet->setCellValue('A' . $curRow, 'Working person:  ');
+        $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('B' . $curRow, $nomecognome);
+        $sheet->getStyle('B' . $curRow)->getFont()->setBold(true);
+        $sheet->setCellValue('O' . $curRow, 'Supervisor:  ');
         $sheet->getStyle('O' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('P' . $curRow, $wp['GRANT_NUMBER']);
-        $sheet->setCellValue('T' . $curRow, $wp['ACRONIMO']);
+        $sheet->setCellValue('P' . $curRow, $nomecognome_super);
+        $sheet->getStyle('P' . $curRow)->getFont()->setBold(true);
+        $sheet->getRowDimension($curRow)->setRowHeight(25);
         $curRow++;
-        $curRow++;
-        $sheet->setCellValue('A' . $curRow, 'TIMESHEET');
-        $sheet->setCellValue('I' . $curRow, 'year');
-        $sheet->getStyle('I' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('J' . $curRow, "$anno");
-        $sheet->setCellValue('M' . $curRow, 'month');
-        $sheet->getStyle('M' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('N' . $curRow, $data->format('F'));
-        $sheet->getStyle('J' . $curRow)->setQuotePrefix(true);
         
-        $this->insertImage($sheet, './images/logo.png', 50, 'Logo', 'X2');
+        $this->insertImage($sheet, './images/logo.png', 50, 'Logo', 'AB1');
 
-        $curRow += 2;
+        $sheet->setCellValue('A' . $curRow, 'TIMESHEET');
+        $sheet->getRowDimension($curRow)->setRowHeight(25);
+        $curRow ++;
+    }
+
+    function creaTabellaPresenze($sheet, &$curRow, $anno, $mese, $matr, $map_matr_ore, &$rigaTotali) {
+
+        $first_row = $curRow;
+        // In alto i giorni
+        $mese = strtoupper(date('F', strtotime("$anno-$mese-01")));
+        $sheet->setCellValue('A' . $curRow, "$mese $anno");
+        $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('B' . $curRow, 'day');
+        $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        for ($i = 1; $i <= 31; ++$i) {
+            $curCol = $i + 2;
+            $sheet->setCellValueByColumnAndRow($curCol, $curRow, $i);
+        }
+
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setSize(12);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setBold(true);
+
+        $curRow++;
+
+        // Riga con le ore di presenza
+        $sheet->setCellValue('A' . $curRow, "Working hours *");
+        $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('A' . $curRow)->getFont()->setBold(true);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFECFF');
+        $sheet->setCellValue('B' . $curRow, "=SUM(C$curRow:AG$curRow)");
+        for ($i = 1; $i <= 31; ++$i) {
+            $curCol = $i + 2;
+            if (isset($map_matr_ore[$i])) {
+                $ore = $map_matr_ore[$i];
+            } else {
+                $ore = 'A';
+                $map_matr_ore[$i] = 0;
+            }
+            $sheet->setCellValueByColumnAndRow($curCol, $curRow, $ore);
+        }
+        $curRow++;
+
+        // RIGA TOTALI
+        $sheet->setCellValue('A' . $curRow, "TOTAL PROJECTS");
+        $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('A' . $curRow)->getFont()->setBold(true);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFCCECFF');
+        $sheet->setCellValue('B' . $curRow, "=SUM(C$curRow:AG$curRow)");
+        for ($i = 1; $i <= 31; ++$i) {
+            $curCol = $i + 2;
+            $sheet->setCellValueByColumnAndRow($curCol, $curRow, "=0");
+        }
+        $rigaTotali = $curRow;
+
+        $sheet->getStyle("A$first_row:AG$curRow")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        $curRow++;
+        $curRow++;
+    }
+
+    function aggiornaRigaTotali($sheet, $curRow, $rigaTotali) {
+        $startRow = $rigaTotali + 2;
+        for ($i = 1; $i <= 31; ++$i) {
+            $curCol = $i + 2;
+            $letter = Coordinate::stringFromColumnIndex($i + 2, $curRow);;
+            // Divido per due perchè ci sono anche i totali 
+            $sheet->setCellValueByColumnAndRow($curCol, $rigaTotali, "=SUM($letter$startRow:$letter$curRow)/2");
+        }
     }
 
     function insertImage($sheet, $path, $height, $caption, $coordinates) {
@@ -162,112 +256,86 @@ class RapportiniManager {
         $drawing->setWorksheet($sheet);
     }
 
-    function creaLegenda($sheet, &$curRow, $map_wp_wp) {
-        $sheet->setCellValue('A' . $curRow, 'Activities description');
-        $sheet->setCellValue('I' . $curRow, 'Start');
-        $sheet->setCellValue('J' . $curRow, 'End');
-        foreach($map_wp_wp as $idwp => $wp) {
-            $curRow++;
-            $sheet->setCellValue('A' . $curRow, $wp["TITOLO"]);
-            $sheet->getStyle('A' . $curRow)->getFont()->setBold(true);
-            $sheet->setCellValue('B' . $curRow, $wp["DESCRIZIONE"]);
-            $sheet->setCellValue('I' . $curRow, '??');
-            $sheet->setCellValue('J' . $curRow, '??');
-        }
-        $curRow += 2;
-    }
+    function creaTabella($sheet, &$curRow, $idProgetto, $map_wp, $anno, $mese, $matricola, $nomecognome, $map_matr_ore, $data_inizio_progetto) {
 
-    function creaTabella($sheet, &$curRow, $map_wp_wp, $anno, $mese, $matricola, $nomecognome, $map_matr_ore) {
-        $sheet->setCellValue('A' . $curRow, 'Activity details and daily working hours on ADIR project');
-        $sheet->setCellValue('W' . $curRow, 'Full name of the person working in the action:');
-        $sheet->getStyle('W' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('X' . $curRow, $matricola);
-        $sheet->setCellValue('Z' . $curRow, $nomecognome);
-        $first_day = new DateTime("$anno-$mese-01"); 
-        $num_days = $first_day->format('t');
+        // la riga azzurra piccola
+        $sheet->getStyle("A$curRow:AG$curRow")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFCCECFF');
+        $sheet->getRowDimension($curRow)->setRowHeight(5);
 
-        $OFFSET = 2;
-        
-        // Imposto la width delle colonne
-        for ($i = 0; $i < 32; ++$i) {
-            $sheet->getColumnDimensionByColumn($i + $OFFSET)->setWidth(5);
-        }
-        // In alto i giorni
         $curRow++;
-        for ($i = 0; $i < $num_days; ++$i) {
-            $curCol = $i + $OFFSET;
-            $sheet->setCellValueByColumnAndRow($curCol, $curRow, $i + 1);
-            $sheet->getStyleByColumnAndRow($curCol, $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
-        }
-        $sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, 'TOT');
 
-        // day of week
-        $curRow++;
-        for ($i = 0; $i < $num_days; ++$i) {
-            $d = new DateTime("$anno-$mese-$i");
-            $curCol = $i + $OFFSET;
-            $sheet->setCellValueByColumnAndRow($curCol, $curRow, $d->format('D'));
-            $sheet->getStyleByColumnAndRow($curCol, $curRow)->getFont()->setBold(true);
-            $sheet->getStyleByColumnAndRow($curCol, $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
-        }
-        
-        // A sinistra le WP
+        // prima riga intestazione di progetto
+        $nummese = $this->getMeseProgetto($anno, $mese, $data_inizio_progetto);
+        $sheet->setCellValue('A' . $curRow, "M$nummese");
+        $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        $unaWpACaso = $map_wp[array_keys($map_wp)[0]];
+        $title = "$unaWpACaso[ACRONIMO] - Grant $unaWpACaso[GRANT_NUMBER] - $unaWpACaso[TITOLO_P]"; 
+        $sheet->setCellValue('B' . $curRow, $title);
+        $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->mergeCells("B$curRow:AG$curRow");
+
+        $sheet->getStyle("A$curRow:B$curRow")->getFont()->setBold(true);
+        $sheet->getStyle("A$curRow:B$curRow")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
+
         $row_prima_riga = $curRow + 1;
-        foreach($map_wp_wp as $idwp => $wp) {
+        foreach($map_wp as $idwp => $wp) {
             ++$curRow;
-            $sheet->setCellValue('A' . $curRow, $wp["TITOLO"]);
-            $sheet->getStyle('A' . $curRow)->getFont()->setBold(true);
-            $sheet->getStyle('A' . $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
-            // In mezzo, le ore consuntivate
+            // A sinistra le WP
+            $sheet->setCellValue('A' . $curRow, $wp['ACRONIMO'] . ' - ' . $wp['TITOLO']);
+            // Poi, totale di riga
+            $formula = "=SUM(C$curRow:AG$curRow)";
+            $sheet->setCellValue('B' . $curRow, $formula);
+            // Infine, le ore consuntivate
             if (isset($wp["ORE_LAVORATE"]) && ! empty($wp["ORE_LAVORATE"])) {
-                $OFFSET2 = $OFFSET - 1;
-                for ($i = 0; $i <= $num_days; ++$i) {
-                    $sheet->getStyleByColumnAndRow($i + $OFFSET2, $curRow)->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+                for ($i = 1; $i <= 31; ++$i) {
                     if (isset($wp["ORE_LAVORATE"][$i])) {
-                        $val = $wp["ORE_LAVORATE"][$i];
-                        $sheet->setCellValueByColumnAndRow($i + $OFFSET2, $curRow, $val);
+                        $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $wp["ORE_LAVORATE"][$i]);
                     }
                 }
             }
-            // A destra, totale di riga
-            $letter_last = Coordinate::stringFromColumnIndex($num_days - 1 + $OFFSET, $curRow);
-            $formula = '=SUM(B'.$curRow.':'.$letter_last.$curRow.')';
-            $sheet->setCellValueByColumnAndRow($num_days + $OFFSET, $curRow, $formula);
-            $sheet->getStyleByColumnAndRow($num_days + $OFFSET, $curRow)->getFont()->setBold(true);
         }
         $row_ultima_riga = $curRow;
 
         // Totali di colonna
-        ++$curRow;
-        $sheet->setCellValue('A' . $curRow, "TOT");
-        for ($i = 0; $i <= $num_days; ++$i) {
-            $letter = Coordinate::stringFromColumnIndex($i + $OFFSET, $curRow);
+        $curRow +=2;
+        $sheet->setCellValue('A' . $curRow, "TOT - $unaWpACaso[ACRONIMO]");
+        $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $formula = "=SUM(C$curRow:AG$curRow)";
+        $sheet->setCellValue('B' . $curRow, $formula);
+        for ($i = 1; $i <= 31; ++$i) {
+            $letter = Coordinate::stringFromColumnIndex($i + 2, $curRow);
             $formula = '=SUM('.$letter.$row_prima_riga.':'.$letter.$row_ultima_riga.')';
-            $sheet->setCellValueByColumnAndRow($i + $OFFSET, $curRow, $formula);
-            $sheet->getStyleByColumnAndRow($i + $OFFSET, $curRow)->getFont()->setBold(true);
+            $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $formula);
         }
-        
-        // Dati dei LUL
-        ++$curRow;
-        $sheet->setCellValue('A' . $curRow, "LUL");
-        for ($i = 0; $i <= $num_days; ++$i) {
-            if (!isset($map_matr_ore[$i])) $map_matr_ore[$i] = 0;
-            $sheet->setCellValueByColumnAndRow($i + $OFFSET, $curRow, $map_matr_ore[$i]);
-        }
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setBold(true);
 
-        $curRow += 3;
+        $sheet->getStyle("A$row_prima_riga:AG$curRow")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        $curRow ++;
     }
 
-    function creaFooter($sheet, &$curRow, $wp, $nomecognome, $nomecognome_super, $data_firma) {
-        $sheet->setCellValue('E' . $curRow, 'Working person:');
-        $sheet->setCellValue('J' . $curRow, $nomecognome);
-        $sheet->setCellValue('P' . $curRow, 'Signature');
-        $sheet->setCellValue('S' . $curRow, $data_firma);
+    function creaFooter($sheet, &$curRow, $nomecognome, $nomecognome_super, $data_firma) {
         $curRow++;
-        $sheet->setCellValue('E' . $curRow, 'Supervisor:');
-        $sheet->setCellValue('J' . $curRow, $nomecognome_super);
-        $sheet->setCellValue('P' . $curRow, 'Signature');
-        $sheet->setCellValue('S' . $curRow, $data_firma);
+        $sheet->setCellValue('B' . $curRow, 'Working person:  ');
+        $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('B' . $curRow)->getFont()->setBold(true);
+        $sheet->getStyle("C$curRow:L$curRow")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->setCellValue('S' . $curRow, 'Supervisor:  ');
+        $sheet->getStyle('S' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('S' . $curRow)->getFont()->setBold(true);
+        $sheet->getStyle("T$curRow:AC$curRow")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $curRow++;
+        $sheet->setCellValue('B' . $curRow, 'Date:');
+        $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('B' . $curRow)->getFont()->setBold(true);
+        $sheet->setCellValue('C' . $curRow, $data_firma);
+        $sheet->setCellValue('S' . $curRow, 'Date:');
+        $sheet->getStyle('S' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('S' . $curRow)->getFont()->setBold(true);
+        $sheet->setCellValue('T' . $curRow, $data_firma);
         $curRow += 2;
     }
 
@@ -351,6 +419,12 @@ class RapportiniManager {
         }
         
         $message->success .= 'Caricamento Effettuato correttamente.</br>';
+    }
+
+    function getMeseProgetto($anno, $mese, $data_inizio_progetto) {
+        $d1 = date_create($data_inizio_progetto);
+        $d2 = date_create("$anno-$mese-01");
+        return date_diff($d2, $d1)->format('%m') + 1;
     }
 }
 ?>
