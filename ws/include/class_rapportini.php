@@ -183,15 +183,14 @@ class RapportiniManager {
         // In alto i giorni
         $mese = strtoupper(date('F', strtotime("$anno-$mese-01")));
         $sheet->setCellValue('A' . $curRow, "$mese $anno");
-        $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->setCellValue('B' . $curRow, 'day');
-        $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         for ($i = 1; $i <= 31; ++$i) {
             $curCol = $i + 2;
             $sheet->setCellValueByColumnAndRow($curCol, $curRow, $i);
         }
 
+        $sheet->getStyle("A$curRow:AG$curRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setSize(12);
         $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setBold(true);
 
@@ -200,28 +199,29 @@ class RapportiniManager {
         // Riga con le ore di presenza
         $sheet->setCellValue('A' . $curRow, "Working hours *");
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getStyle('A' . $curRow)->getFont()->setBold(true);
-        $sheet->getStyle("A$curRow:AG$curRow")->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFECFF');
         $sheet->setCellValue('B' . $curRow, "=SUM(C$curRow:AG$curRow)");
         for ($i = 1; $i <= 31; ++$i) {
             $curCol = $i + 2;
-            if (isset($map_matr_ore[$i])) {
-                $ore = $map_matr_ore[$i];
+            if (isset($map_matr_ore[$matr][$i])) {
+                $ore = $map_matr_ore[$matr][$i];
             } else {
                 $ore = 'A';
                 $map_matr_ore[$i] = 0;
             }
             $sheet->setCellValueByColumnAndRow($curCol, $curRow, $ore);
         }
+
+        $sheet->getStyle("B$curRow:AG$curRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setSize(10);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setBold(true);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFECFF');
+
         $curRow++;
 
         // RIGA TOTALI
         $sheet->setCellValue('A' . $curRow, "TOTAL PROJECTS");
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getStyle('A' . $curRow)->getFont()->setBold(true);
-        $sheet->getStyle("A$curRow:AG$curRow")->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFCCECFF');
         $sheet->setCellValue('B' . $curRow, "=SUM(C$curRow:AG$curRow)");
         for ($i = 1; $i <= 31; ++$i) {
             $curCol = $i + 2;
@@ -229,6 +229,11 @@ class RapportiniManager {
         }
         $rigaTotali = $curRow;
 
+        $sheet->getStyle("B$curRow:AG$curRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setSize(11);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setBold(true);
+        $sheet->getStyle("A$curRow:AG$curRow")->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFCCECFF');
         $sheet->getStyle("A$first_row:AG$curRow")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
         $curRow++;
@@ -298,6 +303,8 @@ class RapportiniManager {
             }
         }
         $row_ultima_riga = $curRow;
+
+        $sheet->getStyle("A$row_prima_riga:AG$row_ultima_riga")->getFont()->setSize(10);
 
         // Totali di colonna
         $curRow +=2;
