@@ -297,7 +297,11 @@ class ReportBudgetManager {
             $report['consuntivi']['PCT_SCARTO_COSTI'] = null;
         } else {
             $budget = $report['budget'];
-            $report['consuntivi']['PCT_SCARTO_COSTI'] = ($report['consuntivi']['COSTO'] - $budget) / $budget * 100;
+            if(isset($report['consuntivi']['COSTO'])){
+                $report['consuntivi']['PCT_SCARTO_COSTI'] = ($report['consuntivi']['COSTO'] - $budget) / $budget * 100;
+            } else {
+                $report['consuntivi']['PCT_SCARTO_COSTI'] = (0 - $budget) / $budget * 100;
+            }
         }
         
         if ($completo) {
