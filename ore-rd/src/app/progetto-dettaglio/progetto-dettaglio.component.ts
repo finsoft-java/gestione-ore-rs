@@ -1,9 +1,9 @@
 import { TipologiaSpesaService } from './../_services/tipospesa.service';
-import { ProgettiWpService } from './../_services/progetti.wp.service';
+import { ProgettiPersoneService } from '../_services/progetti.persone.service';
 import { ProgettiSpesaService } from './../_services/progetti.spesa.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
-import { Progetto, ProgettoSpesa, ProgettoWp } from './../_models';
+import { Progetto, ProgettoPersona, ProgettoSpesa, Tipologia } from './../_models';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProgettiService } from './../_services/progetti.service';
 import { AlertService } from './../_services/alert.service';
@@ -41,17 +41,16 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   projectSubscription: Subscription;
   progetto!: Progetto;
-  progettoWp!: ProgettoWp[];
+  progettoPersone!: ProgettoPersona[];
   progetto_old!: Progetto;
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
-  displayedColumnsWp: string[] = ['id','titolo', 'descrizione', 'dataInizio', 'dataFine', 'risorse', 'monteOre', 'mesiUomo', 'actions'];
+  displayedColumnsPersone: string[] = ['nome', 'matricola', 'pctImpiego', 'actions'];
   dataSource = new MatTableDataSource<ProgettoSpesa>();
-  dataSourceWp = new MatTableDataSource<ProgettoWp>();
-  allTipologie: any[] = [];
-  allMatricole: any[] = [];
-  allTipiCosto: any[] = [];
-  isNotAnnulable:boolean = false;
-  id_progetto!: any;
+  dataSourcePersone = new MatTableDataSource<ProgettoPersona>();
+  allTipologie: Tipologia[] = [];
+  allMatricole: {MATRICOLA: string, NOME: string}[] = [];
+  allTipiCosto: {ID_TIPO_COSTO: string, DESCRIZIONE: string}[] = [];
+  id_progetto!: number|null;
   errore_stringa = '';
   MONTE_ORE_MENSILE_PREVISTO = 1720 / 12; // 143.3333
 
@@ -59,7 +58,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     private progettiService: ProgettiService,
     private tipologiaSpesaService: TipologiaSpesaService,
     private progettiSpesaService: ProgettiSpesaService,   
-    private progettiWpService: ProgettiWpService,   
+    private progettiPersoneService: ProgettiPersoneService,   
     private alertService: AlertService,
     private route: ActivatedRoute,
     private router: Router) {
@@ -87,22 +86,22 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
     this.getMatricole();
     this.getSupervisor();
-    this.getProgettowP();
+    this.getProgettoPersone();
   }
   
-  getProgettowP(): void {
-    this.progettiWpService.getById(this.id_progetto)
+  getProgettoPersone(): void {
+    this.progettiPersoneService.getById(this.id_progetto!)
       .subscribe(response => {
-        this.progettoWp = response.data;
-        this.dataSourceWp = new MatTableDataSource(response.data);
+        this.progettoPersone = response.data;
+        this.dataSourcePersone = new MatTableDataSource(response.data);
       },
       error => {
-        this.dataSourceWp = new MatTableDataSource();
+        this.dataSourcePersone = new MatTableDataSource();
       });
   }
 
   getProgettoSpesa(): void {
-    this.progettiSpesaService.getById(this.id_progetto)
+    this.progettiSpesaService.getById(this.id_progetto!)
       .subscribe(response => {
         this.dataSource = new MatTableDataSource(response.data);
       },
@@ -112,7 +111,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   getProgetto(): void {
-    this.progettiService.getById(this.id_progetto)
+    this.progettiService.getById(this.id_progetto!)
       .subscribe(response => {
         this.progetto = new Progetto;
         this.progetto = response.value;
@@ -130,13 +129,14 @@ export class ProgettoDettaglioComponent implements OnInit {
     prgSpesa.isEditable = true;
   }
 
-  getRecordwP(prgWp: ProgettoWp) {
-    if (this.dataSourceWp.data) {
-      this.dataSourceWp.data.forEach(x => x.isEditable = false);
+  getRecordPersona(prgPersona: ProgettoPersona) {
+    if (this.dataSourcePersone.data) {
+      this.dataSourcePersone.data.forEach(x => x.isEditable = false);
     }
-    prgWp.isEditable = true;
+    prgPersona.isEditable = true;
   }
 
+  // carica l'elenco di tutte le matricole da Panthera
   getMatricole(): void {
     this.progettiService.getAllMatricole()
       .subscribe(response => {
@@ -147,15 +147,13 @@ export class ProgettoDettaglioComponent implements OnInit {
       });
   }
 
- stampaRisorse(risorse: string[]) {
-    let arrayRisorse:any[] = [];
-    risorse.forEach(element => {
-      let  u  = this.allMatricole.find(x => x.MATRICOLA == element);
-      if (this.allMatricole.find(x => x.MATRICOLA == element) != null)
-        arrayRisorse.push(this.allMatricole.find(x => x.MATRICOLA == element).NOME);
-    });
-    return arrayRisorse.join(', ');
- }
+  getNomeMatricola(matricola: string): string {
+    if (this.allMatricole == null) {
+      return '(unknown)';
+    }
+    const pantheraObj = this.allMatricole.find(x => x.MATRICOLA == matricola);
+    return pantheraObj != null ? pantheraObj.NOME : '(unknown)';
+  }
 
   getSupervisor(): void {
     this.progettiService.getAllTipiCostoPanthera()
@@ -193,19 +191,6 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.alertService.error(error);
       });
     } else {
-      let no_error = true;
-      let monte_totale_wp: number = 0;
-      if (this.progettoWp) {
-        for(let i = 0; i < this.progettoWp.length; i++) {
-          no_error = this.controlliDate(this.progettoWp[i]);
-          monte_totale_wp = (Number(monte_totale_wp) + Number(this.progettoWp[i].MONTE_ORE));
-        }
-      }
-      if (this.progetto.MONTE_ORE_TOT < monte_totale_wp) {
-        this.alertService.error("Il monte ore dei WP supera quello del progetto");
-        no_error = false;
-      }
-      if (no_error) {
         this.progettiService.update(this.progetto)
         .subscribe(response => {
           this.alertService.success("Progetto modificato con successo");
@@ -215,7 +200,6 @@ export class ProgettoDettaglioComponent implements OnInit {
           this.alertService.error(error);
         });
       }
-    }
   }
 
   nuovoProgettoSpesa() {  
@@ -231,29 +215,21 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.dataSource.data = data;
   } 
 
-  nuovoProgettoWp() {  
-    let progettoWp_nuovo: ProgettoWp;
-    progettoWp_nuovo = {
+  nuovoProgettoPersona() {  
+    let nuovo: ProgettoPersona;
+    nuovo = {
       ID_PROGETTO: this.progetto.ID_PROGETTO, 
-      ID_WP: null, 
-      TITOLO: null, 
-      DESCRIZIONE: null, 
-      DATA_INIZIO: null, 
-      DATA_FINE: null , 
-      RISORSE: [], 
-      MONTE_ORE: 0, 
+      MATRICOLA_DIPENDENTE: null, 
+      PCT_IMPIEGO: 0, 
       isEditable: true,
       isInsert: true
     };
-    let dataWp: any[] = [];
-    if (this.dataSourceWp.data == null) {
-      this
-      dataWp.push(progettoWp_nuovo);
-    } else {
-      dataWp = this.dataSourceWp.data;
-      dataWp.push(progettoWp_nuovo);
+    let array: any[] = [];
+    if (this.dataSourcePersone.data != null) {
+      array = this.dataSourcePersone.data;
     }
-    this.dataSourceWp.data = dataWp;
+    array.push(nuovo);
+    this.dataSourcePersone.data = array;
   } 
 
   deleteChange(prgSpesa: ProgettoSpesa) {
@@ -268,11 +244,11 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
   }
 
-  deleteChangeWp(prgWp: ProgettoWp) {
-    if (prgWp.ID_WP != null && prgWp.ID_PROGETTO != null) {
-      this.progettiWpService.delete(prgWp.ID_WP, prgWp.ID_PROGETTO)
+  deleteChangePersona(p: ProgettoPersona) {
+    if (p.MATRICOLA_DIPENDENTE != null && p.ID_PROGETTO != null) {
+      this.progettiPersoneService.delete(p.ID_PROGETTO, p.MATRICOLA_DIPENDENTE)
       .subscribe(response => {
-        this.getProgettowP();
+        this.getProgettoPersone();
       },
       error => {
         this.alertService.error(error);
@@ -314,117 +290,36 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.getProgettoSpesa();
   }
 
-  annullaModificaWp(row: ProgettoWp) {
-    this.getProgettowP();
+  annullaModificaPersona(row: ProgettoPersona) {
+    this.getProgettoPersone();
   }
 
-  controlliDate(wp: ProgettoWp) {
-    let datePrIniziale = '';
-    let datePrFinale = '';
-    let dateWpIniziale = '';
-    let dateWpFinale = '';
-    this.errore_stringa = '';
+  salvaModificaPersona(p: ProgettoPersona) {    
+    console.log(p);
 
-    if (this.progetto.DATA_INIZIO) {
-      datePrIniziale = formatDate(this.progetto.DATA_INIZIO,'yyyy-MM-dd','en_US');
-    } else {
-      this.errore_stringa += "Inserire la Data Inizio Progetto <br/>";
-    }
-    if (this.progetto.DATA_FINE) {
-      datePrFinale = formatDate(this.progetto.DATA_FINE,'yyyy-MM-dd','en_US');
-    } else {
-        this.errore_stringa += "Inserire la Data Fine Progetto <br/>";
-    }
-
-    if (wp.DATA_INIZIO !== null && wp.DATA_INIZIO !== '') {
-      dateWpIniziale = formatDate(wp.DATA_INIZIO,'yyyy-MM-dd','en_US');
-    } else {
-      this.errore_stringa += "Inserire la Data Inizio Wp <br/>";
-    }
-
-    if (wp.DATA_FINE !== null && wp.DATA_FINE !== '') {
-      dateWpFinale = formatDate(wp.DATA_FINE,'yyyy-MM-dd','en_US');
-    } else {
-        this.errore_stringa += "Inserire la Data Fine Wp <br/>";
-    }
-    console.log(datePrIniziale+" > "+dateWpIniziale);
-    if (datePrIniziale != '' && dateWpIniziale != '') {
-      if (datePrIniziale > dateWpIniziale) {
-        this.errore_stringa = "Un WP non può iniziare prima del Progetto <br/>";
-        wp.DATA_INIZIO = '';
-      }
-    }
-    
-    if (datePrFinale != '' && dateWpFinale != '') {
-      if (datePrFinale < dateWpFinale) {
-        this.errore_stringa += "Un WP non può finire dopo il Progetto <br/>";
-        wp.DATA_FINE = '';
-      }
-    }
-
-    if ( wp.DATA_INIZIO == '' || wp.DATA_FINE == '') {
-      this.alertService.error(this.errore_stringa);
-      return false;
-    }
-    return true;
-  }
-
-  salvaModificaWp(prgWp: ProgettoWp) {    
-    console.log(prgWp);
-    if (prgWp.DATA_FINE)
-      prgWp.DATA_FINE = formatDate(prgWp.DATA_FINE,"YYYY-MM-dd","en-GB");
-
-    if (prgWp.DATA_INIZIO)
-      prgWp.DATA_INIZIO = formatDate(prgWp.DATA_INIZIO,"YYYY-MM-dd","en-GB");
-
-    let error = false;
-    if (prgWp.ID_WP == null) {
-      let monte_totale_wp = 0;
-      if (this.progettoWp.length >= 1) {
-        for(let i = 0; i < this.progettoWp.length; i++) {
-          monte_totale_wp = (Number(monte_totale_wp) + Number(this.progettoWp[i].MONTE_ORE));
-        }
-        if (this.progetto.MONTE_ORE_TOT < monte_totale_wp) {
-          this.alertService.error("Il monte ore dei WP supera quello del progetto");
-          error = true;
-        }
-      }
-
-      if (this.controlliDate(prgWp) && !error) {
-        this.progettiWpService.insert(prgWp)
+    if (p.isInsert) {
+        this.progettiPersoneService.insert(p)
         .subscribe(response => {
-          this.alertService.success("Work Package inserito con successo");
-          this.dataSourceWp.data.splice(-1, 1);
-          this.dataSourceWp.data.push(response.value);
-          this.dataSourceWp.data = this.dataSourceWp.data;
-          prgWp.isEditable = false;
+          this.alertService.success("Matricola inserita con successo");
+          this.dataSourcePersone.data.splice(-1, 1);
+          this.dataSourcePersone.data.push(response.value);
+          this.dataSourcePersone.data = this.dataSourcePersone.data;
+          p.isEditable = false;
+        },
+        error => {
+          this.alertService.error(error);
+        });
+      
+    } else {
+        this.progettiPersoneService.update(p)
+        .subscribe(response => {
+          this.alertService.success("Matricola aggiornata con successo");
+          p.isEditable=false;
         },
         error => {
           this.alertService.error(error);
         });
       }
-    } else {
-      let monte_totale_wp = 0;
-      if (this.progettoWp.length >= 1) {
-        for(let i = 0; i < this.progettoWp.length; i++) {
-          monte_totale_wp = (Number(monte_totale_wp) + Number(this.progettoWp[i].MONTE_ORE));
-        }
-        if (this.progetto.MONTE_ORE_TOT < monte_totale_wp) {
-          this.alertService.error("Il MonteOre dei WP supera quello del Progetto");
-          error = true;
-        }
-      }
-      if (this.controlliDate(prgWp) && !error) {
-        this.progettiWpService.update(prgWp)
-        .subscribe(response => {
-          this.alertService.success("Work Package modificato con successo");
-          prgWp.isEditable=false;
-        },
-        error => {
-          this.alertService.error(error);
-        });
-      }
-    }
   }
   
 
@@ -460,6 +355,15 @@ export class ProgettoDettaglioComponent implements OnInit {
       this.progetto.MONTE_ORE_TOT = parseFloat(value.replace('.', '').replace(',', '.'));
     } else {
       this.progetto.MONTE_ORE_TOT = 0;
+    }
+  }
+
+  setObiettivoBudgetFmt($event: Event) {
+    const value = ($event.target as HTMLInputElement).value;
+    if (value != null && value != '') {
+      this.progetto.OBIETTIVO_BUDGET_ORE = parseFloat(value.replace('.', '').replace(',', '.'));
+    } else {
+      this.progetto.OBIETTIVO_BUDGET_ORE = 0;
     }
   }
 

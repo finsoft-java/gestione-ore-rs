@@ -36,18 +36,6 @@ class ProgettiManager {
         $sql = "SELECT * FROM progetti p WHERE id_progetto = '$id_progetto'";
         return select_single($sql);
     }
-    
-    function get_progetto_wp($id_progetto, $anno=null, $mese=null) {
-        $sql = "SELECT * FROM progetti_wp WHERE id_progetto = '$id_progetto' ";
-        
-        if (!empty($anno) and !empty($mese)) {
-            $primo = "DATE('$anno-$mese-01')";
-            $query .= "AND DATA_FINE >= $primo AND DATA_INIZIO <= LAST_DAY($primo)";
-        }
-        
-        return select_list($sql);
-    }
-    
 
     function crea($json_data) {
         global $con, $logged_user;
@@ -57,6 +45,7 @@ class ProgettiManager {
                                    "GRANT_NUMBER" => $con->escape_string($json_data->GRANT_NUMBER),
                                    "ABSTRACT" => $con->escape_string($json_data->ABSTRACT),
                                    "MONTE_ORE_TOT" => $json_data->MONTE_ORE_TOT,
+                                   "OBIETTIVO_BUDGET_ORE" => $json_data->OBIETTIVO_BUDGET_ORE,
                                    "DATA_INIZIO" => $json_data->DATA_INIZIO,
                                    "DATA_FINE" => $json_data->DATA_FINE,
                                    "COSTO_MEDIO_UOMO" => $json_data->COSTO_MEDIO_UOMO,
@@ -78,6 +67,7 @@ class ProgettiManager {
                                     "GRANT_NUMBER" => $con->escape_string($json_data->GRANT_NUMBER),
                                     "ABSTRACT" => $con->escape_string($json_data->ABSTRACT),
                                     "MONTE_ORE_TOT" => $json_data->MONTE_ORE_TOT,
+                                    "OBIETTIVO_BUDGET_ORE" => $json_data->OBIETTIVO_BUDGET_ORE,
                                     "DATA_INIZIO" => $json_data->DATA_INIZIO,
                                     "DATA_FINE" => $json_data->DATA_FINE,
                                     "COSTO_MEDIO_UOMO" => $json_data->COSTO_MEDIO_UOMO,

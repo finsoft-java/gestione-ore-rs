@@ -32,6 +32,6 @@ export class ProgettiService {
     }
 
     getAllMatricole() {
-        return this.http.get<ListBean<string>>(environment.wsUrl + `GetNomiUtenti.php`);;
+        return this.http.get<ListBean<any>>(environment.wsUrl + `GetNomiUtenti.php`);;
     }
 }

@@ -18,35 +18,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_logged_user_JWT();
 
 $id_progetto = isset($_GET['id_progetto']) ? $con->escape_string($_GET['id_progetto']) : null;
-$id_wp = isset($_GET['id_wp']) ? $con->escape_string($_GET['id_wp']) : null;
+$matricola = isset($_GET['matricola']) ? $con->escape_string($_GET['matricola']) : null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($id_progetto) {
         //==========================================================
-        $lista_wp = $progettiWpManager->get_wp_progetto($id_progetto);
-        if (!$lista_wp) {
-            $lista_wp = [];
+        $lista = $progettiPersoneManager->get_persone($id_progetto);
+        if (!$lista) {
+            $lista = [];
         }
         header('Content-Type: application/json');
-        echo json_encode(['data' => $lista_wp]);
+        echo json_encode(['data' => $lista]);
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //==========================================================
     $postdata = file_get_contents("php://input");
     $json_data = json_decode($postdata);
-    $id_wp = '';
     
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
     
-    if(isset($json_data->ID_WP)) {
-        $id_wp = $json_data->ID_WP;
-    }
-    if ($id_wp) {
-        print_error(400, "id_wp must be null when creating new object");
-    }
-    $progetto = $progettiWpManager->crea($json_data);
+    $progetto = $progettiPersoneManager->crea($json_data);
     
     header('Content-Type: application/json');
     echo json_encode(['value' => $progetto]);
@@ -60,11 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(400, "Missing JSON data");
     }
 
-    $wp_su_db = $progettiWpManager->get_wp($json_data->ID_PROGETTO, $json_data->ID_WP);
+    $wp_su_db = $progettiPersoneManager->get_persona($json_data->ID_PROGETTO, $json_data->MATRICOLA_DIPENDENTE);
     if (!$wp_su_db) {
         print_error(404, 'Not found');
     }
-    $wp = $progettiWpManager->aggiorna($wp_su_db, $json_data);
+    $wp = $progettiPersoneManager->aggiorna($wp_su_db, $json_data);
 
     header('Content-Type: application/json');
     echo json_encode(['value' => $wp]);
@@ -74,10 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$id_progetto) {
         print_error(400, 'Missing id_progetto');
     }
-    if (!$id_wp) {
-        print_error(400, 'Missing id_wp');
+    if (!$matricola) {
+        print_error(400, 'Missing matricola');
     }
-    $progettiWpManager->elimina($id_wp, $id_progetto);
+    $progettiPersoneManager->elimina($id_progetto, $matricola);
     
 } else {
     //==========================================================

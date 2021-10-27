@@ -8,6 +8,7 @@ export class Progetto {
     public GRANT_NUMBER:string|null = null,
     public ABSTRACT:string|null = null,
     public MONTE_ORE_TOT: number = 0,
+    public OBIETTIVO_BUDGET_ORE: number = 0,
     public DATA_INIZIO: string|null = null,
     public DATA_FINE: string|null = null,
     public COSTO_MEDIO_UOMO: number|null = null,
@@ -27,17 +28,13 @@ export class ProgettoSpesa {
     ) {}   
 }
 
-export class ProgettoWp {
+export class ProgettoPersona {
   constructor(
     public ID_PROGETTO: number|null = null,
-    public ID_WP: number|null = null,
-    public TITOLO: string|null = null,
-    public DESCRIZIONE: string|null = null,
-    public DATA_INIZIO: string|null = null,
-    public DATA_FINE: string|null = null,
-    public MONTE_ORE: number = 0,
-    public RISORSE: any[] = [], // FIXME any 
-    public isEditable: boolean= false,
-    public isInsert: boolean= false
+    public MATRICOLA_DIPENDENTE: string|null = null,
+    public NOME?: string,
+    public PCT_IMPIEGO: number = 0,
+    public isEditable: boolean = false,
+    public isInsert: boolean = false
     ) {}   
 }
