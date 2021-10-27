@@ -317,6 +317,12 @@
                         </div>
                     </td>
                 </ng-container>
+                <ng-container matColumnDef="giustificativo">
+                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 150px;">Giustificativo</th>
+                    <td mat-cell *matCellDef="let element">
+                        <label > (TODO) </label>
+                    </td>
+                </ng-container>
                 <ng-container matColumnDef="actions">
                     <th mat-header-cell *matHeaderCellDef> Azioni </th>
                     <td mat-cell *matCellDef="let row" style="width:200px">
@@ -342,6 +348,8 @@
             <div>
                 <h5 style="margin-bottom: 20px;text-align:center">Persone assegnate</h5>
                 <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgettoPersona()">Nuovo</button>
+                <button mat-raised-button color="secondary" style="float: right;margin: 0px 0px 20px 0px;" (click)="ripartisciPercentuali()">Ripartisci perc.</button>
+                <div *ngIf="!isPercentuali100" class="alertPercentuali" style="float: right;margin: 0px 0px 20px 0px;">Attenzione la somma delle percentuali deve essere 100%&nbsp;</div>
             </div>
             <table mat-table [dataSource]="dataSourcePersone" class="mat-elevation-z8">
                 <ng-container matColumnDef="nome">

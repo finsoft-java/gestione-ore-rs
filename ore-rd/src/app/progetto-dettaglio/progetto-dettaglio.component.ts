@@ -14,7 +14,6 @@ import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
 import { ProgettiCommesseService } from '../_services/progetti.commesse.service';
-import { zipAll } from 'rxjs-compat/operator/zipAll';
 
 export const MY_FORMATS = {
   parse: {
@@ -50,7 +49,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
   displayedColumnsPersone: string[] = ['nome', 'matricola', 'pctImpiego', 'actions'];
   displayedColumnsCommesseP: string[] = ['codCommessa', 'note', 'actions'];
-  displayedColumnsCommesseC: string[] = ['codCommessa', 'pctCompatibilita', 'note', 'actions'];
+  displayedColumnsCommesseC: string[] = ['codCommessa', 'pctCompatibilita', 'giustificativo', 'note', 'actions'];
   dataSource = new MatTableDataSource<ProgettoSpesa>();
   dataSourcePersone = new MatTableDataSource<ProgettoPersona>();
   dataSourceCommesseDiProgetto = new MatTableDataSource<ProgettoCommessa>();
@@ -61,6 +60,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   id_progetto!: number|null;
   errore_stringa = '';
   MONTE_ORE_MENSILE_PREVISTO = 1720 / 12; // 143.3333
+  isPercentuali100 = true;
 
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
@@ -104,6 +104,7 @@ export class ProgettoDettaglioComponent implements OnInit {
       .subscribe(response => {
         this.progettoPersone = response.data;
         this.dataSourcePersone = new MatTableDataSource(response.data);
+        this.checkIsPercentuali100();
       },
       error => {
         this.dataSourcePersone = new MatTableDataSource();
@@ -380,6 +381,7 @@ export class ProgettoDettaglioComponent implements OnInit {
           this.dataSourcePersone.data.push(response.value);
           this.dataSourcePersone.data = this.dataSourcePersone.data;
           p.isEditable = false;
+          this.checkIsPercentuali100();
         },
         error => {
           this.alertService.error(error);
@@ -390,6 +392,7 @@ export class ProgettoDettaglioComponent implements OnInit {
         .subscribe(response => {
           this.alertService.success("Matricola aggiornata con successo");
           p.isEditable = false;
+          this.checkIsPercentuali100();
         },
         error => {
           this.alertService.error(error);
@@ -501,5 +504,22 @@ export class ProgettoDettaglioComponent implements OnInit {
     } else {
       progSpesa.IMPORTO = null;
     }
+  }
+
+  ripartisciPercentuali() {
+    const array = this.dataSourcePersone.data;
+    if (array != null && array.length > 0) {
+      const media = 100.0 / array.length;
+      array.forEach(x => x.PCT_IMPIEGO = media);
+      array.forEach(x => this.progettiPersoneService.update(x));
+      // KNOWN BUG questa chiamata dovrebbe essere asincrona...
+      this.getProgettoPersone();
+    }
+  }
+
+  checkIsPercentuali100() {
+    let sum = 0.0;
+    this.dataSourcePersone.data.forEach(x => sum += parseFloat((<any>x.PCT_IMPIEGO!)));
+    this.isPercentuali100 = (Math.abs(sum - 100) <= 0.000001);
   }
 }

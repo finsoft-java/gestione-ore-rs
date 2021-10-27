@@ -66,3 +66,8 @@ table {
     background-color: rgba(0, 0, 0, 0.04);
     padding: 10px 10px 0px 10px;color:rgba(0, 0, 0, 0.6)
 }
+
+.alertPercentuali {
+    font-weight: bold;
+    color: red;
+}
