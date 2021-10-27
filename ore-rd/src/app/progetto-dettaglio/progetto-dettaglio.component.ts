@@ -3,7 +3,7 @@ import { ProgettiPersoneService } from '../_services/progetti.persone.service';
 import { ProgettiSpesaService } from './../_services/progetti.spesa.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
-import { Progetto, ProgettoPersona, ProgettoSpesa, Tipologia } from './../_models';
+import { Progetto, ProgettoCommessa, ProgettoPersona, ProgettoSpesa, Tipologia } from './../_models';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProgettiService } from './../_services/progetti.service';
 import { AlertService } from './../_services/alert.service';
@@ -13,6 +13,8 @@ import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/mater
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
+import { ProgettiCommesseService } from '../_services/progetti.commesse.service';
+import { zipAll } from 'rxjs-compat/operator/zipAll';
 
 export const MY_FORMATS = {
   parse: {
@@ -42,11 +44,17 @@ export class ProgettoDettaglioComponent implements OnInit {
   projectSubscription: Subscription;
   progetto!: Progetto;
   progettoPersone!: ProgettoPersona[];
+  progettoCommesseDiProgetto!: ProgettoCommessa[];
+  progettoCommesseCompatibili!: ProgettoCommessa[];
   progetto_old!: Progetto;
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
   displayedColumnsPersone: string[] = ['nome', 'matricola', 'pctImpiego', 'actions'];
+  displayedColumnsCommesseP: string[] = ['codCommessa', 'note', 'actions'];
+  displayedColumnsCommesseC: string[] = ['codCommessa', 'pctCompatibilita', 'note', 'actions'];
   dataSource = new MatTableDataSource<ProgettoSpesa>();
   dataSourcePersone = new MatTableDataSource<ProgettoPersona>();
+  dataSourceCommesseDiProgetto = new MatTableDataSource<ProgettoCommessa>();
+  dataSourceCommesseCompatibili = new MatTableDataSource<ProgettoCommessa>();
   allTipologie: Tipologia[] = [];
   allMatricole: {MATRICOLA: string, NOME: string}[] = [];
   allTipiCosto: {ID_TIPO_COSTO: string, DESCRIZIONE: string}[] = [];
@@ -59,6 +67,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     private tipologiaSpesaService: TipologiaSpesaService,
     private progettiSpesaService: ProgettiSpesaService,   
     private progettiPersoneService: ProgettiPersoneService,   
+    private progettiCommesseService: ProgettiCommesseService,
     private alertService: AlertService,
     private route: ActivatedRoute,
     private router: Router) {
@@ -86,6 +95,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
     this.getMatricole();
     this.getSupervisor();
+    this.getProgettoCommesse();
     this.getProgettoPersone();
   }
   
@@ -94,6 +104,24 @@ export class ProgettoDettaglioComponent implements OnInit {
       .subscribe(response => {
         this.progettoPersone = response.data;
         this.dataSourcePersone = new MatTableDataSource(response.data);
+      },
+      error => {
+        this.dataSourcePersone = new MatTableDataSource();
+      });
+  }
+  
+  getProgettoCommesse(): void {
+    this.progettiCommesseService.getById(this.id_progetto!)
+      .subscribe(response => {
+        if (response.data == null) {
+          this.progettoCommesseCompatibili = [];
+          this.progettoCommesseDiProgetto = [];
+        } else {
+          this.progettoCommesseDiProgetto = response.data.filter(x => x.PCT_COMPATIBILITA == 100);
+          this.progettoCommesseCompatibili = response.data.filter(x => x.PCT_COMPATIBILITA < 100);
+        }
+        this.dataSourceCommesseCompatibili = new MatTableDataSource(this.progettoCommesseCompatibili);
+        this.dataSourceCommesseDiProgetto = new MatTableDataSource(this.progettoCommesseDiProgetto);
       },
       error => {
         this.dataSourcePersone = new MatTableDataSource();
@@ -129,11 +157,21 @@ export class ProgettoDettaglioComponent implements OnInit {
     prgSpesa.isEditable = true;
   }
 
-  getRecordPersona(prgPersona: ProgettoPersona) {
+  getRecordPersona(p: ProgettoPersona) {
     if (this.dataSourcePersone.data) {
       this.dataSourcePersone.data.forEach(x => x.isEditable = false);
     }
-    prgPersona.isEditable = true;
+    p.isEditable = true;
+  }
+
+  getRecordCommessa(p: ProgettoCommessa) {
+    if (this.dataSourceCommesseDiProgetto.data) {
+      this.dataSourceCommesseDiProgetto.data.forEach(x => x.isEditable = false);
+    }
+    if (this.dataSourceCommesseCompatibili.data) {
+      this.dataSourceCommesseCompatibili.data.forEach(x => x.isEditable = false);
+    }
+    p.isEditable = true;
   }
 
   // carica l'elenco di tutte le matricole da Panthera
@@ -232,6 +270,27 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.dataSourcePersone.data = array;
   } 
 
+  nuovoProgettoCommessa(compat: boolean = false) {  
+    let nuovo: ProgettoCommessa;
+    nuovo = {
+      ID_PROGETTO: this.progetto.ID_PROGETTO, 
+      COD_COMMESSA: null, 
+      PCT_COMPATIBILITA: compat ? 50 : 100,
+      NOTE: null,
+      isEditable: true,
+      isInsert: true
+    };
+    if (compat) {
+      const array = this.dataSourceCommesseCompatibili.data;
+      array.push(nuovo);
+      this.dataSourceCommesseCompatibili.data = array;
+    } else {
+      const array = this.dataSourceCommesseDiProgetto.data;
+      array.push(nuovo);
+      this.dataSourceCommesseDiProgetto.data = array;
+    }
+  } 
+
   deleteChange(prgSpesa: ProgettoSpesa) {
     if (prgSpesa.ID_PROGETTO != null && prgSpesa.ID_SPESA != null) {
       this.progettiSpesaService.delete(prgSpesa.ID_PROGETTO, prgSpesa.ID_SPESA)
@@ -249,6 +308,18 @@ export class ProgettoDettaglioComponent implements OnInit {
       this.progettiPersoneService.delete(p.ID_PROGETTO, p.MATRICOLA_DIPENDENTE)
       .subscribe(response => {
         this.getProgettoPersone();
+      },
+      error => {
+        this.alertService.error(error);
+      });
+    }
+  }
+
+  deleteCommessa(p: ProgettoCommessa) {
+    if (p.COD_COMMESSA != null && p.ID_PROGETTO != null) {
+      this.progettiCommesseService.delete(p.ID_PROGETTO, p.COD_COMMESSA)
+      .subscribe(response => {
+        this.getProgettoCommesse();
       },
       error => {
         this.alertService.error(error);
@@ -294,6 +365,10 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.getProgettoPersone();
   }
 
+  annullaModificaCommessa(row: ProgettoCommessa) {
+    this.getProgettoCommesse();
+  }
+
   salvaModificaPersona(p: ProgettoPersona) {    
     console.log(p);
 
@@ -314,7 +389,41 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.progettiPersoneService.update(p)
         .subscribe(response => {
           this.alertService.success("Matricola aggiornata con successo");
-          p.isEditable=false;
+          p.isEditable = false;
+        },
+        error => {
+          this.alertService.error(error);
+        });
+      }
+  }
+
+  salvaModificaCommessa(p: ProgettoCommessa) {    
+    console.log(p);
+
+    if (p.isInsert) {
+        this.progettiCommesseService.insert(p)
+        .subscribe(response => {
+          this.alertService.success("Commessa inserita con successo");
+          if (p.PCT_COMPATIBILITA == 100) {
+            this.dataSourceCommesseDiProgetto.data.splice(-1, 1);
+            this.dataSourceCommesseDiProgetto.data.push(response.value);
+            this.dataSourceCommesseDiProgetto.data = this.dataSourceCommesseDiProgetto.data;
+          } else {
+            this.dataSourceCommesseCompatibili.data.splice(-1, 1);
+            this.dataSourceCommesseCompatibili.data.push(response.value);
+            this.dataSourceCommesseCompatibili.data = this.dataSourceCommesseCompatibili.data;
+          }
+          p.isEditable = false;
+        },
+        error => {
+          this.alertService.error(error);
+        });
+      
+    } else {
+        this.progettiCommesseService.update(p)
+        .subscribe(response => {
+          this.alertService.success("Commessa aggiornata con successo");
+          p.isEditable = false;
         },
         error => {
           this.alertService.error(error);
@@ -355,6 +464,15 @@ export class ProgettoDettaglioComponent implements OnInit {
       this.progetto.MONTE_ORE_TOT = parseFloat(value.replace('.', '').replace(',', '.'));
     } else {
       this.progetto.MONTE_ORE_TOT = 0;
+    }
+  }
+
+  setOreGiaAssegnateFmt($event: Event) {
+    const value = ($event.target as HTMLInputElement).value;
+    if (value != null && value != '') {
+      this.progetto.ORE_GIA_ASSEGNATE = parseFloat(value.replace('.', '').replace(',', '.'));
+    } else {
+      this.progetto.ORE_GIA_ASSEGNATE = 0;
     }
   }
 
