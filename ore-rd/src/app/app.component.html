@@ -7,25 +7,20 @@
             <button mat-menu-item (click)="router_frontend.navigate(['tipologie-spesa']); drawer.toggle()">
                 <span>Tipologia Spesa</span>
             </button>
-            <!--<button mat-menu-item (click)="router_frontend.navigate(['importazione-lul']); drawer.toggle()" disabled >-->
             <button mat-menu-item (click)="router_frontend.navigate(['importazione-lul']); drawer.toggle()" >
                 <span>Importazione LUL</span>
             </button>
-            <!--<button mat-menu-item (click)="router_frontend.navigate(['importazione-rapportini']); drawer.toggle()" disabled>-->
-            <button mat-menu-item (click)="router_frontend.navigate(['importazione-rapportini']); drawer.toggle()">
-                <span>Importazione Rapportini</span>
+            <button mat-menu-item (click)="router_frontend.navigate(['importazione-ore']); drawer.toggle()">
+                <span>Importazione Ore dipendenti</span>
+            </button>
+            <button mat-menu-item (click)="router_frontend.navigate(['associazione-ore']); drawer.toggle()">
+                <span>Associazione ore / progetti</span>
             </button>
             <button mat-menu-item (click)="router_frontend.navigate(['esportazione-rapportini']); drawer.toggle()">
-            <!--<button mat-menu-item (click)="router_frontend.navigate(['esportazione-rapportini']); drawer.toggle()" disabled>-->
                 <span>Esportazione Rapportini</span>
             </button>
             <button mat-menu-item (click)="router_frontend.navigate(['raccolta-date-firma']); drawer.toggle()">
-            <!--<button mat-menu-item (click)="router_frontend.navigate(['raccolta-date-firma']); drawer.toggle()" disabled>-->
                 <span>Raccolta date firma</span>
-            </button>
-            <!--<button mat-menu-item (click)="router_frontend.navigate(['dati-test']); drawer.toggle()" disabled>-->
-            <button mat-menu-item (click)="router_frontend.navigate(['dati-test']); drawer.toggle()">
-                <span>Dati Test</span>
             </button>
             <button mat-menu-item (click)="logout(); drawer.toggle()">
                 <span>Logout</span>
