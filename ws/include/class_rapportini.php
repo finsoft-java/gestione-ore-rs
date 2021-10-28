@@ -400,10 +400,8 @@ class RapportiniManager {
         $spreadSheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
         $numOfSheets = $spreadSheet->getSheetCount();
 
-        // Un file di solito contiene solo il mese corrente, ma per l'importazione iniziale potrebbe contenere più mesi
-        for ($i = 0; $i < $numOfSheets; ++$i) {
-            $this->importSheet($spreadSheet->getSheet($i), $message);
-        }
+        // Mi aspetto un unico sheet
+        $this->importSheet($spreadSheet->getSheet(0), $message);
     }
 
     function importSheet($excelSheet, &$message) {
@@ -411,67 +409,39 @@ class RapportiniManager {
 
         $spreadSheetAry = $excelSheet->toArray();
         
+        // per ora ipotizzo che ci sia la header
+        $firstRow = 1;
         $numRows = count($spreadSheetAry);
-        $anno = '';
-        $mese = '';
-        if (isset($spreadSheetAry[2][0])){
-            $data = $con->escape_string($spreadSheetAry[2][0]);
-            $data = DateTime::createFromFormat('F Y', $data);
-            $anno = $data->format('Y');
-            $mese = $data->format('m');
-        }
-        if (empty($anno) || empty ($mese)) {
-            $message->error .= 'Bad file. Non riesco a identificare la data del rapportino (cella A3).<br/>';
+        if ($numRows <= 1) {
+            $message->error .= 'Il file deve contenere almeno una riga (header esclusa).<br/>';
             return;
         }
-        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $mese, $anno);
-
-        // Attenzione sto usando nome cognome anzichè matricola
-        $matr = '';
-        if (isset($spreadSheetAry[0][1])) {
-            $nomecognome = $spreadSheetAry[0][1];
-            $matr = $panthera->getMatricolaByName($nomecognome);
-        }
-        if (empty($matr)) {
-            $message->error .= 'Bad file. Non riesco a identificare la matricola del dipendente (cella B1).<br/>';
-            return;
-        }
-
-        for ($curRow = 8; $curRow < $numRows; ++$curRow) {
+        for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
     
             if(!isset($spreadSheetAry[$curRow][0])) {
                 continue;
             }
-            $pieces = explode(' - ', $spreadSheetAry[$curRow][0]);
-            if (count($pieces) < 2 || $pieces[0] === 'TOT') {
+
+            $nrDoc = $spreadSheetAry[$curRow][0];
+            $rigaDoc = $spreadSheetAry[$curRow][1];
+            $dataDoc = $spreadSheetAry[$curRow][2];
+            $matricola = $spreadSheetAry[$curRow][3];
+            $codCommessa = $spreadSheetAry[$curRow][4];
+            $numOre = $spreadSheetAry[$curRow][5];
+
+            if (!$dataDoc) {
+                $message->error('Campo "data" non valorizzato');
                 continue;
             }
-
-            // Sto assumnedo che l'acronimo non possa contenere " - ", mentre il titolo WP sì
-            $acronimo = $pieces[0];
-            array_shift($pieces);
-            $titolo_wp = implode(' - ', $pieces);
-
-            $id_progetto = select_single_value("SELECT ID_PROGETTO FROM progetti WHERE ACRONIMO='$acronimo'"); // chiave unica
-            if (empty($id_progetto)) {
-                $message->error .= "Bad file. Non trovo un progetto con acronimo '$acronimo'<br/>";
-                return;
+            if (!$matricola) {
+                $message->error('Campo "matricola" non valorizzato');
+                continue;
             }
-
-            $id_wp = select_single_value("SELECT ID_WP FROM PROGETTI_WP WHERE ID_PROGETTO=$id_progetto AND TITOLO='$titolo_wp'");
-            if (empty($id_wp)) {
-                $message->error .= "Bad file. Non trovo l'attività con titolo '$titolo_wp'<br/>";
-                return;
-            }
-
-            for ($day = 1; $day < $daysInMonth; ++$day) {
-                $data = "$anno-$mese-$day";
-                $ore = $spreadSheetAry[$curRow][$day+1];
-
-                if ($ore > 0) {
-                    $query = "replace into ore_consuntivate(MATRICOLA_DIPENDENTE,DATA,ID_PROGETTO,ID_WP,ORE_LAVORATE) values('$matr','$data',$id_progetto,$id_wp,$ore)";
-                    execute_update($query);
-                }
+            $dataDoc = DateTime::createFromFormat('d/m/Y', $dataDoc)->format('Y-m-d');
+            if ($numOre > 0) {
+                $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA,RIF_DOC,RIF_RIGA_DOC,ORE_LAVORATE,TMS_CARICAMENTO) " .
+                            "VALUES('$codCommessa','$matricola','$dataDoc','$nrDoc','$rigaDoc','$numOre',CURRENT_TIMESTAMP)";
+                execute_update($query);
             }
 
         }
