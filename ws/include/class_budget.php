@@ -7,11 +7,11 @@ $budget = new ReportBudgetManager();
 
 class ReportBudgetManager {
 
+
     function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
         $sql = "SELECT NVL(SUM(c.ORE_LAVORATE),0) as ORE_LAVORATE, NVL(SUM(c.ORE_LAVORATE * c.COSTO_ORARIO),0.0) as COSTO " .
             "FROM progetti p " .
-            "JOIN progetti_wp wp ON wp.id_progetto=p.id_progetto ".
-            "LEFT JOIN ore_consuntivate c ON wp.id_progetto=c.id_progetto AND wp.id_wp=c.id_wp ";
+            "LEFT JOIN ore_consuntivate_progetti c ON p.id_progetto=c.id_progetto ";
         if (!empty($anno) and !empty($mese)) {
             $sql .= "AND c.DATA >= DATE('$anno-$mese-01') AND c.DATA <= LAST_DAY(DATE('$anno-$mese-01')) ";
         }
@@ -22,7 +22,7 @@ class ReportBudgetManager {
 
     function get_matricole_progetto($id_progetto) {
         global $panthera;
-        $sql = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_wp_risorse WHERE ID_PROGETTO = '$id_progetto' ORDER BY 1";
+        $sql = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_persone WHERE ID_PROGETTO = '$id_progetto' ORDER BY 1";
         $matricole = select_list($sql); // voglio proprio una lista di oggetti, non una colonna
         foreach ($matricole as $key => $m) {
             $matricole[$key]['COGNOME_NOME'] = $panthera->getUtente($m['MATRICOLA_DIPENDENTE']);
@@ -30,18 +30,10 @@ class ReportBudgetManager {
         return $matricole;
     }
 
-    function get_wp_matricola($id_progetto, $matricola) {
-        $sql = "SELECT wp.ID_WP, wp.TITOLO FROM progetti_wp wp " .
-                "JOIN progetti_wp_risorse r ON r.id_progetto=wp.id_progetto AND r.id_wp=wp.id_wp " .
-                "WHERE wp.ID_PROGETTO = '$id_progetto' AND r.MATRICOLA_DIPENDENTE='$matricola' " .
-                "ORDER BY wp.ID_WP";
-        return select_list($sql);
-    }
-
-    function get_consuntivi_matricola_wp($id_progetto, $matricola, $id_wp, $anno=null, $mese=null) {
+    function get_consuntivi_matricola($id_progetto, $matricola, $anno=null) {
         $sql = "SELECT c.DATA, c.ORE_LAVORATE, (c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
                 "FROM ore_consuntivate c " .
-                "WHERE ID_PROGETTO=$id_progetto AND MATRICOLA_DIPENDENTE='$matricola' AND ID_WP=$id_wp ";
+                "WHERE ID_PROGETTO=$id_progetto AND MATRICOLA_DIPENDENTE='$matricola'";
         if (!empty($anno) and !empty($mese)) {
             $primo = "DATE('$anno-$mese-01')";
             $sql .= "AND c.DATA >= $primo AND c.DATA <= LAST_DAY($primo) ";
@@ -55,51 +47,45 @@ class ReportBudgetManager {
         $lista_matricole = $this->get_matricole_progetto($progetto['ID_PROGETTO']);
 
         foreach($lista_matricole as $key => $matricola) {
-            $lista_wp = $this->get_wp_matricola($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE']);
-            $totali_per_data = [ ];
-            foreach ($lista_wp as $key_wp => $wp) {
-                $consuntivi = $this->get_consuntivi_matricola_wp($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE'], $wp['ID_WP']);
+            $consuntivi = $this->get_consuntivi_matricola($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE']);
 
-                // completo le date con quelle del range temporale
-                $dates = $this->get_range_temporale($progetto, $anno, $mese);
-                foreach ($dates as $date_key => $date) {
-                    $dates[$date_key]['ORE_LAVORATE'] = null;
-                    $dates[$date_key]['COSTO'] = null;
-                    foreach($consuntivi as $c) {
-                        if ($c['DATA'] == $date['DATA']) {
-                            $dates[$date_key]['ORE_LAVORATE'] = (empty($c['ORE_LAVORATE']) ? null : $c['ORE_LAVORATE']);
-                            $dates[$date_key]['COSTO'] = $c['COSTO'] ;
-                            break;
-                        }
-                    }
-                }
-                $lista_wp[$key_wp]['DETTAGLI'] = $dates;
-
-                // totali riga
-                $tot_ore = 0;
-                $tot_costo = 0.0;
+            // completo le date con quelle del range temporale
+            $dates = $this->get_range_temporale($progetto, $anno, $mese);
+            foreach ($dates as $date_key => $date) {
+                $dates[$date_key]['ORE_LAVORATE'] = null;
+                $dates[$date_key]['COSTO'] = null;
                 foreach($consuntivi as $c) {
-                    $tot_ore += $c['ORE_LAVORATE'];
-                    $tot_costo += $c['COSTO'];
-                }
-                $lista_wp[$key_wp]['DETTAGLI'][] = [ 'ORE_LAVORATE' => $tot_ore, 'COSTO' => $tot_costo ];
-                
-                // totali colonna
-                foreach($lista_wp[$key_wp]['DETTAGLI'] as $date_key => $c) {
-                    if (!isset($totali_per_data[$date_key])) {
-                        $totali_per_data[$date_key] = [ 'ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
-                        if (isset($c['DATA'])) {
-                            // nn settato per i totali
-                            $totali_per_data[$date_key]['DATA'] = $c['DATA'];
-                            $totali_per_data[$date_key]['DAY'] = $c['DAY'];
-                        }
+                    if ($c['DATA'] == $date['DATA']) {
+                        $dates[$date_key]['ORE_LAVORATE'] = (empty($c['ORE_LAVORATE']) ? null : $c['ORE_LAVORATE']);
+                        $dates[$date_key]['COSTO'] = $c['COSTO'] ;
+                        break;
                     }
-                    $totali_per_data[$date_key]['ORE_LAVORATE'] += $c['ORE_LAVORATE'];
-                    $totali_per_data[$date_key]['COSTO'] += $c['COSTO'];
                 }
             }
-            $lista_matricole[$key]['WP'] = $lista_wp;
-            $lista_matricole[$key]['WP'][] = [ 'ID_WP' => null, 'TITOLO' => 'TOT.', 'DETTAGLI' => $totali_per_data];
+            $lista_matricole[$key]['DETTAGLI'] = $dates;
+
+            // totali riga
+            $tot_ore = 0;
+            $tot_costo = 0.0;
+            foreach($consuntivi as $c) {
+                $tot_ore += $c['ORE_LAVORATE'];
+                $tot_costo += $c['COSTO'];
+            }
+            $lista_matricole[$key]['DETTAGLI'][] = [ 'ORE_LAVORATE' => $tot_ore, 'COSTO' => $tot_costo ];
+            
+            // totali colonna
+            foreach($lista_matricole[$key]['DETTAGLI'] as $date_key => $c) {
+                if (!isset($totali_per_data[$date_key])) {
+                    $totali_per_data[$date_key] = [ 'ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
+                    if (isset($c['DATA'])) {
+                        $totali_per_data[$date_key]['DATA'] = $c['DATA'];
+                        $totali_per_data[$date_key]['DAY'] = $c['DAY'];
+                    }
+                }
+                $totali_per_data[$date_key]['ORE_LAVORATE'] += $c['ORE_LAVORATE'];
+                $totali_per_data[$date_key]['COSTO'] += $c['COSTO'];
+            }
+            $lista_matricole[$key][] = [ 'MATRICOLA_DIPENDENTE' => 'TOT.', 'DETTAGLI' => $totali_per_data];
         }
         
         // var_dump($lista_matricole); die();
@@ -122,12 +108,12 @@ class ReportBudgetManager {
         }
         
         // ELIMINO I COSTI PREESISTENTI
-        $query = "UPDATE ore_consuntivate SET COSTO_ORARIO=NULL WHERE ID_PROGETTO=$idprogetto AND DATA >= '$dataInizio' AND DATA <= '$dataFine' ";
+        $query = "UPDATE ore_consuntivate_progetti SET COSTO_ORARIO=NULL WHERE ID_PROGETTO=$idprogetto AND DATA >= '$dataInizio' AND DATA <= '$dataFine' ";
         
         // AGGIORNO I COSTI
         $costi = $panthera->getMatriceCosti($dataInizio, $dataFine, $tipoCosto);
         foreach ($costi as $c) {
-            $query = "UPDATE ore_consuntivate SET COSTO_ORARIO=" . $c["COSTO"] . " WHERE ID_PROGETTO=$idprogetto AND MATRICOLA_DIPENDENTE='" . $c["ID_RISORSA"] . "' ";
+            $query = "UPDATE ore_consuntivate_progetti SET COSTO_ORARIO=" . $c["COSTO"] . " WHERE ID_PROGETTO=$idprogetto AND MATRICOLA_DIPENDENTE='" . $c["ID_RISORSA"] . "' ";
             if (!empty($c["DATA_COSTO"])) {
                 $query .= "AND DATA >= '" . $c["DATA_COSTO"] . "' ";
             }
@@ -138,7 +124,7 @@ class ReportBudgetManager {
         }
         
         // VERIFICO COSTI MANCANTI
-        $query = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM ore_consuntivate " .
+        $query = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM ore_consuntivate_progetti " .
                 "WHERE ID_PROGETTO=$idprogetto " .
                 "AND DATA >= '$dataInizio' AND DATA <= '$dataFine' AND COSTO_ORARIO IS NULL";
         $mancanti = select_column($query);
@@ -340,8 +326,6 @@ class ReportBudgetManager {
             'dates' => $dates,
             'titolo_consuntivi' => ((!empty($anno) && !(empty($mese))) ? "Consuntivi per il periodo $anno-$mese" : '')
         ];
-        
-        // print_r($data['consuntivi']['dettagli'][0]['WP']); die();
 
         $loader = new FilesystemLoader(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'templates');
         $twig = new Environment($loader);
