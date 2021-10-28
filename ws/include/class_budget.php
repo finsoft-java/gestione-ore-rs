@@ -32,7 +32,7 @@ class ReportBudgetManager {
 
     function get_consuntivi_matricola($id_progetto, $matricola, $anno=null) {
         $sql = "SELECT c.DATA, c.ORE_LAVORATE, (c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
-                "FROM ore_consuntivate c " .
+                "FROM ore_consuntivate_progetti c " .
                 "WHERE ID_PROGETTO=$id_progetto AND MATRICOLA_DIPENDENTE='$matricola'";
         if (!empty($anno) and !empty($mese)) {
             $primo = "DATE('$anno-$mese-01')";

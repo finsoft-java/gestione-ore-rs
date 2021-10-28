@@ -89,7 +89,8 @@ export class ReportCompletoComponent implements OnInit {
           this.openHtmlPage(response);
       },
       error => {
-          // TODO
+        // Qui error è una stringa !?!
+        this.alertService.error(error);
       });
     }
   
