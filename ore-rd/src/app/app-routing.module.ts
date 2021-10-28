@@ -14,8 +14,8 @@ import { AuthGuard } from './_guards/auth.guard';
 const routes: Routes = [
   { path: 'login', component: LoginComponent},
   { path: 'progetti', component: ProgettiComponent, canActivate:[AuthGuard]},
-  { path: 'progetto/nuovo', component: ProgettoDettaglioComponent, canActivate:[AuthGuard]},
   { path: 'progetto/:id_progetto', component: ProgettoDettaglioComponent, canActivate:[AuthGuard]},
+  { path: 'progetto/nuovo', component: ProgettoDettaglioComponent, canActivate:[AuthGuard]},
   { path: 'progetto/:id_progetto/report', component: ReportCompletoComponent, canActivate:[AuthGuard]},
   { path: 'tipologie-spesa', component: TipologiaSpesaComponent, canActivate:[AuthGuard]},
   { path: 'importazione-lul', component: ImportazioneLulComponent, canActivate:[AuthGuard]},
