@@ -11,64 +11,89 @@ $rapportini = new RapportiniManager();
 
 class RapportiniManager {
 
-    function carica_wp_da_db($anno, $mese) {
+    function carica_da_db($anno, $mese) {
         $primo = "DATE('$anno-$mese-01')";
 
         // Con questa query cerco di stampare solo i rapportini dei dipendenti che mi interessano
-        $query_dipendenti = "SELECT DISTINCT r.MATRICOLA_DIPENDENTE " .
+        $query_matricole = "SELECT DISTINCT r.MATRICOLA_DIPENDENTE, p.* " .
             "FROM progetti p " .
-            "JOIN progetti_wp wp ON wp.ID_PROGETTO=p.ID_PROGETTO " .
-            "JOIN progetti_wp_risorse r ON wp.ID_PROGETTO=r.ID_PROGETTO AND wp.ID_WP=r.ID_WP " .
-            "WHERE wp.DATA_FINE >= $primo AND wp.DATA_INIZIO <= LAST_DAY($primo)";
-        $matricole = select_column($query_dipendenti);
+            "JOIN progetti_persone r ON p.ID_PROGETTO=r.ID_PROGETTO " .
+            "WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo)";
+        $matricole = select_list($query_matricole);
 
-        // Per questi dipendenti, però, voglio vedere tutti i progetti e tutte le WP
-        $query_wp = "SELECT p.ID_PROGETTO, p.ACRONIMO, p.TITOLO AS TITOLO_P, p.GRANT_NUMBER, p.DATA_INIZIO as DATA_INIZIO_P, p.MATRICOLA_SUPERVISOR, " .
-                    "wp.ID_WP, wp.TITOLO, wp.DESCRIZIONE, wp.DATA_INIZIO, wp.DATA_FINE " .
-                    "FROM progetti p " .
-                    "JOIN progetti_wp wp ON wp.ID_PROGETTO=p.ID_PROGETTO " .
-                    "WHERE wp.DATA_FINE >= $primo AND wp.DATA_INIZIO <= LAST_DAY($primo)";
-        $array_wp = select_list($query_wp);
+        if (count($matricole) == 0) {
+            return [];
+        }
 
-        $query_consuntivo = "SELECT ID_PROGETTO,ID_WP,MATRICOLA_DIPENDENTE,DATA,ORE_LAVORATE " .
-                    "FROM ore_consuntivate " .
+        $query_consuntivo = "SELECT ID_PROGETTO,MATRICOLA_DIPENDENTE,DATA,ORE_LAVORATE " .
+                    "FROM ore_consuntivate_progetti " .
                     "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
         $consuntivo = select_list($query_consuntivo);
-        
-        // trasformo i vari array in una struttura $map_progetti_matricole_wp
-        $map_progetti_matricole_wp = array();
-        foreach($matricole as $matr) {
-            $map_progetti_matricole_wp[$matr] = array();
-            foreach($array_wp as $row) {
-                $idprogetto = $row["ID_PROGETTO"];
-                $idwp = $row["ID_WP"];
-                if (! array_key_exists($idprogetto, $map_progetti_matricole_wp[$matr])) $map_progetti_matricole_wp[$matr][$idprogetto] = array();
-                $map_progetti_matricole_wp[$matr][$idprogetto][$idwp] = $row;
+
+        // trasformo i vari array in una struttura $map_progetti_matricole
+        $map_progetti_matricole = array();
+
+        foreach($matricole as $row) {
+            $idprogetto = $row["ID_PROGETTO"];
+            $matr = $row["MATRICOLA_DIPENDENTE"];
+            if (! isset($map_progetti_matricole[$matr])) {
+                $map_progetti_matricole[$matr] = array();
+            }
+            if (! isset($map_progetti_matricole[$matr][$idprogetto])) {
+                $map_progetti_matricole[$matr][$idprogetto] = $row;
+                $map_progetti_matricole[$matr][$idprogetto]['DATE'] = array();
             }
         }
+
         foreach ($consuntivo as $row) {
             $idprogetto = $row["ID_PROGETTO"];
-            $idwp = $row["ID_WP"];
             $matr = $row["MATRICOLA_DIPENDENTE"];
             $data = new DateTime($row["DATA"]);
-            $wp = $map_progetti_matricole_wp[$matr][$idprogetto][$idwp];
-            if (! isset($wp["ORE_LAVORATE"])) $wp["ORE_LAVORATE"] = array();
-            $wp["ORE_LAVORATE"][$data->format('j')] = $row["ORE_LAVORATE"];
-            $map_progetti_matricole_wp[$matr][$idprogetto][$idwp] = $wp;
+            $map_progetti_matricole[$matr][$idprogetto]['DATE'][$data->format('j')] = 0.0 + $row["ORE_LAVORATE"];
         }
-        return $map_progetti_matricole_wp;
+    return $map_progetti_matricole;
     }
 
-    function creaZip($anno, $mese) {
+    function creaZip($anno, $mese, $isEsploso) {
         global $lul;
         
         // REPERIRE DATI DA DB
-        $map_progetti_matricole_wp = $this->carica_wp_da_db($anno, $mese);
+        $map_progetti_matricole = $this->carica_da_db($anno, $mese);
         $map_matr_ore = $lul->carica_da_db($anno, $mese);
         
-        if (empty($map_progetti_matricole_wp)) {
+        if (empty($map_progetti_matricole)) {
             print_error(404, 'Nessun dato trovato.');
         }
+
+        /*
+        $map_progetti_matricole = Array
+        (
+            [1234] => Array
+                (
+                    [2] => Array
+                        (
+                            [ID_PROGETTO] => 2
+                            [MATRICOLA_DIPENDENTE] => 1234
+                            [ACRONIMO] => aad'
+                            [MATRICOLA_SUPERVISOR] => 4321
+                            [DATE] => Array
+                                (
+                                    [6] => 5
+                                )
+
+                        )
+
+                )
+        )
+        $map_matr_ore = Array
+        (
+            [1234] => Array
+                (
+                    [6] => 8
+                )
+
+        )
+        */
 
         // CREA FILE ZIP VUOTO
         $zip = new ZipArchive;
@@ -79,12 +104,25 @@ class RapportiniManager {
         $tempfiles = [];
         
         // MAIN LOOP
-        foreach ($map_progetti_matricole_wp as $matr => $map_matricole_wp) {
-            $xlsxfilename = $this->creaFileExcel($matr, $anno, $mese, $map_matricole_wp, $map_matr_ore);
-            $matr = trim($matr);
-            $xlsxfilename_final = "Rapportini_${matr}_$anno$mese.xlsx";
-            $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON salva su disco
-            $tempfiles[] = $xlsxfilename;
+        foreach ($map_progetti_matricole as $matr => $map_progetti) {
+            if ($isEsploso) {
+                // un report distinto per ogni progetto
+                foreach( $map_progetti as $idprogetto => $row) {
+                    $xlsxfilename = $this->creaFileExcel($matr, $anno, $mese, [$idprogetto => $row], $map_matr_ore);
+                    $matr = trim($matr);
+                    $acronimo = trim($row["ACRONIMO"]);
+                    $xlsxfilename_final = "Rapportini_${matr}_${acronimo}_$anno$mese.xlsx";
+                    $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON salva su disco
+                    $tempfiles[] = $xlsxfilename;
+                }
+            } else {
+                // unico report con tutti i progetti
+                $xlsxfilename = $this->creaFileExcel($matr, $anno, $mese, $map_progetti, $map_matr_ore);
+                $matr = trim($matr);
+                $xlsxfilename_final = "Rapportini_${matr}_$anno$mese.xlsx";
+                $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON salva su disco
+                $tempfiles[] = $xlsxfilename;
+            }
         }
 
         $zip->close(); // Questo esegue il salvataggio su disco
@@ -95,24 +133,23 @@ class RapportiniManager {
         return $zipfilename;
     }
 
-    function creaFileExcel($matr, $anno, $mese, $map_matricole_wp, $map_matr_ore) {
+    function creaFileExcel($matr, $anno, $mese, $map_matricole_progetti, $map_matr_ore) {
         
         // Sto assumento che ci sia un unico supervisor per tutti i progetti...
         // E le stesse data firma!
         // cfr. email Gabriele / Alice del 25/05/2021
-        $unIdProgettoACaso = array_keys($map_matricole_wp)[0];
-        $unIdWpACaso = array_keys($map_matricole_wp[$unIdProgettoACaso])[0];
-        $unWpACaso = $map_matricole_wp[$unIdProgettoACaso][$unIdWpACaso];
-        
+        $unIdProgettoACaso = array_keys($map_matricole_progetti)[0];
+        $unProgettoACaso = $map_matricole_progetti[$unIdProgettoACaso];
         $data_firma = $this->get_data_firma($unIdProgettoACaso, $matr, $anno, $mese);
 
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $mese, $anno);
 
         global $panthera;
         $nomecognome = $panthera->getUtente($matr);
-        $nomecognome_super = $panthera->getUtente($unWpACaso['MATRICOLA_SUPERVISOR']);
 
-        $data_inizio_progetto = $unWpACaso['DATA_INIZIO_P'];
+        $nomecognome_super = $panthera->getUtente($unProgettoACaso['MATRICOLA_SUPERVISOR']);
+
+        $data_inizio_progetto = $unProgettoACaso['DATA_INIZIO'];
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -125,9 +162,7 @@ class RapportiniManager {
         $this->creaIntestazione($sheet, $curRow, $anno, $mese, $matr, $nomecognome, $nomecognome_super);
         $this->creaTabellaPresenze($sheet, $curRow, $anno, $mese, $matr, $map_matr_ore, $rigaTotali, $daysInMonth);
 
-        foreach ($map_matricole_wp as $idProgetto => $map_wp) {
-            $this->creaTabella($sheet, $curRow, $idProgetto, $map_wp, $anno, $mese, $matr, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth);
-        }
+        $this->creaTabella($sheet, $curRow, -1 /* FIXME */, $map_matricole_progetti, $anno, $mese, $matr, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth);
 
         $this->aggiornaRigaTotali($sheet, $curRow, $rigaTotali, $daysInMonth);
 
@@ -276,7 +311,7 @@ class RapportiniManager {
         $drawing->setWorksheet($sheet);
     }
 
-    function creaTabella($sheet, &$curRow, $idProgetto, $map_wp, $anno, $mese, $matricola, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth) {
+    function creaTabella($sheet, &$curRow, $idProgetto, $data, $anno, $mese, $matricola, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth) {
 
         // la riga azzurra piccola
         $sheet->getStyle("A$curRow:AG$curRow")->getFill()
@@ -290,8 +325,8 @@ class RapportiniManager {
         $sheet->setCellValue('A' . $curRow, "M$numMese");
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-        $unaWpACaso = $map_wp[array_keys($map_wp)[0]];
-        $title = "$unaWpACaso[ACRONIMO] - Grant $unaWpACaso[GRANT_NUMBER] - $unaWpACaso[TITOLO_P]"; 
+        $unProgettoACaso = $data[array_keys($data)[0]];
+        $title = "$unProgettoACaso[ACRONIMO] - Grant $unProgettoACaso[GRANT_NUMBER] - $unProgettoACaso[TITOLO]";
         $sheet->setCellValue('B' . $curRow, $title);
         $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->mergeCells("B$curRow:AG$curRow");
@@ -301,7 +336,7 @@ class RapportiniManager {
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
 
         $row_prima_riga = $curRow + 1;
-        foreach($map_wp as $idwp => $wp) {
+        foreach($data as $idprogetto => $wp) {
             ++$curRow;
             // A sinistra le WP
             $sheet->setCellValue('A' . $curRow, $wp['ACRONIMO'] . ' - ' . $wp['TITOLO']);
@@ -323,7 +358,7 @@ class RapportiniManager {
 
         // Totali di colonna
         $curRow +=2;
-        $sheet->setCellValue('A' . $curRow, "TOT - $unaWpACaso[ACRONIMO]");
+        $sheet->setCellValue('A' . $curRow, "TOT - $unProgettoACaso[ACRONIMO]");
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $formula = "=SUM(C$curRow:AG$curRow)";
         $sheet->setCellValue('B' . $curRow, $formula);

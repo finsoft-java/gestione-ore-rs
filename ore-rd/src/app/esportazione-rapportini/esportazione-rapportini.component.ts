@@ -13,6 +13,7 @@ import {Moment} from 'moment';
 // the `default as` syntax.
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
+import { AlertService } from '../_services/alert.service';
 // tslint:disable-next-line:no-duplicate-imports
 
 const moment = _moment;
@@ -41,6 +42,12 @@ export const MY_FORMATS = {
 })
 export class EsportazioneRapportiniComponent implements OnInit {
     date = new FormControl(moment());
+    isEsploso = false;
+
+    constructor(private alertService: AlertService,
+        private uploadRapportiniService: UploadRapportiniService) {
+    }
+
     chosenYearHandler(normalizedYear: Moment) {
       const ctrlValue = this.date.value;
       ctrlValue.year(normalizedYear.year());
@@ -53,18 +60,22 @@ export class EsportazioneRapportiniComponent implements OnInit {
       this.date.setValue(ctrlValue);
       datepicker.close();
     }
-    constructor(private uploadRapportiniService: UploadRapportiniService) { }
 
     ngOnInit(): void {
     }
 
     download() {
       if(this.date.value != null){
-        this.uploadRapportiniService.download(formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe(response => {
+        this.uploadRapportiniService.download(formatDate(this.date.value,"YYYY-MM","en-GB"), this.isEsploso).subscribe(response => {
             this.downloadFile(response);
         },
         error => {
-            // TODO
+          // Qui error è una stringa !?!
+          if (error && error.includes('404')) {
+            this.alertService.error('Nessun dato per il periodo selezionato');
+          } else {
+            this.alertService.error(error);
+          }
         });
       }
     }

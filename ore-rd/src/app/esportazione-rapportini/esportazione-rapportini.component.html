@@ -2,6 +2,12 @@
     Esportazione Rapportini</h5>
 <div>
     <p style="width: 75%;display: block;margin: 0px auto;" class="fraz2_width">
+        <mat-checkbox class="example-margin" 
+            title="Un report diverso per ogni progetto"
+            [(ngModel)]="isEsploso"
+            style="margin-right:10px;">
+            Modalità esplosa
+        </mat-checkbox>
         <mat-form-field appearance="fill" style="margin-right: 10px;">
             <mat-label>Data</mat-label>
             <input matInput readonly [matDatepicker]="picker" [formControl]="date" required>
