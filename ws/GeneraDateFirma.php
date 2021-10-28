@@ -31,22 +31,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $primo = "DATE('$anno-$mese-01')";
     $metaMese = "DATE('$anno-$mese-15')";
 
-    $query = "SELECT P.ID_PROGETTO,p.TITOLO,p.MATRICOLA_SUPERVISOR,pwr.MATRICOLA_DIPENDENTE from progetti p inner join progetti_wp_risorse pwr on p.ID_PROGETTO = pwr.ID_PROGETTO WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo) group by 1,2,3,4";            
+    // Questa e' la griglia che verra' presentata all'utente
+    $query = "SELECT pwr.MATRICOLA_DIPENDENTE,P.ID_PROGETTO,p.TITOLO,p.MATRICOLA_SUPERVISOR " .
+                "FROM progetti p INNER JOIN progetti_persone pwr on p.ID_PROGETTO = pwr.ID_PROGETTO " .
+                "WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo) " .
+                "GROUP BY 1,2,3,4 " .
+                "ORDER BY 1,3";
     $dateFirma = select_list($query);
-    /**
-    *  ciclo precompilazione Data_firma
-    */
+    
+    // ciclo precompilazione Data_firma
     for($i = 0 ; $i < count($dateFirma); $i++){
         $matr_sup = $dateFirma[$i]['MATRICOLA_SUPERVISOR'];
         $matr_dip = $dateFirma[$i]['MATRICOLA_DIPENDENTE'];
-        $query = "SELECT min(a.DATA) FROM ore_presenza_lul a join ore_presenza_lul b on a.DATA= b.DATA AND b.MATRICOLA_DIPENDENTE = '$matr_sup' AND b.ORE_PRESENZA_ORDINARIE > 0 where a.ORE_PRESENZA_ORDINARIE > 0 AND a.MATRICOLA_DIPENDENTE = '$matr_dip' AND a.DATA >= $metaMese";
+
+        $query_sup = "SELECT max(a.DATA) FROM ore_presenza_lul a " .
+                    "WHERE a.ORE_PRESENZA_ORDINARIE > 0 AND a.MATRICOLA_DIPENDENTE = '$matr_sup' ";
+        $dateFirma[$i]['ULTIMA_PRESENZA_SUP'] = select_single_value($query_sup);
         
-        $matr_dipendente = $panthera->getUtente($matr_dip);
-        $matr_supervisor = $panthera->getUtente($matr_sup);
-        $dateFirma[$i]['MATRICOLA_DIPENDENTE'] = $matr_dipendente;
-        $dateFirma[$i]['MATRICOLA_SUPERVISOR'] = $matr_supervisor;
+        $query_dip = "SELECT max(a.DATA) FROM ore_presenza_lul a " .
+                    "WHERE a.ORE_PRESENZA_ORDINARIE > 0 AND a.MATRICOLA_DIPENDENTE = '$matr_dip' ";
+        $dateFirma[$i]['ULTIMA_PRESENZA_DIP'] = select_single_value($query_dip);
+        
+        $query = "SELECT min(a.DATA) FROM ore_presenza_lul a " .
+                    "WHERE a.ORE_PRESENZA_ORDINARIE > 0 AND a.MATRICOLA_DIPENDENTE = '$matr_sup' AND a.DATA >= LAST_DAY($primo)";
         $dataDefault = select_single_value($query);
         $dateFirma[$i]['DATA_FIRMA'] = $dataDefault;
+
+        // compilo anche nome dipendente e supervisor
+        $nome_dipendente = $panthera->getUtente($matr_dip);
+        $nome_supervisor = $panthera->getUtente($matr_sup);
+        $dateFirma[$i]['NOME_DIPENDENTE'] = $nome_dipendente;
+        $dateFirma[$i]['NOME_SUPERVISOR'] = $nome_supervisor;
     }
     header('Content-Type: application/json');
     echo json_encode(['data' => $dateFirma]);
