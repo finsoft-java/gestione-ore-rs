@@ -42,9 +42,6 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   projectSubscription: Subscription;
   progetto!: Progetto;
-  progettoPersone!: ProgettoPersona[];
-  progettoCommesseDiProgetto!: ProgettoCommessa[];
-  progettoCommesseCompatibili!: ProgettoCommessa[];
   progetto_old!: Progetto;
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
   displayedColumnsPersone: string[] = ['nome', 'matricola', 'pctImpiego', 'actions'];
@@ -102,7 +99,6 @@ export class ProgettoDettaglioComponent implements OnInit {
   getProgettoPersone(): void {
     this.progettiPersoneService.getById(this.id_progetto!)
       .subscribe(response => {
-        this.progettoPersone = response.data;
         this.dataSourcePersone = new MatTableDataSource(response.data);
         this.checkIsPercentuali100();
       },
@@ -114,15 +110,14 @@ export class ProgettoDettaglioComponent implements OnInit {
   getProgettoCommesse(): void {
     this.progettiCommesseService.getById(this.id_progetto!)
       .subscribe(response => {
-        if (response.data == null) {
-          this.progettoCommesseCompatibili = [];
-          this.progettoCommesseDiProgetto = [];
-        } else {
-          this.progettoCommesseDiProgetto = response.data.filter(x => x.PCT_COMPATIBILITA == 100);
-          this.progettoCommesseCompatibili = response.data.filter(x => x.PCT_COMPATIBILITA < 100);
+        let progettoCommesseCompatibili: ProgettoCommessa[] = [];
+        let progettoCommesseDiProgetto: ProgettoCommessa[] = [];
+        if (response.data != null) {
+          progettoCommesseDiProgetto = response.data.filter(x => x.PCT_COMPATIBILITA == 100);
+          progettoCommesseCompatibili = response.data.filter(x => x.PCT_COMPATIBILITA < 100);
         }
-        this.dataSourceCommesseCompatibili = new MatTableDataSource(this.progettoCommesseCompatibili);
-        this.dataSourceCommesseDiProgetto = new MatTableDataSource(this.progettoCommesseDiProgetto);
+        this.dataSourceCommesseCompatibili = new MatTableDataSource(progettoCommesseCompatibili);
+        this.dataSourceCommesseDiProgetto = new MatTableDataSource(progettoCommesseDiProgetto);
       },
       error => {
         this.dataSourcePersone = new MatTableDataSource();
@@ -511,9 +506,16 @@ export class ProgettoDettaglioComponent implements OnInit {
     if (array != null && array.length > 0) {
       const media = 100.0 / array.length;
       array.forEach(x => x.PCT_IMPIEGO = media);
-      array.forEach(x => this.progettiPersoneService.update(x));
-      // KNOWN BUG questa chiamata dovrebbe essere asincrona...
-      this.getProgettoPersone();
+      this.dataSourcePersone.data = array; //this is not useless!
+      array.forEach(x => {
+        this.progettiPersoneService.update(x)
+          .subscribe(response => {
+            // do nothing
+          },
+          error => {
+            this.alertService.error(error);
+          });
+      });
     }
   }
 

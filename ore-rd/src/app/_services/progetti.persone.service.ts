@@ -16,6 +16,7 @@ export class ProgettiPersoneService {
     }
 
     update(p: ProgettoPersona) {
+        console.log("Shoud call:" + environment.wsUrl + `ProgettiPersone.php`, p)
         return this.http.put<ValueBean<ProgettoPersona>>(environment.wsUrl + `ProgettiPersone.php`, p);
     }
 
