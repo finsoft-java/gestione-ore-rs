@@ -75,6 +75,7 @@ export class GeneraDatiTestComponent implements OnInit {
           this.message_error = response.value.error;
         },
         error => {
+          this.message_success = '';
           this.message_error = error;
         });
     }
