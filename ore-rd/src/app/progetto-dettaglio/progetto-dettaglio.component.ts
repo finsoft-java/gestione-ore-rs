@@ -442,6 +442,10 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.router.navigate(["progetto", this.progetto.ID_PROGETTO, "report"]);
   }
 
+  associaOre() {
+    this.router.navigate(["progetto", this.progetto.ID_PROGETTO, "associazione-ore"]);
+  }
+
   monteOreMensile(monteOre: number|null) {
     if (monteOre === null) {
       return null;

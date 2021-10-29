@@ -19,3 +19,4 @@ include("class_panthera.php");
 include("class_rapportini.php");
 include("class_lul.php");
 include("class_budget.php");
+include("class_consuntivi_progetti.php");

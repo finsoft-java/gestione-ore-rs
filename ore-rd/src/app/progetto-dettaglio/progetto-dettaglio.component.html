@@ -3,6 +3,7 @@
     <div>
 
         <div style="text-align:right">
+            <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" style="margin-right:10px" (click)="associaOre()">Associa ore</button>
             <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" (click)="report()">Report</button>
         </div>
 

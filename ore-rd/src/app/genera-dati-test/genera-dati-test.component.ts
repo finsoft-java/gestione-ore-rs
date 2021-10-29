@@ -12,19 +12,21 @@ import {Moment} from 'moment';
 // the `default as` syntax.
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
+import { AlertService } from '../_services/alert.service';
+import { ActivatedRoute } from '@angular/router';
 // tslint:disable-next-line:no-duplicate-imports
 
 const moment = _moment;
 export const MY_FORMATS = {
   parse: {
-    dateInput: 'YYYY-MM',
+      dateInput: 'LL'
   },
   display: {
-    dateInput: 'YYYY-MM',
-    monthYearLabel: 'YYYY MMM',
-    dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'YYYY MMMM',
-  },
+      dateInput: 'DD-MM-YYYY',
+      monthYearLabel: 'YYYY',
+      dateA11yLabel: 'LL',
+      monthYearA11yLabel: 'YYYY'
+  }
 };
 
 @Component({
@@ -40,11 +42,16 @@ export const MY_FORMATS = {
 })
 export class GeneraDatiTestComponent implements OnInit {
 
-    date = new FormControl(moment());
+    date: Date = new Date();
 
     message_success = '';
     message_error = '';
+    idProgetto: number = -1;
     
+    constructor(private datitestService: DatitestService,
+      private alertService: AlertService,
+      private route: ActivatedRoute) { }
+
     resetAlertSuccess() {    
       this.message_success = '';
     }
@@ -53,30 +60,21 @@ export class GeneraDatiTestComponent implements OnInit {
       this.message_error = '';
     }
 
-    chosenYearHandler(normalizedYear: Moment) {
-      const ctrlValue = this.date.value;
-      ctrlValue.year(normalizedYear.year());
-      this.date.setValue(ctrlValue);
-    }
-
-    chosenMonthHandler(normalizedMonth: Moment, datepicker: MatDatepicker<Moment>) {
-      const ctrlValue = this.date.value;
-      ctrlValue.month(normalizedMonth.month());
-      this.date.setValue(ctrlValue);
-      datepicker.close();
-    }
-
-    constructor(private datitestService: DatitestService) { }
-
     ngOnInit(): void {
+      this.route.params.subscribe(params => {
+        this.idProgetto = +params['id_progetto']; 
+      },
+        error => {
+        this.alertService.error(error);
+      });
     }
 
     run() {
-        this.datitestService.run(formatDate(this.date.value,"YYYY-MM","en-GB")).subscribe(response => {
-          this.message_success = 'Fatto';
+        this.datitestService.run(this.idProgetto, formatDate(this.date,"YYYY-MM-dd","en-GB")).subscribe(response => {
+          this.message_success = response.value.success;
         },
         error => {
-          this.message_error = 'Errore durante l\'elaborazione';
+          this.message_error = error;
         });
     }
 }
