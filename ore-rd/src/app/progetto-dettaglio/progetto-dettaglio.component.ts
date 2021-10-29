@@ -523,9 +523,11 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
   }
 
+  TOLLERANZA = 0.001;
+
   checkIsPercentuali100() {
     let sum = 0.0;
     this.dataSourcePersone.data.forEach(x => sum += parseFloat((<any>x.PCT_IMPIEGO!)));
-    this.isPercentuali100 = (Math.abs(sum - 100) <= 0.000001);
+    this.isPercentuali100 = (Math.abs(sum - 100) <= this.TOLLERANZA);
   }
 }
