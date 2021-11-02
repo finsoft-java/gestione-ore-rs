@@ -9,7 +9,7 @@ class ReportBudgetManager {
 
 
     function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
-        $sql = "SELECT NVL(SUM(c.ORE_LAVORATE),0) as ORE_LAVORATE, NVL(SUM(c.ORE_LAVORATE * c.COSTO_ORARIO),0.0) as COSTO " .
+        $sql = "SELECT NVL(SUM(c.NUM_ORE_LAVORATE),0) as NUM_ORE_LAVORATE, NVL(SUM(c.NUM_ORE_LAVORATE * c.COSTO_ORARIO),0.0) as COSTO " .
             "FROM progetti p " .
             "LEFT JOIN ore_consuntivate_progetti c ON p.id_progetto=c.id_progetto ";
         if (!empty($anno) and !empty($mese)) {
@@ -31,7 +31,7 @@ class ReportBudgetManager {
     }
 
     function get_consuntivi_matricola($id_progetto, $matricola, $anno=null) {
-        $sql = "SELECT c.DATA, c.ORE_LAVORATE, (c.ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
+        $sql = "SELECT c.DATA, c.NUM_ORE_LAVORATE, (c.NUM_ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
                 "FROM ore_consuntivate_progetti c " .
                 "WHERE ID_PROGETTO=$id_progetto AND MATRICOLA_DIPENDENTE='$matricola'";
         if (!empty($anno) and !empty($mese)) {
@@ -52,11 +52,11 @@ class ReportBudgetManager {
             // completo le date con quelle del range temporale
             $dates = $this->get_range_temporale($progetto, $anno, $mese);
             foreach ($dates as $date_key => $date) {
-                $dates[$date_key]['ORE_LAVORATE'] = null;
+                $dates[$date_key]['NUM_ORE_LAVORATE'] = null;
                 $dates[$date_key]['COSTO'] = null;
                 foreach($consuntivi as $c) {
                     if ($c['DATA'] == $date['DATA']) {
-                        $dates[$date_key]['ORE_LAVORATE'] = (empty($c['ORE_LAVORATE']) ? null : $c['ORE_LAVORATE']);
+                        $dates[$date_key]['NUM_ORE_LAVORATE'] = (empty($c['NUM_ORE_LAVORATE']) ? null : $c['NUM_ORE_LAVORATE']);
                         $dates[$date_key]['COSTO'] = $c['COSTO'] ;
                         break;
                     }
@@ -68,21 +68,21 @@ class ReportBudgetManager {
             $tot_ore = 0;
             $tot_costo = 0.0;
             foreach($consuntivi as $c) {
-                $tot_ore += $c['ORE_LAVORATE'];
+                $tot_ore += $c['NUM_ORE_LAVORATE'];
                 $tot_costo += $c['COSTO'];
             }
-            $lista_matricole[$key]['DETTAGLI'][] = [ 'ORE_LAVORATE' => $tot_ore, 'COSTO' => $tot_costo ];
+            $lista_matricole[$key]['DETTAGLI'][] = [ 'NUM_ORE_LAVORATE' => $tot_ore, 'COSTO' => $tot_costo ];
             
             // totali colonna
             foreach($lista_matricole[$key]['DETTAGLI'] as $date_key => $c) {
                 if (!isset($totali_per_data[$date_key])) {
-                    $totali_per_data[$date_key] = [ 'ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
+                    $totali_per_data[$date_key] = [ 'NUM_ORE_LAVORATE' => 0, 'COSTO' => 0.0 ];
                     if (isset($c['DATA'])) {
                         $totali_per_data[$date_key]['DATA'] = $c['DATA'];
                         $totali_per_data[$date_key]['DAY'] = $c['DAY'];
                     }
                 }
-                $totali_per_data[$date_key]['ORE_LAVORATE'] += $c['ORE_LAVORATE'];
+                $totali_per_data[$date_key]['NUM_ORE_LAVORATE'] += $c['NUM_ORE_LAVORATE'];
                 $totali_per_data[$date_key]['COSTO'] += $c['COSTO'];
             }
             $lista_matricole[$key][] = [ 'MATRICOLA_DIPENDENTE' => 'TOT.', 'DETTAGLI' => $totali_per_data];
@@ -159,7 +159,7 @@ class ReportBudgetManager {
         $nomecognome_super = $panthera->getUtente($progetto['MATRICOLA_SUPERVISOR']);
         
         $budget = $progetto["MONTE_ORE_TOT"] * $progetto["COSTO_MEDIO_UOMO"];
-        $scarto_ore = ($totali["ORE_LAVORATE"] - $progetto["MONTE_ORE_TOT"]) / $progetto["MONTE_ORE_TOT"] * 100;
+        $scarto_ore = ($totali["NUM_ORE_LAVORATE"] - $progetto["MONTE_ORE_TOT"]) / $progetto["MONTE_ORE_TOT"] * 100;
         $scarto_costi = ($totali["COSTO"] - $budget) / $budget * 100;
 
         $ROW_HEIGHT = 10;
@@ -225,7 +225,7 @@ class ReportBudgetManager {
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell($COLUMN_WIDTH, $ROW_HEIGHT, 'Ore lavorate:');
         $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell($COLUMN_WIDTH / 2, $ROW_HEIGHT, $totali["ORE_LAVORATE"], 0, 0);
+        $pdf->Cell($COLUMN_WIDTH / 2, $ROW_HEIGHT, $totali["NUM_ORE_LAVORATE"], 0, 0);
         $pdf->Cell($COLUMN_WIDTH / 2, $ROW_HEIGHT, $scarto_ore, 0, 1);
         
         if (empty($totali["COSTO"])) { $totali["COSTO"] = '-'; $scarto_costi = ''; }
@@ -267,7 +267,7 @@ class ReportBudgetManager {
         $report['budget'] = $report['progetto']['MONTE_ORE_TOT'] * $report['progetto']['COSTO_MEDIO_UOMO'];
 
         $report['consuntivi'] = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese);
-        // ha due campi, ORE_LAVORATE e COSTO
+        // ha due campi, NUM_ORE_LAVORATE e COSTO
         // var_dump($report['consuntivi']); die();
         
         if (empty($report['progetto']['MONTE_ORE_TOT'])) {
@@ -275,7 +275,7 @@ class ReportBudgetManager {
             $report['consuntivi']['PCT_SCARTO_TEMPI'] = null;
         } else {
             $monte_ore = $report['progetto']['MONTE_ORE_TOT'];
-            $report['consuntivi']['PCT_SCARTO_TEMPI'] = ($report['consuntivi']['ORE_LAVORATE'] - $monte_ore) / $monte_ore * 100;
+            $report['consuntivi']['PCT_SCARTO_TEMPI'] = ($report['consuntivi']['NUM_ORE_LAVORATE'] - $monte_ore) / $monte_ore * 100;
         }
 
         if (empty($report['budget'])) {

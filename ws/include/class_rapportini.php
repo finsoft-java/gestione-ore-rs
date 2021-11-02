@@ -25,7 +25,7 @@ class RapportiniManager {
             return [];
         }
 
-        $query_consuntivo = "SELECT ID_PROGETTO,MATRICOLA_DIPENDENTE,DATA,ORE_LAVORATE " .
+        $query_consuntivo = "SELECT ID_PROGETTO,MATRICOLA_DIPENDENTE,DATA,NUM_ORE_LAVORATE " .
                     "FROM ore_consuntivate_progetti " .
                     "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
         $consuntivo = select_list($query_consuntivo);
@@ -49,7 +49,7 @@ class RapportiniManager {
             $idprogetto = $row["ID_PROGETTO"];
             $matr = $row["MATRICOLA_DIPENDENTE"];
             $data = new DateTime($row["DATA"]);
-            $map_progetti_matricole[$matr][$idprogetto]['DATE'][$data->format('j')] = 0.0 + $row["ORE_LAVORATE"];
+            $map_progetti_matricole[$matr][$idprogetto]['DATE'][$data->format('j')] = 0.0 + $row["NUM_ORE_LAVORATE"];
         }
     return $map_progetti_matricole;
     }
@@ -344,10 +344,10 @@ class RapportiniManager {
             $formula = "=SUM(C$curRow:AG$curRow)";
             $sheet->setCellValue('B' . $curRow, $formula);
             // Infine, le ore consuntivate
-            if (isset($wp["ORE_LAVORATE"]) && ! empty($wp["ORE_LAVORATE"])) {
+            if (isset($wp["NUM_ORE_LAVORATE"]) && ! empty($wp["NUM_ORE_LAVORATE"])) {
                 for ($i = 1; $i <= 31; ++$i) {
-                    if (isset($wp["ORE_LAVORATE"][$i])) {
-                        $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $wp["ORE_LAVORATE"][$i]);
+                    if (isset($wp["NUM_ORE_LAVORATE"][$i])) {
+                        $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $wp["NUM_ORE_LAVORATE"][$i]);
                     }
                 }
             }
@@ -439,7 +439,7 @@ class RapportiniManager {
             }
             $dataDoc = DateTime::createFromFormat('d/m/Y', $dataDoc)->format('Y-m-d');
             if ($numOre > 0) {
-                $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA,RIF_DOC,RIF_RIGA_DOC,ORE_LAVORATE,TMS_CARICAMENTO) " .
+                $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA,RIF_DOC,RIF_RIGA_DOC,NUM_ORE_LAVORATE,TMS_CARICAMENTO) " .
                             "VALUES('$codCommessa','$matricola','$dataDoc','$nrDoc','$rigaDoc','$numOre',CURRENT_TIMESTAMP)";
                 execute_update($query);
             }

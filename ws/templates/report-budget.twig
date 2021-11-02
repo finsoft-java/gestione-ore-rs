@@ -94,7 +94,7 @@
                 Monte ore consumato:
                 </div>
                 <div class='col-md-2'>
-                {{ consuntivi.ORE_LAVORATE }}
+                {{ consuntivi.NUM_ORE_LAVORATE }}
                 </div>
                 <div class='col-md-2'>
                 {% if consuntivi.PCT_SCARTO_TEMPI>0 %}+{% endif %}{{ consuntivi.PCT_SCARTO_TEMPI | number_format(0) }}%
@@ -142,7 +142,7 @@
 {% for d in WP.DETTAGLI %}
     {% if(d.DATA is null) %}
                     <td class='calendario title'>
-                    {{ d.ORE_LAVORATE }}&nbsp;
+                    {{ d.NUM_ORE_LAVORATE }}&nbsp;
                     </td>
     {% endif %}
 {% endfor %}
