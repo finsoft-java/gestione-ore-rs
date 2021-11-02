@@ -43,8 +43,8 @@ class ConsuntiviProgettiManager {
         $message->success .= "<b>Tot. $tot_ore_assegnate ore assegnate</b>". NL;
         
         // TODO: salvare anche la ore_consuntivate_progetti
-        // $this->apply($idEsecuzione, $tot_ore_assegnate);
-        // $message->success .= "Ore assegnate." . NL;
+        $this->apply($idEsecuzione, $tot_ore_assegnate);
+        $message->success .= "Ore assegnate." . NL;
 
         $this->log($idEsecuzione, $message);
 
@@ -117,8 +117,9 @@ class ConsuntiviProgettiManager {
     }
 
     function show_commesse($idEsecuzione, $commesse_p, $commesse_c, $if_lul, &$message) {
-        $NOME_CAMPO_ORE_LAVORATE = $if_lul == PRE ? 'NUM_ORE_LAVORATE' : 'NUM_ORE_LUL';
+        $NOME_CAMPO_ORE_LAVORATE = $if_lul == PRE ? 'NUM_ORE_LAVORATE' : 'NUM_ORE_UTILIZZABILI_LUL';
         $NOME_CAMPO_ORE_COMPATIBILI = $if_lul == PRE ? 'NUM_ORE_COMPATIBILI' : 'NUM_ORE_COMPATIBILI_LUL';
+        $UTILIZZABILI = $if_lul == PRE ? "" : " utilizzabili";
 
         $caricamenti = $this->get_data($idEsecuzione, $message);
 
@@ -134,7 +135,7 @@ class ConsuntiviProgettiManager {
             $message->success .= "  $comm: trovate $tot ore" . NL;
             $tot_di_progetto += $tot;
         }
-        $message->success .= "<b>Tot. $tot_di_progetto ore di progetto</b>". NL;
+        $message->success .= "<b>Tot. $tot_di_progetto ore di progetto$UTILIZZABILI</b>". NL;
         
         $message->success .= "Commesse compatibili assegnate: " . implode(", ", $commesse_c) . NL;
         $tot_compat = 0.0;
@@ -151,7 +152,7 @@ class ConsuntiviProgettiManager {
             $tot_compat += $compatibili;
         }
 
-        $message->success .= "<b>Tot. $tot_compat ore su commesse compatibili</b>". NL;
+        $message->success .= "<b>Tot. $tot_compat ore$UTILIZZABILI su commesse compatibili</b>". NL;
 
         return $tot_di_progetto+$tot_compat;
     }
@@ -222,15 +223,33 @@ class ConsuntiviProgettiManager {
 
         $con->begin_transaction();
         try {
-            $query ="INSERT INTO ore_consuntivate_progetti(ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, NUM_ORE_LAVORATE)
-                     SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, SUM(NUM_ORE_LAVORATE)
+            $query ="INSERT INTO ore_consuntivate_progetti(ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, NUM_ORE_LAVORATE, ID_ESECUZIONE)
+                     SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, SUM(NUM_ORE_COMPATIBILI_LUL), $idEsecuzione
                      FROM assegnazioni_dettaglio ad
-                     WHERE ID_ESECUZIONE=$idEsecuzione
+                     WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_COMPATIBILI_LUL>0
                      GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA
                      ";
             execute_update($query);
 
             $query = "UPDATE assegnazioni SET TOT_ASSEGNATE=$tot_ore_assegnate,IS_ASSEGNATE=1 WHERE ID_ESECUZIONE=$idEsecuzione";
+            execute_update($query);
+
+            $con->commit();
+        } catch (mysqli_sql_exception $exception) {
+            $mysqli->rollback();        
+            throw $exception;
+        }
+    }
+
+    function unapply($idEsecuzione) {
+        global $con;
+
+        $con->begin_transaction();
+        try {
+            $query ="DELETE FROM ore_consuntivate_progetti WHERE ID_ESECUZIONE=$idEsecuzione";
+            execute_update($query);
+
+            $query = "UPDATE assegnazioni SET IS_ASSEGNATE=0 WHERE ID_ESECUZIONE=$idEsecuzione";
             execute_update($query);
 
             $con->commit();
