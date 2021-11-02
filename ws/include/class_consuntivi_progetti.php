@@ -9,46 +9,50 @@ define('POST', "2");
 class ConsuntiviProgettiManager {
     
     function run_assegnazione($idProgetto, $dataLimite, &$message) {
+        try {
+            $message->success .= "Lancio assegnazione ore progetto n.$idProgetto alla data " . $dataLimite->format('d/m/Y') . NL;
 
-        $message->success .= "Lancio assegnazione ore progetto n.$idProgetto alla data " . $dataLimite->format('d/m/Y') . NL;
+            $query_monte_ore = "select MONTE_ORE_TOT-ORE_GIA_ASSEGNATE from progetti p where id_progetto=$idProgetto";
+            $monte_ore = select_single_value($query_monte_ore);
+            if ($monte_ore <= 0) {
+                $message->error .= "Monte ore di progetto esaurito!" . NL;
+                return;
+            }
+            $message->success .= "Monte ore residuo $monte_ore ore." . NL;
 
-        $query_monte_ore = "select MONTE_ORE_TOT-ORE_GIA_ASSEGNATE from progetti p where id_progetto=$idProgetto";
-        $monte_ore = select_single_value($query_monte_ore);
-        if ($monte_ore <= 0) {
-            $message->error .= "Monte ore di progetto esaurito!" . NL;
-            return;
-        }
-        $message->success .= "Monte ore residuo $monte_ore ore." . NL;
+            $idEsecuzione = $this->get_id_esecuzione($idProgetto, $message);
 
-        $idEsecuzione = $this->get_id_esecuzione($idProgetto, $message);
+            $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, $message);
 
-        $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, $message);
+            $this->estrazione_lul($idEsecuzione, $message);
 
-        $this->estrazione_lul($idEsecuzione, $message);
+            $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA>=100";
+            $commesse_p = select_column($query);
+            $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA<100";
+            $commesse_c = select_column($query);
 
-        $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA>=100";
-        $commesse_p = select_column($query);
-        $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA<100";
-        $commesse_c = select_column($query);
+            
+            $tot_ore_assegnate = $this->show_commesse($idEsecuzione, $commesse_p, $commesse_c, PRE, $message);
 
+            $lul_ok = $this->verifica_lul($idEsecuzione, $message);
+
+            if (!$lul_ok) {
+                $tot_ore_assegnate = $this->show_commesse($idEsecuzione, $commesse_p, $commesse_c, POST, $message);
+            }
+
+            $message->success .= "<b>Tot. $tot_ore_assegnate ore assegnate</b>". NL;
+            
+            // TODO: salvare anche la ore_consuntivate_progetti
+            $this->apply($idEsecuzione, $tot_ore_assegnate);
+            $message->success .= "Ore assegnate." . NL;
+
+            $this->log($idEsecuzione, $message);
+
+            $message->success .= "Fine." . NL;
         
-        $tot_ore_assegnate = $this->show_commesse($idEsecuzione, $commesse_p, $commesse_c, PRE, $message);
-
-        $lul_ok = $this->verifica_lul($idEsecuzione, $message);
-
-        if (!$lul_ok) {
-            $tot_ore_assegnate = $this->show_commesse($idEsecuzione, $commesse_p, $commesse_c, POST, $message);
+        } catch (Exception $exception) {
+            $message->error .= $exception->getMessage();
         }
-
-        $message->success .= "<b>Tot. $tot_ore_assegnate ore assegnate</b>". NL;
-        
-        // TODO: salvare anche la ore_consuntivate_progetti
-        $this->apply($idEsecuzione, $tot_ore_assegnate);
-        $message->success .= "Ore assegnate." . NL;
-
-        $this->log($idEsecuzione, $message);
-
-        $message->success .= "Fine." . NL;
     }
 
     function get_id_esecuzione($idProgetto, &$message) {
@@ -72,12 +76,16 @@ class ConsuntiviProgettiManager {
         return $idEsecuzione;
     }
 
+    /**
+     * Questa query fa una FULL JOIN di tutte le commesse/persone/date associate al progetto
+     * e poi recupera le ore dalla vista dei residui
+     * 
+     * Salva il risultato nella tabella di lavoro
+     */
     function estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, &$message) {
 
         $d = "DATE('" . $dataLimite->format('Y-m-d') . "')";
 
-        // Questa query fa una FULL JOIN di tutte le commesse/persone/date associate al progetto
-        // e poi recupera le ore dalla vista dei residui
         $query = "INSERT INTO assegnazioni_dettaglio (ID_ESECUZIONE, ID_PROGETTO,
                 COD_COMMESSA, PCT_COMPATIBILITA,
                 MATRICOLA_DIPENDENTE, PCT_IMPIEGO,
@@ -93,12 +101,15 @@ class ConsuntiviProgettiManager {
             FROM progetti_commesse c
             JOIN progetti_persone p ON c.ID_PROGETTO=p.ID_PROGETTO
             JOIN progetti pr ON pr.ID_PROGETTO=p.ID_PROGETTO
-            LEFT JOIN ore_consuntivate_commesse oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
+            LEFT JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
                 AND oc.MATRICOLA_DIPENDENTE=p.MATRICOLA_DIPENDENTE
             WHERE pr.ID_PROGETTO=$idProgetto AND (oc.DATA IS NULL OR (oc.DATA > pr.DATA_ULTIMO_REPORT and oc.DATA < $d))";
         execute_update($query);
     }
 
+    /**
+     * Aggiorna la tabella di lavoro con le informazioni derivanti dai LUL
+     */
     function estrazione_lul($idEsecuzione, &$message) {
         $query = "UPDATE assegnazioni_dettaglio ad
             SET NUM_ORE_LUL=
@@ -109,6 +120,9 @@ class ConsuntiviProgettiManager {
         execute_update($query);
     }
 
+    /**
+     * Carica la tabella di lavoro
+     */
     function get_data($idEsecuzione, &$message) {
         $query = "SELECT * FROM assegnazioni_dettaglio ad
             WHERE ID_ESECUZIONE=$idEsecuzione
@@ -116,6 +130,12 @@ class ConsuntiviProgettiManager {
         return select_list($query);
     }
 
+    /**
+     * Mostra all'utente un report delle varie commesse legate al progetto, e restituisce
+     * il totale delle ore assegnabili
+     * 
+     * @param if_lul puo' valere PRE o POST, a seconda che si voglia tenere conto o meno dei LUL
+     */
     function show_commesse($idEsecuzione, $commesse_p, $commesse_c, $if_lul, &$message) {
         $NOME_CAMPO_ORE_LAVORATE = $if_lul == PRE ? 'NUM_ORE_LAVORATE' : 'NUM_ORE_UTILIZZABILI_LUL';
         $NOME_CAMPO_ORE_COMPATIBILI = $if_lul == PRE ? 'NUM_ORE_COMPATIBILI' : 'NUM_ORE_COMPATIBILI_LUL';
@@ -157,11 +177,14 @@ class ConsuntiviProgettiManager {
         return $tot_di_progetto+$tot_compat;
     }
 
+    /**
+     * Cerca i dipendenti le cui dichiarazioni sforano i LUL, e cerca di "sistemarli".
+     * 
+     * PUNTI DI ATTENZIONE:
+     * (1) controllo la differenza ore solo sul progetto corrente!
+     * (2) trovo una discrepanza tra la somma ore e il LUL, ma non so a quale commessa imputare tale differenza
+     */
     function verifica_lul($idEsecuzione, &$message) {
-
-        // PUNTI DI ATTENZIONE:
-        // (1) controllo la differenza ore solo sul progetto corrente!
-        // (2) trovo una discrepanza tra la somma ore e il LUL, ma non so a quale commessa imputare tale differenza
 
         $query = "SELECT MATRICOLA_DIPENDENTE,DATA,SUM(NUM_ORE_LAVORATE)AS NUM_ORE_LAVORATE, MAX(NUM_ORE_LUL)AS ORE_LUL
             FROM assegnazioni_dettaglio ad
@@ -218,6 +241,9 @@ class ConsuntiviProgettiManager {
         return false;
     }
 
+    /**
+     * Copia le rettifiche dalla tabella di lavoro alla ore_consuntivate_progetti
+     */
     function apply($idEsecuzione, $tot_ore_assegnate) {
         global $con;
 
@@ -241,6 +267,9 @@ class ConsuntiviProgettiManager {
         }
     }
 
+    /**
+     * Elimina le righe dalla tabella ore_consuntivate_progetti
+     */
     function unapply($idEsecuzione) {
         global $con;
 
@@ -259,6 +288,9 @@ class ConsuntiviProgettiManager {
         }
     }
 
+    /**
+     * Stampa la tabellina di lavoro
+     */
     function log($idEsecuzione, &$message) {
         $caricamenti = $this->get_data($idEsecuzione, $message);
         $message->success .= NL . "La seguente tabella viene mostrata a scopo di debug:" . NL;
