@@ -1,3 +1,6 @@
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './_guards/auth.guard';
 import { GeneraDatiTestComponent } from './genera-dati-test/genera-dati-test.component';
 import { ReportCompletoComponent } from './report-completo/report-completo.component';
 import { RaccoltaDateFirmaComponent } from './raccolta-date-firma/raccolta-date-firma.component';
@@ -6,11 +9,10 @@ import { ImportazioneRapportiniComponent } from './importazione-rapportini/impor
 import { ImportazioneLulComponent } from './importazione-lul/importazione-lul.component';
 import { TipologiaSpesaComponent } from './tipologia-spesa/tipologia-spesa.component';
 import { ProgettiComponent } from './progetti/progetti.component';
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
 import { ProgettoDettaglioComponent } from './progetto-dettaglio/progetto-dettaglio.component';
+import { StoricoAssociazioniOreComponent } from './storico-associazioni-ore/storico-associazioni-ore.component';
 import { LoginComponent } from './login/login.component';
-import { AuthGuard } from './_guards/auth.guard';
+
 const routes: Routes = [
   { path: 'login', component: LoginComponent},
   { path: 'progetti', component: ProgettiComponent, canActivate:[AuthGuard]},
@@ -23,6 +25,7 @@ const routes: Routes = [
   { path: 'importazione-ore', component: ImportazioneRapportiniComponent, canActivate:[AuthGuard]},
   { path: 'esportazione-rapportini', component: EsportazioneRapportiniComponent, canActivate:[AuthGuard]},
   { path: 'raccolta-date-firma', component: RaccoltaDateFirmaComponent, canActivate:[AuthGuard]},
+  { path: 'storico-associazioni-ore', component: StoricoAssociazioniOreComponent, canActivate:[AuthGuard]},
   { path: '**', redirectTo: 'progetti' }
 ];
 

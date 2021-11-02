@@ -1,0 +1,43 @@
+<div>
+    <h5 style="margin-bottom: 20px;text-align:center">Storico associazioni ore/progetti</h5>
+</div>
+
+
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+    <!-- Position Column -->
+    <ng-container matColumnDef="idEsecuzione">
+        <th mat-header-cell *matHeaderCellDef> ID </th>
+        <td mat-cell *matCellDef="let element"> {{element.ID_ESECUZIONE}} </td>
+    </ng-container>
+    <ng-container matColumnDef="totOre">
+        <th mat-header-cell *matHeaderCellDef> Tot. ore </th>
+        <td mat-cell *matCellDef="let element"> {{element.TOT_ASSEGNATE}} </td>
+    </ng-container>
+    <ng-container matColumnDef="tmsEsecuzione">
+        <th mat-header-cell *matHeaderCellDef> Timestamp </th>
+        <td mat-cell *matCellDef="let element"> {{element.TMS_ESECUZIONE}} </td>
+    </ng-container>
+    <ng-container matColumnDef="applied">
+        <th mat-header-cell *matHeaderCellDef> Timestamp </th>
+        <td mat-cell *matCellDef="let element"> {{element.IS_ASSEGNATE ? 'true' : 'false'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Azione </th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-raised-button color="primary" (click)="unApply(row)">Un/apply</button>
+        </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+<mat-paginator
+(page)="handlePageEvent($event)"
+[length]="length"
+[pageSize]="pageSize"
+[showFirstLastButtons]="showFirstLastButtons"
+[pageSizeOptions]="pageSizeOptions"
+[pageIndex]="pageIndex">
+</mat-paginator>
