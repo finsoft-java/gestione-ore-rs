@@ -90,14 +90,14 @@ class ConsuntiviProgettiManager {
                 COD_COMMESSA, PCT_COMPATIBILITA,
                 MATRICOLA_DIPENDENTE, PCT_IMPIEGO,
                 DATA, RIF_DOC, RIF_RIGA_DOC,
-                NUM_ORE_LAVORATE, NUM_ORE_COMPATIBILI)
+                NUM_ORE_RESIDUE, NUM_ORE_COMPATIBILI)
             SELECT
                 $idEsecuzione, $idProgetto,
                 c.COD_COMMESSA,c.PCT_COMPATIBILITA,
                 p.MATRICOLA_DIPENDENTE,p.PCT_IMPIEGO,
                 oc.DATA,oc.RIF_DOC,oc.RIF_RIGA_DOC,
-                NVL(oc.NUM_ORE_LAVORATE,0) as NUM_ORE_LAVORATE,
-                FLOOR(p.PCT_IMPIEGO*NVL(oc.NUM_ORE_LAVORATE,0)*4/100)/4 as NUM_ORE_COMPATIBILI
+                NVL(oc.NUM_ORE_RESIDUE,0) as NUM_ORE_RESIDUE,
+                FLOOR(p.PCT_IMPIEGO*NVL(oc.NUM_ORE_RESIDUE,0)*4/100)/4 as NUM_ORE_COMPATIBILI
             FROM progetti_commesse c
             JOIN progetti_persone p ON c.ID_PROGETTO=p.ID_PROGETTO
             JOIN progetti pr ON pr.ID_PROGETTO=p.ID_PROGETTO
@@ -137,7 +137,7 @@ class ConsuntiviProgettiManager {
      * @param if_lul puo' valere PRE o POST, a seconda che si voglia tenere conto o meno dei LUL
      */
     function show_commesse($idEsecuzione, $commesse_p, $commesse_c, $if_lul, &$message) {
-        $NOME_CAMPO_ORE_LAVORATE = $if_lul == PRE ? 'NUM_ORE_LAVORATE' : 'NUM_ORE_UTILIZZABILI_LUL';
+        $NOME_CAMPO_ORE_LAVORATE = $if_lul == PRE ? 'NUM_ORE_RESIDUE' : 'NUM_ORE_UTILIZZABILI_LUL';
         $NOME_CAMPO_ORE_COMPATIBILI = $if_lul == PRE ? 'NUM_ORE_COMPATIBILI' : 'NUM_ORE_COMPATIBILI_LUL';
         $UTILIZZABILI = $if_lul == PRE ? "" : " utilizzabili";
 
@@ -186,15 +186,15 @@ class ConsuntiviProgettiManager {
      */
     function verifica_lul($idEsecuzione, &$message) {
 
-        $query = "SELECT MATRICOLA_DIPENDENTE,DATA,SUM(NUM_ORE_LAVORATE)AS NUM_ORE_LAVORATE, MAX(NUM_ORE_LUL)AS ORE_LUL
+        $query = "SELECT MATRICOLA_DIPENDENTE,DATA,SUM(NUM_ORE_RESIDUE)AS NUM_ORE_RESIDUE, MAX(NUM_ORE_LUL)AS ORE_LUL
             FROM assegnazioni_dettaglio ad
             WHERE ID_ESECUZIONE=$idEsecuzione
             GROUP BY MATRICOLA_DIPENDENTE,DATA
-            HAVING SUM(NUM_ORE_LAVORATE) > MAX(NUM_ORE_LUL)";
+            HAVING SUM(NUM_ORE_RESIDUE) > MAX(NUM_ORE_LUL)";
         $ore_in_eccesso = select_list($query);
 
         $query = "UPDATE assegnazioni_dettaglio ad
-            SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_LAVORATE,
+            SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_RESIDUE,
             NUM_ORE_COMPATIBILI_LUL=NUM_ORE_COMPATIBILI
             WHERE ID_ESECUZIONE=$idEsecuzione";
         execute_update($query);
@@ -205,7 +205,7 @@ class ConsuntiviProgettiManager {
         } else {
             $message->success .= "Verifica LUL" . NL;
             foreach($ore_in_eccesso as $r) {
-                $sum = $r['NUM_ORE_LAVORATE'];
+                $sum = $r['NUM_ORE_RESIDUE'];
                 $lul = $r['ORE_LUL'];
                 $diff = $sum - $lul;
                 $message->success .= "$r[MATRICOLA_DIPENDENTE] il $r[DATA] ha $diff ore in eccesso" . NL;
@@ -219,8 +219,8 @@ class ConsuntiviProgettiManager {
                 $rows = select_list($query);
 
                 foreach($rows as $row) {
-                    $available = $row['NUM_ORE_LAVORATE'];
-                    $newValue = max($row['NUM_ORE_LAVORATE'] - $diff, 0);
+                    $available = $row['NUM_ORE_RESIDUE'];
+                    $newValue = max($row['NUM_ORE_RESIDUE'] - $diff, 0);
 
                     $query = "UPDATE assegnazioni_dettaglio ad
                         SET NUM_ORE_UTILIZZABILI_LUL=$newValue,
@@ -317,7 +317,7 @@ class ConsuntiviProgettiManager {
         if (count($caricamenti) > 0) {
             foreach($caricamenti as $c) {
 
-                if ($c['NUM_ORE_UTILIZZABILI_LUL'] != $c['NUM_ORE_LAVORATE']) {
+                if ($c['NUM_ORE_UTILIZZABILI_LUL'] != $c['NUM_ORE_RESIDUE']) {
                     $c['NUM_ORE_UTILIZZABILI_LUL'] .= '*';
                 }
 
@@ -328,7 +328,7 @@ class ConsuntiviProgettiManager {
                         <TD>$c[MATRICOLA_DIPENDENTE]</TD>
                         <TD>$c[PCT_IMPIEGO]</TD>
                         <TD>$c[DATA]</TD>
-                        <TD>$c[NUM_ORE_LAVORATE]</TD>
+                        <TD>$c[NUM_ORE_RESIDUE]</TD>
                         <TD>$c[NUM_ORE_COMPATIBILI]</TD>
                         <TD>$c[NUM_ORE_LUL]</TD>
                         <TD>$c[NUM_ORE_UTILIZZABILI_LUL]</TD>
