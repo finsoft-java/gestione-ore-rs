@@ -82,12 +82,8 @@ class ProgettiManager {
     }
     
     function elimina($id_progetto) {
-        global $con;
         $sql = "DELETE FROM progetti WHERE id_progetto = '$id_progetto'";  //on delete cascade! (FIXME funziona anche con i questionari?!?)
-        mysqli_query($con, $sql);
-        if ($con ->error) {
-            print_error(500, $con ->error);
-        }
+        execute_update($sql);
     }
 
 }

@@ -54,6 +54,14 @@ export class StoricoAssociazioniOreComponent implements OnInit {
       error => { this.alertService.error(error); }
     );
   }
+
+  elimina(e: Esecuzione) {
+    // e.IS_ASSEGNATE == 0
+    this.esecuzioniService.delete(e.ID_ESECUZIONE).subscribe(
+      response => { this.getAll(0, this.pageSize); },
+      error => { this.alertService.error(error); }
+    );
+  }
   
   handlePageEvent(event: PageEvent) {
     console.log(event);

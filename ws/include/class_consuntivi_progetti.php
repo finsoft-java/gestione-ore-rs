@@ -374,5 +374,13 @@ class ConsuntiviProgettiManager {
         $sql = "SELECT * FROM assegnazioni WHERE id_esecuzione = '$id_esecuzione'";
         return select_single($sql);
     }
+    
+    function elimina_esecuzione($id_esecuzione) {
+        // PRE: esecuzione già disassociata
+        $sql = "DELETE FROM assegnazioni_dettaglio WHERE id_esecuzione = '$id_esecuzione'";
+        execute_update($sql);
+        $sql = "DELETE FROM assegnazioni WHERE id_esecuzione = '$id_esecuzione'";
+        execute_update($sql);
+    }
 }
 ?>
