@@ -244,7 +244,7 @@ class ConsuntiviProgettiManager {
     /**
      * Copia le rettifiche dalla tabella di lavoro alla ore_consuntivate_progetti
      */
-    function apply($idEsecuzione, $tot_ore_assegnate) {
+    function apply($idEsecuzione, $tot_ore_assegnate=null) {
         global $con;
 
         $con->begin_transaction();
@@ -257,7 +257,11 @@ class ConsuntiviProgettiManager {
                      ";
             execute_update($query);
 
-            $query = "UPDATE assegnazioni SET TOT_ASSEGNATE=$tot_ore_assegnate,IS_ASSEGNATE=1 WHERE ID_ESECUZIONE=$idEsecuzione";
+            if ($tot_ore_assegnate != null) {
+                $query = "UPDATE assegnazioni SET TOT_ASSEGNATE=$tot_ore_assegnate,IS_ASSEGNATE=1 WHERE ID_ESECUZIONE=$idEsecuzione";
+            } else {
+                $query = "UPDATE assegnazioni SET IS_ASSEGNATE=1 WHERE ID_ESECUZIONE=$idEsecuzione";
+            }
             execute_update($query);
 
             $con->commit();
@@ -336,6 +340,39 @@ class ConsuntiviProgettiManager {
         }
         $message->success .= "</TBODY>";
         $message->success .= "</TABLE>" . NL;
+    }
+    
+    function get_esecuzioni($skip=null, $top=null, $orderby=null) {
+        global $con;
+        
+        $sql0 = "SELECT COUNT(*) AS cnt ";
+        $sql1 = "SELECT * ";
+        $sql = "FROM assegnazioni p ";
+        
+        if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
+            // avoid SQL-injection
+            $sql .= " ORDER BY $orderby";
+        } else {
+            $sql .= " ORDER BY p.id_esecuzione DESC";
+        }
+
+        $count = select_single_value($sql0 . $sql);
+
+        if ($top != null){
+            if ($skip != null) {
+                $sql .= " LIMIT $skip,$top";
+            } else {
+                $sql .= " LIMIT $top";
+            }
+        }        
+        $oggetti = select_list($sql1 . $sql);
+        
+        return [$oggetti, $count];
+    }
+    
+    function get_esecuzione($id_esecuzione) {
+        $sql = "SELECT * FROM assegnazioni WHERE id_esecuzione = '$id_esecuzione'";
+        return select_single($sql);
     }
 }
 ?>

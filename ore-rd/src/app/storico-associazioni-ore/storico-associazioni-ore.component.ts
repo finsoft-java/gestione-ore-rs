@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Esecuzione } from '../_models';
+import { AlertService } from '../_services/alert.service';
 import { EsecuzioniService } from '../_services/esecuzioni.service';
 
 @Component({
@@ -16,11 +17,11 @@ export class StoricoAssociazioniOreComponent implements OnInit {
   pageIndex = 0;
   pageSizeOptions = [5, 10, 25];
   showFirstLastButtons = true;
-  displayedColumns: string[] = ['idEsecuzione','totOre', 'tmsEsecuzione', 'actions'];
+  displayedColumns: string[] = ['idEsecuzione', 'utente', 'tmsEsecuzione', 'totOre', 'applied', 'actions'];
   dataSource = new MatTableDataSource<Esecuzione>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
 
-  constructor(private esecuzioniService: EsecuzioniService) { }
+  constructor(private esecuzioniService: EsecuzioniService, private alertService: AlertService) { }
 
   ngOnInit(): void {
     this.dataSource.paginator = this.paginator;
@@ -34,19 +35,24 @@ export class StoricoAssociazioniOreComponent implements OnInit {
           this.dataSource = new MatTableDataSource<Esecuzione>(response.data);
         },
         error => {
+          this.alertService.error(error);
         });
   }
 
-  unApply(e: Esecuzione) {
-    if (e.IS_ASSEGNATE == 0) {
+  apply(e: Esecuzione) {
+    // e.IS_ASSEGNATE == 0
       this.esecuzioniService.apply(e.ID_ESECUZIONE).subscribe(
-        response => { this.getAll(0, this.pageSize) }
+        response => { e.IS_ASSEGNATE = response.value.IS_ASSEGNATE; },
+        error => { this.alertService.error(error); }
       );
-    } else {
-      this.esecuzioniService.unapply(e.ID_ESECUZIONE).subscribe(
-        response => { this.getAll(0, this.pageSize) }
-      );
-    }
+  }
+
+  unapply(e: Esecuzione) {
+    // e.IS_ASSEGNATE == 1
+    this.esecuzioniService.unapply(e.ID_ESECUZIONE).subscribe(
+      response => { e.IS_ASSEGNATE = response.value.IS_ASSEGNATE; },
+      error => { this.alertService.error(error); }
+    );
   }
   
   handlePageEvent(event: PageEvent) {
