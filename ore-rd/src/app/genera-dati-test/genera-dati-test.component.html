@@ -1,8 +1,11 @@
 <h5 style="margin-bottom: 30px;text-align:center">
-    Associazione ore ai progetti</h5>
+    Associazione ore commesse</h5>
 <div>
+    <div style="width: 75%;display: block;margin: 0px auto 20px auto; text-align:center" class="fraz2_width">
+        Progetto n. {{ idProgetto }} {{ progetto?.TITOLO }}
+    </div>
 
-    <p style="width: 75%;display: block;margin: 0px auto;" class="fraz2_width">
+    <div style="width: 75%;display: block;margin: 0px auto;" class="fraz2_width">
         <mat-form-field appearance="fill" style="margin-right: 10px;">
             <mat-label>Data</mat-label>
             <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="date" [matDatepicker]="picker">
@@ -13,7 +16,7 @@
             <mat-hint>required</mat-hint>
         </mat-form-field>
         <button mat-raised-button color="primary" (click)="run()">RUN HERE</button>
-    </p>
+    </div>
     
     <div class="alert alert-success" role="alert" *ngIf="message_success">
         <button type="button" class="close" (click)="resetAlertSuccess()">
@@ -29,4 +32,9 @@
         <div [innerHtml]="message_error">
         </div>
     </div>
+
+    <div style="width: 75%;display: block;margin: 0px auto;" class="max_width">
+        <button mat-raised-button color="secondary" (click)="back()">Ritorna al progetto</button>
+    </div>
+    
 </div>

@@ -15,6 +15,8 @@ import { Moment } from 'moment';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
 import { MatCheckboxChange } from '@angular/material/checkbox';
+import { ProgettiService } from '../_services/progetti.service';
+import { Progetto } from '../_models';
 // tslint:disable-next-line:no-duplicate-imports
 
 const moment = _moment;
@@ -47,10 +49,29 @@ export class ReportCompletoComponent implements OnInit {
     singoloMese = true;
     date = new FormControl(moment());
     idProgetto: number = -1;
+    progetto?: Progetto;
 
     constructor(private reportService: ReportService,
+      private progettiService: ProgettiService,
       private alertService: AlertService,
-      private route: ActivatedRoute) { }
+      private route: ActivatedRoute,
+      private router: Router) { }
+
+    ngOnInit(): void {
+      this.route.params.subscribe(params => {
+        this.idProgetto = +params['id_progetto'];
+        this.progettiService.getById(this.idProgetto).subscribe(
+          response => {
+            this.progetto = response.value;
+          },
+          error => {
+            this.alertService.error(error);
+          });
+      },
+        error => {
+        this.alertService.error(error);
+      });
+    }
 
     chosenYearHandler(normalizedYear: Moment) {
       let ctrlValue;
@@ -70,17 +91,7 @@ export class ReportCompletoComponent implements OnInit {
       datepicker.close();
     }
 
-    ngOnInit(): void {
-      this.route.params.subscribe(params => {
-        this.idProgetto = +params['id_progetto']; 
-      },
-        error => {
-        this.alertService.error(error);
-      });
-    }
-
     download() {
-
       let dateRapportini = '';
       if(this.date.value != null){
         dateRapportini = formatDate(this.date.value,"YYYY-MM","en-GB");
@@ -105,5 +116,9 @@ export class ReportCompletoComponent implements OnInit {
       this.singoloMese = $event.checked;
       this.date.setValue(null);
       console.log('HERE', this.date.value)
+    }
+
+    back(){
+      this.router.navigate(['/progetto', this.idProgetto])
     }
 }

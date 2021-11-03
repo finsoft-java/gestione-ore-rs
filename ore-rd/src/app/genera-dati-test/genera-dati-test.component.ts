@@ -13,7 +13,9 @@ import {Moment} from 'moment';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
 import { AlertService } from '../_services/alert.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ProgettiService } from '../_services/progetti.service';
+import { Progetto } from '../_models';
 // tslint:disable-next-line:no-duplicate-imports
 
 const moment = _moment;
@@ -47,10 +49,29 @@ export class GeneraDatiTestComponent implements OnInit {
     message_success = '';
     message_error = '';
     idProgetto: number = -1;
+    progetto?: Progetto;
     
     constructor(private datitestService: DatitestService,
+      private progettiService: ProgettiService,
       private alertService: AlertService,
-      private route: ActivatedRoute) { }
+      private route: ActivatedRoute,
+      private router: Router) { }
+    
+    ngOnInit(): void {
+      this.route.params.subscribe(params => {
+        this.idProgetto = +params['id_progetto'];
+        this.progettiService.getById(this.idProgetto).subscribe(
+          response => {
+            this.progetto = response.value;
+          },
+          error => {
+            this.alertService.error(error);
+          });
+      },
+        error => {
+        this.alertService.error(error);
+      });
+    }
 
     resetAlertSuccess() {    
       this.message_success = '';
@@ -58,15 +79,6 @@ export class GeneraDatiTestComponent implements OnInit {
     
     resetAlertDanger() {
       this.message_error = '';
-    }
-
-    ngOnInit(): void {
-      this.route.params.subscribe(params => {
-        this.idProgetto = +params['id_progetto']; 
-      },
-        error => {
-        this.alertService.error(error);
-      });
     }
 
     run() {
@@ -78,5 +90,9 @@ export class GeneraDatiTestComponent implements OnInit {
           this.message_success = '';
           this.message_error = error;
         });
+    }
+
+    back(){
+      this.router.navigate(['/progetto', this.idProgetto])
     }
 }
