@@ -3,11 +3,13 @@
         <title>Report {{ progetto.ACRONIMO }}</title>
         <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'/>
         <style>
-        .title { font-weight: bold  }
-        .table-calendario { width: 250px; }
+        .title { font-weight: bold; }
         .div_style{ padding: 10px; border: 1px solid; width: 250px; margin: 10px 0px;}
         .calendario { width: 3% }
+        .numbers { text-align: right }
         .rotate { transform: rotate(270deg); }
+        table { border-collapse: collapse; border: 1px solid; width:300px; }
+        td { padding:4px; }
         </style>
     </head>
     <body>
@@ -58,7 +60,7 @@
                 Supervisor:
                 </div>
                 <div class='col-md-8'>
-                {{ progetto.MATRICOLA_SUPERVISOR }} {{ progetto.COGNOME_NOME_SUPERVISOR }}
+                {{ progetto.COGNOME_NOME_SUPERVISOR }}
                 </div>
             </div>
             <div class='row'>
@@ -77,16 +79,18 @@
                 {{ data.budget | number_format(2, ',', '.')  }}&euro;
                 </div>
             </div>
-{% if data.warning %}
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Warning:
+            {% if data.warning %}
+                <div class='row'>
+                    <div class='col-md-2 title'>
+                    Warning:
+                    </div>
+                    <div class='col-md-8'>
+                    {{ data.warning }}
+                    </div>
                 </div>
-                <div class='col-md-8'>
-                {{ data.warning }}
-                </div>
-            </div>
-{% endif %}
+            {% endif %}
+
+<!-- ============================================================================ -->
 
             <h3>{{ titolo_consuntivi }}</h3>
             <div class='row'>
@@ -112,89 +116,72 @@
                 </div>
             </div>
 
-{% if completo %}
+<!-- ============================================================================ -->
+
+            {% if completo %}
+
             <h3>Dettaglio ore</h3>
-{% for m in consuntivi.dettagli %}
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Dipendente:
-                </div>
-                <div class='col-md-8'>
-                {{m.COGNOME_NOME }}
-                </div>
-            </div>
-                
-{% if m.WP %}
-<div class='div_style'>
+<!-- Ci è stato chiesto di mostrare solo il totale, non il dettaglio per date -->
+
             <table class='table-calendario'>
-                <tr>
-                    <td class='title calendario'>
-                    </td>    
-                    <td class='calendario'>
-                    
-                    </td>
-                </tr>
-{% for WP in m.WP %}
-                <tr>
-                    <td class='title calendario'>
-                    {{ WP.TITOLO }}
-                    </td>
-{% for d in WP.DETTAGLI %}
-    {% if(d.DATA is null) %}
-                    <td class='calendario title'>
-                    {{ d.NUM_ORE_LAVORATE }}&nbsp;
-                    </td>
-    {% endif %}
-{% endfor %}
-                </tr>
-{% endfor %}
+                <thead>
+                    <tr>
+                        <th class="title col-md-6">Dipendente</th>
+                        <th class="title col-md-6 numbers">Numero ore</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dip in consuntivi.dettagli %}
+                    <tr>
+                        <td class="">{{dip.COGNOME_NOME }}</td>
+                        <td class="numbers">
+                            {% for d in dip.DETTAGLI %}
+                                {% if(d.DATA is null) %}
+                                    {{ d.NUM_ORE_LAVORATE }}&nbsp;
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-            </div>
-{% endif %}
-{% endfor %}
-{% endif %}
-{% if completo %}
+
+            {% endif %}
+
+<!-- ============================================================================ -->
+
+            {% if completo %}
 
             <h3>Dettaglio costi</h3>
-{% for m in consuntivi.dettagli %}
-            <div class='row'>
-                <div class='col-md-2 title'>
-                Dipendente:
-                </div>
-                <div class='col-md-8'>
-                {{m.COGNOME_NOME }}
-                </div>
-            </div>
-                
-{% if m.WP %}
-    <div class='div_style'>
+            <!-- Ci è stato chiesto di mostrare solo il totale, non il dettaglio per date -->
+
             <table class='table-calendario'>
-                <tr>
-                    <td class='title calendario'>
-                    </td>
-                    <td class='calendario'>
-                    
-                    </td>
-                </tr>
-{% for WP in m.WP %}
-                <tr>
-                    <td class='title calendario'>
-                    {{ WP.TITOLO }}
-                    </td>
-{% for d in WP.DETTAGLI %}
-    {% if(d.DATA is null) %}
-                    <td class='calendario title'>
-                    {{ d.COSTO | number_format(2, ',', '.') }}&nbsp;
-                    </td>
-    {% endif %}
-{% endfor %}
-                </tr>
-{% endfor %}
+                <thead>
+                    <tr>
+                        <th class="title col-md-6">Dipendente</th>
+                        <th class="title col-md-6 numbers">Costo &euro;</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dip in consuntivi.dettagli %}
+                    <tr>
+                        <td class="">{{dip.COGNOME_NOME }}</td>
+                        <td class="numbers">
+                            {% for d in dip.DETTAGLI %}
+                                {% if(d.DATA is null) %}
+                                    {{ d.COSTO | number_format(2, ',', '.') }}&nbsp;
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-    </div>
-{% endif %}
-{% endfor %}
-{% endif %}
-        </div>
+
+            {% endif %}
+
+<!-- ============================================================================ -->
+
+        </div> <!-- container-->
     </body>
 </html>

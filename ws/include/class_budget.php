@@ -31,7 +31,7 @@ class ReportBudgetManager {
     }
 
     function get_consuntivi_matricola($id_progetto, $matricola, $anno=null) {
-        $sql = "SELECT c.DATA, c.NUM_ORE_LAVORATE, (c.NUM_ORE_LAVORATE * c.COSTO_ORARIO) as COSTO " .
+        $sql = "SELECT c.DATA, c.NUM_ORE_LAVORATE, c.COSTO " .
                 "FROM ore_consuntivate_progetti c " .
                 "WHERE ID_PROGETTO=$id_progetto AND MATRICOLA_DIPENDENTE='$matricola'";
         if (!empty($anno) and !empty($mese)) {
@@ -88,7 +88,7 @@ class ReportBudgetManager {
             $lista_matricole[$key][] = [ 'MATRICOLA_DIPENDENTE' => 'TOT.', 'DETTAGLI' => $totali_per_data];
         }
         
-        // var_dump($lista_matricole); die();
+        //var_dump($lista_matricole); die();
         return $lista_matricole;
     }
 
@@ -108,17 +108,17 @@ class ReportBudgetManager {
         }
         
         // ELIMINO I COSTI PREESISTENTI
-        $query = "UPDATE ore_consuntivate_progetti SET COSTO_ORARIO=NULL WHERE ID_PROGETTO=$idprogetto AND DATA >= '$dataInizio' AND DATA <= '$dataFine' ";
+        $query = "UPDATE ore_consuntivate_progetti SET COSTO_ORARIO=NULL,COSTO=NULL WHERE ID_PROGETTO=$idprogetto AND DATA >= '$dataInizio' AND DATA <= '$dataFine' ";
         
         // AGGIORNO I COSTI
         $costi = $panthera->getMatriceCosti($dataInizio, $dataFine, $tipoCosto);
         foreach ($costi as $c) {
-            $query = "UPDATE ore_consuntivate_progetti SET COSTO_ORARIO=" . $c["COSTO"] . " WHERE ID_PROGETTO=$idprogetto AND MATRICOLA_DIPENDENTE='" . $c["ID_RISORSA"] . "' ";
+            $query = "UPDATE ore_consuntivate_progetti SET COSTO_ORARIO=$c[COSTO],COSTO=NUM_ORE_LAVORATE*$c[COSTO] WHERE ID_PROGETTO=$idprogetto AND MATRICOLA_DIPENDENTE='$c[ID_RISORSA]' ";
             if (!empty($c["DATA_COSTO"])) {
-                $query .= "AND DATA >= '" . $c["DATA_COSTO"] . "' ";
+                $query .= "AND DATA >= '$c[DATA_COSTO]' ";
             }
             if (!empty($c["DATA_FINE_COSTO"])) {
-                $query .= "AND DATA <= '" . $c["DATA_FINE_COSTO"] . "' ";
+                $query .= "AND DATA <= '$c[DATA_FINE_COSTO]' ";
             }
             execute_update($query);
         }
@@ -136,10 +136,9 @@ class ReportBudgetManager {
         return $msg;
     }
     
-    /**
+    /*
     Genera report PDF
     ATTUALMENTE NON USATA!!!!!!!!!!!!!!!!!!!!!!!!
-    */
     function sendReport($idprogetto, $anno, $mese, $completo) {
         // anno e mese sono facoltativi
         // see http://www.fpdf.org/en/doc/index.php
@@ -247,7 +246,7 @@ class ReportBudgetManager {
         }
         
         $pdf->Output('Budget.pdf', 'I'); // Download
-    }
+    }*/
     
     function getReportData($idprogetto, $anno, $mese, $completo) {
 
@@ -329,7 +328,7 @@ class ReportBudgetManager {
 
         $loader = new FilesystemLoader(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'templates');
         $twig = new Environment($loader);
-        //print_r($context);
+        // print_r($context['consuntivi']['dettagli']); die();
         return $twig->render('report-budget.twig', $context);
     }
 
