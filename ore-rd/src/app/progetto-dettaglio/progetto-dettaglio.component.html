@@ -2,23 +2,20 @@
 <div *ngIf="progetto">
     <div>
 
-        <div style="text-align:right">
+        <div style="text-align:right;margin-bottom:15px">
             <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" style="margin-right:10px" (click)="associaOre()">Associa ore</button>
             <button *ngIf="progetto.ID_PROGETTO" mat-raised-button color="primary" (click)="report()">Report</button>
         </div>
 
-        <div>
-            <p style="width: 75%; display: block; margin: 0px auto;" class="max_width">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="max_width">
                 <mat-form-field appearance="fill">
                     <mat-label>Titolo</mat-label>
                     <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.TITOLO" placeholder="Inserisci il Titolo">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
-            </p>
         </div>
 
-        <div>
-            <p style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Acronimo</mat-label>
                     <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ACRONIMO" placeholder="Inserisci l'acronimo">
@@ -30,18 +27,14 @@
                     <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.GRANT_NUMBER" placeholder="Inserisci il Grant Number">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
-            </p>
         </div>
-        <div>
-            <p style="width: 75%; display: block; margin: 0px auto;" class="max_width">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="max_width">
                 <mat-form-field appearance="fill" style="float:right">
                     <mat-label>Abstract</mat-label>
                     <textarea matInput maxlength="2000" [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ABSTRACT" placeholder="Inserisci l'Abstract"></textarea>
                 </mat-form-field>
-            </p>
         </div>
-        <div>
-            <p style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Data Inizio</mat-label>
                     <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_INIZIO" [matDatepicker]="picker">
@@ -60,18 +53,14 @@
                     <mat-datepicker #picker2></mat-datepicker>
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
-            </p>
         </div>
-        <div>
-            <p style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
                     <mat-label class="label_mat">Matricola Supervisor</mat-label>
                     <ng-select [items]="allMatricole" 
                         bindLabel="NOME" 
                         bindValue="MATRICOLA" 
                         [(ngModel)]="progetto.MATRICOLA_SUPERVISOR">
                     </ng-select>
-                
-            </p>
         </div>
     </div>
 
@@ -79,8 +68,7 @@
         <div>
             <h5 style="margin-bottom: 20px;text-align:center">Budget</h5>
         </div>
-        <div>
-            <p style="width: 75%; display: block; margin: 0px auto;" class="fraz3_width">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz3_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Monte Ore Totale</mat-label>
                     <input matInput [value]="this.progetto.MONTE_ORE_TOT|number:'1.0'"
@@ -102,10 +90,8 @@
                     placeholder="Inserisci un numero">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
-            </p>
         </div>
-        <div>
-            <p style="width: 75%; display: block; margin: 0px auto;" class="fraz3_width">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz3_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Mesi uomo totali</mat-label>
                     <input matInput disabled [value]="monteOreMensile(progetto.MONTE_ORE_TOT)|number:'1.2'">
@@ -121,7 +107,6 @@
                     <input matInput disabled [value]="monteOreMensile(progetto.OBIETTIVO_BUDGET_ORE)|number:'1.2'">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
-            </p>
         </div>
         <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
             <mat-form-field appearance="fill">
@@ -137,7 +122,7 @@
         <div>
             <h5 style="margin-bottom: 20px;text-align:center">Storico</h5>
         </div>
-        <p style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
             <mat-form-field appearance="fill" style="margin-right: 10px;">
                 <mat-label>Data Ultimo report</mat-label>
                 <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_ULTIMO_REPORT" [matDatepicker]="picker3">
@@ -154,7 +139,7 @@
                 placeholder="Inserisci un numero">
                 <mat-hint>required</mat-hint>
             </mat-form-field>
-        </p>
+        </div>
     </div>
 
 <!-- BOTTONE SALVA -->
@@ -255,10 +240,10 @@
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="note">
-                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 150px;">Note</th>
+                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 300px;">Note</th>
                     <td mat-cell *matCellDef="let element">
                         <label *ngIf="!element.isEditable"> {{element.NOTE}} </label>
-                        <div style="display: block;margin: 0px auto;width: 150px;">
+                        <div style="display: block;margin: 0px auto;width: 300px;">
                             <input class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.NOTE">
                         </div>
                     </td>
@@ -309,10 +294,10 @@
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="note">
-                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 150px;">Note</th>
+                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 300px;">Note</th>
                     <td mat-cell *matCellDef="let element">
                         <label *ngIf="!element.isEditable"> {{element.NOTE}} </label>
-                        <div style="display: block;margin: 0px auto;width: 150px;">
+                        <div style="display: block;margin: 0px auto;width: 50%;">
                             <input class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.NOTE">
                         </div>
                     </td>
@@ -347,9 +332,9 @@
         <div style="margin-bottom:30px;">
             <div>
                 <h5 style="margin-bottom: 20px;text-align:center">Persone assegnate</h5>
-                <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgettoPersona()">Nuovo</button>
-                <button mat-raised-button color="secondary" style="float: right;margin: 0px 0px 20px 0px;" (click)="ripartisciPercentuali()">Ripartisci perc.</button>
-                <div *ngIf="!isPercentuali100" class="alertPercentuali" style="float: right;margin: 0px 0px 20px 0px;">Attenzione la somma delle percentuali deve essere 100%&nbsp;</div>
+                <button mat-raised-button color="primary" style="float: right;margin: 0px 10px 20px 0px;" (click)="nuovoProgettoPersona()">Nuovo</button>
+                <button mat-raised-button color="secondary" style="float: right;margin: 0px 10px 20px 0px;" (click)="ripartisciPercentuali()">Ripartisci perc.</button>
+                <div *ngIf="!isPercentuali100" class="alertPercentuali" style="float: right;margin: 0px 10px 20px 0px;line-height: 34px;">Attenzione la somma delle percentuali deve essere 100%&nbsp;</div>
             </div>
             <table mat-table [dataSource]="dataSourcePersone" class="mat-elevation-z8">
                 <ng-container matColumnDef="nome">
