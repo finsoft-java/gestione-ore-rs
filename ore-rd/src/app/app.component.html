@@ -1,28 +1,28 @@
 <mat-drawer-container class="example-container" autosize>
     <mat-drawer #drawer class="example-sidenav" mode="side">
         <nav style="padding:15px;">
-            <button mat-menu-item (click)="router_frontend.navigate(['progetti']); drawer.toggle()">
+            <button mat-menu-item (click)="router_frontend.navigate(['progetti'])">
                 <span>Progetti</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['tipologie-spesa']); drawer.toggle()">
+            <button mat-menu-item (click)="router_frontend.navigate(['tipologie-spesa'])">
                 <span>Tipologia Spesa</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['importazione-lul']); drawer.toggle()" >
+            <button mat-menu-item (click)="router_frontend.navigate(['importazione-lul'])" >
                 <span>Importazione LUL</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['importazione-ore']); drawer.toggle()">
+            <button mat-menu-item (click)="router_frontend.navigate(['importazione-ore'])">
                 <span>Importazione Ore dipendenti</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['storico-associazioni-ore']); drawer.toggle()">
+            <button mat-menu-item (click)="router_frontend.navigate(['storico-associazioni-ore'])">
                 <span>Storico associazioni</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['esportazione-rapportini']); drawer.toggle()">
+            <button mat-menu-item (click)="router_frontend.navigate(['esportazione-rapportini'])">
                 <span>Esportazione Rapportini</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['raccolta-date-firma']); drawer.toggle()">
+            <button mat-menu-item (click)="router_frontend.navigate(['raccolta-date-firma'])">
                 <span>Raccolta date firma</span>
             </button>
-            <button mat-menu-item (click)="logout(); drawer.toggle()">
+            <button mat-menu-item (click)="logout()">
                 <span>Logout</span>
             </button>
         </nav>
