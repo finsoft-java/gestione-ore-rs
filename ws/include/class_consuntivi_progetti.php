@@ -243,17 +243,20 @@ class ConsuntiviProgettiManager {
 
     /**
      * Copia le rettifiche dalla tabella di lavoro alla ore_consuntivate_progetti
+     * La prima volta bisogna chiamarlo con tot_ore_assegnate != null
      */
     function apply($idEsecuzione, $tot_ore_assegnate=null) {
         global $con;
 
         $con->begin_transaction();
         try {
-            $query ="INSERT INTO ore_consuntivate_progetti(ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, NUM_ORE_LAVORATE, ID_ESECUZIONE)
-                     SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, SUM(NUM_ORE_COMPATIBILI_LUL), $idEsecuzione
+            $query ="INSERT INTO ore_consuntivate_progetti(ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, 
+                        COD_COMMESSA, RIF_DOC, RIF_RIGA_DOC, NUM_ORE_LAVORATE, ID_ESECUZIONE)
+                     SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA,
+                        COD_COMMESSA, RIF_DOC, RIF_RIGA_DOC, SUM(NUM_ORE_COMPATIBILI_LUL), $idEsecuzione
                      FROM assegnazioni_dettaglio ad
                      WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_COMPATIBILI_LUL>0
-                     GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA
+                     GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, COD_COMMESSA, RIF_DOC, RIF_RIGA_DOC
                      ";
             execute_update($query);
 
