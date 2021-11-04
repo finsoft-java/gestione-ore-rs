@@ -1,12 +1,5 @@
 <?php
 
-// Prevedo le seguenti richieste:
-// OPTIONS
-// GET Progetti  -> lista di tutti i progetti
-// GET Progetti?id_progetto=xxx  -> singolo progetto
-// PUT Progetti -> creazione nuovo progetto
-// POST Progetti -> update progetto esistente
-// DELETE Progetti?id_progetto=xxx -> elimina progetto esistente
 include("include/all.php");
 $con = connect();
 
@@ -15,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-require_logged_user_JWT();
+// require_logged_user_JWT();
 
 $id_progetto = isset($_GET['id_progetto']) ? $con->escape_string($_GET['id_progetto']) : null;
 $cod_commessa = isset($_GET['cod_commessa']) ? $con->escape_string($_GET['cod_commessa']) : null;
@@ -34,15 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(404, 'Not found');
     }
 
-    $lista = $progettiCommesseManager->downloadGiustificativo($id_progetto, $cod_commessa);
+    $lista = $progettiCommesseManager->download_giustificativo($id_progetto, $cod_commessa);
         
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // UPLOAD ==========================================================
-    if (!isset($_FILES["file"]["name"]) or count($_FILES["file"]["name"]) == 0) {
+    if (!isset($_FILES["file"]["name"])) {
         print_error(400, "Missing uploaded file.");
     }
-    $origfilename =  $_FILES["file"]["name"][0];
-    $tmpfilename =  $_FILES["file"]["tmp_name"][0];
+    $origfilename =  $_FILES["file"]["name"];
+    $tmpfilename =  $_FILES["file"]["tmp_name"];
 
     if (!$id_progetto) {
         print_error(400, 'Missing id_progetto');
@@ -55,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(404, 'Not found');
     }
 
-    $progettiCommesseManager->uploadGiustificativo($id_progetto, $cod_commessa, $tmpfilename, $origfilename);
+    $progettiCommesseManager->upload_giustificativo($id_progetto, $cod_commessa, $tmpfilename, $origfilename);
 
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     //==========================================================
@@ -70,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(404, 'Not found');
     }
 
-    $progettiCommesseManager->eliminaGiustificativo($id_progetto, $cod_commessa);
+    $progettiCommesseManager->elimina_giustificativo($id_progetto, $cod_commessa);
     
 } else {
     //==========================================================

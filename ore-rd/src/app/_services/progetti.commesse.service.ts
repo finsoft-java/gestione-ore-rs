@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { ListBean, ValueBean, ProgettoCommessa } from '../_models';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class ProgettiCommesseService {
@@ -25,7 +26,7 @@ export class ProgettiCommesseService {
 
     downloadGiustificativo(idProgetto: number, codCommessa: string) {
         return this.http.get(environment.wsUrl + `Giustificativo.php?id_progetto=${idProgetto}&cod_commessa=${codCommessa}`, {
-          responseType: 'arraybuffer'
+            responseType: 'arraybuffer'
         });
     }
 

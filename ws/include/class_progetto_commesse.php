@@ -7,7 +7,7 @@ class ProgettiCommesseManager {
     function get_commesse($id_progetto) {
         $arr = array();
         $sql = "SELECT ID_PROGETTO,COD_COMMESSA,PCT_COMPATIBILITA,NOTE,GIUSTIFICATIVO_FILENAME,
-                CASE WHEN GIUSTIFICATIVO IS NULL THEN 'false' ELSE 'true' END AS HAS_GIUSTIFICATIVO
+                CASE WHEN GIUSTIFICATIVO IS NULL THEN 'N' ELSE 'Y' END AS HAS_GIUSTIFICATIVO
                 FROM progetti_commesse WHERE id_progetto = '$id_progetto'";
         $arr = select_list($sql);
         return $arr;
@@ -65,16 +65,17 @@ class ProgettiCommesseManager {
     }
     
     function download_giustificativo($id_progetto, $codCommessa) {
-        $sql = "SELECT GIUSTIFICATIVO_FILENAME, LENGTH(GIUSTIFICATIVO), GIUSTIFICATIVO
+        $sql = "SELECT GIUSTIFICATIVO_FILENAME, LENGTH(GIUSTIFICATIVO) AS LEN, GIUSTIFICATIVO
+                FROM progetti_commesse
                 WHERE id_progetto = '$id_progetto' AND cod_commessa = '$codCommessa'";
-        list($origfilename, $size, $content) = execute_query($sql);
-        $type = mime_content_type($origfilename); // works if file does not exists?
-        header("Content-length: $size");
-        header("Content-type: $type");
-        header("Content-Disposition: attachment; filename=$origfilename");
+        $result = select_single($sql);
+
+        header("Content-length: $result[LEN]");
+        // header("Content-type: ???");
+        header("Content-Disposition: attachment; filename=$result[GIUSTIFICATIVO_FILENAME]");
         ob_clean();
         flush();
-        echo $content;
+        echo $result["GIUSTIFICATIVO"];
     }
     
     function elimina_giustificativo($id_progetto, $codCommessa) {

@@ -272,7 +272,8 @@ export class ProgettoDettaglioComponent implements OnInit {
       ID_PROGETTO: this.progetto.ID_PROGETTO, 
       COD_COMMESSA: null, 
       PCT_COMPATIBILITA: compat ? 50 : 100,
-      HAS_GIUSTIFICATIVO: false,
+      HAS_GIUSTIFICATIVO: 'N',
+      GIUSTIFICATIVO_FILENAME: null,
       NOTE: null,
       isEditable: true,
       isInsert: true
@@ -538,7 +539,8 @@ export class ProgettoDettaglioComponent implements OnInit {
     console.log('Going to upload:', file);
     if (file) {
       this.progettiCommesseService.uploadGiustificativo(p.ID_PROGETTO!, p.COD_COMMESSA!, file).subscribe(response => {
-        p.HAS_GIUSTIFICATIVO = true;
+        p.HAS_GIUSTIFICATIVO = 'Y';
+        p.GIUSTIFICATIVO_FILENAME = file.name;
         this.alertService.success('Giustificativo caricato con successo');
       },
       error => {
@@ -550,7 +552,8 @@ export class ProgettoDettaglioComponent implements OnInit {
   deleteGiustificativo(p: ProgettoCommessa) {
     // TODO Some warning?
     this.progettiCommesseService.deleteGiustificativo(p.ID_PROGETTO!, p.COD_COMMESSA!).subscribe(response => {
-      p.HAS_GIUSTIFICATIVO = false;
+      p.HAS_GIUSTIFICATIVO = 'N';
+      p.GIUSTIFICATIVO_FILENAME = null;
       this.alertService.success('Giustificativo eliminato con successo');
     },
     error => {
@@ -560,18 +563,18 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   downloadGiustificativo(p: ProgettoCommessa) {
     this.progettiCommesseService.downloadGiustificativo(p.ID_PROGETTO!, p.COD_COMMESSA!).subscribe(response => {
-      this.downloadFile(response);
+      this.downloadFile(response, p.GIUSTIFICATIVO_FILENAME!);
     },
     error => {
       this.alertService.error(error);
     });
   }
   
-  downloadFile(data: any) {
-      const blob = new Blob([data], { type: 'applicazion/zip' });
+  downloadFile(data: any, filename: string) {
+      const blob = new Blob([data] /* , { type: 'applicazion/zip' } */ );
       const url = window.URL.createObjectURL(blob);
       var anchor = document.createElement("a");
-      anchor.download = "Esportazione.zip";
+      anchor.download = filename;
       anchor.href = url;
       anchor.click();
   }
