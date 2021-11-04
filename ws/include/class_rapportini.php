@@ -416,6 +416,7 @@ class RapportiniManager {
             $message->error .= 'Il file deve contenere almeno una riga (header esclusa).<br/>';
             return;
         }
+        $contatore = 0;
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
     
             if(!isset($spreadSheetAry[$curRow][0])) {
@@ -442,10 +443,11 @@ class RapportiniManager {
                 $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA,RIF_DOC,RIF_RIGA_DOC,NUM_ORE_LAVORATE,TMS_CARICAMENTO) " .
                             "VALUES('$codCommessa','$matricola','$dataDoc','$nrDoc','$rigaDoc','$numOre',CURRENT_TIMESTAMP)";
                 execute_update($query);
+                ++$contatore;
             }
 
         }
-        $message->success .= 'Caricamento Effettuato correttamente.</br>';
+        $message->success .= "Caricamento Effettuato correttamente. $contatore righe caricate.</br>";
     }
 
     function getMeseProgetto($anno, $mese, $data_inizio_progetto) {
