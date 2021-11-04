@@ -25,6 +25,8 @@ class ProgettiCommesseManager {
     function crea($json_data) {
         global $con;
 
+        $this->controllo_pct_commessa($json_data);
+
         $sql = insert("progetti_commesse", [
                                     "ID_PROGETTO" => $json_data->ID_PROGETTO,
                                     "COD_COMMESSA" => $con->escape_string($json_data->COD_COMMESSA),
@@ -38,6 +40,8 @@ class ProgettiCommesseManager {
     function aggiorna($progetto, $json_data) {
         global $con;
 
+        $this->controllo_pct_commessa($json_data);
+
         $sql = update("progetti_commesse", [
                                     "PCT_COMPATIBILITA" => $json_data->PCT_COMPATIBILITA,
                                     "NOTE" => $con->escape_string($json_data->NOTE)
@@ -49,6 +53,28 @@ class ProgettiCommesseManager {
         return $this->get_commessa($json_data->ID_PROGETTO, $json_data->COD_COMMESSA);
     }
     
+    function controllo_pct_commessa($json_data) {
+        if ($json_data->PCT_COMPATIBILITA >= 100) {
+            // commessa di progetto
+            $sql = "SELECT count(*)
+                    FROM progetti_commesse
+                    WHERE id_progetto <> '$json_data->ID_PROGETTO' and cod_commessa='$json_data->COD_COMMESSA'";
+            $count = select_single_value($sql);
+            if ($count > 0) {
+                print_error(400, "La commessa $json_data->COD_COMMESSA &egrave; gi&agrave; utilizzata in altri progetti");
+            }
+        } else {
+            // commessa compatibile
+            $sql = "SELECT sum(PCT_COMPATIBILITA)
+                    FROM progetti_commesse
+                    WHERE id_progetto <> '$json_data->ID_PROGETTO' and cod_commessa='$json_data->COD_COMMESSA'";
+            $pct = select_single_value($sql);
+            if ($pct +  $json_data->PCT_COMPATIBILITA > 100.01) {
+                print_error(400, "La commessa $json_data->COD_COMMESSA &egrave; gi&agrave; utilizzata al $pct% in altri progetti");
+            }
+        }
+    }
+
     function elimina($id_progetto, $codCommessa) {
         $sql = "DELETE FROM progetti_commesse WHERE id_progetto = '$id_progetto' AND cod_commessa = '$codCommessa'";
         execute_update($sql);
