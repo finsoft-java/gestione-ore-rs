@@ -231,29 +231,30 @@
             </div>
             <table mat-table [dataSource]="dataSourceCommesseDiProgetto" class="mat-elevation-z8">
                 <ng-container matColumnDef="codCommessa">
-                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 80px;">Codice commessa</th>
+                    <th mat-header-cell *matHeaderCellDef style="width: 20%;">Codice commessa</th>
                     <td mat-cell *matCellDef="let element">
                         <label *ngIf="!element.isInsert"> {{element.COD_COMMESSA}} </label>
-                        <div style="display: block;margin: 0px auto;width: 85px;">
+                        <div style="display: block;margin: 0px auto;width: 100%;">
                             <input  class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isInsert" matInput [(ngModel)]="element.COD_COMMESSA">
                         </div>
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="note">
-                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 300px;">Note</th>
+                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 60%;">Note</th>
                     <td mat-cell *matCellDef="let element">
                         <label *ngIf="!element.isEditable"> {{element.NOTE}} </label>
-                        <div style="display: block;margin: 0px auto;width: 300px;">
-                            <input class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.NOTE">
+                        <div style="display: block;margin: 0px auto;width: 100%;">
+                            <textarea class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;height:100px" *ngIf="element.isEditable" matInput [(ngModel)]="element.NOTE" >
+                            </textarea>
                         </div>
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="actions">
                     <th mat-header-cell *matHeaderCellDef> Azioni </th>
-                    <td mat-cell *matCellDef="let row" style="width:200px">
-                        <button *ngIf="!row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="getRecordCommessa(row)">Modifica</button>
+                    <td mat-cell *matCellDef="let row" style="width:20%;">
+                        <button *ngIf="!row.isEditable" mat-raised-button color="primary" (click)="getRecordCommessa(row)">Modifica</button>
                         <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteCommessa(row)">Elimina</button>
-                        <button *ngIf="row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="salvaModificaCommessa(row)">Salva</button>
+                        <button *ngIf="row.isEditable" mat-raised-button color="primary" (click)="salvaModificaCommessa(row)">Salva</button>
                         <button *ngIf="row.isEditable" mat-raised-button color="secondary" (click)="annullaModificaCommessa(row)">Annulla</button>
                     </td>
                 </ng-container>
@@ -272,48 +273,55 @@
         <div style="margin-bottom:30px;">
             <div>
                 <h5 style="margin-bottom: 20px;text-align:center">Commesse compatibili</h5>
-                <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgettoCommessa(true)">Nuovo</button>
+                <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" 
+                (click)="nuovoProgettoCommessa(true)">Nuovo</button>
             </div>
             <table mat-table [dataSource]="dataSourceCommesseCompatibili" class="mat-elevation-z8">
                 <ng-container matColumnDef="codCommessa">
-                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 80px;">Codice commessa</th>
+                    <th mat-header-cell *matHeaderCellDef style="width: 15%;">Codice commessa</th>
                     <td mat-cell *matCellDef="let element">
                         <label *ngIf="!element.isInsert"> {{element.COD_COMMESSA}} </label>
-                        <div style="display: block;margin: 0px auto;width: 85px;">
-                            <input  class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isInsert" matInput [(ngModel)]="element.COD_COMMESSA">
+                        <div style="display: block;margin: 0px auto;width: 100%;">
+                            <input  class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;"
+                            *ngIf="element.isInsert" matInput [(ngModel)]="element.COD_COMMESSA">
                         </div>
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="pctCompatibilita">
-                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 150px;">Perc. compatibilità</th>
+                    <th mat-header-cell *matHeaderCellDef style="width: 10%">Perc. compatibilità</th>
                     <td mat-cell *matCellDef="let element">
                         <label *ngIf="!element.isEditable"> {{element.PCT_COMPATIBILITA}} </label>
-                        <div style="display: block;margin: 0px auto;width: 50px;">
-                            <input type="number" class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.PCT_COMPATIBILITA">
+                        <div style="display: block;margin: 0px auto;width: 100%;">
+                            <input type="number" class="form-control"
+                            style="width: 100%;max-width: 100px;margin-right: 15px;border: 1px solid;"
+                            *ngIf="element.isEditable" matInput [(ngModel)]="element.PCT_COMPATIBILITA">
                         </div>
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="note">
-                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 300px;">Note</th>
+                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;width: 40%;">Note</th>
                     <td mat-cell *matCellDef="let element">
                         <label *ngIf="!element.isEditable"> {{element.NOTE}} </label>
-                        <div style="display: block;margin: 0px auto;width: 50%;">
-                            <input class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;" *ngIf="element.isEditable" matInput [(ngModel)]="element.NOTE">
+                        <div style="display: block;margin: 0px auto;width: 100%;">
+                            <textarea class="form-control"
+                            style="width: 100%;margin-right: 15px;border: 1px solid;height:100px"
+                            *ngIf="element.isEditable" matInput [(ngModel)]="element.NOTE">
+                            </textarea>
                         </div>
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="giustificativo">
-                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 150px;">Giustificativo</th>
+                    <th mat-header-cell *matHeaderCellDef style="width: 10%;">Giustificativo</th>
                     <td mat-cell *matCellDef="let element">
                         <label > (TODO) </label>
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef> Azioni </th>
-                    <td mat-cell *matCellDef="let row" style="width:200px">
-                        <button *ngIf="!row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="getRecordCommessa(row)">Modifica</button>
+                    <th mat-header-cell *matHeaderCellDef style="width:20%;"> Azioni </th>
+                    <td mat-cell *matCellDef="let row">
+                        <button *ngIf="!row.isEditable" mat-raised-button color="primary" (click)="getRecordCommessa(row)">Modifica</button>
                         <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteCommessa(row)">Elimina</button>
-                        <button *ngIf="row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="salvaModificaCommessa(row)">Salva</button>
+                        <button *ngIf="row.isEditable" mat-raised-button color="primary" (click)="salvaModificaCommessa(row)">Salva</button>
                         <button *ngIf="row.isEditable" mat-raised-button color="secondary" (click)="annullaModificaCommessa(row)">Annulla</button>
                     </td>
                 </ng-container>
@@ -369,9 +377,9 @@
                 <ng-container matColumnDef="actions">
                     <th mat-header-cell *matHeaderCellDef> Azioni </th>
                     <td mat-cell *matCellDef="let row" style="width:200px">
-                        <button *ngIf="!row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="getRecordPersona(row)">Modifica</button>
+                        <button *ngIf="!row.isEditable" mat-raised-button color="primary" (click)="getRecordPersona(row)">Modifica</button>
                         <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteChangePersona(row)">Elimina</button>
-                        <button *ngIf="row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="salvaModificaPersona(row)">Salva</button>
+                        <button *ngIf="row.isEditable" mat-raised-button color="primary" (click)="salvaModificaPersona(row)">Salva</button>
                         <button *ngIf="row.isEditable" mat-raised-button color="secondary" (click)="annullaModificaPersona(row)">Annulla</button>
                     </td>
                 </ng-container>
