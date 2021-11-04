@@ -42,6 +42,7 @@ import localeIt from '@angular/common/locales/it';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { StoricoAssociazioniOreComponent } from './storico-associazioni-ore/storico-associazioni-ore.component';
+import { ProgettoCommesseComponent } from './progetto-commesse/progetto-commesse.component';
 
 
 registerLocaleData(localeIt);
@@ -61,7 +62,8 @@ registerLocaleData(localeIt);
     LoginComponent,
     AlertComponent,
     TabellaDateFirmaComponent,
-    StoricoAssociazioniOreComponent
+    StoricoAssociazioniOreComponent,
+    ProgettoCommesseComponent
   ],
   imports: [
     HttpClientModule,

@@ -3,7 +3,7 @@ import { ProgettiPersoneService } from '../_services/progetti.persone.service';
 import { ProgettiSpesaService } from './../_services/progetti.spesa.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
-import { Progetto, ProgettoCommessa, ProgettoPersona, ProgettoSpesa, Tipologia } from './../_models';
+import { Progetto, ProgettoPersona, ProgettoSpesa, Tipologia } from './../_models';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProgettiService } from './../_services/progetti.service';
 import { AlertService } from './../_services/alert.service';
@@ -13,7 +13,6 @@ import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/mater
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
-import { ProgettiCommesseService } from '../_services/progetti.commesse.service';
 
 export const MY_FORMATS = {
   parse: {
@@ -45,16 +44,13 @@ export class ProgettoDettaglioComponent implements OnInit {
   progetto_old!: Progetto;
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
   displayedColumnsPersone: string[] = ['nome', 'matricola', 'pctImpiego', 'actions'];
-  displayedColumnsCommesseP: string[] = ['codCommessa', 'note', 'actions'];
-  displayedColumnsCommesseC: string[] = ['codCommessa', 'pctCompatibilita', 'giustificativo', 'note', 'actions'];
+  
   dataSource = new MatTableDataSource<ProgettoSpesa>();
   dataSourcePersone = new MatTableDataSource<ProgettoPersona>();
-  dataSourceCommesseDiProgetto = new MatTableDataSource<ProgettoCommessa>();
-  dataSourceCommesseCompatibili = new MatTableDataSource<ProgettoCommessa>();
   allTipologie: Tipologia[] = [];
   allMatricole: {MATRICOLA: string, NOME: string}[] = [];
   allTipiCosto: {ID_TIPO_COSTO: string, DESCRIZIONE: string}[] = [];
-  id_progetto!: number|null;
+  idProgetto!: number|null;
   errore_stringa = '';
   MONTE_ORE_MENSILE_PREVISTO = 1720 / 12; // 143.3333
   isPercentuali100 = true;
@@ -63,17 +59,16 @@ export class ProgettoDettaglioComponent implements OnInit {
     private progettiService: ProgettiService,
     private tipologiaSpesaService: TipologiaSpesaService,
     private progettiSpesaService: ProgettiSpesaService,   
-    private progettiPersoneService: ProgettiPersoneService,   
-    private progettiCommesseService: ProgettiCommesseService,
+    private progettiPersoneService: ProgettiPersoneService,
     private alertService: AlertService,
     private route: ActivatedRoute,
     private router: Router) {
 
       this.projectSubscription = this.route.params.subscribe(params => {
         if (params['id_progetto'] == 'nuovo') {
-          this.id_progetto = null; 
+          this.idProgetto = null; 
         } else {
-          this.id_progetto = +params['id_progetto']; 
+          this.idProgetto = +params['id_progetto']; 
         }
       },
         error => {
@@ -83,7 +78,7 @@ export class ProgettoDettaglioComponent implements OnInit {
 
 
   ngOnInit(): void {
-    if (this.id_progetto != null) {
+    if (this.idProgetto != null) {
       this.getProgetto();
       this.getProgettoSpesa();
       this.getTipoSpesa();
@@ -92,12 +87,11 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
     this.getMatricole();
     this.getSupervisor();
-    this.getProgettoCommesse();
     this.getProgettoPersone();
   }
   
   getProgettoPersone(): void {
-    this.progettiPersoneService.getById(this.id_progetto!)
+    this.progettiPersoneService.getById(this.idProgetto!)
       .subscribe(response => {
         this.dataSourcePersone = new MatTableDataSource(response.data);
         this.checkIsPercentuali100();
@@ -106,26 +100,9 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.dataSourcePersone = new MatTableDataSource();
       });
   }
-  
-  getProgettoCommesse(): void {
-    this.progettiCommesseService.getById(this.id_progetto!)
-      .subscribe(response => {
-        let progettoCommesseCompatibili: ProgettoCommessa[] = [];
-        let progettoCommesseDiProgetto: ProgettoCommessa[] = [];
-        if (response.data != null) {
-          progettoCommesseDiProgetto = response.data.filter(x => x.PCT_COMPATIBILITA == 100);
-          progettoCommesseCompatibili = response.data.filter(x => x.PCT_COMPATIBILITA < 100);
-        }
-        this.dataSourceCommesseCompatibili = new MatTableDataSource(progettoCommesseCompatibili);
-        this.dataSourceCommesseDiProgetto = new MatTableDataSource(progettoCommesseDiProgetto);
-      },
-      error => {
-        this.dataSourcePersone = new MatTableDataSource();
-      });
-  }
 
   getProgettoSpesa(): void {
-    this.progettiSpesaService.getById(this.id_progetto!)
+    this.progettiSpesaService.getById(this.idProgetto!)
       .subscribe(response => {
         this.dataSource = new MatTableDataSource(response.data);
       },
@@ -135,7 +112,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   getProgetto(): void {
-    this.progettiService.getById(this.id_progetto!)
+    this.progettiService.getById(this.idProgetto!)
       .subscribe(response => {
         this.progetto = new Progetto;
         this.progetto = response.value;
@@ -156,16 +133,6 @@ export class ProgettoDettaglioComponent implements OnInit {
   getRecordPersona(p: ProgettoPersona) {
     if (this.dataSourcePersone.data) {
       this.dataSourcePersone.data.forEach(x => x.isEditable = false);
-    }
-    p.isEditable = true;
-  }
-
-  getRecordCommessa(p: ProgettoCommessa) {
-    if (this.dataSourceCommesseDiProgetto.data) {
-      this.dataSourceCommesseDiProgetto.data.forEach(x => x.isEditable = false);
-    }
-    if (this.dataSourceCommesseCompatibili.data) {
-      this.dataSourceCommesseCompatibili.data.forEach(x => x.isEditable = false);
     }
     p.isEditable = true;
   }
@@ -215,7 +182,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     if (this.progetto.DATA_INIZIO)
       this.progetto.DATA_INIZIO = formatDate(this.progetto.DATA_INIZIO,"YYYY-MM-dd","en-GB");
     
-    if (this.id_progetto == null) {
+    if (this.idProgetto == null) {
       this.progettiService.insert(this.progetto)
       .subscribe(response => {
         this.alertService.success("Progetto inserito con successo");
@@ -266,29 +233,6 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.dataSourcePersone.data = array;
   } 
 
-  nuovoProgettoCommessa(compat: boolean = false) {  
-    let nuovo: ProgettoCommessa;
-    nuovo = {
-      ID_PROGETTO: this.progetto.ID_PROGETTO, 
-      COD_COMMESSA: null, 
-      PCT_COMPATIBILITA: compat ? 50 : 100,
-      HAS_GIUSTIFICATIVO: 'N',
-      GIUSTIFICATIVO_FILENAME: null,
-      NOTE: null,
-      isEditable: true,
-      isInsert: true
-    };
-    if (compat) {
-      const array = this.dataSourceCommesseCompatibili.data;
-      array.push(nuovo);
-      this.dataSourceCommesseCompatibili.data = array;
-    } else {
-      const array = this.dataSourceCommesseDiProgetto.data;
-      array.push(nuovo);
-      this.dataSourceCommesseDiProgetto.data = array;
-    }
-  } 
-
   deleteChange(prgSpesa: ProgettoSpesa) {
     if (prgSpesa.ID_PROGETTO != null && prgSpesa.ID_SPESA != null) {
       this.progettiSpesaService.delete(prgSpesa.ID_PROGETTO, prgSpesa.ID_SPESA)
@@ -306,18 +250,6 @@ export class ProgettoDettaglioComponent implements OnInit {
       this.progettiPersoneService.delete(p.ID_PROGETTO, p.MATRICOLA_DIPENDENTE)
       .subscribe(response => {
         this.getProgettoPersone();
-      },
-      error => {
-        this.alertService.error(error);
-      });
-    }
-  }
-
-  deleteCommessa(p: ProgettoCommessa) {
-    if (p.COD_COMMESSA != null && p.ID_PROGETTO != null) {
-      this.progettiCommesseService.delete(p.ID_PROGETTO, p.COD_COMMESSA)
-      .subscribe(response => {
-        this.getProgettoCommesse();
       },
       error => {
         this.alertService.error(error);
@@ -363,10 +295,6 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.getProgettoPersone();
   }
 
-  annullaModificaCommessa(row: ProgettoCommessa) {
-    this.getProgettoCommesse();
-  }
-
   salvaModificaPersona(p: ProgettoPersona) {    
     console.log(p);
 
@@ -390,40 +318,6 @@ export class ProgettoDettaglioComponent implements OnInit {
           this.alertService.success("Matricola aggiornata con successo");
           p.isEditable = false;
           this.checkIsPercentuali100();
-        },
-        error => {
-          this.alertService.error(error);
-        });
-      }
-  }
-
-  salvaModificaCommessa(p: ProgettoCommessa) {    
-    console.log(p);
-
-    if (p.isInsert) {
-        this.progettiCommesseService.insert(p)
-        .subscribe(response => {
-          this.alertService.success("Commessa inserita con successo");
-          if (p.PCT_COMPATIBILITA == 100) {
-            this.dataSourceCommesseDiProgetto.data.splice(-1, 1);
-            this.dataSourceCommesseDiProgetto.data.push(response.value);
-            this.dataSourceCommesseDiProgetto.data = this.dataSourceCommesseDiProgetto.data;
-          } else {
-            this.dataSourceCommesseCompatibili.data.splice(-1, 1);
-            this.dataSourceCommesseCompatibili.data.push(response.value);
-            this.dataSourceCommesseCompatibili.data = this.dataSourceCommesseCompatibili.data;
-          }
-          p.isEditable = false;
-        },
-        error => {
-          this.alertService.error(error);
-        });
-      
-    } else {
-        this.progettiCommesseService.update(p)
-        .subscribe(response => {
-          this.alertService.success("Commessa aggiornata con successo");
-          p.isEditable = false;
         },
         error => {
           this.alertService.error(error);
@@ -531,51 +425,5 @@ export class ProgettoDettaglioComponent implements OnInit {
     let sum = 0.0;
     this.dataSourcePersone.data.forEach(x => sum += parseFloat((<any>x.PCT_IMPIEGO!)));
     this.isPercentuali100 = (Math.abs(sum - 100) <= this.TOLLERANZA);
-  }
-
-  uploadGiustificativo(p: ProgettoCommessa, event: any) {
-    console.log(event);
-    let file = event.target.files && event.target.files[0];
-    console.log('Going to upload:', file);
-    if (file) {
-      this.progettiCommesseService.uploadGiustificativo(p.ID_PROGETTO!, p.COD_COMMESSA!, file).subscribe(response => {
-        p.HAS_GIUSTIFICATIVO = 'Y';
-        p.GIUSTIFICATIVO_FILENAME = file.name;
-        this.alertService.success('Giustificativo caricato con successo');
-      },
-      error => {
-        this.alertService.error(error);
-      });
-    }
-  }
-
-  deleteGiustificativo(p: ProgettoCommessa) {
-    // TODO Some warning?
-    this.progettiCommesseService.deleteGiustificativo(p.ID_PROGETTO!, p.COD_COMMESSA!).subscribe(response => {
-      p.HAS_GIUSTIFICATIVO = 'N';
-      p.GIUSTIFICATIVO_FILENAME = null;
-      this.alertService.success('Giustificativo eliminato con successo');
-    },
-    error => {
-      this.alertService.error(error);
-    });
-  }
-
-  downloadGiustificativo(p: ProgettoCommessa) {
-    this.progettiCommesseService.downloadGiustificativo(p.ID_PROGETTO!, p.COD_COMMESSA!).subscribe(response => {
-      this.downloadFile(response, p.GIUSTIFICATIVO_FILENAME!);
-    },
-    error => {
-      this.alertService.error(error);
-    });
-  }
-  
-  downloadFile(data: any, filename: string) {
-      const blob = new Blob([data] /* , { type: 'applicazion/zip' } */ );
-      const url = window.URL.createObjectURL(blob);
-      var anchor = document.createElement("a");
-      anchor.download = filename;
-      anchor.href = url;
-      anchor.click();
   }
 }

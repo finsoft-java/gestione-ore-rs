@@ -1,0 +1,83 @@
+.fraz2_width>.mat-form-field {
+    width: calc(50% - 5px);
+}
+.fraz3_width>.mat-form-field {
+    width: calc(33% - 6px);
+}
+.max_width>.mat-form-field {
+    width: 100%;
+}
+
+.max_width,
+.fraz2_width,
+.fraz3_width {
+    margin-bottom: 15px !important;
+}
+
+label {
+    margin-bottom: 0px;
+}
+
+.mat-paginator {
+    background: initial;
+}
+
+table {
+    width: 100%;
+}
+
+.mat-header-cell {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.mat-cell {
+    text-align: center;
+    justify-content: center;
+}
+
+.mat-dialog-container {
+    padding: 0px
+}
+::ng-deep .ng-select .ng-select-container {
+    color: #333;
+    background-color:rgba(0, 0, 0, 0.04);
+    border-radius: 0px;
+    border: 0px solid #ccc;
+    min-height: 36px;
+    height: 59px;
+    align-items: center;
+}
+
+::ng-deep .ng-select.ng-select-single .ng-select-container {
+    height: 36px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.87);
+}
+
+::ng-deep .ng-select.ng-select-opened>.ng-select-container {
+    background:rgba(0, 0, 0, 0.04);
+    border-color: 1px solid rgba(0, 0, 0, 0.87);
+}
+.label_mat {
+    font-size: 12px;
+    width: 100%;
+    float: left;
+    background-color: rgba(0, 0, 0, 0.04);
+    padding: 10px 10px 0px 10px;color:rgba(0, 0, 0, 0.6)
+}
+
+.alertPercentuali {
+    font-weight: bold;
+    color: red;
+}
+
+th.mat-header-cell:last-of-type, td.mat-cell:last-of-type {
+    padding-right: 0px; /*Material lo mette a 24px */
+}
+
+td>button, td>*>button{
+    width: 80px;
+    padding: 0px;
+    margin: 5px 5px 5px 5px; /* così spazia anche se va su due righe */
+}
