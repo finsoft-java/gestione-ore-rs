@@ -10,6 +10,10 @@
         <th mat-header-cell *matHeaderCellDef> ID </th>
         <td mat-cell *matCellDef="let element"> {{element.ID_ESECUZIONE}} </td>
     </ng-container>
+    <ng-container matColumnDef="idProgetto">
+        <th mat-header-cell *matHeaderCellDef> Progetto </th>
+        <td mat-cell *matCellDef="let element"> {{element.ID_PROGETTO}} </td>
+    </ng-container>
     <ng-container matColumnDef="totOre">
         <th mat-header-cell *matHeaderCellDef> Tot. ore </th>
         <td mat-cell *matCellDef="let element"> {{element.TOT_ASSEGNATE}} </td>

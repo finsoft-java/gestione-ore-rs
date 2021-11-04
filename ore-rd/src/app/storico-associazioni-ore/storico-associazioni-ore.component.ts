@@ -17,7 +17,7 @@ export class StoricoAssociazioniOreComponent implements OnInit {
   pageIndex = 0;
   pageSizeOptions = [5, 10, 25];
   showFirstLastButtons = true;
-  displayedColumns: string[] = ['idEsecuzione', 'utente', 'tmsEsecuzione', 'totOre', 'applied', 'actions'];
+  displayedColumns: string[] = ['idEsecuzione', 'idProgetto', 'utente', 'tmsEsecuzione', 'totOre', 'applied', 'actions'];
   dataSource = new MatTableDataSource<Esecuzione>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
 
