@@ -47,6 +47,7 @@ export class ProgettoCommessa {
     public COD_COMMESSA: string|null = null,
     public PCT_COMPATIBILITA: number = 0,
     public NOTE: string|null,
+    public HAS_GIUSTIFICATIVO: boolean = false,
     public isEditable: boolean = false,
     public isInsert: boolean = false
     ) {}   

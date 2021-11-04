@@ -162,20 +162,20 @@
         <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
             <ng-container matColumnDef="descrizione">
-                <th mat-header-cell *matHeaderCellDef> Descrizione </th>
+                <th mat-header-cell *matHeaderCellDef style="width:30%"> Descrizione </th>
                 <td mat-cell *matCellDef="let element">
                     <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}} </label>
-                    <div style="display: block;margin: 0px auto;width: 250px;">
+                    <div style="display: block;margin: 0px auto;">
                         <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
                     </div>
                 </td>
             </ng-container>
 
             <ng-container matColumnDef="importo">
-                <th mat-header-cell *matHeaderCellDef> Importo &euro;</th>
+                <th mat-header-cell *matHeaderCellDef style="width:20%"> Importo &euro;</th>
                 <td mat-cell *matCellDef="let element">
                     <label *ngIf="!element.isEditable"> {{element.IMPORTO|number:'1.2'}} </label>
-                    <div style="display: block;margin: 0px auto;width: 250px;">
+                    <div style="display: block;margin: 0px auto;">
                         <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput 
                         [value]="element.IMPORTO|number:'1.2'"
                         (change)="setImportoFmt($event, element)"
@@ -184,10 +184,10 @@
                 </td>
             </ng-container>
             <ng-container matColumnDef="tipologia">
-                <th mat-header-cell *matHeaderCellDef> Tipologia </th>
+                <th mat-header-cell *matHeaderCellDef style="width:20%"> Tipologia </th>
                 <td mat-cell *matCellDef="let element">
                     <label *ngIf="!element.isEditable"> {{element.TIPOLOGIA.DESCRIZIONE}}  </label>
-                    <div style="display: block;margin: 0px auto;width: 250px;">
+                    <div style="display: block;margin: 0px auto;">
                         <mat-form-field appearance="fill" *ngIf="element.isEditable" style="margin-top: 1.34375em;">
                             <mat-label>Tipologia Spesa</mat-label>
                             <mat-select [(ngModel)]="element.TIPOLOGIA.ID_TIPOLOGIA">
@@ -196,16 +196,14 @@
                         </mat-form-field>
                     </div>
                 </td>
-
-
             </ng-container>
 
             <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef> Azioni </th>
+                <th mat-header-cell *matHeaderCellDef style="width:30%"> Azioni </th>
                 <td mat-cell *matCellDef="let row">
-                    <button *ngIf="!row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="getRecord(row)">Modifica</button>
+                    <button *ngIf="!row.isEditable" mat-raised-button color="primary" (click)="getRecord(row)">Modifica</button>
                     <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteChange(row)">Elimina</button>
-                    <button *ngIf="row.isEditable" mat-raised-button color="primary" style="margin-right:10px;" (click)="salvaModifica(row)">Salva</button>
+                    <button *ngIf="row.isEditable" mat-raised-button color="primary" (click)="salvaModifica(row)">Salva</button>
                     <button *ngIf="row.isEditable" mat-raised-button color="secondary" (click)="annullaModifica(row)">Annulla</button>
                 </td>
             </ng-container>
@@ -312,8 +310,15 @@
                 </ng-container>
                 <ng-container matColumnDef="giustificativo">
                     <th mat-header-cell *matHeaderCellDef style="width: 10%;">Giustificativo</th>
-                    <td mat-cell *matCellDef="let element">
-                        <label > (TODO) </label>
+                    <td mat-cell *matCellDef="let row">
+                        <div *ngIf="!row.isCreating">
+                            <button (click)="fileInput.click()" class="spaced-button" mat-raised-button color="primary">
+                                <span>Upload...</span>
+                                <input #fileInput type="file" (change)="uploadGiustificativo(row,$event)" style="display:none;" />
+                            </button>
+                            <button *ngIf="!row.HAS_GIUSTIFICATIVO" mat-raised-button color="primary" class="spaced-button" (click)="downloadGiustificativo(row)" >Delete</button>
+                            <button *ngIf="!row.HAS_GIUSTIFICATIVO" mat-raised-button color="warn" class="spaced-button" (click)="deleteGiustificativo(row)" >Delete</button>
+                        </div>
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="actions">
