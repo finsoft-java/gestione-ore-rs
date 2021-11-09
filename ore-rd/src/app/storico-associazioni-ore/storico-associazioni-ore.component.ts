@@ -17,7 +17,7 @@ export class StoricoAssociazioniOreComponent implements OnInit {
   pageSize = 10;
   pageIndex = 0;
   pageSizeOptions = [5, 10, 25];
-  showFirstLastButtons = true;
+  isCaricamentoEliminabile = false;
   
   dataSource = new MatTableDataSource<Esecuzione>();
   displayedColumns: string[] = ['idEsecuzione', 'idProgetto', 'utente', 'tmsEsecuzione', 'totOre', 'applied', 'actions'];
@@ -38,18 +38,28 @@ export class StoricoAssociazioniOreComponent implements OnInit {
         .subscribe(response => {
           this.length = response.count;
           this.dataSource = new MatTableDataSource<Esecuzione>(response.data);
+          this.checkIsCaricamentoEliminabile();
         },
         error => {
           this.alertService.error(error);
+          this.checkIsCaricamentoEliminabile();
         });
     this.caricamentiService.getLast()
         .subscribe(response => {
           this.length = response.count;
           this.dataSource2 = new MatTableDataSource<Caricamento>(response.data);
+          this.checkIsCaricamentoEliminabile();
         },
         error => {
           this.alertService.error(error);
+          this.checkIsCaricamentoEliminabile();
         });
+  }
+
+  checkIsCaricamentoEliminabile() {
+    const lastCar = this.dataSource2.data && this.dataSource2.data.length > 0 ? this.dataSource2.data[0] : null;
+    const lastEsec = this.dataSource.data && this.dataSource.data.length > 0 ? this.dataSource.data[0] : null;
+    this.isCaricamentoEliminabile = lastEsec != null && lastCar != null && lastEsec.TMS_ESECUZIONE < lastCar.TMS_ESECUZIONE;
   }
 
   elimina(e: Esecuzione) {

@@ -477,13 +477,46 @@ class RapportiniManager {
         }
         return $id;
     }
+    
+    function get_caricamenti($skip=null, $top=null, $orderby=null) {
+        global $con;
+        
+        $sql0 = "SELECT COUNT(*) AS cnt ";
+        $sql1 = "SELECT * ";
+        $sql = "FROM caricamenti p ";
+        
+        if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
+            // avoid SQL-injection
+            $sql .= " ORDER BY $orderby";
+        } else {
+            $sql .= " ORDER BY p.id_caricamento DESC";
+        }
+
+        $count = select_single_value($sql0 . $sql);
+
+        if ($top != null){
+            if ($skip != null) {
+                $sql .= " LIMIT $skip,$top";
+            } else {
+                $sql .= " LIMIT $top";
+            }
+        }        
+        $oggetti = select_list($sql1 . $sql);
+        
+        return [$oggetti, $count];
+    }
+    
+    function get_caricamento($id_esecuzione) {
+        $sql = "SELECT * FROM caricamenti WHERE id_caricamento = '$id_esecuzione'";
+        return select_single($sql);
+    }
 
     function elimina_caricamento($idCaricamento) {
         // SI PUO' FARE SOLO SE NON E' GIA' STATO UTILIZZATO
         $query = "DELETE FROM ore_consuntivate_commesse WHERE ID_CARICAMENTO=$idCaricamento ";
         execute_update($query);
 
-        $query = "DELETE FROM caricaemnti WHERE ID_CARICAMENTO=$idCaricamento ";
+        $query = "DELETE FROM caricamenti WHERE ID_CARICAMENTO=$idCaricamento ";
         execute_update($query);
     }
 
