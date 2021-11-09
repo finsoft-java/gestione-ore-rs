@@ -6,3 +6,4 @@ export * from './tipocosto';
 export * from './ListBean';
 export * from './ValueBean';
 export * from './esecuzione';
+export * from './caricamento';

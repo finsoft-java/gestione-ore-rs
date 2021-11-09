@@ -1,7 +1,13 @@
 <div>
-    <h5 style="margin-bottom: 20px;text-align:center">Storico associazioni ore/progetti</h5>
+    <h5 style="margin-bottom: 20px;text-align:center">Eliminazione di caricamenti e/o associazioni</h5>
 </div>
 
+<p>
+    In questa pagina &egrave; possibile eliminare l'ultima "Associazione ore" lanciata, e l'ultimo "Caricamento ore dipendenti"
+    effettuato, quest'ultimo solo a patto che le ore non siano già state associate a qualche progetto.
+</p>
+
+<p><b>Ultima associazione</b></p>
 
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
@@ -34,20 +40,40 @@
     <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef> Azioni </th>
         <td mat-cell *matCellDef="let row">
-            <button *ngIf="row.IS_ASSEGNATE == '0'" mat-raised-button color="primary" (click)="apply(row)">Apply</button>
-            <button *ngIf="row.IS_ASSEGNATE == '1'" mat-raised-button color="secondary" (click)="unapply(row)">Unapply</button>
-            <button [style.visibility]="row.IS_ASSEGNATE == '0' ? 'visible' : 'hidden'" mat-raised-button color="warn" (click)="elimina(row)">Elimina</button>
+            <button mat-raised-button color="warn" (click)="elimina(row)">Elimina</button>
         </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
 
-<mat-paginator
-(page)="handlePageEvent($event)"
-[length]="length"
-[pageSize]="pageSize"
-[showFirstLastButtons]="showFirstLastButtons"
-[pageSizeOptions]="pageSizeOptions"
-[pageIndex]="pageIndex">
-</mat-paginator>
+<!-- ====================================================================================== -->
+<hr/>
+
+<p><b>Ultimo caricamento</b></p>
+
+<table mat-table [dataSource]="dataSource2" class="mat-elevation-z8">
+
+    <!-- Position Column -->
+    <ng-container matColumnDef="idCaricamento">
+        <th mat-header-cell *matHeaderCellDef> ID </th>
+        <td mat-cell *matCellDef="let element"> {{element.ID_CARICAMENTO}} </td>
+    </ng-container>
+    <ng-container matColumnDef="utente">
+        <th mat-header-cell *matHeaderCellDef> Utente lancio </th>
+        <td mat-cell *matCellDef="let element"> {{element.UTENTE}} </td>
+    </ng-container>
+    <ng-container matColumnDef="tmsEsecuzione">
+        <th mat-header-cell *matHeaderCellDef> Timestamp lancio </th>
+        <td mat-cell *matCellDef="let element"> {{element.TMS_ESECUZIONE}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Azioni </th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-raised-button color="warn" (click)="eliminaCaricamento(row)">Elimina</button>
+        </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns2"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns2;"></tr>
+</table>

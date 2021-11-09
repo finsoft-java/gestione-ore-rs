@@ -243,9 +243,8 @@ class ConsuntiviProgettiManager {
 
     /**
      * Copia le rettifiche dalla tabella di lavoro alla ore_consuntivate_progetti
-     * La prima volta bisogna chiamarlo con tot_ore_assegnate != null
      */
-    function apply($idEsecuzione, $tot_ore_assegnate=null) {
+    function apply($idEsecuzione, $tot_ore_assegnate) {
         global $con;
 
         $con->begin_transaction();
@@ -265,27 +264,6 @@ class ConsuntiviProgettiManager {
             } else {
                 $query = "UPDATE assegnazioni SET IS_ASSEGNATE=1 WHERE ID_ESECUZIONE=$idEsecuzione";
             }
-            execute_update($query);
-
-            $con->commit();
-        } catch (mysqli_sql_exception $exception) {
-            $mysqli->rollback();        
-            throw $exception;
-        }
-    }
-
-    /**
-     * Elimina le righe dalla tabella ore_consuntivate_progetti
-     */
-    function unapply($idEsecuzione) {
-        global $con;
-
-        $con->begin_transaction();
-        try {
-            $query ="DELETE FROM ore_consuntivate_progetti WHERE ID_ESECUZIONE=$idEsecuzione";
-            execute_update($query);
-
-            $query = "UPDATE assegnazioni SET IS_ASSEGNATE=0 WHERE ID_ESECUZIONE=$idEsecuzione";
             execute_update($query);
 
             $con->commit();
@@ -378,11 +356,14 @@ class ConsuntiviProgettiManager {
         return select_single($sql);
     }
     
-    function elimina_esecuzione($id_esecuzione) {
-        // PRE: esecuzione già disassociata
-        $sql = "DELETE FROM assegnazioni_dettaglio WHERE id_esecuzione = '$id_esecuzione'";
+    function elimina_esecuzione($idEsecuzione) {
+        $query ="DELETE FROM ore_consuntivate_progetti WHERE ID_ESECUZIONE=$idEsecuzione";
+        execute_update($query);
+        $query = "UPDATE assegnazioni SET IS_ASSEGNATE=0 WHERE ID_ESECUZIONE=$idEsecuzione";
+        execute_update($query);
+        $sql = "DELETE FROM assegnazioni_dettaglio WHERE ID_ESECUZIONE = '$idEsecuzione'";
         execute_update($sql);
-        $sql = "DELETE FROM assegnazioni WHERE id_esecuzione = '$id_esecuzione'";
+        $sql = "DELETE FROM assegnazioni WHERE ID_ESECUZIONE = '$idEsecuzione'";
         execute_update($sql);
     }
 }

@@ -25,7 +25,7 @@ const routes: Routes = [
   { path: 'importazione-ore', component: ImportazioneRapportiniComponent, canActivate:[AuthGuard]},
   { path: 'esportazione-rapportini', component: EsportazioneRapportiniComponent, canActivate:[AuthGuard]},
   { path: 'raccolta-date-firma', component: RaccoltaDateFirmaComponent, canActivate:[AuthGuard]},
-  { path: 'storico-associazioni-ore', component: StoricoAssociazioniOreComponent, canActivate:[AuthGuard]},
+  { path: 'regressione', component: StoricoAssociazioniOreComponent, canActivate:[AuthGuard]},
   { path: '**', redirectTo: 'progetti' }
 ];
 

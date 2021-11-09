@@ -24,7 +24,7 @@ $orderby = isset($_GET['orderby']) ? $con->escape_string($_GET['orderby']) : nul
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     //==========================================================
-    [$objects, $count] = $consuntiviProgettiManager->get_esecuzioni($top, $skip, $orderby);
+    [$objects, $count] = $consuntiviProgettiManager->get_esecuzioni($skip, $top, $orderby);
         
     header('Content-Type: application/json');
     echo json_encode(['data' => $objects, 'count' => $count]);
