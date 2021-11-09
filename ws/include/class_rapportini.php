@@ -409,13 +409,16 @@ class RapportiniManager {
 
         $spreadSheetAry = $excelSheet->toArray();
         
-        // per ora ipotizzo che ci sia la header
+        // salto la header
         $firstRow = 1;
         $numRows = count($spreadSheetAry);
         if ($numRows <= 1) {
             $message->error .= 'Il file deve contenere almeno una riga (header esclusa).<br/>';
             return;
         }
+
+        $idCaricamento = $this->nuovo_caricamento();
+
         $contatore = 0;
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
     
@@ -447,13 +450,41 @@ class RapportiniManager {
             }
             $dataDoc = $dataDocDt->format('Y-m-d');
 
-            $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA,RIF_SERIE_DOC,RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA,NUM_ORE_LAVORATE,TMS_CARICAMENTO) " .
-                        "VALUES('$codCommessa','$matricola','$dataDoc','$serieDoc','$nrDoc','$codAtv','$codSottoComm','$numOre',CURRENT_TIMESTAMP)";
+            $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA,RIF_SERIE_DOC,RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA,NUM_ORE_LAVORATE,ID_CARICAMENTO) " .
+                        "VALUES('$codCommessa','$matricola','$dataDoc','$serieDoc','$nrDoc','$codAtv','$codSottoComm','$numOre',$idCaricamento)";
             execute_update($query);
             ++$contatore;
         }
 
         $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
+    }
+
+    function nuovo_caricamento() {
+        global $con, $logged_user;
+        
+        $con->begin_transaction();
+        try {
+            $query_max = "SELECT NVL(MAX(ID_CARICAMENTO),0)+1 FROM caricamenti ";
+            $id = select_single_value($query_max);
+
+            $query ="INSERT INTO caricamenti (ID_CARICAMENTO, UTENTE) VALUES ('$id', '$logged_user->nome_utente')";
+            execute_update($query);
+
+            $con->commit();
+        } catch (mysqli_sql_exception $exception) {
+            $mysqli->rollback();        
+            throw $exception;
+        }
+        return $id;
+    }
+
+    function elimina_caricamento($idCaricamento) {
+        // SI PUO' FARE SOLO SE NON E' GIA' STATO UTILIZZATO
+        $query = "DELETE FROM ore_consuntivate_commesse WHERE ID_CARICAMENTO=$idCaricamento ";
+        execute_update($query);
+
+        $query = "DELETE FROM caricaemnti WHERE ID_CARICAMENTO=$idCaricamento ";
+        execute_update($query);
     }
 
     function getMeseProgetto($anno, $mese, $data_inizio_progetto) {
