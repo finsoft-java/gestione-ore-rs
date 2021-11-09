@@ -423,31 +423,37 @@ class RapportiniManager {
                 continue;
             }
 
-            $nrDoc = $spreadSheetAry[$curRow][0];
-            $rigaDoc = $spreadSheetAry[$curRow][1];
-            $dataDoc = $spreadSheetAry[$curRow][2];
-            $matricola = $spreadSheetAry[$curRow][3];
-            $codCommessa = $spreadSheetAry[$curRow][4];
-            $numOre = $spreadSheetAry[$curRow][5];
+            $serieDoc = $spreadSheetAry[$curRow][COL_SERIE_DOC];
+            $nrDoc = $spreadSheetAry[$curRow][COL_NUMERO_DOC];
+            $dataDoc = $spreadSheetAry[$curRow][COL_DATA_DOC];
+            $matricola = $spreadSheetAry[$curRow][COL_MATRICOLA];
+            $codCommessa = $spreadSheetAry[$curRow][COL_COMMESSA];
+            $codAtv = $spreadSheetAry[$curRow][COL_ATV];
+            $codSottoComm = $spreadSheetAry[$curRow][COL_SOTTO_COMM];
+            $numOre = $spreadSheetAry[$curRow][COL_NUM_ORE];
 
-            if (!$dataDoc) {
-                $message->error('Campo "data" non valorizzato');
+            if (!$codCommessa || !$dataDoc || !$matricola || !$codAtv || !$serieDoc || !$nrDoc || !$codSottoComm) {
+                $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
                 continue;
             }
-            if (!$matricola) {
-                $message->error('Campo "matricola" non valorizzato');
-                continue;
-            }
-            $dataDoc = DateTime::createFromFormat('d/m/Y', $dataDoc)->format('Y-m-d');
-            if ($numOre > 0) {
-                $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA,RIF_DOC,RIF_RIGA_DOC,NUM_ORE_LAVORATE,TMS_CARICAMENTO) " .
-                            "VALUES('$codCommessa','$matricola','$dataDoc','$nrDoc','$rigaDoc','$numOre',CURRENT_TIMESTAMP)";
-                execute_update($query);
-                ++$contatore;
+            if (!$numOre) {
+                $numOre = 0.0;
             }
 
+            $dataDocDt = DateTime::createFromFormat(DATE_FORMAT, $dataDoc);
+            if (!$dataDocDt) {
+                $message->error .= "Formato data errato alla riga $curRow: $dataDoc<br/>";
+                continue;
+            }
+            $dataDoc = $dataDocDt->format('Y-m-d');
+
+            $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA,RIF_SERIE_DOC,RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA,NUM_ORE_LAVORATE,TMS_CARICAMENTO) " .
+                        "VALUES('$codCommessa','$matricola','$dataDoc','$serieDoc','$nrDoc','$codAtv','$codSottoComm','$numOre',CURRENT_TIMESTAMP)";
+            execute_update($query);
+            ++$contatore;
         }
-        $message->success .= "Caricamento Effettuato correttamente. $contatore righe caricate.</br>";
+
+        $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
     }
 
     function getMeseProgetto($anno, $mese, $data_inizio_progetto) {

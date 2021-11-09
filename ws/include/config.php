@@ -30,4 +30,16 @@ define('DB_PTH_HOST', 'tcp:myserver.database.windows.net,1433');
 define('DB_PTH_USER', 'my_user');
 define('DB_PTH_PASS', 'my_pwd');
 define('DB_PTH_NAME', 'PANTH01');
+
+// configurazione colonne del file excel dei caricamenti
+define('COL_SERIE_DOC',     0);
+define('COL_NUMERO_DOC',    1);
+define('COL_DATA_DOC',      2);
+define('COL_MATRICOLA',     7);
+define('COL_ATV',           9);
+define('COL_SOTTO_COMM',    12);
+define('COL_COMMESSA',      14);
+define('COL_NUM_ORE',       16);
+define('DATE_FORMAT', 'd/m/Y H:i');
+
 ?>
