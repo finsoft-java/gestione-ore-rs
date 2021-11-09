@@ -89,13 +89,13 @@ class ConsuntiviProgettiManager {
         $query = "INSERT INTO assegnazioni_dettaglio (ID_ESECUZIONE, ID_PROGETTO,
                 COD_COMMESSA, PCT_COMPATIBILITA,
                 MATRICOLA_DIPENDENTE, PCT_IMPIEGO,
-                DATA, RIF_DOC, RIF_RIGA_DOC,
+                DATA, RIF_SERIE_DOC, RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA,
                 NUM_ORE_RESIDUE, NUM_ORE_COMPATIBILI)
             SELECT
                 $idEsecuzione, $idProgetto,
                 c.COD_COMMESSA,c.PCT_COMPATIBILITA,
                 p.MATRICOLA_DIPENDENTE,p.PCT_IMPIEGO,
-                oc.DATA,oc.RIF_DOC,oc.RIF_RIGA_DOC,
+                oc.DATA,oc.RIF_SERIE_DOC,oc.RIF_NUMERO_DOC,oc.RIF_ATV,oc.RIF_SOTTO_COMMESSA,
                 NVL(oc.NUM_ORE_RESIDUE,0) as NUM_ORE_RESIDUE,
                 FLOOR(p.PCT_IMPIEGO*NVL(oc.NUM_ORE_RESIDUE,0)*4/100)/4 as NUM_ORE_COMPATIBILI
             FROM progetti_commesse c
@@ -250,9 +250,9 @@ class ConsuntiviProgettiManager {
         $con->begin_transaction();
         try {
             $query ="INSERT INTO ore_consuntivate_progetti(ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, 
-                        COD_COMMESSA, RIF_DOC, RIF_RIGA_DOC, NUM_ORE_LAVORATE, ID_ESECUZIONE)
+                        COD_COMMESSA, RIF_SERIE_DOC, RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA, NUM_ORE_LAVORATE, ID_ESECUZIONE)
                      SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA,
-                        COD_COMMESSA, RIF_DOC, RIF_RIGA_DOC, SUM(NUM_ORE_COMPATIBILI_LUL), $idEsecuzione
+                        COD_COMMESSA, RIF_SERIE_DOC, RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA, SUM(NUM_ORE_COMPATIBILI_LUL), $idEsecuzione
                      FROM assegnazioni_dettaglio ad
                      WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_COMPATIBILI_LUL>0
                      GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, COD_COMMESSA, RIF_DOC, RIF_RIGA_DOC
