@@ -12,18 +12,9 @@ class ConsuntiviProgettiManager {
         try {
             $message->success .= "Lancio assegnazione ore progetto n.$idProgetto alla data " . $dataLimite->format('d/m/Y') . NL;
 
-            $query_monte_ore = "select MONTE_ORE_TOT-ORE_GIA_ASSEGNATE from progetti p where id_progetto=$idProgetto";
-            $monte_ore = select_single_value($query_monte_ore);
-            if ($monte_ore <= 0) {
-                $message->error .= "Monte ore di progetto esaurito!" . NL;
-                return;
-            }
-            $message->success .= "Monte ore residuo $monte_ore ore." . NL;
-
             $idEsecuzione = $this->get_id_esecuzione($idProgetto, $message);
 
             $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, $message);
-
             $this->estrazione_lul($idEsecuzione, $message);
 
             $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA>=100";
@@ -36,16 +27,23 @@ class ConsuntiviProgettiManager {
 
             $lul_ok = $this->verifica_lul($idEsecuzione, $message);
 
-            if (!$lul_ok) {
+            $query_monte_ore = "select MONTE_ORE_TOT-ORE_GIA_ASSEGNATE from progetti p where id_progetto=$idProgetto";
+            $monte_ore = select_single_value($query_monte_ore);
+            if ($monte_ore > 0) {
+                $message->success .= "Monte ore residuo $monte_ore ore." . NL;
+            } else {
+                $message->error .= "Monte ore esaurito, verranno salvate solamente le ore delle commesse di progetto." . NL;
+            }
+
+            if (!$lul_ok || $monte_ore <= 0) {
                 $tot_ore_assegnate = $this->show_commesse($idEsecuzione, $commesse_p, $commesse_c, POST, $message);
             }
 
             $message->success .= "<b>Tot. $tot_ore_assegnate ore assegnate</b>". NL;
             
-            // TODO: salvare anche la ore_consuntivate_progetti
             $this->apply($idEsecuzione, $tot_ore_assegnate);
             $message->success .= "Ore assegnate." . NL;
-
+            
             $this->log($idEsecuzione, $message);
 
             $message->success .= "Fine." . NL;
@@ -250,12 +248,12 @@ class ConsuntiviProgettiManager {
         $con->begin_transaction();
         try {
             $query ="INSERT INTO ore_consuntivate_progetti(ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, 
-                        COD_COMMESSA, RIF_SERIE_DOC, RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA, NUM_ORE_LAVORATE, ID_ESECUZIONE)
+                        NUM_ORE_LAVORATE, ID_ESECUZIONE)
                      SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA,
-                        COD_COMMESSA, RIF_SERIE_DOC, RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA, SUM(NUM_ORE_COMPATIBILI_LUL), $idEsecuzione
+                        SUM(NUM_ORE_COMPATIBILI_LUL), $idEsecuzione
                      FROM assegnazioni_dettaglio ad
                      WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_COMPATIBILI_LUL>0
-                     GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, COD_COMMESSA, RIF_DOC, RIF_RIGA_DOC
+                     GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA
                      ";
             execute_update($query);
 
@@ -339,7 +337,7 @@ class ConsuntiviProgettiManager {
 
         $count = select_single_value($sql0 . $sql);
 
-        if ($top != null){
+        if ($top != null) {
             if ($skip != null) {
                 $sql .= " LIMIT $skip,$top";
             } else {
@@ -357,13 +355,25 @@ class ConsuntiviProgettiManager {
     }
     
     function elimina_esecuzione($idEsecuzione) {
+        $query ="SELECT ID_PROGETTO,TOT_ASSEGNATE FROM assegnazioni WHERE ID_ESECUZIONE=$idEsecuzione";
+        $result = select_single($query);
+        $idProgetto = $result['ID_PROGETTO'];
+        $oreDaTogliere = $result['TOT_ASSEGNATE'];
+
         $query ="DELETE FROM ore_consuntivate_progetti WHERE ID_ESECUZIONE=$idEsecuzione";
-        execute_update($query);
-        $query = "UPDATE assegnazioni SET IS_ASSEGNATE=0 WHERE ID_ESECUZIONE=$idEsecuzione";
         execute_update($query);
         $sql = "DELETE FROM assegnazioni_dettaglio WHERE ID_ESECUZIONE = '$idEsecuzione'";
         execute_update($sql);
         $sql = "DELETE FROM assegnazioni WHERE ID_ESECUZIONE = '$idEsecuzione'";
+        execute_update($sql);
+
+        $sql = "UPDATE progetti SET ORE_GIA_ASSEGNATE=ORE_GIA_ASSEGNATE-$oreDaTogliere WHERE ID_PROGETTO = '$idProgetto'";
+        execute_update($sql);
+        $sql = "UPDATE progetti SET DATA_ULITMO_REPORT=(
+                    SELECT MAX(`DATA`)
+                    FROM ore_consuntivate_progetti
+                    WHERE ID_PROGETTO = '$idProgetto'
+                ) WHERE ID_PROGETTO = '$idProgetto'";
         execute_update($sql);
     }
 }
