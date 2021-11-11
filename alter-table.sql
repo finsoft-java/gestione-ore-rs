@@ -1,9 +1,5 @@
 -- seconda versione del software
 
-drop table ore_consuntivate;
-drop table progetti_wp_risorse;
-drop table progetti_wp;
-drop view progetti_wp_residuo;
 
 -- nuove tabelle
 
@@ -114,3 +110,13 @@ FROM ore_consuntivate_commesse x;
 ALTER TABLE `progetti` ADD `OBIETTIVO_BUDGET_ORE` INT NULL AFTER `MONTE_ORE_TOT`;
 ALTER TABLE `progetti` ADD `DATA_ULTIMO_REPORT` DATE NULL AFTER `MATRICOLA_SUPERVISOR`, ADD `ORE_GIA_ASSEGNATE` INT NULL AFTER `DATA_ULTIMO_REPORT`;
 
+--- backup
+insert into progetti_persone(ID_PROGETTO,MATRICOLA_DIPENDENTE,PCT_IMPIEGO)
+select distinct ID_PROGETTO,MATRICOLA_DIPENDENTE,100 from progetti_wp_risorse;
+
+-- rimozione tabelle obsolete
+
+drop table ore_consuntivate;
+drop table progetti_wp_risorse;
+drop table progetti_wp;
+drop view progetti_wp_residuo;
