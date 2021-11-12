@@ -35,24 +35,44 @@ class ConsuntiviProgettiManager {
             }
             $this->check_commesse_dipendenti($idProgetto, $dataLimite, $message);
 
-            list($ore_progetto, $ore_compat) = $this->show_commesse($idEsecuzione, $commesse_p, $commesse_c, PRE, $message);
+            $ore_progetto = $this->show_commesse_progetto($idEsecuzione, $commesse_p, $message);
+            $message->success .= "<strong>Tot. $ore_progetto ore di progetto</strong>". NL;
 
             $ore_in_eccesso_lul = $this->verifica_lul_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $monte_ore, $message);
-            $ore_progetto -= $ore_in_eccesso_lul;
+            if ($ore_in_eccesso_lul > 0) {
+                $ore_progetto -= $ore_in_eccesso_lul;
+                $message->success .= "<strong>Tot. $ore_progetto ore di progetto utilizzabili</strong>" . NL;
+            }
+
             $monte_ore -= $ore_progetto;
+
+            if ($monte_ore <= 0) {
+                $message->error .= "Monte ore esaurito, le ore delle commesse compatibili non verranno assegnate " .
+                                                                    "(verranno comunque mostrate qui di seguito)" . NL;
+            }
+            $ore_compat = $this->show_commesse_compatibili($idEsecuzione, $commesse_c, $message);
+            $message->success .= "<strong>Tot. $ore_compat ore su commesse compatibili</strong>". NL;
 
             if ($monte_ore > 0) {
                 $ore_in_eccesso_lul = $this->verifica_lul_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $monte_ore, $message);
-                $ore_compat -= $ore_in_eccesso_lul;
+
+                if ($ore_in_eccesso_lul > 0) {
+                    $ore_compat = $this->show_commesse_compatibili($idEsecuzione, $commesse_c, $message);
+                    $message->success .= "<strong>Tot. $ore_compat ore utilizzabili su commesse compatibili</strong>" . NL;
+                }
                 $monte_ore -= $ore_compat;
             } else {
-                $message->error .= "Monte ore esaurito, le ore delle commesse compatibili non verranno assegnate." . NL;
                 $ore_compat = 0.0;
             }
 
             $tot_ore_assegnate = $ore_progetto + $ore_compat;
             $message->success .= "<strong>Tot. $tot_ore_assegnate ore assegnate</strong>". NL;
             
+            if ($tot_ore_assegnate < 0 ) {
+                // in caso di errori evitiamo di sottrarre ore!!! 
+                $tot_ore_assegnate = 0.0;
+            }
+
             $this->apply($idEsecuzione, $tot_ore_assegnate);
             $message->success .= "Ore assegnate." . NL;
             
@@ -160,6 +180,13 @@ class ConsuntiviProgettiManager {
                 AND oc.DATA > pr.DATA_ULTIMO_REPORT AND oc.DATA < $d
             WHERE pr.ID_PROGETTO=$idProgetto";
         execute_update($query);
+        
+        // pre-compilo queste colonne con valori non veritieri, da usare come contatori
+        $query = "UPDATE assegnazioni_dettaglio ad
+            SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_RESIDUE,
+            NUM_ORE_COMPATIBILI_LUL=NUM_ORE_COMPATIBILI
+            WHERE ID_ESECUZIONE=$idEsecuzione";
+        execute_update($query);
     }
 
     /**
@@ -185,16 +212,8 @@ class ConsuntiviProgettiManager {
         return select_list($query);
     }
 
-    /**
-     * Mostra all'utente un report delle varie commesse legate al progetto, e restituisce
-     * il totale delle ore assegnabili
-     * 
-     * @param if_lul puo' valere PRE o POST, a seconda che si voglia tenere conto o meno dei LUL
-     */
-    function show_commesse($idEsecuzione, $commesse_p, $commesse_c, $if_lul, &$message) {
-        $NOME_CAMPO_ORE_LAVORATE = $if_lul == PRE ? 'NUM_ORE_RESIDUE' : 'NUM_ORE_UTILIZZABILI_LUL';
-        $NOME_CAMPO_ORE_COMPATIBILI = $if_lul == PRE ? 'NUM_ORE_COMPATIBILI' : 'NUM_ORE_COMPATIBILI_LUL';
-        $UTILIZZABILI = $if_lul == PRE ? "" : " utilizzabili";
+    function show_commesse_progetto($idEsecuzione, $commesse_p, &$message) {
+        $NOME_CAMPO_ORE_LAVORATE = 'NUM_ORE_RESIDUE';
 
         $caricamenti = $this->get_data($idEsecuzione);
 
@@ -210,26 +229,37 @@ class ConsuntiviProgettiManager {
             $message->success .= "  $comm: trovate $tot ore" . NL;
             $tot_di_progetto += $tot;
         }
-        $message->success .= "<strong>Tot. $tot_di_progetto ore di progetto$UTILIZZABILI</strong>". NL;
-        
+        return $tot_di_progetto;
+    }
+
+    function show_commesse_compatibili($idEsecuzione, $commesse_c, &$message) {
+        $NOME_CAMPO_ORE_LAVORATE = 'NUM_ORE_UTILIZZABILI_LUL';
+        $NOME_CAMPO_ORE_COMPATIBILI = 'NUM_ORE_COMPATIBILI_LUL';
+
+        $caricamenti = $this->get_data($idEsecuzione);
+
         $message->success .= "Commesse compatibili assegnate: " . implode(", ", $commesse_c) . NL;
         $tot_compat = 0.0;
         foreach($commesse_c as $comm) {
             $tot = 0.0;
             $compatibili = 0.0;
+            $pct_comp = null; // peccato non averla già...
             foreach($caricamenti as $id => $c) {
                 if ($c['COD_COMMESSA'] == $comm) {
                     $tot += $c[$NOME_CAMPO_ORE_LAVORATE];
                     $compatibili += $c[$NOME_CAMPO_ORE_COMPATIBILI];
+                    $pct_comp = $c['PCT_COMPATIBILITA'];
                 }
             }
-            $message->success .= "  $comm: trovate $tot ore * $c[PCT_COMPATIBILITA]% = $compatibili ore compatibili" . NL;
+            if ($compatibili > 0) {
+                $message->success .= "  $comm: trovate $tot ore * $pct_comp% = $compatibili ore compatibili" . NL;
+            } else {
+                $message->success .= "  $comm: trovate 0 ore compatibili" . NL;
+            }
             $tot_compat += $compatibili;
         }
 
-        $message->success .= "<strong>Tot. $tot_compat ore$UTILIZZABILI su commesse compatibili</strong>". NL;
-
-        return [$tot_di_progetto, $tot_compat];
+        return $tot_compat;
     }
 
     /**
@@ -245,13 +275,6 @@ class ConsuntiviProgettiManager {
     function verifica_lul_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $monte_ore, &$message) {
 
         $commesse_imploded = "'" . implode("','", $commesse_p) . "'";
-        
-        $query = "UPDATE assegnazioni_dettaglio ad
-            SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_RESIDUE,
-            NUM_ORE_COMPATIBILI_LUL=NUM_ORE_COMPATIBILI
-            WHERE ID_ESECUZIONE=$idEsecuzione
-                AND ad.COD_COMMESSA IN ($commesse_imploded)";
-        execute_update($query);
 
         $query = "SELECT MATRICOLA_DIPENDENTE,DATA,SUM(NUM_ORE_RESIDUE)-MAX(NUM_ORE_LUL) AS ORE_ECCESSO
             FROM assegnazioni_dettaglio ad
@@ -269,7 +292,7 @@ class ConsuntiviProgettiManager {
             return $ore_in_eccesso;
         }
         
-        $message->success .= "Verifica LUL: Ci sono $ore_in_eccesso ore in eccesso non utilizzabili" . NL;
+        $message->success .= "Verifica LUL: Ci sono $ore_in_eccesso ore in eccesso non utilizzabili." . NL;
         
         foreach ($lista_ore_eccesso as $ore) {
             // so che quel giorno, per quel dipendente, ho xxx ore in eccesso
@@ -279,34 +302,22 @@ class ConsuntiviProgettiManager {
             $query = "SELECT *
                 FROM assegnazioni_dettaglio ad
                 WHERE ad.ID_ESECUZIONE=$idEsecuzione
-                    AND ad.MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND ad.DATA=$ore[DATA]
+                    AND ad.MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND ad.DATA='$ore[DATA]'
                     AND ad.COD_COMMESSA in ($commesse_imploded) AND NUM_ORE_RESIDUE>0";
             $dettagli = select_list($query);
-
-            $ore_eccesso_data = $ore["ORE_ECCESSO"];
+            $ore_eccesso_data = 0.0 + $ore["ORE_ECCESSO"];
             foreach ($dettagli as $dett) {
-                if ($dett["NUM_ORE_UTILIZZABILI_LUL"] >= $ore_eccesso_data) {
-                    $query = "UPDATE assegnazioni_dettaglio
-                        SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_UTILIZZABILI_LUL-$ore_eccesso_data
-                        WHERE ID_ESECUZIONE=$idEsecuzione
-                            AND MATRICOLA_DIPENDENTE=$dett[MATRICOLA_DIPENDENTE] AND DATA=$dett[DATA]
-                            AND RIF_SERIE_DOC=$dett[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$dett[RIF_NUMERO_DOC]
-                            AND RIF_ATV=$dett[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$dett[RIF_SOTTO_COMMESSA]";
-                    execute_update($query);
+                if (0.0 + $dett["NUM_ORE_UTILIZZABILI_LUL"] >= $ore_eccesso_data) {
+                    $this->update_ore_post_lul($idEsecuzione, $dett, $ore_eccesso_data);
                     break;
                 } else {
                     $ore_eccesso_data -= $dett["NUM_ORE_UTILIZZABILI_LUL"];
-                    $query = "UPDATE assegnazioni_dettaglio
-                        SET NUM_ORE_UTILIZZABILI_LUL=0
-                        WHERE ID_ESECUZIONE=$idEsecuzione
-                            AND MATRICOLA_DIPENDENTE=$dett[MATRICOLA_DIPENDENTE] AND DATA=$dett[DATA]
-                            AND RIF_SERIE_DOC=$dett[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$dett[RIF_NUMERO_DOC]
-                            AND RIF_ATV=$dett[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$dett[RIF_SOTTO_COMMESSA]";
-                    execute_update($query);
+                    $this->update_ore_post_lul($idEsecuzione, $dett, $dett["NUM_ORE_UTILIZZABILI_LUL"]);
                 }
             }
         }
-        
+
+        $this->update_ore_compatibili($idEsecuzione);
         return $ore_in_eccesso;
     }
 
@@ -323,13 +334,6 @@ class ConsuntiviProgettiManager {
     function verifica_lul_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $monte_ore, &$message) {
 
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
-
-        $query = "UPDATE assegnazioni_dettaglio ad
-            SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_RESIDUE,
-            NUM_ORE_COMPATIBILI_LUL=NUM_ORE_COMPATIBILI
-            WHERE ID_ESECUZIONE=$idEsecuzione
-                AND ad.COD_COMMESSA IN ($commesse_imploded)";
-        execute_update($query);
 
         $query = "SELECT MATRICOLA_DIPENDENTE,DATA,SUM(NUM_ORE_UTILIZZABILI_LUL)-MAX(NUM_ORE_LUL) AS ORE_ECCESSO
             FROM assegnazioni_dettaglio ad
@@ -359,36 +363,42 @@ class ConsuntiviProgettiManager {
                 FROM assegnazioni_dettaglio ad
                 JOIN progetti_commesse pc ON pc.ID_PROGETTO=$idProgetto AND pc.COD_COMMESSA=ad.COD_COMMESSA
                 WHERE ad.ID_ESECUZIONE=$idEsecuzione
-                    AND ad.MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND ad.DATA=$ore[DATA]
+                    AND ad.MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND ad.DATA='$ore[DATA]'
                     AND ad.COD_COMMESSA in ($commesse_imploded) AND NUM_ORE_RESIDUE>0
                 ORDER BY PCT_COMPATIBILITA ASC";
             $dettagli = select_list($query);
 
-            $ore_eccesso_data = $ore["ORE_ECCESSO"];
+            $ore_eccesso_data = 0.0 + $ore["ORE_ECCESSO"];
             foreach ($dettagli as $dett) {
-                if ($dett["NUM_ORE_UTILIZZABILI_LUL"] >= $ore_eccesso_data) {
-                    $query = "UPDATE assegnazioni_dettaglio
-                        SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_UTILIZZABILI_LUL-$ore_eccesso_data
-                        WHERE ID_ESECUZIONE=$idEsecuzione
-                            AND MATRICOLA_DIPENDENTE=$dett[MATRICOLA_DIPENDENTE] AND DATA=$dett[DATA]
-                            AND RIF_SERIE_DOC=$dett[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$dett[RIF_NUMERO_DOC]
-                            AND RIF_ATV=$dett[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$dett[RIF_SOTTO_COMMESSA]";
-                    execute_update($query);
+                if (0.0 + $dett["NUM_ORE_UTILIZZABILI_LUL"] >= $ore_eccesso_data) {
+                    $this->update_ore_post_lul($idEsecuzione, $dett, $ore_eccesso_data);
                     break;
                 } else {
                     $ore_eccesso_data -= $dett["NUM_ORE_UTILIZZABILI_LUL"];
-                    $query = "UPDATE assegnazioni_dettaglio
-                        SET NUM_ORE_UTILIZZABILI_LUL=0
-                        WHERE ID_ESECUZIONE=$idEsecuzione
-                            AND MATRICOLA_DIPENDENTE=$dett[MATRICOLA_DIPENDENTE] AND DATA=$dett[DATA]
-                            AND RIF_SERIE_DOC=$dett[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$dett[RIF_NUMERO_DOC]
-                            AND RIF_ATV=$dett[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$dett[RIF_SOTTO_COMMESSA]";
-                    execute_update($query);
+                    $this->update_ore_post_lul($idEsecuzione, $dett, $dett["NUM_ORE_UTILIZZABILI_LUL"]);
                 }
             }
         }
         
+        $this->update_ore_compatibili($idEsecuzione);
         return $ore_in_eccesso;
+    }
+
+    function update_ore_post_lul($idEsecuzione, $dett, $oreDaTogliere) {
+        $query = "UPDATE assegnazioni_dettaglio
+                SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_UTILIZZABILI_LUL-$oreDaTogliere
+                WHERE ID_ESECUZIONE=$idEsecuzione
+                    AND MATRICOLA_DIPENDENTE=$dett[MATRICOLA_DIPENDENTE] AND DATA='$dett[DATA]'
+                    AND RIF_SERIE_DOC='$dett[RIF_SERIE_DOC]' AND RIF_NUMERO_DOC='$dett[RIF_NUMERO_DOC]'
+                    AND RIF_ATV='$dett[RIF_ATV]' AND  RIF_SOTTO_COMMESSA ='$dett[RIF_SOTTO_COMMESSA]'";
+            execute_update($query);
+    }
+
+    function update_ore_compatibili($idEsecuzione) {
+        $query = "UPDATE assegnazioni_dettaglio
+                SET NUM_ORE_COMPATIBILI_LUL=FLOOR(PCT_IMPIEGO*(NUM_ORE_UTILIZZABILI_LUL)*4/100)/4
+                WHERE ID_ESECUZIONE=$idEsecuzione";
+            execute_update($query);
     }
 
     /**
@@ -524,7 +534,7 @@ class ConsuntiviProgettiManager {
         }
         execute_update($sql);
         $sql = "UPDATE progetti SET DATA_ULTIMO_REPORT=(
-                    SELECT MAX(`DATA`)
+                    SELECT NVL(MAX(`DATA`),DATE('0000-01-01'))
                     FROM ore_consuntivate_progetti
                     WHERE ID_PROGETTO = '$idProgetto'
                 ) WHERE ID_PROGETTO = '$idProgetto'";
