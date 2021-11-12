@@ -30,9 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$oggetto_su_db) {
         print_error(404, 'Not found');
     }
-    if ($oggetto_su_db['IS_ASSEGNATE'] == '1') {
-        print_error(400, 'Esecuzione assegnata a progetti, prima eseguire la disassociazione');
-    }
     
     $consuntiviProgettiManager->elimina_esecuzione($idEsecuzione);
     

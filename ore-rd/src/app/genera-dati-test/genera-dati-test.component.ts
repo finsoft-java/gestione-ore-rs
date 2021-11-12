@@ -82,17 +82,19 @@ export class GeneraDatiTestComponent implements OnInit {
     }
 
     run() {
-        this.datitestService.run(this.idProgetto, formatDate(this.date,"YYYY-MM-dd","en-GB")).subscribe(response => {
-          this.message_success = response.value.success;
-          this.message_error = response.value.error;
-        },
-        error => {
-          this.message_success = '';
-          this.message_error = error;
-        });
+      this.resetAlertSuccess();
+      this.resetAlertDanger();
+
+      this.datitestService.run(this.idProgetto, formatDate(this.date,"YYYY-MM-dd","en-GB")).subscribe(response => {
+        this.message_success = response.value.success;
+        this.message_error = response.value.error;
+      },
+      error => {
+        this.message_error = error;
+      });
     }
 
-    back(){
+    back() {
       this.router.navigate(['/progetto', this.idProgetto])
     }
 }

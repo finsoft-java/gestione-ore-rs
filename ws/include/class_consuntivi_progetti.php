@@ -37,12 +37,12 @@ class ConsuntiviProgettiManager {
 
             list($ore_progetto, $ore_compat) = $this->show_commesse($idEsecuzione, $commesse_p, $commesse_c, PRE, $message);
 
-            $ore_in_eccesso_lul = $this->verifica_lul_commesse_progetto($idEsecuzione, $commesse_p, $monte_ore, $message);
+            $ore_in_eccesso_lul = $this->verifica_lul_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $monte_ore, $message);
             $ore_progetto -= $ore_in_eccesso_lul;
             $monte_ore -= $ore_progetto;
 
             if ($monte_ore > 0) {
-                $ore_in_eccesso_lul = $this->verifica_lul_commesse_compatibili($idEsecuzione, $commesse_c, $monte_ore, $message);
+                $ore_in_eccesso_lul = $this->verifica_lul_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $monte_ore, $message);
                 $ore_compat -= $ore_in_eccesso_lul;
                 $monte_ore -= $ore_compat;
             } else {
@@ -93,7 +93,7 @@ class ConsuntiviProgettiManager {
         $commesse_p = select_column($query);
         $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA>0 and PCT_COMPATIBILITA<100";
         $commesse_c = select_column($query);
-        $query = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA>0 and PCT_UTILIZZO>0";
+        $query = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto and PCT_IMPIEGO>0 ";
         $matricole = select_column($query);
         return [$commesse_p, $commesse_c, $matricole];
     }
@@ -109,20 +109,21 @@ class ConsuntiviProgettiManager {
             $message->success .= "<strong>WARNING</strong>: ci sono commesse con PCT_COMPATIBILITA<=0: " . implode(', ', $commesse). NL;
         }
 
-        $query = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto and PCT_UTILIZZO<=0";
+        $query = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto and PCT_IMPIEGO<=0";
         $matricole = select_column($query);
         if (count($matricole) > 0) {
-            $message->success .= "<strong>WARNING</strong>: ci sono matricole con PCT_UTILIZZO<=0: " . implode(', ', $matricole). NL;
+            $message->success .= "<strong>WARNING</strong>: ci sono matricole con PCT_IMPIEGO<=0: " . implode(', ', $matricole). NL;
         }
 
         $d = "DATE('" . $dataLimite->format('Y-m-d') . "')";
-        $query = "SELECT DISTINCT oc.MATRICOLA_DIPENDENTE||'-'||oc.COD_COMMESSA
+        $query = "SELECT DISTINCT CONCAT(oc.COD_COMMESSA,'-',oc.MATRICOLA_DIPENDENTE)
                 FROM ore_consuntivate_residuo oc
-                JOIN progetti_commesse c ON c.COD_COMMESSA=oc.CODCOMMESSA
+                JOIN progetti_commesse c ON c.COD_COMMESSA=oc.COD_COMMESSA
                 JOIN progetti pr ON pr.ID_PROGETTO=c.ID_PROGETTO
                 WHERE pr.id_progetto=$idProgetto
-                MATRICOLA_DIPENDENTE NOT IN (SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto)
-                AND (oc.DATA IS NULL OR (oc.DATA > pr.DATA_ULTIMO_REPORT and oc.DATA < $d))";
+                AND MATRICOLA_DIPENDENTE NOT IN (SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto)
+                AND (oc.DATA IS NULL OR (oc.DATA > pr.DATA_ULTIMO_REPORT and oc.DATA < $d))
+                ORDER BY 1";
         $ore = select_column($query);
         if (count($ore) > 0) {
             $message->success .= "<strong>WARNING</strong>: ci sono ore su commesse di progetto o compatibili ma con dipendenti incompatibili: " . implode(', ', $ore). NL;
@@ -156,7 +157,8 @@ class ConsuntiviProgettiManager {
             JOIN progetti pr ON pr.ID_PROGETTO=p.ID_PROGETTO
             LEFT JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
                 AND oc.MATRICOLA_DIPENDENTE=p.MATRICOLA_DIPENDENTE
-            WHERE pr.ID_PROGETTO=$idProgetto AND (oc.DATA IS NULL OR (oc.DATA > pr.DATA_ULTIMO_REPORT and oc.DATA < $d))";
+                AND oc.DATA > pr.DATA_ULTIMO_REPORT AND oc.DATA < $d
+            WHERE pr.ID_PROGETTO=$idProgetto";
         execute_update($query);
     }
 
@@ -179,7 +181,7 @@ class ConsuntiviProgettiManager {
     function get_data($idEsecuzione) {
         $query = "SELECT * FROM assegnazioni_dettaglio ad
             WHERE ID_ESECUZIONE=$idEsecuzione
-            ORDER BY DATA,MATRICOLA_DIPENDENTE,COD_COMMESSA";
+            ORDER BY COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA";
         return select_list($query);
     }
 
@@ -243,14 +245,6 @@ class ConsuntiviProgettiManager {
     function verifica_lul_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $monte_ore, &$message) {
 
         $commesse_imploded = "'" . implode("','", $commesse_p) . "'";
-
-        $query = "SELECT MATRICOLA_DIPENDENTE,DATA,SUM(NUM_ORE_RESIDUE)-MAX(NUM_ORE_LUL) AS ORE_ECCESSO
-            FROM assegnazioni_dettaglio ad
-            WHERE ad.ID_ESECUZIONE=$idEsecuzione
-                AND ad.COD_COMMESSA IN ($commesse_imploded)
-            GROUP BY MATRICOLA_DIPENDENTE,DATA
-            HAVING SUM(NUM_ORE_RESIDUE) > MAX(NUM_ORE_LUL)";
-        $lista_ore_eccesso = select_list($query);
         
         $query = "UPDATE assegnazioni_dettaglio ad
             SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_RESIDUE,
@@ -259,7 +253,16 @@ class ConsuntiviProgettiManager {
                 AND ad.COD_COMMESSA IN ($commesse_imploded)";
         execute_update($query);
 
-        $ore_in_eccesso = array_sum(array_colum($lista_ore_eccesso,'ORE_ECCESSO'));
+        $query = "SELECT MATRICOLA_DIPENDENTE,DATA,SUM(NUM_ORE_RESIDUE)-MAX(NUM_ORE_LUL) AS ORE_ECCESSO
+            FROM assegnazioni_dettaglio ad
+            WHERE ad.ID_ESECUZIONE=$idEsecuzione
+                AND ad.COD_COMMESSA IN ($commesse_imploded)
+                AND NUM_ORE_RESIDUE>0
+            GROUP BY MATRICOLA_DIPENDENTE,DATA
+            HAVING SUM(NUM_ORE_RESIDUE) > MAX(NUM_ORE_LUL)";
+        $lista_ore_eccesso = select_list($query);
+
+        $ore_in_eccesso = array_sum(array_column($lista_ore_eccesso,'ORE_ECCESSO'));
 
         if ($ore_in_eccesso == 0.0) {
             $message->success .= "Verifica LUL: ok." . NL;
@@ -277,7 +280,7 @@ class ConsuntiviProgettiManager {
                 FROM assegnazioni_dettaglio ad
                 WHERE ad.ID_ESECUZIONE=$idEsecuzione
                     AND ad.MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND ad.DATA=$ore[DATA]
-                    AND ad.COD_COMMESSA in ($commesse_imploded)";
+                    AND ad.COD_COMMESSA in ($commesse_imploded) AND NUM_ORE_RESIDUE>0";
             $dettagli = select_list($query);
 
             $ore_eccesso_data = $ore["ORE_ECCESSO"];
@@ -286,20 +289,20 @@ class ConsuntiviProgettiManager {
                     $query = "UPDATE assegnazioni_dettaglio
                         SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_UTILIZZABILI_LUL-$ore_eccesso_data
                         WHERE ID_ESECUZIONE=$idEsecuzione
-                            AND MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND DATA=$ore[DATA]
-                            AND RIF_SERIE_DOC=$ore[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$ore[RIF_NUMERO_DOC]
-                            AND RIF_ATV=$ore[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$ore[RIF_SOTTO_COMMESSA]";
-                    execute_update();
+                            AND MATRICOLA_DIPENDENTE=$dett[MATRICOLA_DIPENDENTE] AND DATA=$dett[DATA]
+                            AND RIF_SERIE_DOC=$dett[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$dett[RIF_NUMERO_DOC]
+                            AND RIF_ATV=$dett[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$dett[RIF_SOTTO_COMMESSA]";
+                    execute_update($query);
                     break;
                 } else {
                     $ore_eccesso_data -= $dett["NUM_ORE_UTILIZZABILI_LUL"];
                     $query = "UPDATE assegnazioni_dettaglio
                         SET NUM_ORE_UTILIZZABILI_LUL=0
                         WHERE ID_ESECUZIONE=$idEsecuzione
-                            AND MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND DATA=$ore[DATA]
-                            AND RIF_SERIE_DOC=$ore[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$ore[RIF_NUMERO_DOC]
-                            AND RIF_ATV=$ore[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$ore[RIF_SOTTO_COMMESSA]"
-                    execute_update();
+                            AND MATRICOLA_DIPENDENTE=$dett[MATRICOLA_DIPENDENTE] AND DATA=$dett[DATA]
+                            AND RIF_SERIE_DOC=$dett[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$dett[RIF_NUMERO_DOC]
+                            AND RIF_ATV=$dett[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$dett[RIF_SOTTO_COMMESSA]";
+                    execute_update($query);
                 }
             }
         }
@@ -317,7 +320,7 @@ class ConsuntiviProgettiManager {
      * (1) controllo la differenza ore solo sul progetto corrente!
      * (2) trovo una discrepanza tra la somma ore e il LUL, ma non so a quale commessa imputare tale differenza
      */
-    function verifica_lul_commesse_progetto($idEsecuzione, $idProgetto, $commesse_c, $monte_ore, &$message) {
+    function verifica_lul_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $monte_ore, &$message) {
 
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
 
@@ -330,15 +333,15 @@ class ConsuntiviProgettiManager {
 
         $query = "SELECT MATRICOLA_DIPENDENTE,DATA,SUM(NUM_ORE_UTILIZZABILI_LUL)-MAX(NUM_ORE_LUL) AS ORE_ECCESSO
             FROM assegnazioni_dettaglio ad
-            WHERE ad.ID_ESECUZIONE=$idEsecuzione
+            WHERE ad.ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_RESIDUE>0
             GROUP BY MATRICOLA_DIPENDENTE,DATA
             HAVING SUM(NUM_ORE_UTILIZZABILI_LUL) > MAX(NUM_ORE_LUL)";
         $lista_ore_eccesso = select_list($query);
-        // Queste ore in eccesso sono TUTTE dovute a commesse compatibili,
-        // perchè quelle di progetto le ho già decurtate
+        // La query prende tutte le commesse, ma le ore in eccesso sono tutte dovute
+        // alle commesse compatibili, perchè quelle di progetto le ho già decurtate
         // nota che guardo NUM_ORE_UTILIZZABILI_LUL e non NUM_ORE_RESIDUE
 
-        $ore_in_eccesso = array_sum(array_colum($lista_ore_eccesso,'ORE_ECCESSO'));
+        $ore_in_eccesso = array_sum(array_column($lista_ore_eccesso,'ORE_ECCESSO'));
 
         if ($ore_in_eccesso == 0.0) {
             $message->success .= "Verifica LUL: ok." . NL;
@@ -354,10 +357,10 @@ class ConsuntiviProgettiManager {
             
             $query = "SELECT ad.*
                 FROM assegnazioni_dettaglio ad
-                JOIN progetto_commesse pc ON pc.ID_PROGETTO=$idProgetto AND pc.COD_COMMESSA=ad.COD_COMMESSA
+                JOIN progetti_commesse pc ON pc.ID_PROGETTO=$idProgetto AND pc.COD_COMMESSA=ad.COD_COMMESSA
                 WHERE ad.ID_ESECUZIONE=$idEsecuzione
                     AND ad.MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND ad.DATA=$ore[DATA]
-                    AND ad.COD_COMMESSA in ($commesse_imploded)
+                    AND ad.COD_COMMESSA in ($commesse_imploded) AND NUM_ORE_RESIDUE>0
                 ORDER BY PCT_COMPATIBILITA ASC";
             $dettagli = select_list($query);
 
@@ -367,20 +370,20 @@ class ConsuntiviProgettiManager {
                     $query = "UPDATE assegnazioni_dettaglio
                         SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_UTILIZZABILI_LUL-$ore_eccesso_data
                         WHERE ID_ESECUZIONE=$idEsecuzione
-                            AND MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND DATA=$ore[DATA]
-                            AND RIF_SERIE_DOC=$ore[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$ore[RIF_NUMERO_DOC]
-                            AND RIF_ATV=$ore[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$ore[RIF_SOTTO_COMMESSA]";
-                    execute_update();
+                            AND MATRICOLA_DIPENDENTE=$dett[MATRICOLA_DIPENDENTE] AND DATA=$dett[DATA]
+                            AND RIF_SERIE_DOC=$dett[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$dett[RIF_NUMERO_DOC]
+                            AND RIF_ATV=$dett[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$dett[RIF_SOTTO_COMMESSA]";
+                    execute_update($query);
                     break;
                 } else {
                     $ore_eccesso_data -= $dett["NUM_ORE_UTILIZZABILI_LUL"];
                     $query = "UPDATE assegnazioni_dettaglio
                         SET NUM_ORE_UTILIZZABILI_LUL=0
                         WHERE ID_ESECUZIONE=$idEsecuzione
-                            AND MATRICOLA_DIPENDENTE=$ore[MATRICOLA_DIPENDENTE] AND DATA=$ore[DATA]
-                            AND RIF_SERIE_DOC=$ore[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$ore[RIF_NUMERO_DOC]
-                            AND RIF_ATV=$ore[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$ore[RIF_SOTTO_COMMESSA]"
-                    execute_update();
+                            AND MATRICOLA_DIPENDENTE=$dett[MATRICOLA_DIPENDENTE] AND DATA=$dett[DATA]
+                            AND RIF_SERIE_DOC=$dett[RIF_SERIE_DOC] AND RIF_NUMERO_DOC=$dett[RIF_NUMERO_DOC]
+                            AND RIF_ATV=$dett[RIF_ATV] AND  RIF_SOTTO_COMMESSA =$dett[RIF_SOTTO_COMMESSA]";
+                    execute_update($query);
                 }
             }
         }
@@ -516,9 +519,11 @@ class ConsuntiviProgettiManager {
         $sql = "DELETE FROM assegnazioni WHERE ID_ESECUZIONE = '$idEsecuzione'";
         execute_update($sql);
 
-        $sql = "UPDATE progetti SET ORE_GIA_ASSEGNATE=ORE_GIA_ASSEGNATE-$oreDaTogliere WHERE ID_PROGETTO = '$idProgetto'";
+        if ($oreDaTogliere != null && $oreDaTogliere > 0) {
+            $sql = "UPDATE progetti SET ORE_GIA_ASSEGNATE=ORE_GIA_ASSEGNATE-$oreDaTogliere WHERE ID_PROGETTO = '$idProgetto'";
+        }
         execute_update($sql);
-        $sql = "UPDATE progetti SET DATA_ULITMO_REPORT=(
+        $sql = "UPDATE progetti SET DATA_ULTIMO_REPORT=(
                     SELECT MAX(`DATA`)
                     FROM ore_consuntivate_progetti
                     WHERE ID_PROGETTO = '$idProgetto'
