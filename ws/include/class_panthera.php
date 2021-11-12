@@ -123,7 +123,7 @@ class PantheraManager {
                       [ 'MATRICOLA' => '6666', 'NOME' => 'Bianchi Gianni' ]
                      ];
         } else {
-            $query = "SELECT DISTINCT ID_UTENTE AS MATRICOLA,DENOMINAZIONE AS NOME FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' ORDER BY DENOMINAZIONE ASC";
+            $query = "SELECT DISTINCT RTRIM(R_DIPENDENTE) AS MATRICOLA,RTRIM(DENOMINAZIONE) AS NOME FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' ORDER BY RTRIM(DENOMINAZIONE) ASC";
             $matricole = $this->select_list($query);
         }        
         return $matricole;
@@ -133,7 +133,7 @@ class PantheraManager {
         if ($this->mock) {
             $matricola = 'Rossi Mario';
         } else {
-            $query = "SELECT DISTINCT DENOMINAZIONE FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' AND ID_UTENTE='$matricola'";
+            $query = "SELECT DISTINCT DENOMINAZIONE FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' AND RTRIM(R_DIPENDENTE)=RTRIM('$matricola')";
             $matricola = $this->select_single_value($query);
         }
         return $matricola;
@@ -143,7 +143,7 @@ class PantheraManager {
         if ($this->mock) {
             $matricola = 'PIPPO'; // or 1234
         } else {
-            $query = "SELECT DISTINCT ID_UTENTE FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' AND DENOMINAZIONE='$denominazione'";
+            $query = "SELECT DISTINCT ID_UTENTE FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' AND RTRIM(DENOMINAZIONE)=RTRIM('$denominazione')";
             $matricola = $this->select_single_value($query);
         }
         return $matricola;
