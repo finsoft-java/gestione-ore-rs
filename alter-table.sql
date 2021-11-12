@@ -3,7 +3,7 @@
 
 -- nuove tabelle
 
-CREATE TABLE `ore-rd`.`progetti_persone` (
+CREATE TABLE `progetti_persone` (
   `ID_PROGETTO` INT NOT NULL ,
   `MATRICOLA_DIPENDENTE` VARCHAR(50) NOT NULL ,
   `PCT_IMPIEGO` FLOAT NOT NULL ,
@@ -11,7 +11,7 @@ CREATE TABLE `ore-rd`.`progetti_persone` (
 ) ENGINE = InnoDB;
 ALTER TABLE `progetti_persone` ADD FOREIGN KEY (`ID_PROGETTO`) REFERENCES `progetti`(`ID_PROGETTO`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
-CREATE TABLE `ore-rd`.`progetti_commesse` (
+CREATE TABLE `progetti_commesse` (
   `ID_PROGETTO` INT NOT NULL ,
   `COD_COMMESSA` VARCHAR(50) NOT NULL ,
   `PCT_COMPATIBILITA` FLOAT NOT NULL ,
@@ -29,7 +29,7 @@ CREATE TABLE `caricamenti` (
   PRIMARY KEY (`ID_CARICAMENTO`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `ore-rd`.`ore_consuntivate_commesse` (
+CREATE TABLE `ore_consuntivate_commesse` (
   `COD_COMMESSA` VARCHAR(50) NOT NULL ,       
   `MATRICOLA_DIPENDENTE` VARCHAR(50) NOT NULL , 
   `DATA` DATE NOT NULL ,
@@ -44,7 +44,7 @@ CREATE TABLE `ore-rd`.`ore_consuntivate_commesse` (
 ALTER TABLE `ore_consuntivate_commesse` ADD FOREIGN KEY (`ID_CARICAMENTO`) REFERENCES `caricamenti`(`ID_CARICAMENTO`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 
-CREATE TABLE `ore-rd`.`ore_consuntivate_progetti` (
+CREATE TABLE `ore_consuntivate_progetti` (
   ID INT NOT NULL AUTO_INCREMENT,
   `ID_PROGETTO` INT NOT NULL ,
   `MATRICOLA_DIPENDENTE` VARCHAR(50) NOT NULL ,
