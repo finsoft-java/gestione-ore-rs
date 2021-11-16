@@ -8,6 +8,9 @@ define('POST', "2");
 
 class ConsuntiviProgettiManager {
     
+    /**
+     * Main procedure
+     */
     function run_assegnazione($idProgetto, $dataLimite, &$message) {
         try {
             $message->success .= "Lancio assegnazione ore progetto n.$idProgetto alla data " . $dataLimite->format('d/m/Y') . NL;
@@ -61,6 +64,21 @@ class ConsuntiviProgettiManager {
                     $message->success .= "<strong>Tot. $ore_compat ore utilizzabili su commesse compatibili</strong>" . NL;
                 }
                 $monte_ore -= $ore_compat;
+
+                $ore_in_eccesso_pct_ut = $this->controlla_pct_dipendenti($idEsecuzione, $commesse_c, $message);
+                if ($ore_in_eccesso_pct_ut > 0) {
+                    $message->success .= "<strong>Tot. $ore_in_eccesso_pct_ut ore non utilizzabili per rispettare le pct dipendenti</strong>" . NL;
+                }
+                
+                $monte_ore += $ore_in_eccesso_pct_ut;
+
+                if ($monte_ore < 0) {
+                    $ore_extra = -$monte_ore;
+                    $this->elimina_ore_fuori_monte_ore($idEsecuzione, $commesse_c, $ore_extra, $message);
+                    $message->success .= "<strong>Tot. $ore_extra ore non utilizzabili perch&egrave; fuori monte ore</strong>" . NL;
+                    $ore_compat -= $ore_extra;
+                    $monte_ore = 0.0;
+                }
             } else {
                 $ore_compat = 0.0;
             }
@@ -384,6 +402,31 @@ class ConsuntiviProgettiManager {
         return $ore_in_eccesso;
     }
 
+    function controlla_pct_dipendenti($idEsecuzione, $commesse_c, $message) {
+
+    }
+
+    function elimina_ore_fuori_monte_ore($idEsecuzione, $commesse_c, $ore_extra, $message) {
+
+        $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
+
+        $query = "SELECT * FROM assegnazioni_dettaglio ad
+            WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA in ($commesse_imploded)
+            ORDER BY DATA DESC,COD_COMMESSA,MATRICOLA_DIPENDENTE";
+        $caricamenti = select_list($query);
+
+        foreach ($caricamenti as $c) {
+            $ore = 0.0 + $c['NUM_ORE_UTILIZZABILI_LUL'];
+            if ($ore >= $ore_extra) {
+                $this->update_ore_post_lul($idEsecuzione, $dett, $ore_extra);
+                break;
+            } else {
+                $this->update_ore_post_lul($idEsecuzione, $dett, $ore);
+                $ore_extra -= $ore;
+            }
+        }
+    }
+
     function update_ore_post_lul($idEsecuzione, $dett, $oreDaTogliere) {
         $query = "UPDATE assegnazioni_dettaglio
                 SET NUM_ORE_UTILIZZABILI_LUL=NUM_ORE_UTILIZZABILI_LUL-$oreDaTogliere
@@ -437,7 +480,7 @@ class ConsuntiviProgettiManager {
      * Stampa la tabellina di lavoro
      */
     function log($idEsecuzione, &$message) {
-        $caricamenti = $this->get_data($idEsecuzione, $message);
+        $caricamenti = $this->get_data($idEsecuzione);
         $message->success .= NL . "La seguente tabella viene mostrata a scopo di debug:" . NL;
         $message->success .= "<TABLE BORDER='1'>";
         $message->success .= "<THEAD>
