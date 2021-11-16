@@ -439,7 +439,7 @@ class ConsuntiviProgettiManager {
 
     function update_ore_compatibili($idEsecuzione) {
         $query = "UPDATE assegnazioni_dettaglio
-                SET NUM_ORE_COMPATIBILI_LUL=FLOOR(PCT_IMPIEGO*(NUM_ORE_UTILIZZABILI_LUL)*4/100)/4
+                SET NUM_ORE_COMPATIBILI_LUL=FLOOR(PCT_COMPATIBILITA*(NUM_ORE_UTILIZZABILI_LUL)*4/100)/4
                 WHERE ID_ESECUZIONE=$idEsecuzione";
             execute_update($query);
     }
