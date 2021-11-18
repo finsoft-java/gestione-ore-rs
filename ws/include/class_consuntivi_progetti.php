@@ -41,20 +41,26 @@ class ConsuntiviProgettiManager {
             $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $commesse_p, $message);
             $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $commesse_c, $message);
 
+            $message->success .= "<strong>Tot. " . ($ore_progetto_teoriche + $ore_compat_teoriche) .
+                                                            " ore prelevabili teoriche</strong>". NL;
+
             $lul = $this->estrazione_lul($idEsecuzione, $message);
 
             $message->success .= "Verifica LUL...". NL;
             $ore_progetto = $this->prelievo_commesse_progetto($idEsecuzione, $commesse_p, $lul, $message);
-            $message->success .= "<strong>Tot. $ore_progetto ore di progetto prelevate</strong>". NL;
+            $message->success .= "<strong>Tot. $ore_progetto ore prelevate da commesse di progetto</strong>". NL;
 
-            if ($monte_ore - $ore_progetto <= 0) {
+            $monte_ore -= $ore_progetto;
+
+            if ($monte_ore <= 0) {
                 $message->success .= "<strong>WARNING</strong> Monte ore esaurito, non saranno prelevate ore dalle commesse compatibili". NL;
                 $ore_compat = 0.0;
             } else {
                 $message->success .= "Verifica LUL...". NL;
                 $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $commesse_c);
-                $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c);
-                $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $commesse_c, $lul, $monte_ore, $max_compat, $max_dip, $message);
+                $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $message);
+                $lul_p = $this->togli_ore_progetto_dai_lul($idEsecuzione);
+                $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, $message);
                 $message->success .= "<strong>Tot. $ore_compat ore prelevate da commesse compatibili</strong>". NL;
             }
 
@@ -69,7 +75,7 @@ class ConsuntiviProgettiManager {
             $this->apply($idEsecuzione, $tot_ore_assegnate);
             $message->success .= "Ore assegnate." . NL;
             
-            $message->success .= "Monte ore residuo dopo l'assegnazione: $monte_ore ore." . NL;
+            $message->success .= "Monte ore residuo dopo l'assegnazione: $monte_ore ore" . NL;
             
             $this->log($idEsecuzione, $message);
 
@@ -219,6 +225,7 @@ class ConsuntiviProgettiManager {
             $totale += (float) $t['ORE_COMP'];
         }
         
+        $totale = round($totale*100)/100;
         $message->success .= "<strong>Tot. $totale ore su commesse compatibili</strong>". NL;
 
         return $totale;
@@ -266,7 +273,7 @@ class ConsuntiviProgettiManager {
      * Arrotondo le ore al quarto d'ora per difetto
      */
     function round_quarter($ore) {
-        return round($ore*4, PHP_ROUND_HALF_DOWN) / 4;
+        return floor($ore * 4) / 4;
     }
 
     function preleva($idEsecuzione, $caricamento, $ore) {
@@ -286,14 +293,14 @@ class ConsuntiviProgettiManager {
     function select_max_per_commesse_compatibili($idEsecuzione, $commesse_c) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         $query = "SELECT COD_COMMESSA,
-                    SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100) AS ORE_COMP
+                    SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100) AS ORE_PREVISTE
                 FROM assegnazioni_dettaglio ad
                 WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)
                 GROUP BY COD_COMMESSA";
         return array_group_by(select_list($query), ['COD_COMMESSA']);
     }
 
-    function select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c) {
+    function select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         
         $query = "SELECT SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100) AS ORE_COMP
@@ -301,15 +308,83 @@ class ConsuntiviProgettiManager {
                 WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)";
         $totale_ore_compatibili_previste = select_single_value($query);
 
-        $query = "SELECT MATRICOLA_DIPENDENTE,
-                    $totale_ore_compatibili_previste*PCT_IMPIEGO AS ORE_PREVISTE
+        $query = "SELECT MATRICOLA_DIPENDENTE,PCT_IMPIEGO,
+                    ROUND($totale_ore_compatibili_previste*PCT_IMPIEGO/100,2) AS ORE_PREVISTE
                 FROM progetti_persone p
                 WHERE ID_PROGETTO=$idProgetto";
-        return array_group_by(select_list($query), ['MATRICOLA_DIPENDENTE']);
+        $list = select_list($query);
+
+        $message->success .= "  Suddivisione ipotetica delle commesse compatibili tra i dipendenti:" . NL;
+        foreach($list as $m) {
+            $message->success .= "  $m[MATRICOLA_DIPENDENTE] al $m[PCT_IMPIEGO] % = $m[ORE_PREVISTE] ore" . NL;
+        }
+        return array_group_by($list, ['MATRICOLA_DIPENDENTE']);
     }
 
-    function prelievo_commesse_compatibili($idEsecuzione, $commesse_c, $lul, $monte_ore, $max_compat, $max_dip, $message) {
-        echo "Unimplemented"; die();
+    function togli_ore_progetto_dai_lul($idEsecuzione) {
+        // rifaccio l'estrazione dei lul, questa volta tenendo conto delle ore già prelevate
+        $query = "SELECT t.MATRICOLA_DIPENDENTE,t.DATA,NVL(l.ORE_PRESENZA_ORDINARIE,0)-ORE_PRELEVATE AS ORE_PRESENZA_ORDINARIE
+                FROM (SELECT MATRICOLA_DIPENDENTE,DATA,SUM(NUM_ORE_PRELEVATE) AS ORE_PRELEVATE
+                    FROM assegnazioni_dettaglio ad
+                    WHERE ID_ESECUZIONE=$idEsecuzione
+                    GROUP BY MATRICOLA_DIPENDENTE,DATA) t
+                LEFT JOIN ore_presenza_lul l
+                ON l.MATRICOLA_DIPENDENTE=t.MATRICOLA_DIPENDENTE AND l.DATA=t.DATA";
+        $array = select_list($query);
+        return array_group_by($array, ['MATRICOLA_DIPENDENTE', 'DATA']);
+    }
+
+    function prelievo_commesse_compatibili($idEsecuzione, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, $message) {
+        $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
+        $query = "SELECT *
+            FROM assegnazioni_dettaglio ad
+            WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN ($commesse_imploded)
+                AND NUM_ORE_RESIDUE >= 0.25 
+            ORDER BY MATRICOLA_DIPENDENTE, DATA";
+        $map = array_group_by(select_list($query), ['MATRICOLA_DIPENDENTE', 'DATA']);
+
+        $data_corrente = "";
+        $totale = 0.0;
+        
+        foreach($map as $matricola => $map1) {
+            foreach($map1 as $data => $caricamenti) {
+                $totale_data = 0.0;
+                $max_data = (float) $lul_p[$matricola][$data]; // SHOULD BE SET!!!
+                foreach($caricamenti as $c) {
+                    $ore = (float) $c['NUM_ORE_RESIDUE'];
+                    $ore_max_commessa = (float) $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'];
+                    $ore_max_matricola = (float) $max_dip[$c['MATRICOLA_DIPENDENTE']][0]['ORE_PREVISTE'];
+                    if ($ore_max_commessa > 0 && $ore_max_matricola > 0) {
+
+                        $ore = min($ore, $ore_max_commessa, $ore_max_matricola);
+                        $ore = $this->round_quarter($ore);
+
+                        if ($totale_data + $ore < $max_data) {
+                            // in questo caso posso prelevare tutto
+                            $this->preleva($idEsecuzione, $c, $ore);
+                            $totale_data += $ore;
+                            $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'] -= $ore;
+                            $max_dip[$c['MATRICOLA_DIPENDENTE']][0]['ORE_PREVISTE'] -= $ore;
+                        } else {
+                            // prelevo quel che posso e poi interrompo
+                            $ore = $this->round_quarter($max_data - $totale_data);
+                            $this->preleva($idEsecuzione, $c, $ore);
+                            $totale_data += $ore;
+                            $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'] -= $ore;
+                            $max_dip[$c['MATRICOLA_DIPENDENTE']][0]['ORE_PREVISTE'] -= $ore;
+                            break;
+                        }
+                    }
+                }
+                $totale += $totale_data;
+                if ($totale >= $monte_ore) {
+                    $message->success .= "Interrompo i prelievi per raggiungimento del monte ore" . NL;
+                    break;
+                }
+            }
+            if ($totale >= $monte_ore) break;
+        }
+        return $totale;
     }
 
     /**
@@ -323,9 +398,9 @@ class ConsuntiviProgettiManager {
             $query ="INSERT INTO ore_consuntivate_progetti(ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA, 
                         NUM_ORE_LAVORATE, ID_ESECUZIONE)
                      SELECT ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA,
-                        SUM(NUM_ORE_COMPATIBILI_LUL), $idEsecuzione
+                        SUM(NUM_ORE_PRELEVATE), $idEsecuzione
                      FROM assegnazioni_dettaglio ad
-                     WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_COMPATIBILI_LUL>0
+                     WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_PRELEVATE>0
                      GROUP BY ID_PROGETTO, MATRICOLA_DIPENDENTE, DATA
                      ";
             execute_update($query);
@@ -348,7 +423,12 @@ class ConsuntiviProgettiManager {
      * Stampa la tabellina di lavoro
      */
     function log($idEsecuzione, &$message) {
-        $caricamenti = $this->get_data($idEsecuzione);
+        $query = "SELECT *
+            FROM assegnazioni_dettaglio ad
+            WHERE ID_ESECUZIONE=$idEsecuzione
+            ORDER BY MATRICOLA_DIPENDENTE, DATA, COD_COMMESSA";
+        $caricamenti = select_list($query);
+
         $message->success .= NL . "La seguente tabella viene mostrata a scopo di debug:" . NL;
         $message->success .= "<TABLE BORDER='1'>";
         $message->success .= "<THEAD>
