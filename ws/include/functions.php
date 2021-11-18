@@ -270,10 +270,10 @@ function insert_select($table, $lista_tutte_le_colonne, $mappa_valori_da_modific
 }
 
 /**
-Estrae un indice tra 1 e count($probabilities), con probabilità non uniforme
-La probabilità di estrarre $i è $probabilities[i]/sum($probabilities)
-@param $probabilities: array di numeri (sono frequenze), positivi o nulli
-@return $i in [0, count($probabilities)-1] indice estratto, oppure null se sono tutti zeri
+ * Estrae un indice tra 1 e count($probabilities), con probabilità non uniforme
+ * La probabilità di estrarre $i è $probabilities[i]/sum($probabilities)
+ * @param $probabilities: array di numeri (sono frequenze), positivi o nulli
+ * @return $i in [0, count($probabilities)-1] indice estratto, oppure null se sono tutti zeri
 */
 function random_probability($probabilities) {
     // $rand numero decimale casuale tra 0 e sum($probabilities) inclusi
@@ -289,6 +289,34 @@ function random_probability($probabilities) {
         if ($probabilities[$i] > 0) return $i;
     }
     return null; // tutti zeri!!!
+}
+
+/**
+ * Create a map with given keys, whose values are $array elements
+ * 
+ * e.g. [[NOME=>Carlo, COGNOME=>Rossi],[NOME=>Paolo, COGNOME=>Bianchi]]
+ * con columns=[NOME,COGNOME]
+ * risultato:
+ * map[Carlo][Rossi]   =  [NOME=>Carlo, COGNOME=>Rossi]
+ * map[Paolo][Bianchi] =  [NOME=>Paolo, COGNOME=>Bianchi]
+ */
+function array_group_by($array, $columns) {
+    $map = [];
+    foreach($array as $elm) {
+        $father = &$map;
+        foreach (range(0, count($columns)-2) as $i) {
+            $col = $columns[$i];
+            $value = $elm[$col];
+            if (!isset($father[$value])) {
+                $father[$value] = [];
+            }
+            $father = &$father[$value];
+        }
+        $col = $columns[count($columns)-1];
+        $value = $elm[$col];
+        $father[$value]= $elm;
+    }
+    return $map;
 }
 
 ?>
