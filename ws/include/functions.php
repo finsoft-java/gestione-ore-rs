@@ -304,17 +304,14 @@ function array_group_by($array, $columns) {
     $map = [];
     foreach($array as $elm) {
         $father = &$map;
-        foreach (range(0, count($columns)-2) as $i) {
-            $col = $columns[$i];
+        foreach ($columns as $col) {
             $value = $elm[$col];
             if (!isset($father[$value])) {
                 $father[$value] = [];
             }
             $father = &$father[$value];
         }
-        $col = $columns[count($columns)-1];
-        $value = $elm[$col];
-        $father[$value]= $elm;
+        $father[]= $elm;
     }
     return $map;
 }

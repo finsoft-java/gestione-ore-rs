@@ -17,7 +17,7 @@ $orderby = isset($_GET['orderby']) ? $con->escape_string($_GET['orderby']) : nul
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     //==========================================================
-    [$objects, $count] = $consuntiviProgettiManager->get_esecuzioni($skip, $top, $orderby);
+    [$objects, $count] = $esecuzioniManager->get_esecuzioni($skip, $top, $orderby);
         
     header('Content-Type: application/json');
     echo json_encode(['data' => $objects, 'count' => $count]);
@@ -26,12 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$idEsecuzione) {
         print_error(400, 'Missing idEsecuzione');
     }
-    $oggetto_su_db = $consuntiviProgettiManager->get_esecuzione($idEsecuzione);
+    $oggetto_su_db = $esecuzioniManager->get_esecuzione($idEsecuzione);
     if (!$oggetto_su_db) {
         print_error(404, 'Not found');
     }
     
-    $consuntiviProgettiManager->elimina_esecuzione($idEsecuzione);
+    $esecuzioniManager->elimina_esecuzione($idEsecuzione);
     
 } else {
     //==========================================================
