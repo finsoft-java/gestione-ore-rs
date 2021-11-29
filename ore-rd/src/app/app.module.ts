@@ -39,7 +39,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { TabellaDateFirmaComponent } from './tabella-date-firma/tabella-date-firma.component';
 import { registerLocaleData } from '@angular/common';
 import localeIt from '@angular/common/locales/it';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { StoricoAssociazioniOreComponent } from './storico-associazioni-ore/storico-associazioni-ore.component';
 import { ProgettoCommesseComponent } from './progetto-commesse/progetto-commesse.component';
@@ -95,6 +96,7 @@ registerLocaleData(localeIt);
     MatDatepickerModule,
     MatMomentDateModule,
     MatCheckboxModule,
+    MatExpansionModule,
     MatAutocompleteModule,
     NgSelectModule
   ],
