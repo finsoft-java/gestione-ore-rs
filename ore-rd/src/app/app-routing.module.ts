@@ -12,6 +12,8 @@ import { ProgettiComponent } from './progetti/progetti.component';
 import { ProgettoDettaglioComponent } from './progetto-dettaglio/progetto-dettaglio.component';
 import { StoricoAssociazioniOreComponent } from './storico-associazioni-ore/storico-associazioni-ore.component';
 import { LoginComponent } from './login/login.component';
+import { GrigliaLulComponent } from './griglia-lul/griglia-lul.component';
+import { GrigliaOreImportateComponent } from './griglia-ore-importate/griglia-ore-importate.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent},
@@ -26,6 +28,8 @@ const routes: Routes = [
   { path: 'esportazione-rapportini', component: EsportazioneRapportiniComponent, canActivate:[AuthGuard]},
   { path: 'raccolta-date-firma', component: RaccoltaDateFirmaComponent, canActivate:[AuthGuard]},
   { path: 'regressione', component: StoricoAssociazioniOreComponent, canActivate:[AuthGuard]},
+  { path: 'ore-importate', component: GrigliaOreImportateComponent, canActivate:[AuthGuard]},
+  { path: 'lul-importati', component: GrigliaLulComponent, canActivate:[AuthGuard]},
   { path: '**', redirectTo: 'progetti' }
 ];
 

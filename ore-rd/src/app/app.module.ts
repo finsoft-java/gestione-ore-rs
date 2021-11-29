@@ -43,6 +43,8 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { StoricoAssociazioniOreComponent } from './storico-associazioni-ore/storico-associazioni-ore.component';
 import { ProgettoCommesseComponent } from './progetto-commesse/progetto-commesse.component';
+import { GrigliaLulComponent } from './griglia-lul/griglia-lul.component';
+import { GrigliaOreImportateComponent } from './griglia-ore-importate/griglia-ore-importate.component';
 
 
 registerLocaleData(localeIt);
@@ -63,7 +65,9 @@ registerLocaleData(localeIt);
     AlertComponent,
     TabellaDateFirmaComponent,
     StoricoAssociazioniOreComponent,
-    ProgettoCommesseComponent
+    ProgettoCommesseComponent,
+    GrigliaLulComponent,
+    GrigliaOreImportateComponent
   ],
   imports: [
     HttpClientModule,
