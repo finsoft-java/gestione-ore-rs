@@ -7,3 +7,5 @@ export * from './ListBean';
 export * from './ValueBean';
 export * from './esecuzione';
 export * from './caricamento';
+export * from './lul';
+export * from './ore.commesse';

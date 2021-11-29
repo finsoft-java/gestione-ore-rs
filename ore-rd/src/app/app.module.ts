@@ -45,6 +45,7 @@ import { StoricoAssociazioniOreComponent } from './storico-associazioni-ore/stor
 import { ProgettoCommesseComponent } from './progetto-commesse/progetto-commesse.component';
 import { GrigliaLulComponent } from './griglia-lul/griglia-lul.component';
 import { GrigliaOreImportateComponent } from './griglia-ore-importate/griglia-ore-importate.component';
+import { MatEditTableComponent } from './mat-edit-table/mat-edit-table.component';
 
 
 registerLocaleData(localeIt);
@@ -67,7 +68,8 @@ registerLocaleData(localeIt);
     StoricoAssociazioniOreComponent,
     ProgettoCommesseComponent,
     GrigliaLulComponent,
-    GrigliaOreImportateComponent
+    GrigliaOreImportateComponent,
+    MatEditTableComponent
   ],
   imports: [
     HttpClientModule,

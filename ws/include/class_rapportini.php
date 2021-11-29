@@ -525,5 +525,45 @@ class RapportiniManager {
         $d2 = date_create("$anno-$mese-01");
         return date_diff($d2, $d1)->format('%m') + 1;
     }
+    
+    function get_ore_commesse($skip=null, $top=null, $orderby=null, $month=null, $matricola=null) {
+        global $con;
+        
+        $sql0 = "SELECT COUNT(*) AS cnt ";
+        $sql1 = "SELECT * ";
+        $sql = "FROM ore_consuntivate_commesse WHERE 1 ";
+        
+        if ($month !== null && $month !== '') {
+            // in forma YYYY-MM
+            $month = substr($con->escape_string($month), 0, 7);
+            $first = "DATE('$month-01')";
+            $sql .= "AND (data BETWEEN $first AND LAST_DAY($first)) ";
+        }
+        
+        if ($matricola !== null && $matricola !== '') {
+            $matricola = $con->escape_string($matricola);
+            $sql .= "AND MATRICOLA_DIPENDENTE='$matricola' ";
+        }
+
+        if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
+            // avoid SQL-injection
+            $sql .= " ORDER BY $orderby";
+        } else {
+            $sql .= " ORDER BY MATRICOLA_DIPENDENTE, DATA, COD_COMMESSA, RIF_SOTTO_COMMESSA";
+        }
+
+        $count = select_single_value($sql0 . $sql);
+
+        if ($top != null) {
+            if ($skip != null) {
+                $sql .= " LIMIT $skip,$top";
+            } else {
+                $sql .= " LIMIT $top";
+            }
+        }        
+        $oggetti = select_list($sql1 . $sql);
+        
+        return [$oggetti, $count];
+    }
 }
 ?>
