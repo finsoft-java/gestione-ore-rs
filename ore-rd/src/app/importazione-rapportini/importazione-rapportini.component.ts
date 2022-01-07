@@ -17,11 +17,12 @@ export class ImportazioneRapportiniComponent implements OnInit {
   message_error = '';
   eventoClick?:any;
   nomiFile:string[] = [];
+  loading = false;
   @ViewChild('fileInput') inputFile?: ElementRef;
 
   constructor(private uploadService: UploadRapportiniService, private alertService: AlertService) { }
 
-  ngOnInit(){
+  ngOnInit() {
   }
 
   reset() {
@@ -32,11 +33,12 @@ export class ImportazioneRapportiniComponent implements OnInit {
     this.message_error = '';
     this.message_success = '';
   }
+
   selectFiles(event: any) {
     this.eventoClick = event;
     this.selectedFiles = event.target.files;
-    if(this.selectedFiles){
-      for(let i = 0; i < this.selectedFiles.length; i++){
+    if (this.selectedFiles) {
+      for (let i = 0; i < this.selectedFiles.length; i++) {
           this.nomiFile.push(this.selectedFiles[i].name);
       }
     }
@@ -51,23 +53,25 @@ export class ImportazioneRapportiniComponent implements OnInit {
   }
 
   uploadFiles() {
-    if(this.selectedFiles) {
+    if (this.selectedFiles) {
       this.upload(this.selectedFiles);
     }
   }
 
   upload(files: FileList) {
     this.progressInfos.value = 0;
+    this.loading = true;
   
     this.uploadService.upload(files).subscribe(
       event => {
         if (event.type === HttpEventType.UploadProgress) {
-          if(event.total){
+          if (event.total) {
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
           }
         } else if (event instanceof HttpResponse) {
           this.message_error = event.body.value.error;
           this.message_success = event.body.value.success;
+          this.loading = false;
         }
       },
       err => {
@@ -77,6 +81,7 @@ export class ImportazioneRapportiniComponent implements OnInit {
             this.message_error = err.error;
         else
             this.message_error = err;
+            this.loading = false;
       });
   }
 

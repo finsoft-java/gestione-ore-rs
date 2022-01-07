@@ -15,12 +15,13 @@ export class ImportazioneLulComponent implements OnInit {
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
-  eventoClick?:any;
-  nomiFile:string[] = [];
+  eventoClick?: any;
+  loading = false;
+  nomiFile: string[] = [];
 
   constructor(private uploadService: UploadFilesService, private alertService: AlertService) { }
 
-  ngOnInit(){
+  ngOnInit() {
   }
 
   reset() {
@@ -35,8 +36,8 @@ export class ImportazioneLulComponent implements OnInit {
   selectFiles(event: any) {
     this.eventoClick = event;
     this.selectedFiles = event.target.files;
-    if(this.selectedFiles){
-      for(let i = 0; i < this.selectedFiles.length; i++){
+    if (this.selectedFiles) {
+      for (let i = 0; i < this.selectedFiles.length; i++) {
           this.nomiFile.push(this.selectedFiles[i].name);
       }
     }
@@ -51,7 +52,7 @@ export class ImportazioneLulComponent implements OnInit {
   }
 
   uploadFiles() {
-    if(this.selectedFiles) {
+    if (this.selectedFiles) {
       this.upload(this.selectedFiles);
     }
   }
@@ -60,7 +61,8 @@ export class ImportazioneLulComponent implements OnInit {
     this.message_error = '';
     this.message_success = '';
     this.selectedFiles = undefined;
-    this.progressInfos.value = 0;  
+    this.progressInfos.value = 0; 
+    this.loading = true; 
     this.uploadService.upload(files).subscribe(
       event => {
         this.eventoClick.srcElement.value = null;
@@ -68,12 +70,13 @@ export class ImportazioneLulComponent implements OnInit {
         this.nomiFile = [];
         this.progressInfos = { value: 0, fileName: 'Caricamento' };
         if (event.type === HttpEventType.UploadProgress) {
-          if(event.total){
+          if (event.total) {
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
           }
         } else if (event instanceof HttpResponse) {
           this.message_error = event.body.value.error;
           this.message_success = event.body.value.success;
+          this.loading = false;
         }
       },
       err => {
@@ -87,6 +90,7 @@ export class ImportazioneLulComponent implements OnInit {
             this.message_error = err.error;
         else
             this.message_error = err;
+        this.loading = false;
       });
   }
 
