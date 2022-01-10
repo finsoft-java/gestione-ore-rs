@@ -18,6 +18,8 @@ require_logged_user_JWT();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //==========================================================
 
+    set_time_limit(120);
+
     $allowedFileType = [
         'application/vnd.ms-excel',
         'text/xls',

@@ -39,6 +39,14 @@ class ProgettiManager {
 
     function crea($json_data) {
         global $con, $logged_user;
+		
+		$dataUltRep = null;
+		if ($json_data->DATA_ULTIMO_REPORT) {
+			// mi aspetto una data del tipo 2020-05-31T22:00:00.000Z
+			// non funziona... c'è un baco nella conversione della data, decresce sempre di 1g
+			$dataUltRep = substr($con->escape_string($json_data->DATA_ULTIMO_REPORT),0,10);
+        }
+
         $sql = insert("progetti", ["ID_PROGETTO" => null,
                                    "TITOLO" => $con->escape_string($json_data->TITOLO),
                                    "ACRONIMO" => $con->escape_string($json_data->ACRONIMO),
@@ -52,7 +60,7 @@ class ProgettiManager {
                                    "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
                                    "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR,
                                    "ORE_GIA_ASSEGNATE" => $json_data->ORE_GIA_ASSEGNATE,
-                                   "DATA_ULTIMO_REPORT" => $json_data->DATA_ULTIMO_REPORT
+                                   "DATA_ULTIMO_REPORT" => $dataUltRep
                                   ]);
         execute_update($sql);
         $id_progetto = mysqli_insert_id($con);
@@ -62,7 +70,15 @@ class ProgettiManager {
     function aggiorna($progetto, $json_data) {
         global $con, $STATO_PROGETTO;
         $titolo = $con->escape_string($json_data->TITOLO);
-        
+		
+		$dataUltRep = null;
+		if ($json_data->DATA_ULTIMO_REPORT) {
+			// mi aspetto una data del tipo 2020-05-31T22:00:00.000Z
+			// non funziona... c'è un baco nella conversione della data, decresce sempre di 1g
+			// $dataUltRep = substr($con->escape_string($json_data->DATA_ULTIMO_REPORT),0,10);
+			$dataUltRep = $con->escape_string($json_data->DATA_ULTIMO_REPORT);
+        }
+		
         $sql = update("progetti", [
                                     "TITOLO" => $con->escape_string($json_data->TITOLO),
                                     "ACRONIMO" => $con->escape_string($json_data->ACRONIMO),
@@ -76,7 +92,7 @@ class ProgettiManager {
                                     "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
                                     "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR,
                                     "ORE_GIA_ASSEGNATE" => $json_data->ORE_GIA_ASSEGNATE,
-                                    "DATA_ULTIMO_REPORT" => $json_data->DATA_ULTIMO_REPORT
+                                    "DATA_ULTIMO_REPORT" => $dataUltRep
                                   ], ["ID_PROGETTO" => $json_data->ID_PROGETTO]);
         execute_update($sql);
     }

@@ -22,10 +22,6 @@ class ConsuntiviProgettiManager {
                 $message->success .= "Monte ore residuo $monte_ore ore." . NL;
             }
 
-            $idEsecuzione = $esecuzioniManager->get_id_esecuzione($idProgetto, $message);
-
-            $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, $message);
-
             list($commesse_p, $commesse_c, $matricole) = $this->load_commesse_e_dipendenti($idProgetto);
 
             if (count($commesse_p) == 0 && count($commesse_c) == 0) {
@@ -37,6 +33,14 @@ class ConsuntiviProgettiManager {
                 return;
             }
             $this->check_commesse_dipendenti($idProgetto, $dataLimite, $message);
+
+            $idEsecuzione = $esecuzioniManager->get_id_esecuzione($idProgetto, $message);
+
+            $affected_rows = $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, $message);
+			if ($affected_rows == 0) {
+                $message->error .= "Nessun caricamento trovato per questo progetto!" . NL;
+                return;
+			}
 
             $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $commesse_p, $message);
             $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $commesse_c, $message);
@@ -152,11 +156,11 @@ class ConsuntiviProgettiManager {
             FROM progetti_commesse c
             JOIN progetti_persone p ON c.ID_PROGETTO=p.ID_PROGETTO
             JOIN progetti pr ON pr.ID_PROGETTO=p.ID_PROGETTO
-            LEFT JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
+            JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
                 AND oc.MATRICOLA_DIPENDENTE=p.MATRICOLA_DIPENDENTE
                 AND oc.DATA > pr.DATA_ULTIMO_REPORT AND oc.DATA < $d
             WHERE pr.ID_PROGETTO=$idProgetto";
-        execute_update($query);
+        return execute_update($query);
     }
 
     /**
@@ -293,7 +297,7 @@ class ConsuntiviProgettiManager {
     function select_max_per_commesse_compatibili($idEsecuzione, $commesse_c) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         $query = "SELECT COD_COMMESSA,
-                    SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100) AS ORE_PREVISTE
+                    NVL(SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100),0) AS ORE_PREVISTE
                 FROM assegnazioni_dettaglio ad
                 WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)
                 GROUP BY COD_COMMESSA";
@@ -303,9 +307,10 @@ class ConsuntiviProgettiManager {
     function select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         
-        $query = "SELECT SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100) AS ORE_COMP
+        $query = "SELECT NVL(SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100),0) AS ORE_COMP
                 FROM assegnazioni_dettaglio ad
                 WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)";
+
         $totale_ore_compatibili_previste = select_single_value($query);
 
         $query = "SELECT MATRICOLA_DIPENDENTE,PCT_IMPIEGO,

@@ -78,7 +78,7 @@ function getAuthorizationHeader(){
 /**
  * Get access token from header
  * @see https://stackoverflow.com/questions/40582161
- * */
+ */
 function getBearerToken() {
     $headers = getAuthorizationHeader();
     if (!empty($headers)) {
@@ -95,6 +95,13 @@ function print_error($http_err_code, $msg) {
     echo json_encode(["code" => $http_err_code, "error" => ["value" => $msg]]);
     die();
 }
+
+// Questa viene richiamata per tutte le eccezioni non trappate, che altrimenti darebbero un errore 500 senza messaggi
+function exception_handler($exception) {
+    print_error(500, "Errore interno. Consultare i log PHP. " . $exception->getMessage());
+}
+
+set_exception_handler('exception_handler');
 
 function utente_admin() {
     global $logged_user;
@@ -197,6 +204,7 @@ function execute_update($sql, $connessione=null) {
     if ($connessione ->error) {
         print_error(500, $connessione ->error);
     }
+	return mysqli_affected_rows($connessione);
 }
 
 // funzioni per creare comandi SQL
