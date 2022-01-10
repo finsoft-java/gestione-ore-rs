@@ -61,9 +61,12 @@ export class ImportazioneRapportiniComponent implements OnInit {
   upload(files: FileList) {
     this.progressInfos.value = 0;
     this.loading = true;
+    this.message_error = '';
+    this.message_success = 'Loading...';
   
     this.uploadService.upload(files).subscribe(
       event => {
+		  console.log("EVENT=", event);
         if (event.type === HttpEventType.UploadProgress) {
           if (event.total) {
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
@@ -75,6 +78,7 @@ export class ImportazioneRapportiniComponent implements OnInit {
         }
       },
       err => {
+		  console.log("ERRORE=", err);
         if (err && err.error && err.error.error)
             this.message_error = err.error.error.message;
         else if (err && err.error)

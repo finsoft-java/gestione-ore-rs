@@ -59,7 +59,7 @@ export class ImportazioneLulComponent implements OnInit {
 
   upload(files: FileList) {
     this.message_error = '';
-    this.message_success = '';
+    this.message_success = 'Loading...';
     this.selectedFiles = undefined;
     this.progressInfos.value = 0; 
     this.loading = true; 
