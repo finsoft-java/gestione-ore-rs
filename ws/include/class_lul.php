@@ -144,7 +144,7 @@ class LULManager {
         
         if ($matricola !== null && $matricola !== '') {
             $matricola = $con->escape_string($matricola);
-            $sql .= "AND MATRICOLA_DIPENDENTE='$matricola' ";
+            $sql .= "AND (MATRICOLA_DIPENDENTE='$matricola' or ID_DIPENDENTE='$matricola')";
         }
 
         if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
