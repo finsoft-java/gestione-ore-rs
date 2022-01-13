@@ -59,7 +59,7 @@ export class StoricoAssociazioniOreComponent implements OnInit {
   checkIsCaricamentoEliminabile() {
     const lastCar = this.dataSource2.data && this.dataSource2.data.length > 0 ? this.dataSource2.data[0] : null;
     const lastEsec = this.dataSource.data && this.dataSource.data.length > 0 ? this.dataSource.data[0] : null;
-    this.isCaricamentoEliminabile = lastEsec != null && lastCar != null && lastEsec.TMS_ESECUZIONE < lastCar.TMS_ESECUZIONE;
+    this.isCaricamentoEliminabile = lastEsec == null || (lastCar != null && lastEsec.TMS_ESECUZIONE < lastCar.TMS_ESECUZIONE);
   }
 
   elimina(e: Esecuzione) {
