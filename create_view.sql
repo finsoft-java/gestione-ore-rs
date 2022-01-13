@@ -1,6 +1,0 @@
-create view progetti_wp_residuo
-AS
-SELECT wp.ID_PROGETTO, wp.ID_WP, wp.DATA_INIZIO, wp.DATA_FINE, wp.MONTE_ORE-NVL(SUM(oc.ORE_LAVORATE),0) AS MONTE_ORE_RESIDUO FROM progetti_wp wp
-LEFT JOIN ore_consuntivate oc ON oc.ID_PROGETTO=wp.ID_PROGETTO AND oc.ID_WP=wp.ID_WP
-GROUP BY wp.ID_PROGETTO, wp.ID_WP, wp.DATA_INIZIO, wp.DATA_FINE, wp.MONTE_ORE;
-

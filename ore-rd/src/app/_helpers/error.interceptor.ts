@@ -14,12 +14,20 @@ export class ErrorInterceptor implements HttpInterceptor {
             if (err.status === 401) {
                 // auto logout if 401 response returned from api
                 this.authenticationService.logout();
-                location.reload(true);
+                location.reload();
             }
 
             // Il messaggio può essere in molti punti diversi, dipende dal browser
             //  Per Firefox è in err.error.error.value
-            let msg  = (err.error.error && err.error.error.value) || err.error.message || err.message || err.statusText;
+            if (err.error instanceof ArrayBuffer) {
+                // caso particolare: l'arraybuffer è un json e contiene l'errore
+                try {
+                    err.error = JSON.parse(this.ab2str(err.error));
+                } catch (error) {
+                    // go on                    
+                }
+            }
+            let msg = (err.error.error && err.error.error.value) || err.error.message || err.message || err.statusText;
             
             // Qui interveniamo per personalizzare gli errori
             if (!msg) {
@@ -31,5 +39,11 @@ export class ErrorInterceptor implements HttpInterceptor {
             
             return throwError(msg);
         }))
+    }
+
+    decoder = new TextDecoder("utf-8");
+    // see https://stackoverflow.com/questions/26754486
+    ab2str(buf: ArrayBuffer) {
+      return this.decoder.decode(new Uint8Array(buf));
     }
 }

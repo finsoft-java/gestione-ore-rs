@@ -57,9 +57,9 @@
         <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
                     <mat-label class="label_mat">Matricola Supervisor</mat-label>
                     <ng-select [items]="allMatricole" 
-                        bindLabel="NOME" 
+                        bindLabel="DENOMINAZIONE" 
                         bindValue="MATRICOLA" 
-                        [(ngModel)]="progetto.MATRICOLA_SUPERVISOR">
+                        [(ngModel)]="progetto.ID_SUPERVISOR">
                     </ng-select>
         </div>
     </div>
@@ -234,21 +234,21 @@
                 <ng-container matColumnDef="nome">
                     <th mat-header-cell *matHeaderCellDef> Denominazione </th>
                     <td mat-cell *matCellDef="let element">
-                        <label *ngIf="!element.isInsert"> {{getNomeMatricola(element.MATRICOLA_DIPENDENTE)}}  </label>
+                        <label *ngIf="!element.isInsert"> {{getNomeMatricola(element.ID_DIPENDENTE)}}  </label>
                         <div>
                             <mat-form-field appearance="fill" *ngIf="element.isInsert" style="display: block;margin: 0px auto;width: 100px;margin-top: 1.34375em;">
-                                <mat-label>Matricola</mat-label>
-                                <mat-select [(ngModel)]="element.MATRICOLA_DIPENDENTE" >
-                                    <mat-option *ngFor="let matricole of allMatricole" [value]="matricole.MATRICOLA">{{matricole.NOME}}</mat-option>
+                                <mat-label>Dipendente</mat-label>
+                                <mat-select [(ngModel)]="element.ID_DIPENDENTE" >
+                                    <mat-option *ngFor="let matricole of allMatricole" [value]="matricole.ID_DIPENDENTE">{{matricole.DENOMINAZIONE}}</mat-option>
                                 </mat-select>
                             </mat-form-field>
                         </div>
                     </td>
                 </ng-container>
-                <ng-container matColumnDef="matricola">
-                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 80px;"> Matricola </th>
+                <ng-container matColumnDef="idDipendente">
+                    <th mat-header-cell *matHeaderCellDef style="overflow: hidden;text-overflow: ellipsis;max-width: 80px;"> Id. </th>
                     <td mat-cell *matCellDef="let element">
-                        <label> {{element.MATRICOLA_DIPENDENTE}} </label>
+                        <label> {{element.ID_DIPENDENTE}} </label>
                     </td>
                 </ng-container>
                 <ng-container matColumnDef="pctImpiego">

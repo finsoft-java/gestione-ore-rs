@@ -53,6 +53,10 @@ export class GrigliaLulComponent {
       data: 'MATRICOLA_DIPENDENTE'
     },
     {
+      title: 'Id.',
+      data: 'ID_DIPENDENTE'
+    },
+    {
       title: 'Data',
       data: 'DATA'
     },

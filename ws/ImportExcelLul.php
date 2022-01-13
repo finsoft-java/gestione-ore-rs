@@ -4,6 +4,7 @@
 
 include("include/all.php");    
 $con = connect();
+$panthera->connect();
 
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 

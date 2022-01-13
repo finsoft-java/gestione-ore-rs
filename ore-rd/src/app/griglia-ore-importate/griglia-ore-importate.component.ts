@@ -49,8 +49,8 @@ export class GrigliaOreImportateComponent {
   myControl = new FormControl();
   columns: ColumnDefinition<OreCommesse>[] = [
     {
-      title: 'Matricola',
-      data: 'MATRICOLA_DIPENDENTE'
+      title: 'Dipendente',
+      data: 'ID_DIPENDENTE'
     },
     {
       title: 'Data',

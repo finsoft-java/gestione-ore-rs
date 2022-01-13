@@ -22,10 +22,10 @@ class ReportBudgetManager {
 
     function get_matricole_progetto($id_progetto) {
         global $panthera;
-        $sql = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM progetti_persone WHERE ID_PROGETTO = '$id_progetto' ORDER BY 1";
+        $sql = "SELECT DISTINCT ID_DIPENDENTE FROM progetti_persone WHERE ID_PROGETTO = '$id_progetto' ORDER BY 1";
         $matricole = select_list($sql); // voglio proprio una lista di oggetti, non una colonna
         foreach ($matricole as $key => $m) {
-            $matricole[$key]['COGNOME_NOME'] = $panthera->getUtente($m['MATRICOLA_DIPENDENTE']);
+            $matricole[$key]['COGNOME_NOME'] = $panthera->getUtente($m['ID_DIPENDENTE']);
         }
         return $matricole;
     }
@@ -33,7 +33,7 @@ class ReportBudgetManager {
     function get_consuntivi_matricola($id_progetto, $matricola, $anno=null) {
         $sql = "SELECT c.DATA, c.NUM_ORE_LAVORATE, c.COSTO " .
                 "FROM ore_consuntivate_progetti c " .
-                "WHERE ID_PROGETTO=$id_progetto AND MATRICOLA_DIPENDENTE='$matricola'";
+                "WHERE ID_PROGETTO=$id_progetto AND ID_DIPENDENTE='$matricola'";
         if (!empty($anno) and !empty($mese)) {
             $primo = "DATE('$anno-$mese-01')";
             $sql .= "AND c.DATA >= $primo AND c.DATA <= LAST_DAY($primo) ";
@@ -47,7 +47,7 @@ class ReportBudgetManager {
         $lista_matricole = $this->get_matricole_progetto($progetto['ID_PROGETTO']);
 
         foreach($lista_matricole as $key => $matricola) {
-            $consuntivi = $this->get_consuntivi_matricola($progetto['ID_PROGETTO'], $matricola['MATRICOLA_DIPENDENTE']);
+            $consuntivi = $this->get_consuntivi_matricola($progetto['ID_PROGETTO'], $matricola['ID_DIPENDENTE']);
 
             // completo le date con quelle del range temporale
             $dates = $this->get_range_temporale($progetto, $anno, $mese);
@@ -85,7 +85,7 @@ class ReportBudgetManager {
                 $totali_per_data[$date_key]['NUM_ORE_LAVORATE'] += $c['NUM_ORE_LAVORATE'];
                 $totali_per_data[$date_key]['COSTO'] += $c['COSTO'];
             }
-            $lista_matricole[$key][] = [ 'MATRICOLA_DIPENDENTE' => 'TOT.', 'DETTAGLI' => $totali_per_data];
+            $lista_matricole[$key][] = [ 'ID_DIPENDENTE' => 'TOT.', 'DETTAGLI' => $totali_per_data];
         }
         
         //var_dump($lista_matricole); die();
@@ -113,7 +113,7 @@ class ReportBudgetManager {
         // AGGIORNO I COSTI
         $costi = $panthera->getMatriceCosti($dataInizio, $dataFine, $tipoCosto);
         foreach ($costi as $c) {
-            $query = "UPDATE ore_consuntivate_progetti SET COSTO_ORARIO=$c[COSTO],COSTO=NUM_ORE_LAVORATE*$c[COSTO] WHERE ID_PROGETTO=$idprogetto AND MATRICOLA_DIPENDENTE='$c[ID_RISORSA]' ";
+            $query = "UPDATE ore_consuntivate_progetti SET COSTO_ORARIO=$c[COSTO],COSTO=NUM_ORE_LAVORATE*$c[COSTO] WHERE ID_PROGETTO=$idprogetto AND ID_DIPENDENTE='$c[ID_RISORSA]' ";
             if (!empty($c["DATA_COSTO"])) {
                 $query .= "AND DATA >= '$c[DATA_COSTO]' ";
             }
@@ -124,7 +124,7 @@ class ReportBudgetManager {
         }
         
         // VERIFICO COSTI MANCANTI
-        $query = "SELECT DISTINCT MATRICOLA_DIPENDENTE FROM ore_consuntivate_progetti " .
+        $query = "SELECT DISTINCT ID_DIPENDENTE FROM ore_consuntivate_progetti " .
                 "WHERE ID_PROGETTO=$idprogetto " .
                 "AND DATA >= '$dataInizio' AND DATA <= '$dataFine' AND COSTO_ORARIO IS NULL";
         $mancanti = select_column($query);
@@ -155,7 +155,7 @@ class ReportBudgetManager {
         }
 
         global $panthera;
-        $nomecognome_super = $panthera->getUtente($progetto['MATRICOLA_SUPERVISOR']);
+        $nomecognome_super = $panthera->getUtente($progetto['ID_SUPERVISOR']);
         
         $budget = $progetto["MONTE_ORE_TOT"] * $progetto["COSTO_MEDIO_UOMO"];
         $scarto_ore = ($totali["NUM_ORE_LAVORATE"] - $progetto["MONTE_ORE_TOT"]) / $progetto["MONTE_ORE_TOT"] * 100;
@@ -261,7 +261,7 @@ class ReportBudgetManager {
         }
 
         $report['warning'] = $this->update_costi_progetto($report['progetto'], $anno, $mese);
-        $report['progetto']['COGNOME_NOME_SUPERVISOR'] = $panthera->getUtente($report['progetto']['MATRICOLA_SUPERVISOR']);
+        $report['progetto']['COGNOME_NOME_SUPERVISOR'] = $panthera->getUtente($report['progetto']['ID_SUPERVISOR']);
         
         $report['budget'] = $report['progetto']['MONTE_ORE_TOT'] * $report['progetto']['COSTO_MEDIO_UOMO'];
 

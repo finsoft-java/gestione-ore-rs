@@ -118,22 +118,35 @@ class PantheraManager {
 
     function getUtenti() {
         if ($this->mock) {
-            $matricole = [ [ 'MATRICOLA' => '1234', 'NOME' => 'Rossi Mario' ],
-                      [ 'MATRICOLA' => '4321', 'NOME' => 'Verdi Carlo' ],
-                      [ 'MATRICOLA' => '6666', 'NOME' => 'Bianchi Gianni' ]
+            $matricole = [ [ 'MATRICOLA' => '1234', 'ID_DIPENDENTE' => 'F01234', 'DENOMINAZIONE' => 'Rossi Mario' ],
+                      [ 'MATRICOLA' => '4321', 'ID_DIPENDENTE' => 'F04321', 'DENOMINAZIONE' => 'Verdi Carlo' ],
+                      [ 'MATRICOLA' => '6666', 'ID_DIPENDENTE' => 'F06666', 'DENOMINAZIONE' => 'Bianchi Gianni' ]
                      ];
         } else {
-            $query = "SELECT DISTINCT RTRIM(R_DIPENDENTE) AS MATRICOLA,RTRIM(DENOMINAZIONE) AS NOME FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' ORDER BY RTRIM(DENOMINAZIONE) ASC";
+            $query = "SELECT DISTINCT RTRIM(ID_DIPENDENTE) AS ID_DIPENDENTE,RTRIM(DENOMINAZIONE) AS DENOMINAZIONE,RTRIM(MATRICOLA) AS MATRICOLA
+                    FROM THIP.DIPENDENTI_V01
+                    WHERE ID_AZIENDA='001'
+                    ORDER BY RTRIM(DENOMINAZIONE) ASC";
             $matricole = $this->select_list($query);
         }        
         return $matricole;
     }
 
-    function getUtente($matricola) {
+    function getUtenteByMatricola($matricola) {
         if ($this->mock) {
             $matricola = 'Rossi Mario';
         } else {
-            $query = "SELECT DISTINCT DENOMINAZIONE FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' AND RTRIM(R_DIPENDENTE)=RTRIM('$matricola')";
+            $query = "SELECT DISTINCT DENOMINAZIONE FROM THIP.DIPENDENTI_V01 WHERE ID_AZIENDA='001' AND RTRIM(MATRICOLA)=RTRIM('$matricola')";
+            $matricola = $this->select_single_value($query);
+        }
+        return $matricola;
+    }
+
+    function getUtenteByIdDipendente($idDipendente) {
+        if ($this->mock) {
+            $matricola = 'Rossi Mario';
+        } else {
+            $query = "SELECT DISTINCT DENOMINAZIONE FROM THIP.UTENTI_AZIENDE_V01 WHERE ID_AZIENDA='001' AND RTRIM(ID_DIPENDENTE)=RTRIM('$idDipendente')";
             $matricola = $this->select_single_value($query);
         }
         return $matricola;

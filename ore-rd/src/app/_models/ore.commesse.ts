@@ -1,6 +1,6 @@
 ﻿export class OreCommesse {
   constructor(
-    public MATRICOLA_DIPENDENTE: string,
+    public ID_DIPENDENTE: string,
     public DATA: Date,
     public COD_COMMESSA: string,
     public RIF_SERIE_DOC: string,

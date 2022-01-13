@@ -15,7 +15,7 @@ class RapportiniManager {
         $primo = "DATE('$anno-$mese-01')";
 
         // Con questa query cerco di stampare solo i rapportini dei dipendenti che mi interessano
-        $query_matricole = "SELECT DISTINCT r.MATRICOLA_DIPENDENTE, p.* " .
+        $query_matricole = "SELECT DISTINCT r.ID_DIPENDENTE, p.* " .
             "FROM progetti p " .
             "JOIN progetti_persone r ON p.ID_PROGETTO=r.ID_PROGETTO " .
             "WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo)";
@@ -25,7 +25,7 @@ class RapportiniManager {
             return [];
         }
 
-        $query_consuntivo = "SELECT ID_PROGETTO,MATRICOLA_DIPENDENTE,DATA,NUM_ORE_LAVORATE " .
+        $query_consuntivo = "SELECT ID_PROGETTO,ID_DIPENDENTE,DATA,NUM_ORE_LAVORATE " .
                     "FROM ore_consuntivate_progetti " .
                     "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
         $consuntivo = select_list($query_consuntivo);
@@ -35,21 +35,21 @@ class RapportiniManager {
 
         foreach($matricole as $row) {
             $idprogetto = $row["ID_PROGETTO"];
-            $matr = $row["MATRICOLA_DIPENDENTE"];
-            if (! isset($map_progetti_matricole[$matr])) {
-                $map_progetti_matricole[$matr] = array();
+            $idDipendente = $row["ID_DIPENDENTE"];
+            if (! isset($map_progetti_matricole[$idDipendente])) {
+                $map_progetti_matricole[$idDipendente] = array();
             }
-            if (! isset($map_progetti_matricole[$matr][$idprogetto])) {
-                $map_progetti_matricole[$matr][$idprogetto] = $row;
-                $map_progetti_matricole[$matr][$idprogetto]['DATE'] = array();
+            if (! isset($map_progetti_matricole[$idDipendente][$idprogetto])) {
+                $map_progetti_matricole[$idDipendente][$idprogetto] = $row;
+                $map_progetti_matricole[$idDipendente][$idprogetto]['DATE'] = array();
             }
         }
 
         foreach ($consuntivo as $row) {
             $idprogetto = $row["ID_PROGETTO"];
-            $matr = $row["MATRICOLA_DIPENDENTE"];
+            $idDipendente = $row["ID_DIPENDENTE"];
             $data = new DateTime($row["DATA"]);
-            $map_progetti_matricole[$matr][$idprogetto]['DATE'][$data->format('j')] = 0.0 + $row["NUM_ORE_LAVORATE"];
+            $map_progetti_matricole[$idDipendente][$idprogetto]['DATE'][$data->format('j')] = 0.0 + $row["NUM_ORE_LAVORATE"];
         }
     return $map_progetti_matricole;
     }
@@ -73,9 +73,9 @@ class RapportiniManager {
                     [2] => Array
                         (
                             [ID_PROGETTO] => 2
-                            [MATRICOLA_DIPENDENTE] => 1234
+                            [ID_DIPENDENTE] => 1234
                             [ACRONIMO] => aad'
-                            [MATRICOLA_SUPERVISOR] => 4321
+                            [ID_SUPERVISOR] => 4321
                             [DATE] => Array
                                 (
                                     [6] => 5
@@ -104,24 +104,28 @@ class RapportiniManager {
         $tempfiles = [];
         
         // MAIN LOOP
-        foreach ($map_progetti_matricole as $matr => $map_progetti) {
+        foreach ($map_progetti_matricole as $idDipendente => $map_progetti) {
             if ($isEsploso) {
                 // un report distinto per ogni progetto
                 foreach( $map_progetti as $idprogetto => $row) {
-                    $xlsxfilename = $this->creaFileExcel($matr, $anno, $mese, [$idprogetto => $row], $map_matr_ore);
-                    $matr = trim($matr);
-                    $acronimo = trim($row["ACRONIMO"]);
-                    $xlsxfilename_final = "Rapportini_${matr}_${acronimo}_$anno$mese.xlsx";
-                    $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON salva su disco
-                    $tempfiles[] = $xlsxfilename;
+                    $xlsxfilename = $this->creaFileExcel($idDipendente, $anno, $mese, [$idprogetto => $row], $map_matr_ore);
+                    if ($xlsxfilename != null) {
+                        $idDipendente = trim($idDipendente);
+                        $acronimo = trim($row["ACRONIMO"]);
+                        $xlsxfilename_final = "Rapportini_${idDipendente}_${acronimo}_$anno$mese.xlsx";
+                        $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON salva su disco
+                        $tempfiles[] = $xlsxfilename;
+                    }
                 }
             } else {
                 // unico report con tutti i progetti
-                $xlsxfilename = $this->creaFileExcel($matr, $anno, $mese, $map_progetti, $map_matr_ore);
-                $matr = trim($matr);
-                $xlsxfilename_final = "Rapportini_${matr}_$anno$mese.xlsx";
-                $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON salva su disco
-                $tempfiles[] = $xlsxfilename;
+                $xlsxfilename = $this->creaFileExcel($idDipendente, $anno, $mese, $map_progetti, $map_matr_ore);
+                if ($xlsxfilename != null) {
+                    $idDipendente = trim($idDipendente);
+                    $xlsxfilename_final = "Rapportini_${idDipendente}_$anno$mese.xlsx";
+                    $zip->addFile($xlsxfilename, $xlsxfilename_final); // NON salva su disco
+                    $tempfiles[] = $xlsxfilename;
+                }
             }
         }
 
@@ -133,21 +137,23 @@ class RapportiniManager {
         return $zipfilename;
     }
 
-    function creaFileExcel($matr, $anno, $mese, $map_matricole_progetti, $map_matr_ore) {
+    function creaFileExcel($idDipendente, $anno, $mese, $map_matricole_progetti, $map_matr_ore) {
         
         // Sto assumento che ci sia un unico supervisor per tutti i progetti...
         // E le stesse data firma!
         // cfr. email Gabriele / Alice del 25/05/2021
         $unIdProgettoACaso = array_keys($map_matricole_progetti)[0];
         $unProgettoACaso = $map_matricole_progetti[$unIdProgettoACaso];
-        $data_firma = $this->get_data_firma($unIdProgettoACaso, $matr, $anno, $mese);
-
+        if ($unProgettoACaso == null || !isset($unProgettoACaso['ID_PROGETTO'])) {
+            // qualcosa non va, ma pazienza
+            return null;
+        }
+        $data_firma = $this->get_data_firma($unIdProgettoACaso, $idDipendente, $anno, $mese);
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $mese, $anno);
 
         global $panthera;
-        $nomecognome = $panthera->getUtente($matr);
-
-        $nomecognome_super = $panthera->getUtente($unProgettoACaso['MATRICOLA_SUPERVISOR']);
+        $nomecognome = $panthera->getUtenteByIdDipendente($idDipendente);
+        $nomecognome_super = $panthera->getUtenteByIdDipendente($unProgettoACaso['ID_SUPERVISOR']);
 
         $data_inizio_progetto = $unProgettoACaso['DATA_INIZIO'];
 
@@ -159,10 +165,10 @@ class RapportiniManager {
         $rigaTotali = 1;
 
         $this->adjustWidth($sheet);
-        $this->creaIntestazione($sheet, $curRow, $anno, $mese, $matr, $nomecognome, $nomecognome_super);
-        $this->creaTabellaPresenze($sheet, $curRow, $anno, $mese, $matr, $map_matr_ore, $rigaTotali, $daysInMonth);
+        $this->creaIntestazione($sheet, $curRow, $anno, $mese, $idDipendente, $nomecognome, $nomecognome_super);
+        $this->creaTabellaPresenze($sheet, $curRow, $anno, $mese, $idDipendente, $map_matr_ore, $rigaTotali, $daysInMonth);
 
-        $this->creaTabella($sheet, $curRow, -1 /* FIXME */, $map_matricole_progetti, $anno, $mese, $matr, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth);
+        $this->creaTabella($sheet, $curRow, -1 /* FIXME */, $map_matricole_progetti, $anno, $mese, $idDipendente, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth);
 
         $this->aggiornaRigaTotali($sheet, $curRow, $rigaTotali, $daysInMonth);
 
@@ -177,8 +183,8 @@ class RapportiniManager {
         return $xlsxfilename;
     }
     
-    function get_data_firma($idProgetto, $matr, $anno, $mese) {
-        $sql = "SELECT DATA_FIRMA FROM date_firma WHERE MATRICOLA_DIPENDENTE='$matr' AND ANNO_MESE='$anno-$mese' AND ID_PROGETTO='$idProgetto'";
+    function get_data_firma($idProgetto, $idDipendente, $anno, $mese) {
+        $sql = "SELECT DATA_FIRMA FROM date_firma WHERE ID_DIPENDENTE='$idDipendente' AND ANNO_MESE='$anno-$mese' AND ID_PROGETTO='$idProgetto'";
         return select_single_value($sql);
     }
 
@@ -191,7 +197,7 @@ class RapportiniManager {
         }
     }
 
-    function creaIntestazione($sheet, &$curRow, $anno, $mese, $matr, $nomecognome, $nomecognome_super) {
+    function creaIntestazione($sheet, &$curRow, $anno, $mese, $idDipendente, $nomecognome, $nomecognome_super) {
         
         $data = new DateTime("$anno-$mese-01");
         
@@ -213,7 +219,7 @@ class RapportiniManager {
         $curRow ++;
     }
 
-    function creaTabellaPresenze($sheet, &$curRow, $anno, $mese, $matr, $map_matr_ore, &$rigaTotali, $daysInMonth) {
+    function creaTabellaPresenze($sheet, &$curRow, $anno, $mese, $idDipendente, $map_matr_ore, &$rigaTotali, $daysInMonth) {
 
         $first_row = $curRow;
         // In alto i giorni
@@ -238,8 +244,8 @@ class RapportiniManager {
         $sheet->setCellValue('B' . $curRow, "=SUM(C$curRow:AG$curRow)");
         for ($i = 1; $i <= $daysInMonth; ++$i) {
             $curCol = $i + 2;
-            if (isset($map_matr_ore[$matr][$i])) {
-                $ore = $map_matr_ore[$matr][$i];
+            if (isset($map_matr_ore[$idDipendente][$i])) {
+                $ore = $map_matr_ore[$idDipendente][$i];
             } else {
                 $ore = 'A';
                 $map_matr_ore[$i] = 0;
@@ -450,7 +456,7 @@ class RapportiniManager {
             }
             $dataDoc = $dataDocDt->format('Y-m-d');
 
-            $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,MATRICOLA_DIPENDENTE,DATA,RIF_SERIE_DOC,RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA,NUM_ORE_LAVORATE,ID_CARICAMENTO) " .
+            $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,ID_DIPENDENTE,DATA,RIF_SERIE_DOC,RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA,NUM_ORE_LAVORATE,ID_CARICAMENTO) " .
                         "VALUES('$codCommessa','$matricola','$dataDoc','$serieDoc','$nrDoc','$codAtv','$codSottoComm','$numOre',$idCaricamento)";
             execute_update($query);
             ++$contatore;
@@ -542,14 +548,14 @@ class RapportiniManager {
         
         if ($matricola !== null && $matricola !== '') {
             $matricola = $con->escape_string($matricola);
-            $sql .= "AND MATRICOLA_DIPENDENTE='$matricola' ";
+            $sql .= "AND ID_DIPENDENTE='$matricola' ";
         }
 
         if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
             // avoid SQL-injection
             $sql .= " ORDER BY $orderby";
         } else {
-            $sql .= " ORDER BY MATRICOLA_DIPENDENTE, DATA, COD_COMMESSA, RIF_SOTTO_COMMESSA";
+            $sql .= " ORDER BY ID_DIPENDENTE, DATA, COD_COMMESSA, RIF_SOTTO_COMMESSA";
         }
 
         $count = select_single_value($sql0 . $sql);

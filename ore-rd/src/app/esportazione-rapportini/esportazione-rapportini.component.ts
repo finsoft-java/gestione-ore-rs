@@ -70,7 +70,6 @@ export class EsportazioneRapportiniComponent implements OnInit {
             this.downloadFile(response);
         },
         error => {
-          // Qui error è una stringa !?!
           if (error && error.includes('404')) {
             this.alertService.error('Nessun dato per il periodo selezionato');
           } else {
@@ -88,5 +87,4 @@ export class EsportazioneRapportiniComponent implements OnInit {
         anchor.href = url;
         anchor.click();
     }
-
 }

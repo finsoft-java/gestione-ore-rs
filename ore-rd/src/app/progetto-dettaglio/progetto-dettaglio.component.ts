@@ -3,7 +3,7 @@ import { ProgettiPersoneService } from '../_services/progetti.persone.service';
 import { ProgettiSpesaService } from './../_services/progetti.spesa.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
-import { Progetto, ProgettoPersona, ProgettoSpesa, Tipologia } from './../_models';
+import { Matricola, Progetto, ProgettoPersona, ProgettoSpesa, Tipologia } from './../_models';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProgettiService } from './../_services/progetti.service';
 import { AlertService } from './../_services/alert.service';
@@ -43,12 +43,12 @@ export class ProgettoDettaglioComponent implements OnInit {
   progetto!: Progetto;
   progetto_old!: Progetto;
   displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
-  displayedColumnsPersone: string[] = ['nome', 'matricola', 'pctImpiego', 'actions'];
+  displayedColumnsPersone: string[] = ['nome', 'idDipendente', 'pctImpiego', 'actions'];
   
   dataSource = new MatTableDataSource<ProgettoSpesa>();
   dataSourcePersone = new MatTableDataSource<ProgettoPersona>();
   allTipologie: Tipologia[] = [];
-  allMatricole: {MATRICOLA: string, NOME: string}[] = [];
+  allMatricole: Matricola[] = [];
   allTipiCosto: {ID_TIPO_COSTO: string, DESCRIZIONE: string}[] = [];
   idProgetto!: number|null;
   errore_stringa = '';
@@ -148,12 +148,12 @@ export class ProgettoDettaglioComponent implements OnInit {
       });
   }
 
-  getNomeMatricola(matricola: string): string {
+  getNomeMatricola(idDipendente: string): string {
     if (this.allMatricole == null) {
       return '(unknown)';
     }
-    const pantheraObj = this.allMatricole.find(x => x.MATRICOLA == matricola);
-    return pantheraObj != null ? pantheraObj.NOME : '(unknown)';
+    const pantheraObj = this.allMatricole.find(x => x.ID_DIPENDENTE == idDipendente);
+    return pantheraObj != null && pantheraObj.DENOMINAZIONE != null ? pantheraObj.DENOMINAZIONE : '(unknown)';
   }
 
   getSupervisor(): void {
@@ -220,7 +220,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     let nuovo: ProgettoPersona;
     nuovo = {
       ID_PROGETTO: this.progetto.ID_PROGETTO, 
-      MATRICOLA_DIPENDENTE: null, 
+      ID_DIPENDENTE: null,
       PCT_IMPIEGO: 0, 
       isEditable: true,
       isInsert: true
@@ -246,8 +246,8 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   deleteChangePersona(p: ProgettoPersona) {
-    if (p.MATRICOLA_DIPENDENTE != null && p.ID_PROGETTO != null) {
-      this.progettiPersoneService.delete(p.ID_PROGETTO, p.MATRICOLA_DIPENDENTE)
+    if (p.ID_DIPENDENTE != null && p.ID_PROGETTO != null) {
+      this.progettiPersoneService.delete(p.ID_PROGETTO, p.ID_DIPENDENTE)
       .subscribe(response => {
         this.getProgettoPersone();
       },

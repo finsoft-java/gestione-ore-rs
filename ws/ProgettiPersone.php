@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(400, "Missing JSON data");
     }
 
-    $wp_su_db = $progettiPersoneManager->get_persona($json_data->ID_PROGETTO, $json_data->MATRICOLA_DIPENDENTE);
+    $wp_su_db = $progettiPersoneManager->get_persona($json_data->ID_PROGETTO, $json_data->ID_DIPENDENTE);
     if (!$wp_su_db) {
         print_error(404, 'Not found');
     }

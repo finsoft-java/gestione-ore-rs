@@ -58,7 +58,7 @@ class ProgettiManager {
                                    "DATA_FINE" => $json_data->DATA_FINE,
                                    "COSTO_MEDIO_UOMO" => $json_data->COSTO_MEDIO_UOMO,
                                    "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
-                                   "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR,
+                                   "ID_SUPERVISOR" => $json_data->ID_SUPERVISOR,
                                    "ORE_GIA_ASSEGNATE" => $json_data->ORE_GIA_ASSEGNATE,
                                    "DATA_ULTIMO_REPORT" => $dataUltRep
                                   ]);
@@ -90,7 +90,7 @@ class ProgettiManager {
                                     "DATA_FINE" => $json_data->DATA_FINE,
                                     "COSTO_MEDIO_UOMO" => $json_data->COSTO_MEDIO_UOMO,
                                     "COD_TIPO_COSTO_PANTHERA" => $json_data->COD_TIPO_COSTO_PANTHERA,
-                                    "MATRICOLA_SUPERVISOR" => $json_data->MATRICOLA_SUPERVISOR,
+                                    "ID_SUPERVISOR" => $json_data->ID_SUPERVISOR,
                                     "ORE_GIA_ASSEGNATE" => $json_data->ORE_GIA_ASSEGNATE,
                                     "DATA_ULTIMO_REPORT" => $dataUltRep
                                   ], ["ID_PROGETTO" => $json_data->ID_PROGETTO]);

@@ -13,7 +13,7 @@ export class Progetto {
     public DATA_FINE: string|null = null,
     public COSTO_MEDIO_UOMO: number|null = null,
     public COD_TIPO_COSTO_PANTHERA: string|null = null,
-    public MATRICOLA_SUPERVISOR: string|null = null,
+    public ID_SUPERVISOR: string|null = null,
     public ORE_GIA_ASSEGNATE: number|null = null,
     public DATA_ULTIMO_REPORT: Date|null = null,
     ) {}   
@@ -34,7 +34,7 @@ export class ProgettoSpesa {
 export class ProgettoPersona {
   constructor(
     public ID_PROGETTO: number|null = null,
-    public MATRICOLA_DIPENDENTE: string|null = null,
+    public ID_DIPENDENTE: string|null = null,
     public PCT_IMPIEGO: number = 0,
     public isEditable: boolean = false,
     public isInsert: boolean = false

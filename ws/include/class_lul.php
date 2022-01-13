@@ -46,6 +46,7 @@ class LULManager {
         $spreadSheetAry = $excelSheet->toArray();
         $numRows = count($spreadSheetAry);
         $primaRiga = 0;
+        $mapMatricole = $this->getMapMatricole();
         while ($primaRiga < $numRows) {
             if ($spreadSheetAry[$primaRiga][0] == 'Azienda') {
                 [$annoMese, $ultimoGiornoMese] = $this->leggiAzienda($primaRiga, $spreadSheetAry);
@@ -54,13 +55,29 @@ class LULManager {
                 }
                 $primaRiga = $primaRiga + 3;
             } else if($spreadSheetAry[$primaRiga][0] == 'Matricola'){
-                $this->leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, $spreadSheetAry);
+                $this->leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, $mapMatricole, $spreadSheetAry);
                 $primaRiga = $primaRiga + 10;
             } else {
                 break;
             }
         }
         $message->success .= 'Caricamento Effettuato correttamente.</br>';
+    }
+
+    /**
+     * Carica da Panthera la lista dei dipendenti, e crea una mappa che
+     * converte la matricola nell'ID dipendente
+     */
+    function getMapMatricole() {
+        global $panthera;
+        $matricole = $panthera->getUtenti();
+        $mapMatricole =  [];
+        if (count($matricole) > 0) {
+            foreach($matricole as $m) {
+                $mapMatricole[$m['MATRICOLA']] = $m['ID_DIPENDENTE'];
+            }
+        }
+        return $mapMatricole;
     }
 
     function leggiAzienda($primaRiga, &$spreadSheetAry) {
@@ -83,7 +100,7 @@ class LULManager {
         return ["$anno-$mese", $ultimoGiornoMese];
     }
 
-    function leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, &$spreadSheetAry) {
+    function leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, $mapMatricole, &$spreadSheetAry) {
         $pezzi_comando_sql = [];
         $matricola = $spreadSheetAry[$primaRiga][1];
         if($matricola != 0){
@@ -93,10 +110,14 @@ class LULManager {
                 if($ore == ''){
                     $ore = 0;
                 }
-                $pezzi_comando_sql[] = "('$matricola','$data','$ore')";
+                $idDipendente = '';
+                if (isset($mapMatricole[$matricola])) {
+                    $idDipendente = $mapMatricole[$matricola];
+                }
+                $pezzi_comando_sql[] = "('$matricola','$idDipendente','$data','$ore')";
             }
         
-            $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES " .
+            $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,ID_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES " .
                 implode(',', $pezzi_comando_sql);
             execute_update($sql);
         }
