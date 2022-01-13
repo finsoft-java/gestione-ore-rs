@@ -104,6 +104,7 @@ export class GrigliaOreImportateComponent {
   resetFilter(editTableComponent: any): void {
     delete this.filter.matricola;
     delete this.filter.month;
+    this.date.setValue(null);
     editTableComponent.filter(this.filter);
   }
 
