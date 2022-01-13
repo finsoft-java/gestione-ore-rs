@@ -181,6 +181,9 @@ export class ProgettoDettaglioComponent implements OnInit {
 
     if (this.progetto.DATA_INIZIO)
       this.progetto.DATA_INIZIO = formatDate(this.progetto.DATA_INIZIO,"YYYY-MM-dd","en-GB");
+
+    if (this.progetto.DATA_ULTIMO_REPORT)
+      this.progetto.DATA_ULTIMO_REPORT = formatDate(this.progetto.DATA_ULTIMO_REPORT,"YYYY-MM-dd","en-GB");
     
     if (this.idProgetto == null) {
       this.progettiService.insert(this.progetto)

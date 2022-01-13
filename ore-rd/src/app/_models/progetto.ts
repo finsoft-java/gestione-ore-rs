@@ -15,7 +15,7 @@ export class Progetto {
     public COD_TIPO_COSTO_PANTHERA: string|null = null,
     public ID_SUPERVISOR: string|null = null,
     public ORE_GIA_ASSEGNATE: number|null = null,
-    public DATA_ULTIMO_REPORT: Date|null = null,
+    public DATA_ULTIMO_REPORT: string|null = null,
     ) {}   
 }
 
