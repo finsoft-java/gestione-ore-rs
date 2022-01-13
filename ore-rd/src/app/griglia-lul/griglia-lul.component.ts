@@ -66,7 +66,7 @@ export class GrigliaLulComponent {
     }
   ];
   service!: LulService;
-  date = new FormControl(moment());
+  date = new FormControl();
 
   
   constructor(private lulService: LulService){
@@ -91,10 +91,14 @@ export class GrigliaLulComponent {
   resetFilter(editTableComponent: any): void {
     delete this.filter.matricola;
     delete this.filter.month;
+    this.date.setValue(null);
     editTableComponent.filter(this.filter);
   }
 
   chosenYearHandler(normalizedYear: Moment) {
+    if (this.date.value == null) {
+      this.date.setValue(moment());
+    }
     const ctrlValue = this.date.value;
     ctrlValue.year(normalizedYear.year());
     this.date.setValue(ctrlValue);
