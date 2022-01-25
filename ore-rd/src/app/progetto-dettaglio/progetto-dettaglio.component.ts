@@ -438,10 +438,17 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
   }
 
+  /**
+   * Arrotonda x a 4 decimali
+   */
+  round4(x: number) {
+    return Math.round(x * 10000) / 10000;
+  }
+
   ripartisciPercentuali() {
     const array = this.dataSourcePersone.data;
     if (array != null && array.length > 0) {
-      const media = 100.0 / array.length;
+      const media = this.round4(100.0 / array.length);
       array.forEach(x => x.PCT_IMPIEGO = media);
       this.dataSourcePersone.data = array; //this is not useless!
       array.forEach(x => {
