@@ -68,14 +68,14 @@
         <div>
             <h5 style="margin-bottom: 20px;text-align:center">Budget</h5>
         </div>
-        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz3_width">
-                <mat-form-field appearance="fill" style="margin-right: 10px;">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz4_width">
+                <mat-form-field appearance="fill">
                     <mat-label>Monte Ore Totale</mat-label>
                     <input matInput [value]="this.progetto.MONTE_ORE_TOT|number:'1.0'"
                     (change)="setMonteOreFmt($event)" placeholder="Inserisci un numero">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
-                <mat-form-field appearance="fill" style="margin-right: 10px;">
+                <mat-form-field appearance="fill">
                     <mat-label>Costo orario Medio Uomo &euro;</mat-label>
                     <input matInput 
                         [value]="this.progetto.COSTO_MEDIO_UOMO|number:'1.2'"
@@ -91,31 +91,36 @@
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
         </div>
-        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz3_width">
-                <mat-form-field appearance="fill" style="margin-right: 10px;">
+        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz4_width">
+                <mat-form-field appearance="fill">
                     <mat-label>Mesi uomo totali</mat-label>
-                    <input matInput disabled [value]="monteOreMensile(progetto.MONTE_ORE_TOT)|number:'1.2'">
+                    <input matInput disabled [value]="monteOreMensile()|number:'1.2'">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
-                <mat-form-field appearance="fill" style="margin-right: 10px;">
+                <mat-form-field appearance="fill">
                     <mat-label>Costo Uomo Mensile &euro;</mat-label>
-                    <input matInput disabled [value]="costoMensile(progetto.COSTO_MEDIO_UOMO)|number:'1.2'">
+                    <input matInput disabled [value]="costoMensile()|number:'1.2'">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
                 <mat-form-field appearance="fill">
                     <mat-label>Mesi uomo budget</mat-label>
-                    <input matInput disabled [value]="monteOreMensile(progetto.OBIETTIVO_BUDGET_ORE)|number:'1.2'">
+                    <input matInput disabled [value]="obiettivoBudgetMensile()|number:'1.2'">
                     <mat-hint>required</mat-hint>
                 </mat-form-field>
-        </div>
-        <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
-            <mat-form-field appearance="fill">
-                <mat-label>Tipo Costo Panthera</mat-label>
-                <mat-select [(ngModel)]="progetto.COD_TIPO_COSTO_PANTHERA">
-                    <mat-option *ngFor="let tipoCosto of allTipiCosto" [value]="tipoCosto.ID_TIPO_COSTO">{{tipoCosto.DESCRIZIONE}}</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
+                <mat-form-field appearance="fill">
+                    <mat-label>Costo Totale Budget &euro;</mat-label>
+                    <input matInput disabled [value]="costoTotaleBudget()|number:'1.2'">
+                    <mat-hint>required</mat-hint>
+                </mat-form-field>
+    </div>
+    
+    <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
+        <mat-form-field appearance="fill">
+            <mat-label>Tipo Costo Panthera</mat-label>
+            <mat-select [(ngModel)]="progetto.COD_TIPO_COSTO_PANTHERA">
+                <mat-option *ngFor="let tipoCosto of allTipiCosto" [value]="tipoCosto.ID_TIPO_COSTO">{{tipoCosto.DESCRIZIONE}}</mat-option>
+            </mat-select>
+        </mat-form-field>
     </div>
 
     <div style="margin-top:30px;margin-bottom:30px;">

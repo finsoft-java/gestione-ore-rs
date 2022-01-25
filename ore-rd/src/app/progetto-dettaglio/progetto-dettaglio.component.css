@@ -4,15 +4,21 @@
 .fraz3_width>.mat-form-field {
     width: calc(33% - 6px);
 }
+.fraz4_width>.mat-form-field {
+    width: calc(25% - 4px);
+    margin-right: 4px;
+}
 .max_width>.mat-form-field {
     width: 100%;
 }
 
 .max_width,
 .fraz2_width,
-.fraz3_width {
+.fraz3_width,
+.fraz4_width {
     margin-bottom: 15px !important;
 }
+
 
 label {
     margin-bottom: 0px;

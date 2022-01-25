@@ -26,6 +26,8 @@ export const MY_FORMATS = {
   }
 };
 
+export const MONTE_ORE_MENSILE_PREVISTO = 1720 / 12; // 143.3333
+
 @Component({
   selector: 'app-progetto-dettaglio',
   templateUrl: './progetto-dettaglio.component.html',
@@ -52,7 +54,6 @@ export class ProgettoDettaglioComponent implements OnInit {
   allTipiCosto: {ID_TIPO_COSTO: string, DESCRIZIONE: string}[] = [];
   idProgetto!: number|null;
   errore_stringa = '';
-  MONTE_ORE_MENSILE_PREVISTO = 1720 / 12; // 143.3333
   isPercentuali100 = true;
 
   constructor(private authenticationService: AuthenticationService,
@@ -345,18 +346,51 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.router.navigate(["progetto", this.progetto.ID_PROGETTO, "associazione-ore"]);
   }
 
-  monteOreMensile(monteOre: number|null) {
-    if (monteOre === null) {
-      return null;
-    }
-    return Math.round((monteOre / this.MONTE_ORE_MENSILE_PREVISTO)*100) / 100;
+  /**
+   * Arrotonda x a 2 decimali
+   */
+  round2(x: number) {
+    return Math.round(x * 100) / 100;
   }
 
-  costoMensile(costoOrario: number|null) {
-    if (costoOrario === null) {
+  /**
+   * Restituisce l'equivalente di MONTE_ORE_TOT calcolato su base mensile, arrotondato a 2 decimali
+   */
+  monteOreMensile() {
+    if (this.progetto.MONTE_ORE_TOT === null) {
       return null;
     }
-    return Math.round((costoOrario * this.MONTE_ORE_MENSILE_PREVISTO)*100) / 100;
+    return this.round2(this.progetto.MONTE_ORE_TOT / MONTE_ORE_MENSILE_PREVISTO);
+  }
+
+  /**
+   * Restituisce l'equivalente di COSTO_MEDIO_UOMO calcolato su base mensile, arrotondato a 2 decimali
+   */
+   costoMensile() {
+    if (this.progetto.COSTO_MEDIO_UOMO === null) {
+      return null;
+    }
+    return this.round2(this.progetto.COSTO_MEDIO_UOMO * MONTE_ORE_MENSILE_PREVISTO);
+  }
+
+  /**
+   * Restituisce l'equivalente di OBIETTIVO_BUDGET_ORE calcolato su base mensile, arrotondato a 2 decimali
+   */
+  obiettivoBudgetMensile() {
+    if (this.progetto.OBIETTIVO_BUDGET_ORE === null) {
+      return null;
+    }
+    return this.round2(this.progetto.OBIETTIVO_BUDGET_ORE / MONTE_ORE_MENSILE_PREVISTO);
+  }
+
+  /**
+   * Restituisce l'equivalente di COSTO_MEDIO_UOMO calcolato su base mensile, arrotondato a 2 decimali
+   */
+   costoTotaleBudget() {
+    if (this.progetto.COSTO_MEDIO_UOMO === null || this.progetto.OBIETTIVO_BUDGET_ORE == null) {
+      return null;
+    }
+    return this.round2(this.progetto.COSTO_MEDIO_UOMO * this.progetto.OBIETTIVO_BUDGET_ORE);
   }
 
   setMonteOreFmt($event: Event) {
