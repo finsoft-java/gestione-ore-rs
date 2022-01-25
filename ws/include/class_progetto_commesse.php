@@ -82,10 +82,13 @@ class ProgettiCommesseManager {
     
     function upload_giustificativo($id_progetto, $codCommessa, $tmpfilename, $origfilename) {
         global $con;
-        $tmpfilename = str_replace("\\", "/", $tmpfilename);
+
+        $fileContent = addslashes(file_get_contents($tmpfilename)); 
+        // speriamo non sia enorme
+
         $origfilename = $con->escape_string($origfilename);
         $sql = "UPDATE progetti_commesse
-                SET GIUSTIFICATIVO_FILENAME='$origfilename', GIUSTIFICATIVO=LOAD_FILE('$tmpfilename')
+                SET GIUSTIFICATIVO_FILENAME='$origfilename', GIUSTIFICATIVO='$fileContent'
                 WHERE id_progetto = '$id_progetto' AND cod_commessa = '$codCommessa'";
         execute_update($sql);
     }
