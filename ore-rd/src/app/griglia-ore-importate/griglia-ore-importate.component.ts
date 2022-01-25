@@ -61,7 +61,7 @@ export class GrigliaOreImportateComponent implements OnInit {
     {
       title: 'Nr.Doc',
       data: 'fuffa',
-      //render: (x) => x.RIF_SERIE_DOC + ' ' + x.RIF_NUMERO_DOC
+      render: (data, row) => row?.RIF_SERIE_DOC.trim() + '/' + row?.RIF_NUMERO_DOC.trim()
     },
     {
       title: 'Commessa',
