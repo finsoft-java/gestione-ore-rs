@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ColumnDefinition } from '../mat-edit-table';
-import { Lul } from '../_models';
+import { Lul, Matricola } from '../_models';
 import { LulService } from '../_services/lul.service';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
@@ -14,6 +14,8 @@ import {Moment} from 'moment';
 // the `default as` syntax.
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
+import { ProgettiService } from '../_services/progetti.service';
+import { AlertService } from '../_services/alert.service';
 
 const moment = _moment;
 export const MY_FORMATS = {
@@ -43,7 +45,7 @@ export const MY_FORMATS = {
     }
   ],
 })
-export class GrigliaLulComponent {
+export class GrigliaLulComponent implements OnInit {
 
   filter: any = {};
   myControl = new FormControl();
@@ -67,10 +69,16 @@ export class GrigliaLulComponent {
   ];
   service!: LulService;
   date = new FormControl();
-
+  allMatricole: Matricola[] = [];
   
-  constructor(private lulService: LulService){
+  constructor(private lulService: LulService,
+    private progettiService: ProgettiService,
+    private alertService: AlertService){
     this.service = lulService;
+  }
+
+  ngOnInit(): void {
+    this.getMatricole();
   }
 
   filterRow(editTableComponent: any): void {
@@ -86,6 +94,17 @@ export class GrigliaLulComponent {
     }
 
     editTableComponent.filter(this.filter);
+  }
+
+  // carica l'elenco di tutte le matricole da Panthera
+  getMatricole(): void {
+    this.progettiService.getAllMatricole()
+      .subscribe(response => {
+        this.allMatricole = response.data;
+      },
+      error => {
+        this.alertService.error(error);
+      });
   }
 
   resetFilter(editTableComponent: any): void {

@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ColumnDefinition } from '../mat-edit-table';
-import { OreCommesse } from '../_models';
+import { Matricola, OreCommesse } from '../_models';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import {MatDatepicker} from '@angular/material/datepicker';
@@ -14,6 +14,8 @@ import {Moment} from 'moment';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
 import { OreCommesseService } from '../_services/ore.commesse.service';
+import { ProgettiService } from '../_services/progetti.service';
+import { AlertService } from '../_services/alert.service';
 
 const moment = _moment;
 export const MY_FORMATS = {
@@ -43,7 +45,7 @@ export const MY_FORMATS = {
     }
   ],
 })
-export class GrigliaOreImportateComponent {
+export class GrigliaOreImportateComponent implements OnInit {
 
   filter: any = {};
   myControl = new FormControl();
@@ -80,10 +82,27 @@ export class GrigliaOreImportateComponent {
   ];
   service!: OreCommesseService;
   date = new FormControl();
-
+  allMatricole: Matricola[] = [];
   
-  constructor(private svc: OreCommesseService){
+  constructor(private svc: OreCommesseService,
+    private progettiService: ProgettiService,
+    private alertService: AlertService){
     this.service = svc;
+  }
+
+  ngOnInit(): void {
+    this.getMatricole();
+  }
+
+  // carica l'elenco di tutte le matricole da Panthera
+  getMatricole(): void {
+    this.progettiService.getAllMatricole()
+      .subscribe(response => {
+        this.allMatricole = response.data;
+      },
+      error => {
+        this.alertService.error(error);
+      });
   }
 
   filterRow(editTableComponent: any): void {

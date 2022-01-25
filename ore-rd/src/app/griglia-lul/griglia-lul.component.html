@@ -17,6 +17,14 @@
         Pannello Filtri
       </mat-panel-description>
     </mat-expansion-panel-header>
+    <div style="width:6cm" class="mat-form-field-wrapper">
+      <mat-label class="label_mat">Nome e cognome</mat-label>
+      <ng-select [items]="allMatricole" 
+          bindLabel="DENOMINAZIONE" 
+          bindValue="MATRICOLA" 
+          [(ngModel)]="filter.matricola">
+      </ng-select>
+   </div>
     <mat-form-field appearance="fill" style="margin-right:15px;">
         <mat-label>Matricola</mat-label>
         <input matInput [(ngModel)]="filter.matricola">
