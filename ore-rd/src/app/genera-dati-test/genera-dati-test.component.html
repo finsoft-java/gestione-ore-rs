@@ -4,6 +4,12 @@
     <div style="width: 75%;display: block;margin: 0px auto 20px auto; text-align:center" class="fraz2_width">
         Progetto n. {{ idProgetto }} {{ progetto?.TITOLO }}
     </div>
+    <div style="width: 75%;display: block;margin: 0px auto 20px auto; text-align:center" class="fraz2_width" *ngIf="progetto && progetto.DATA_ULTIMO_REPORT">
+        Data ultimo report: {{ progetto.DATA_ULTIMO_REPORT }}
+    </div>
+    <div style="width: 75%;display: block;margin: 0px auto 20px auto; text-align:center" class="fraz2_width" *ngIf="progetto && progetto.DATA_ULTIMO_REPORT==null">
+        Data ultimo report: 0001-01-01
+    </div>
 
     <div style="width: 75%;display: block;margin: 0px auto;" class="fraz2_width">
         <mat-form-field appearance="fill" style="margin-right: 10px;">
