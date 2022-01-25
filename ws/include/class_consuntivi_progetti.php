@@ -46,7 +46,7 @@ class ConsuntiviProgettiManager {
             $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $commesse_c, $message);
 
             $message->success .= "<strong>Tot. " . ($ore_progetto_teoriche + $ore_compat_teoriche) .
-                                                            " ore prelevabili teoriche</strong>". NL;
+                                                            " ore prelevabili teoriche (di progetto+compatibili)</strong>". NL;
 
             $lul = $this->estrazione_lul($idEsecuzione, $message);
 
