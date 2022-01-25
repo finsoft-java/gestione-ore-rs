@@ -76,7 +76,7 @@ class EsecuzioniManager {
         }
         execute_update($sql);
         $sql = "UPDATE progetti SET DATA_ULTIMO_REPORT=(
-                    SELECT NVL(MAX(`DATA`),DATE('0000-01-01'))
+                    SELECT NVL(MAX(`DATA`),DATE('0001-01-01'))
                     FROM ore_consuntivate_progetti
                     WHERE ID_PROGETTO = '$idProgetto'
                 ) WHERE ID_PROGETTO = '$idProgetto'";
