@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { ListBean, Lul, OreCommesse, ValueBean } from '../_models';
+import { ListBean, OreCommesse, ValueBean } from '../_models';
 import { HttpCrudService } from './HttpCrudService';
 import { Observable } from 'rxjs';
 
@@ -10,7 +10,14 @@ export class OreCommesseService implements HttpCrudService<OreCommesse> {
     constructor(private http: HttpClient) { }
 
     getAll(parameters: any) {
-        let url = environment.wsUrl + `OreCommesse.php?top=${parameters.top}&skip=${parameters.skip}`;
+
+        let url = environment.wsUrl + 'OreCommesse.php?';
+        if (parameters.top) {
+            url += `&top=${parameters.top}`;
+        }
+        if (parameters.skip) {
+            url += `&skip=${parameters.skip}`;
+        }
         if (parameters.matricola) {
             url += `&matricola=${parameters.matricola}`;
         }

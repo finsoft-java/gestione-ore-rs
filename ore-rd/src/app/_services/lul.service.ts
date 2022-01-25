@@ -10,7 +10,13 @@ export class LulService implements HttpCrudService<Lul> {
     constructor(private http: HttpClient) { }
 
     getAll(parameters: any) {
-        let url = environment.wsUrl + `Lul.php?top=${parameters.top}&skip=${parameters.skip}`;
+        let url = environment.wsUrl + 'Lul.php?';
+        if (parameters.top) {
+            url += `&top=${parameters.top}`;
+        }
+        if (parameters.skip) {
+            url += `&skip=${parameters.skip}`;
+        }
         if (parameters.matricola) {
             url += `&matricola=${parameters.matricola}`;
         }
