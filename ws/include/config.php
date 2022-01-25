@@ -40,6 +40,6 @@ define('COL_ATV',           9);
 define('COL_SOTTO_COMM',    12);
 define('COL_COMMESSA',      14);
 define('COL_NUM_ORE',       16);
-define('DATE_FORMAT', 'd/m/Y H:i');
+define('DATE_FORMAT', 'n/j/Y H:i'); // Anche se a video vedo gg/mm/aaaa hh:mm:ss, PHP lo vede in formato m/g/aaaa hh:mm
 
 ?>
