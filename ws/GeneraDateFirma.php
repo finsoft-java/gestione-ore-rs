@@ -32,11 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $metaMese = "DATE('$anno-$mese-15')";
 
     // Questa e' la griglia che verra' presentata all'utente
-    $query = "SELECT pwr.ID_DIPENDENTE,P.ID_PROGETTO,p.TITOLO,p.ID_SUPERVISOR " .
-                "FROM progetti p INNER JOIN progetti_persone pwr on p.ID_PROGETTO = pwr.ID_PROGETTO " .
-                "WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo) " .
-                "GROUP BY 1,2,3,4 " .
-                "ORDER BY 1,3";
+    $query = "SELECT pwr.ID_DIPENDENTE,p.ID_PROGETTO,p.TITOLO,p.ID_SUPERVISOR
+                FROM progetti p INNER JOIN progetti_persone pwr on p.ID_PROGETTO = pwr.ID_PROGETTO
+                WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo)
+                GROUP BY 1,2,3,4
+                ORDER BY 1,3";
     $dateFirma = select_list($query);
     
     // ciclo precompilazione Data_firma
