@@ -10,22 +10,19 @@
         <div style="width: 75%; display: block; margin: 0px auto;" class="max_width">
                 <mat-form-field appearance="fill">
                     <mat-label>Titolo</mat-label>
-                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.TITOLO" placeholder="Inserisci il Titolo">
-                    <mat-hint>required</mat-hint>
+                    <input matInput required [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.TITOLO" placeholder="Inserisci il Titolo">
                 </mat-form-field>
         </div>
 
         <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Acronimo</mat-label>
-                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ACRONIMO" placeholder="Inserisci l'acronimo">
-                    <mat-hint>required</mat-hint>
+                    <input matInput required [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.ACRONIMO" placeholder="Inserisci l'acronimo">
                 </mat-form-field>
 
                 <mat-form-field appearance="fill">
                     <mat-label>Grant Number</mat-label>
-                    <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.GRANT_NUMBER" placeholder="Inserisci il Grant Number">
-                    <mat-hint>required</mat-hint>
+                    <input matInput required [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.GRANT_NUMBER" placeholder="Inserisci il Grant Number">
                 </mat-form-field>
         </div>
         <div style="width: 75%; display: block; margin: 0px auto;" class="max_width">
@@ -71,46 +68,38 @@
         <div style="width: 75%; display: block; margin: 0px auto;" class="fraz4_width">
                 <mat-form-field appearance="fill">
                     <mat-label>Monte Ore Totale</mat-label>
-                    <input matInput [value]="this.progetto.MONTE_ORE_TOT|number:'1.0'"
-                    (change)="setMonteOreFmt($event)" placeholder="Inserisci un numero">
-                    <mat-hint>required</mat-hint>
+                    <input matInput required [value]="this.progetto.MONTE_ORE_TOT|number:'1.0'"
+                    (change)="setMonteOreFmt($event)" >
                 </mat-form-field>
                 <mat-form-field appearance="fill">
                     <mat-label>Costo orario Medio Uomo &euro;</mat-label>
                     <input matInput 
                         [value]="this.progetto.COSTO_MEDIO_UOMO|number:'1.2'"
-                        (change)="setCostoMedioFmt($event)"
-                        placeholder="Inserisci un numero">
-                    <mat-hint>required</mat-hint>
+                        (change)="setCostoMedioFmt($event)">
                 </mat-form-field>
                 <mat-form-field appearance="fill">
                     <mat-label>Obiettivo budget ore</mat-label>
                     <input matInput [value]="this.progetto.OBIETTIVO_BUDGET_ORE|number:'1.0'"
                     (change)="setObiettivoBudgetFmt($event)"
-                    placeholder="Inserisci un numero">
-                    <mat-hint>required</mat-hint>
+                    >
                 </mat-form-field>
         </div>
         <div style="width: 75%; display: block; margin: 0px auto;" class="fraz4_width">
                 <mat-form-field appearance="fill">
                     <mat-label>Mesi uomo totali</mat-label>
                     <input matInput disabled [value]="monteOreMensile()|number:'1.2'">
-                    <mat-hint>required</mat-hint>
                 </mat-form-field>
                 <mat-form-field appearance="fill">
                     <mat-label>Costo Uomo Mensile &euro;</mat-label>
                     <input matInput disabled [value]="costoMensile()|number:'1.2'">
-                    <mat-hint>required</mat-hint>
                 </mat-form-field>
                 <mat-form-field appearance="fill">
                     <mat-label>Mesi uomo budget</mat-label>
                     <input matInput disabled [value]="obiettivoBudgetMensile()|number:'1.2'">
-                    <mat-hint>required</mat-hint>
                 </mat-form-field>
                 <mat-form-field appearance="fill">
                     <mat-label>Costo Totale Budget &euro;</mat-label>
                     <input matInput disabled [value]="costoTotaleBudget()|number:'1.2'">
-                    <mat-hint>required</mat-hint>
                 </mat-form-field>
     </div>
     
@@ -135,14 +124,12 @@
                     <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                 </mat-datepicker-toggle>
                 <mat-datepicker #picker3></mat-datepicker>
-                <mat-hint>required</mat-hint>
             </mat-form-field>
             <mat-form-field appearance="fill">
                 <mat-label>Ore già assegnate</mat-label>
                 <input matInput [value]="this.progetto.ORE_GIA_ASSEGNATE|number:'1.0'"
-                (change)="setOreGiaAssegnateFmt($event)" 
-                placeholder="Inserisci un numero">
-                <mat-hint>required</mat-hint>
+                (change)="setOreGiaAssegnateFmt($event)"
+                >
             </mat-form-field>
         </div>
     </div>
