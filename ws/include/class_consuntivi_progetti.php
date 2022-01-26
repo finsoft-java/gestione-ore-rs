@@ -253,7 +253,7 @@ class ConsuntiviProgettiManager {
         foreach($map as $matricola => $map1) {
             foreach($map1 as $data => $caricamenti) {
                 $totale_data = 0.0;
-                $max_data = (float) $lul[$matricola][$data]; // SHOULD BE SET!!!
+                $max_data = (float) $lul[$matricola][$data][0]['ORE_PRESENZA_ORDINARIE']; // SHOULD BE SET!!!
                 foreach($caricamenti as $c) {
                     $ore = (float) $c['NUM_ORE_RESIDUE'];
                     // arrotondo al quarto d'ora per difetto
@@ -376,7 +376,7 @@ class ConsuntiviProgettiManager {
         foreach($map as $matricola => $map1) {
             foreach($map1 as $data => $caricamenti) {
                 $totale_data = 0.0;
-                $max_data = (float) $lul_p[$matricola][$data]; // SHOULD BE SET!!!
+                $max_data = (float) $lul_p[$matricola][$data][0]['ORE_PRESENZA_ORDINARIE']; // SHOULD BE SET!!!
                 foreach($caricamenti as $c) {
                     $ore = (float) $c['NUM_ORE_RESIDUE'];
                     $ore_max_commessa = (float) $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'];
@@ -488,8 +488,8 @@ class ConsuntiviProgettiManager {
         $message->success .= "<THEAD>
                 <TR>
                     <TH>COMMESSA</TH>
-                    <TH>PCT. COMPATIBILITA</TH>
-                    <TH>MATRICOLA</TH>
+                    <TH>PCT. COMPAT.</TH>
+                    <TH>DIPEN- DENTE</TH>
                     <TH>PCT. IMPIEGO</TH>
                     <TH>DATA</TH>
                     <TH>ORE RESIDUE</TH>
