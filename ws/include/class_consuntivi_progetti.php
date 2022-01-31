@@ -445,9 +445,9 @@ class ConsuntiviProgettiManager {
         
         $query = "SELECT ID_DIPENDENTE,NVL(SUM(NUM_ORE_PRELEVATE),0) AS ORE_PREL
                 FROM assegnazioni_dettaglio ad
-                WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)";
+                WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)
+                GROUP BY ID_DIPENDENTE";
         $list = select_list($query);
-
         $message->success .= "  Riepilogo suddivisione delle commesse compatibili tra i dipendenti:" . NL;
         foreach($list as $m) {
             // se servisse, $max = $max_dip[$m['ID_DIPENDENTE']][0]['ORE_PREVISTE'];
