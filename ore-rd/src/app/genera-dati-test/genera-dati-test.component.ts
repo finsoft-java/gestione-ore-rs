@@ -88,9 +88,14 @@ export class GeneraDatiTestComponent implements OnInit {
       this.running = true;
 
       this.datitestService.run(this.idProgetto, formatDate(this.date,"YYYY-MM-dd","en-GB")).subscribe(response => {
-        this.message_success = response.value.success;
+        this.message_success = 'Elaborazione terminata. I dettagli verranno visualizzati in una nuova finestra.';
         this.message_error = response.value.error;
         this.running = false;
+        const tab = window.open('about:blank', '_blank');
+        if (tab) {
+          tab.document.write('<html><body>' + response.value.success + '<br/>' + response.value.error + '</body></html>');
+          tab.document.close(); // to finish loading the page
+        }
       },
       error => {
         this.message_error = error;
