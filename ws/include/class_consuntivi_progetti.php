@@ -127,7 +127,7 @@ class ConsuntiviProgettiManager {
                 JOIN progetti pr ON pr.ID_PROGETTO=c.ID_PROGETTO
                 WHERE pr.id_progetto=$idProgetto
                 AND ID_DIPENDENTE NOT IN (SELECT DISTINCT ID_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto)
-                AND (oc.DATA IS NULL OR (oc.DATA > pr.DATA_ULTIMO_REPORT and oc.DATA < $d))
+                AND (oc.DATA IS NULL OR (oc.DATA >= pr.DATA_ULTIMO_REPORT and oc.DATA < $d))
                 ORDER BY 1";
         $ore = select_column($query);
         if (count($ore) > 0) {
@@ -161,7 +161,7 @@ class ConsuntiviProgettiManager {
             JOIN progetti pr ON pr.ID_PROGETTO=p.ID_PROGETTO
             JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
                 AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE
-                AND oc.DATA > pr.DATA_ULTIMO_REPORT AND oc.DATA < $d
+                AND oc.DATA >= pr.DATA_ULTIMO_REPORT AND oc.DATA < $d
             WHERE pr.ID_PROGETTO=$idProgetto";
         return execute_update($query);
     }
