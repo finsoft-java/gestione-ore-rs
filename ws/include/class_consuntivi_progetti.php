@@ -330,7 +330,7 @@ class ConsuntiviProgettiManager {
         return array_group_by(select_list($query), ['COD_COMMESSA']);
     }
 
-    function select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $utentiPanthera, &$message) {
+    function select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         
         $query = "SELECT NVL(SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100),0) AS ORE_COMP
@@ -350,7 +350,7 @@ class ConsuntiviProgettiManager {
         foreach($list as $m) {
             $idDip = $m['ID_DIPENDENTE'];
             // $lavorate = isset($lul_d[$idDip]) ? $lul_d[$idDip] : 0; // dato interessante ma fuorviante
-            $nome = isset($utentiPanthera[$idDip][0]['DENOMINAZIONE']) ? $utentiPanthera[$idDip]['DENOMINAZIONE'] : '';
+            $nome = isset($nomiUtenti[$idDip][0]['DENOMINAZIONE']) ? $nomiUtenti[$idDip][0]['DENOMINAZIONE'] : '';
             $message->success .= "  $idDip $nome al $m[PCT_IMPIEGO] % = $m[ORE_PREVISTE] ore." . NL;
         }
         return array_group_by($list, ['ID_DIPENDENTE']);
@@ -453,7 +453,7 @@ class ConsuntiviProgettiManager {
         foreach($list as $m) {
             // se servisse, $max = $max_dip[$m['ID_DIPENDENTE']][0]['ORE_PREVISTE'];
             $idDip = $m['ID_DIPENDENTE'];
-            $nome = isset($nomiUtenti[$idDip][0]['DENOMINAZIONE']) ? $nomiUtenti[$idDip]['DENOMINAZIONE'] : '';
+            $nome = isset($nomiUtenti[$idDip][0]['DENOMINAZIONE']) ? $nomiUtenti[$idDip][0]['DENOMINAZIONE'] : '';
             $message->success .= "  $idDip $nome => $m[ORE_PREL] ore" . NL;
         }
         return array_group_by($list, ['ID_DIPENDENTE']);
