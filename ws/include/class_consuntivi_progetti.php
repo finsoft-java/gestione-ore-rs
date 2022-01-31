@@ -12,7 +12,7 @@ class ConsuntiviProgettiManager {
      * Main procedure
      */
     function run_assegnazione($idProgetto, $dataLimite, &$message) {
-        global $esecuzioniManager;
+        global $esecuzioniManager, $panthera;
         try {
             $message->success .= "Lancio assegnazione ore progetto n.$idProgetto alla data " . $dataLimite->format('d/m/Y') . NL;
             
@@ -21,6 +21,8 @@ class ConsuntiviProgettiManager {
             if ($monte_ore > 0) {
                 $message->success .= "Monte ore residuo $monte_ore ore." . NL;
             }
+
+            $nomiUtenti = array_group_by($panthera->getUtenti(), ['ID_DIPENDENTE']);
 
             list($commesse_p, $commesse_c, $matricole) = $this->load_commesse_e_dipendenti($idProgetto);
 
@@ -32,15 +34,14 @@ class ConsuntiviProgettiManager {
                 $message->error .= "Nessun dipendente &egrave; stato configurato su questo progetto!" . NL;
                 return;
             }
-            $this->check_commesse_dipendenti($idProgetto, $dataLimite, $message);
+            $canGoOn = $this->check_commesse_dipendenti($idProgetto, $dataLimite, $message);
+            if (!$canGoOn) {
+                return;
+            }
 
             $idEsecuzione = $esecuzioniManager->get_id_esecuzione($idProgetto, $message);
 
-            $affected_rows = $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, $message);
-			if ($affected_rows == 0) {
-                $message->error .= "Nessun caricamento trovato per questo progetto!" . NL;
-                return;
-			}
+            $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, $message);
 
             $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $commesse_p, $message);
             $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $commesse_c, $message);
@@ -62,7 +63,7 @@ class ConsuntiviProgettiManager {
             } else {
                 $lul_p = $this->togli_ore_progetto_dai_lul($idEsecuzione);
                 $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $commesse_c);
-                $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $message);
+                $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
                 $message->success .= "Verifica LUL...". NL;
                 $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, $message);
                 $this->select_riepilogo_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $max_dip, $message);
@@ -105,8 +106,12 @@ class ConsuntiviProgettiManager {
 
     /**
      * Controlli preliminari (ore che saranno ignorate a priori)
+     * 
+     * @return canGoOn (true/false)
      */
     function check_commesse_dipendenti($idProgetto, $dataLimite, &$message) {
+
+        $canGoOn = true;
 
         $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA<=0";
         $commesse = select_column($query);
@@ -133,6 +138,23 @@ class ConsuntiviProgettiManager {
         if (count($ore) > 0) {
             $message->success .= "<strong>WARNING</strong>: ci sono ore su commesse di progetto o compatibili ma con dipendenti incompatibili: " . implode(', ', $ore). NL;
         }
+
+        $query = "SELECT count(*)
+            FROM progetti_commesse c
+            JOIN progetti_persone p ON c.ID_PROGETTO=p.ID_PROGETTO
+            JOIN progetti pr ON pr.ID_PROGETTO=p.ID_PROGETTO
+            JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
+                AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE
+                AND oc.DATA >= pr.DATA_ULTIMO_REPORT AND oc.DATA < $d
+                AND NUM_ORE_RESIDUE > 0
+            WHERE pr.ID_PROGETTO=$idProgetto";
+        $cnt = select_single_value($query);
+        if ($cnt == 0) {
+            $message->error .= "Nessun caricamento trovato per questo progetto!" . NL;
+            $canGoOn = false;
+        }
+
+        return $canGoOn;
     }
 
     /**
@@ -307,7 +329,7 @@ class ConsuntiviProgettiManager {
         return array_group_by(select_list($query), ['COD_COMMESSA']);
     }
 
-    function select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, &$message) {
+    function select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $utentiPanthera, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         
         $query = "SELECT NVL(SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100),0) AS ORE_COMP
@@ -325,9 +347,10 @@ class ConsuntiviProgettiManager {
         $lul_d = $this->ore_lul_residue_per_dip($lul_p);
         $message->success .= "  Suddivisione ipotetica delle commesse compatibili tra i dipendenti:" . NL;
         foreach($list as $m) {
-            $dip = $m['ID_DIPENDENTE'];
-            $lavorate = isset($lul_d[$dip]) ? $lul_d[$dip] : 0;
-            $message->success .= "  $m[ID_DIPENDENTE] al $m[PCT_IMPIEGO] % = $m[ORE_PREVISTE] ore. Lavorate $lavorate" . NL;
+            $idDip = $m['ID_DIPENDENTE'];
+            // $lavorate = isset($lul_d[$idDip]) ? $lul_d[$idDip] : 0; // dato interessante ma fuorviante
+            $nome = isset($utentiPanthera[$idDip][0]) ? $utentiPanthera[$idDip] : '';
+            $message->success .= "  $idDip $nome al $m[PCT_IMPIEGO] % = $m[ORE_PREVISTE] ore." . NL;
         }
         return array_group_by($list, ['ID_DIPENDENTE']);
     }
