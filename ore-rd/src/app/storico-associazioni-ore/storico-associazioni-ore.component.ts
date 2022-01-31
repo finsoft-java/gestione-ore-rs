@@ -63,17 +63,21 @@ export class StoricoAssociazioniOreComponent implements OnInit {
   }
 
   elimina(e: Esecuzione) {
-    this.esecuzioniService.delete(e.ID_ESECUZIONE).subscribe(
-      response => { this.getLast(); },
-      error => { this.alertService.error(error); }
-    );
+    if (confirm('Stai per eliminare l\'ultima associazione ore, sei sicuro?')) {
+      this.esecuzioniService.delete(e.ID_ESECUZIONE).subscribe(
+        response => { this.getLast(); },
+        error => { this.alertService.error(error); }
+      );
+    }
   }
 
   eliminaCaricamento(e: Caricamento) {
-    this.caricamentiService.delete(e.ID_CARICAMENTO).subscribe(
-      response => { this.getLast(); },
-      error => { this.alertService.error(error); }
-    );
+    if (confirm('Stai per eliminare l\'ultimo **caricamento** ore, sei sicuro?')) {
+      this.caricamentiService.delete(e.ID_CARICAMENTO).subscribe(
+        response => { this.getLast(); },
+        error => { this.alertService.error(error); }
+      );
+    }
   }
 
 }
