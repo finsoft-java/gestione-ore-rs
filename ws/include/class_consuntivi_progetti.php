@@ -68,6 +68,7 @@ class ConsuntiviProgettiManager {
                 $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, $message);
                 $this->select_riepilogo_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $max_dip, $nomiUtenti, $message);
                 $message->success .= "<strong>Tot. $ore_compat ore prelevate da commesse compatibili</strong>". NL;
+                $monte_ore -= $ore_compat;
             }
 
             $tot_ore_assegnate = $ore_progetto + $ore_compat;
