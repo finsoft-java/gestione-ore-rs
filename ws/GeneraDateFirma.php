@@ -4,6 +4,7 @@
 
 include("include/all.php");    
 $con = connect();
+$panthera->connect();
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     //do nothing, HTTP 200
@@ -38,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 GROUP BY 1,2,3,4
                 ORDER BY 1,3";
     $dateFirma = select_list($query);
-    
+
     // ciclo precompilazione Data_firma
     for($i = 0 ; $i < count($dateFirma); $i++){
         $idSupervisor = $dateFirma[$i]['ID_SUPERVISOR'];
