@@ -14,7 +14,7 @@ class LULManager {
     function carica_da_db($anno, $mese) {
         $primo = "DATE('$anno-$mese-01')";
 
-        $query_lul = "SELECT MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE " .
+        $query_lul = "SELECT ID_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE " .
                     "FROM ore_presenza_lul " .
                     "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
         $rows = select_list($query_lul);
@@ -22,7 +22,7 @@ class LULManager {
         // trasformo la matrice $rows in una struttura $map_matr_ore
         $map_matr_ore = array();
         foreach ($rows as $row) {
-            $matr = $row["MATRICOLA_DIPENDENTE"];
+            $matr = $row["ID_DIPENDENTE"];
             $data = new DateTime($row["DATA"]);
             if (! isset($map_matr_ore[$matr])) $map_matr_ore[$matr] = array();
             $map_matr_ore[$matr][$data->format('j')] = $row["ORE_PRESENZA_ORDINARIE"];
