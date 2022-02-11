@@ -23,7 +23,7 @@
                     <td mat-cell *matCellDef="let element">
                         <label *ngIf="!element.isEditable"> {{element.NOTE}} </label>
                         <div style="display: block;margin: 0px auto;width: 100%;">
-                            <textarea class="form-control" style="width: 100%;margin-right: 15px;border: 1px solid;height:100px" *ngIf="element.isEditable" matInput [(ngModel)]="element.NOTE" >
+                            <textarea class="form-control" style="width: calc(100% - 30px);border: 1px solid;height: 100px;margin: 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.NOTE" >
                             </textarea>
                         </div>
                     </td>
@@ -83,7 +83,7 @@
                         <label *ngIf="!element.isEditable"> {{element.NOTE}} </label>
                         <div style="display: block;margin: 0px auto;width: 100%;">
                             <textarea class="form-control"
-                            style="width: 100%;margin-right: 15px;border: 1px solid;height:100px"
+                            style="width: calc(100% - 30px);border: 1px solid;height: 100px;margin: 15px;"
                             *ngIf="element.isEditable" matInput [(ngModel)]="element.NOTE">
                             </textarea>
                         </div>
