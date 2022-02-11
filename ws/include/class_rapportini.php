@@ -172,7 +172,8 @@ class RapportiniManager {
 
         $this->creaFooter($sheet, $curRow, $nomecognome, $nomecognome_super, $data_firma);
 
-        $sheet->getPageSetup()->setPrintArea('A1:AH' . $curRow);
+        $sheet->getPageSetup()->setPrintArea('A1:AG' . $curRow);
+        $sheet->getPageSetup()->setFitToPage(true);
         
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         $xlsxfilename = tempnam(null, "Rapportini");
