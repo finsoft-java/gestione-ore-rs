@@ -25,7 +25,7 @@ class ReportBudgetManager {
         $sql = "SELECT DISTINCT ID_DIPENDENTE FROM progetti_persone WHERE ID_PROGETTO = '$id_progetto' ORDER BY 1";
         $matricole = select_list($sql); // voglio proprio una lista di oggetti, non una colonna
         foreach ($matricole as $key => $m) {
-            $matricole[$key]['COGNOME_NOME'] = $panthera->getUtente($m['ID_DIPENDENTE']);
+            $matricole[$key]['COGNOME_NOME'] = $panthera->getUtenteByIdDipendente($m['ID_DIPENDENTE']);
         }
         return $matricole;
     }
@@ -155,7 +155,7 @@ class ReportBudgetManager {
         }
 
         global $panthera;
-        $nomecognome_super = $panthera->getUtente($progetto['ID_SUPERVISOR']);
+        $nomecognome_super = $panthera->getUtenteByIdDipendente($progetto['ID_SUPERVISOR']);
         
         $budget = $progetto["MONTE_ORE_TOT"] * $progetto["COSTO_MEDIO_UOMO"];
         $scarto_ore = ($totali["NUM_ORE_LAVORATE"] - $progetto["MONTE_ORE_TOT"]) / $progetto["MONTE_ORE_TOT"] * 100;
@@ -261,7 +261,7 @@ class ReportBudgetManager {
         }
 
         $report['warning'] = $this->update_costi_progetto($report['progetto'], $anno, $mese);
-        $report['progetto']['COGNOME_NOME_SUPERVISOR'] = $panthera->getUtente($report['progetto']['ID_SUPERVISOR']);
+        $report['progetto']['COGNOME_NOME_SUPERVISOR'] = $panthera->getUtenteByIdDipendente($report['progetto']['ID_SUPERVISOR']);
         
         $report['budget'] = $report['progetto']['MONTE_ORE_TOT'] * $report['progetto']['COSTO_MEDIO_UOMO'];
 
