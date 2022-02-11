@@ -30,43 +30,41 @@ class RapportiniManager {
                     "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
         $consuntivo = select_list($query_consuntivo);
 
-        // trasformo i vari array in una struttura $map_progetti_matricole
-        $map_progetti_matricole = array();
+        // trasformo i vari array in una struttura $map_dipendenti_progetti
+        $map_dipendenti_progetti = array();
 
         foreach($matricole as $row) {
             $idprogetto = $row["ID_PROGETTO"];
             $idDipendente = $row["ID_DIPENDENTE"];
-            if (! isset($map_progetti_matricole[$idDipendente])) {
-                $map_progetti_matricole[$idDipendente] = array();
+            if (! isset($map_dipendenti_progetti[$idDipendente])) {
+                $map_dipendenti_progetti[$idDipendente] = array();
             }
-            if (! isset($map_progetti_matricole[$idDipendente][$idprogetto])) {
-                $map_progetti_matricole[$idDipendente][$idprogetto] = $row;
-                $map_progetti_matricole[$idDipendente][$idprogetto]['DATE'] = array();
-            }
+            $map_dipendenti_progetti[$idDipendente][$idprogetto] = $row;
+            $map_dipendenti_progetti[$idDipendente][$idprogetto]['DATE'] = array();
         }
 
         foreach ($consuntivo as $row) {
             $idprogetto = $row["ID_PROGETTO"];
             $idDipendente = $row["ID_DIPENDENTE"];
-            $data = new DateTime($row["DATA"]);
-            $map_progetti_matricole[$idDipendente][$idprogetto]['DATE'][$data->format('j')] = 0.0 + $row["NUM_ORE_LAVORATE"];
+            $map_progetti = new DateTime($row["DATA"]);
+            $map_dipendenti_progetti[$idDipendente][$idprogetto]['DATE'][$map_progetti->format('j')] = 0.0 + $row["NUM_ORE_LAVORATE"];
         }
-    return $map_progetti_matricole;
+    return $map_dipendenti_progetti;
     }
 
     function creaZip($anno, $mese, $isEsploso) {
         global $lul;
         
         // REPERIRE DATI DA DB
-        $map_progetti_matricole = $this->carica_da_db($anno, $mese);
+        $map_dipendenti_progetti = $this->carica_da_db($anno, $mese);
         $map_matr_ore = $lul->carica_da_db($anno, $mese);
         
-        if (empty($map_progetti_matricole)) {
+        if (empty($map_dipendenti_progetti)) {
             print_error(404, 'Nessun dato trovato.');
         }
 
         /*
-        $map_progetti_matricole = Array
+        $map_dipendenti_progetti = Array
         (
             [1234] => Array
                 (
@@ -102,9 +100,9 @@ class RapportiniManager {
             print_error(500, 'Cannot create ZIP file');
         }
         $tempfiles = [];
-        
+
         // MAIN LOOP
-        foreach ($map_progetti_matricole as $idDipendente => $map_progetti) {
+        foreach ($map_dipendenti_progetti as $idDipendente => $map_progetti) {
             if ($isEsploso) {
                 // un report distinto per ogni progetto
                 foreach( $map_progetti as $idprogetto => $row) {
@@ -137,13 +135,13 @@ class RapportiniManager {
         return $zipfilename;
     }
 
-    function creaFileExcel($idDipendente, $anno, $mese, $map_matricole_progetti, $map_matr_ore) {
+    function creaFileExcel($idDipendente, $anno, $mese, $map_progetti, $map_matr_ore) {
         
         // Sto assumento che ci sia un unico supervisor per tutti i progetti...
         // E le stesse data firma!
         // cfr. email Gabriele / Alice del 25/05/2021
-        $unIdProgettoACaso = array_keys($map_matricole_progetti)[0];
-        $unProgettoACaso = $map_matricole_progetti[$unIdProgettoACaso];
+        $unIdProgettoACaso = array_keys($map_progetti)[0];
+        $unProgettoACaso = $map_progetti[$unIdProgettoACaso];
         if ($unProgettoACaso == null || !isset($unProgettoACaso['ID_PROGETTO'])) {
             // qualcosa non va, ma pazienza
             return null;
@@ -168,7 +166,7 @@ class RapportiniManager {
         $this->creaIntestazione($sheet, $curRow, $anno, $mese, $idDipendente, $nomecognome, $nomecognome_super);
         $this->creaTabellaPresenze($sheet, $curRow, $anno, $mese, $idDipendente, $map_matr_ore, $rigaTotali, $daysInMonth);
 
-        $this->creaTabella($sheet, $curRow, -1 /* FIXME */, $map_matricole_progetti, $anno, $mese, $idDipendente, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth);
+        $this->creaTabella($sheet, $curRow, $map_progetti, $anno, $mese, $idDipendente, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth);
 
         $this->aggiornaRigaTotali($sheet, $curRow, $rigaTotali, $daysInMonth);
 
@@ -317,7 +315,7 @@ class RapportiniManager {
         $drawing->setWorksheet($sheet);
     }
 
-    function creaTabella($sheet, &$curRow, $idProgetto, $data, $anno, $mese, $matricola, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth) {
+    function creaTabella($sheet, &$curRow, $map_progetti, $anno, $mese, $matricola, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth) {
 
         // la riga azzurra piccola
         $sheet->getStyle("A$curRow:AG$curRow")->getFill()
@@ -331,7 +329,7 @@ class RapportiniManager {
         $sheet->setCellValue('A' . $curRow, "M$numMese");
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
-        $unProgettoACaso = $data[array_keys($data)[0]];
+        $unProgettoACaso = $map_progetti[array_keys($map_progetti)[0]];
         $title = "$unProgettoACaso[ACRONIMO] - Grant $unProgettoACaso[GRANT_NUMBER] - $unProgettoACaso[TITOLO]";
         $sheet->setCellValue('B' . $curRow, $title);
         $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -342,18 +340,19 @@ class RapportiniManager {
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
 
         $row_prima_riga = $curRow + 1;
-        foreach($data as $idprogetto => $wp) {
+
+        foreach($map_progetti as $idprogetto => $row) {
             ++$curRow;
-            // A sinistra le WP
-            $sheet->setCellValue('A' . $curRow, $wp['ACRONIMO'] . ' - ' . $wp['TITOLO']);
+            // A sinistra le row
+            $sheet->setCellValue('A' . $curRow, $row['ACRONIMO'] . ' - ' . $row['TITOLO']);
             // Poi, totale di riga
             $formula = "=SUM(C$curRow:AG$curRow)";
             $sheet->setCellValue('B' . $curRow, $formula);
             // Infine, le ore consuntivate
-            if (isset($wp["NUM_ORE_LAVORATE"]) && ! empty($wp["NUM_ORE_LAVORATE"])) {
+            if (isset($row['DATE']) && ! empty($row['DATE'])) {
                 for ($i = 1; $i <= 31; ++$i) {
-                    if (isset($wp["NUM_ORE_LAVORATE"][$i])) {
-                        $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $wp["NUM_ORE_LAVORATE"][$i]);
+                    if (isset($row['DATE'][$i])) {
+                        $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $row['DATE'][$i]);
                     }
                 }
             }
