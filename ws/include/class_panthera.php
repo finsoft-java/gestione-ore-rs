@@ -206,13 +206,17 @@ class PantheraManager {
                       [ 'ID_RISORSA' => '6666', 'COSTO' => 10.0, 'DATA_COSTO' => '2020-01-01', 'DATA_FINE_COSTO' => null ]
                      ];
         } else {
-            $query = "SELECT DISTINCT ID_RISORSA,COSTO,DATA_COSTO,DATA_FINE_COSTO " .
-                "FROM THIP.RISORSE_COSTI " .
-                "WHERE ID_AZIENDA='001' AND TIPO_RISORSA='U' AND LIVELLO_RISORSA='4' " .
-                "AND R_TIPO_COSTO='$tipoCosto' " .
-                "AND (DATA_COSTO IS NULL OR DATA_COSTO<=$data2) " .
-                "AND (DATA_FINE_COSTO IS NULL OR DATA_FINE_COSTO>=$data1) ";
-            $costi = $this->select_list($query,);
+            $query = "SELECT DISTINCT
+                        RTRIM(ID_RISORSA) AS ID_RISORSA,
+                        COSTO,
+                        SUBSTRING(CONVERT(VARCHAR,DATA_COSTO,20),0,10) AS DATA_COSTO,
+                        SUBSTRING(CONVERT(VARCHAR,DATA_FINE_COSTO,20),0,10) AS DATA_FINE_COSTO
+                    FROM THIP.RISORSE_COSTI
+                        WHERE ID_AZIENDA='001' AND TIPO_RISORSA='U' AND LIVELLO_RISORSA='4'
+                        AND R_TIPO_COSTO='$tipoCosto'
+                        AND (DATA_COSTO IS NULL OR DATA_COSTO<='$data2')
+                        AND (DATA_FINE_COSTO IS NULL OR DATA_FINE_COSTO>='$data1') ";
+            $costi = $this->select_list($query);
         }
         return $costi;
     }

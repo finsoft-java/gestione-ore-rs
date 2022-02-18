@@ -96,7 +96,7 @@ class ReportBudgetManager {
         global $panthera;
         $idprogetto = $progetto['ID_PROGETTO'];
         
-        $query_tipo_costo = "SELECT COD_TIPO_COSTO_PANTHERA FROM progetti WHERE ID_PROGETTO=$idprogetto";
+        $query_tipo_costo = "SELECT TRIM(COD_TIPO_COSTO_PANTHERA) FROM progetti WHERE ID_PROGETTO=$idprogetto";
         $tipoCosto = select_single_value($query_tipo_costo);
 
         if (!empty($anno) and !empty($mese)) {
