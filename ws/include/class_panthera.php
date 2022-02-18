@@ -47,7 +47,7 @@ class PantheraManager {
         //print_r($sql); print("\n");
         if ($result = sqlsrv_query($this->conn, $sql)) {
             $arr = array();
-            while ($row = sqlsrv_fetch_array($result))
+            while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC))
             {
                 $arr[] = $row;
             }
@@ -63,7 +63,7 @@ class PantheraManager {
     function select_column($sql) {
         if ($result = sqlsrv_query($this->conn, $sql)) {
             $arr = array();
-            while ($row = sqlsrv_fetch_array($result))
+            while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC))
             {
                 $arr[] = $row[0];
             }
@@ -78,7 +78,7 @@ class PantheraManager {
     */
     function select_single($sql) {
         if ($result = sqlsrv_query($this->conn, $sql)) {
-            if ($row = sqlsrv_fetch_array($result))
+            if ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC))
             {
                 return $row;
             } else {
@@ -212,7 +212,7 @@ class PantheraManager {
                 "AND R_TIPO_COSTO='$tipoCosto' " .
                 "AND (DATA_COSTO IS NULL OR DATA_COSTO<=$data2) " .
                 "AND (DATA_FINE_COSTO IS NULL OR DATA_FINE_COSTO>=$data1) ";
-            $costi = $this->select_list($query);
+            $costi = $this->select_list($query,);
         }
         return $costi;
     }
