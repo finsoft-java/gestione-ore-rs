@@ -87,7 +87,7 @@ export class ProgettoDettaglioComponent implements OnInit {
       this.progetto = new Progetto;
     }
     this.getMatricole();
-    this.getSupervisor();
+    this.getTipiCosto();
     this.getProgettoPersone();
   }
   
@@ -157,7 +157,7 @@ export class ProgettoDettaglioComponent implements OnInit {
     return pantheraObj != null && pantheraObj.DENOMINAZIONE != null ? pantheraObj.DENOMINAZIONE : '(unknown)';
   }
 
-  getSupervisor(): void {
+  getTipiCosto(): void {
     this.progettiService.getAllTipiCostoPanthera()
       .subscribe(response => {
         this.allTipiCosto = response.data;
