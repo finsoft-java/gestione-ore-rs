@@ -30,12 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $anno = substr($periodo, 0, 4);
     $mese = substr($periodo, 5, 2);
     $primo = "DATE('$anno-$mese-01')";
-    $metaMese = "DATE('$anno-$mese-15')";
+    $ultimo = "LAST_DAY($primo)";
+    $metaMeseSucc = "DATE('$anno-$mese-15') + INTERVAL 1 MONTH";
 
     // Questa e' la griglia che verra' presentata all'utente
     $query = "SELECT pwr.ID_DIPENDENTE,p.ID_PROGETTO,p.TITOLO,p.ID_SUPERVISOR
                 FROM progetti p INNER JOIN progetti_persone pwr on p.ID_PROGETTO = pwr.ID_PROGETTO
-                WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo)
+                WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= $ultimo
                 GROUP BY 1,2,3,4
                 ORDER BY 1,3";
     $dateFirma = select_list($query);
@@ -45,16 +46,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $idSupervisor = $dateFirma[$i]['ID_SUPERVISOR'];
         $idDipendente = $dateFirma[$i]['ID_DIPENDENTE'];
 
-        $query_sup = "SELECT max(a.DATA) FROM ore_presenza_lul a " .
-                    "WHERE a.ORE_PRESENZA_ORDINARIE > 0 AND a.ID_DIPENDENTE = '$idSupervisor' ";
+        $query_sup = "SELECT max(a.DATA) FROM ore_presenza_lul a
+                    WHERE a.ORE_PRESENZA_ORDINARIE > 0 AND a.ID_DIPENDENTE = '$idSupervisor' ";
         $dateFirma[$i]['ULTIMA_PRESENZA_SUP'] = select_single_value($query_sup);
         
-        $query_dip = "SELECT max(a.DATA) FROM ore_presenza_lul a " .
-                    "WHERE a.ORE_PRESENZA_ORDINARIE > 0 AND a.ID_DIPENDENTE = '$idDipendente' ";
+        $query_dip = "SELECT max(a.DATA) FROM ore_presenza_lul a
+                    WHERE a.ORE_PRESENZA_ORDINARIE > 0 AND a.ID_DIPENDENTE = '$idDipendente' ";
         $dateFirma[$i]['ULTIMA_PRESENZA_DIP'] = select_single_value($query_dip);
         
-        $query = "SELECT min(a.DATA) FROM ore_presenza_lul a " .
-                    "WHERE a.ORE_PRESENZA_ORDINARIE > 0 AND a.ID_DIPENDENTE = '$idSupervisor' AND a.DATA >= LAST_DAY($primo)";
+        $query = "SELECT min(a.DATA)
+                    FROM ore_presenza_lul a
+                    JOIN  ore_presenza_lul b ON a.DATA = b.DATA
+                WHERE a.ORE_PRESENZA_ORDINARIE > 0 AND a.ID_DIPENDENTE = '$idSupervisor'
+                    AND b.ORE_PRESENZA_ORDINARIE > 0 AND b.ID_DIPENDENTE = '$idDipendente'
+                    AND a.DATA >= $ultimo
+                    AND a.DATA <= $metaMeseSucc";
         $dataDefault = select_single_value($query);
         $dateFirma[$i]['DATA_FIRMA'] = $dataDefault;
 
