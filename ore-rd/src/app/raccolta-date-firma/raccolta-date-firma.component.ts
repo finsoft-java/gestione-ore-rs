@@ -41,7 +41,7 @@ export const MY_FORMATS = {
 export class RaccoltaDateFirmaComponent implements OnInit {
 
   date = new FormControl(moment());
-  dataSource = new MatTableDataSource<DataFirma[]>();
+  dataSource = new MatTableDataSource<DataFirma>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;
   annoMese: string = '';
@@ -58,6 +58,7 @@ export class RaccoltaDateFirmaComponent implements OnInit {
     ctrlValue.month(normalizedMonth.month());
     this.date.setValue(ctrlValue);
     datepicker.close();
+    this.run();
   }
 
   constructor(private datitestService: DatitestService, private alertService: AlertService) { }
@@ -67,27 +68,28 @@ export class RaccoltaDateFirmaComponent implements OnInit {
   }
 
   run() {
-      this.annoMese = formatDate(this.date.value,"YYYY-MM","en-GB");
-      this.datitestService.runDateFirma(this.annoMese).subscribe(response => {
-        this.dataSource = new MatTableDataSource<DataFirma[]>(response.data);
-        if (response.data == null || response.data.length == 0) {
-          this.message_error = 'Nessun progetto nel periodo selezionato';
-        }
-      },
-      error => {
-        this.message_error = error;
-      });
+    this.resetAlertDanger();
+    this.annoMese = formatDate(this.date.value,"YYYY-MM","en-GB");
+    this.datitestService.runDateFirma(this.annoMese).subscribe(response => {
+      this.dataSource = new MatTableDataSource<DataFirma>(response.data);
+      if (response.data == null || response.data.length == 0) {
+        this.message_error = 'Nessun progetto nel periodo selezionato';
+      }
+    },
+    error => {
+      this.message_error = error;
+    });
   }
 
-  getRecord(a:any){
-    a.isEditable=true;
+  getRecord(a: DataFirma) {
+    a.isEditable = true;
   }
   
-  saveChange(a:DataFirma){
+  saveChange(a: DataFirma) {
         
   }
 
-  undoChange(a:DataFirma){
+  undoChange(a: DataFirma) {
     a.isEditable = false;
   }
 

@@ -20,15 +20,25 @@
         <td mat-cell *matCellDef="let element"> {{element.ULTIMA_PRESENZA_SUP}} </td>
     </ng-container>
     
+    <ng-container matColumnDef="prima_pres_supervisor">
+        <th mat-header-cell *matHeaderCellDef> Prima. pres. sup. </th>
+        <td mat-cell *matCellDef="let element"> {{element.PRIMA_PRESENZA_SUCC_SUP}} </td>
+    </ng-container>
+    
     <ng-container matColumnDef="ult_pres_dipendente">
         <th mat-header-cell *matHeaderCellDef> Ult. pres. dip. </th>
         <td mat-cell *matCellDef="let element"> {{element.ULTIMA_PRESENZA_DIP}} </td>
     </ng-container>
     
+    <ng-container matColumnDef="prima_pres_dipendente">
+        <th mat-header-cell *matHeaderCellDef> Prima. pres. dip. </th>
+        <td mat-cell *matCellDef="let element"> {{element.PRIMA_PRESENZA_SUCC_DIP}} </td>
+    </ng-container>
+    
     <ng-container matColumnDef="dataFirma">
         <th mat-header-cell *matHeaderCellDef> Data Firma </th>
         <td mat-cell *matCellDef="let element"> 
-            <div style="display: block;margin: 0px auto;width: 423px;">                
+            <div style="display: block;margin: 0px auto;">                
                 <mat-form-field appearance="fill">
                     <mat-label>Data Firma</mat-label>
                     <input matInput readonly [matDatepicker]="picker1" [(ngModel)]="element.DATA_FIRMA">

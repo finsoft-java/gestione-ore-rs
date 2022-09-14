@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from './../../environments/environment';
 import { formatDate } from '@angular/common';
+import { ListBean } from '../_models';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,7 @@ export class DatitestService {
   }
 
   runDateFirma(periodo: string) {
-    return this.http.post<any>(`${this.baseUrl}/GeneraDateFirma.php`, {
+    return this.http.post<ListBean<DataFirma>>(`${this.baseUrl}/GeneraDateFirma.php`, {
       periodo: periodo
     });
   }
@@ -32,7 +33,7 @@ export class DatitestService {
         dataFirma[i].DATA_FIRMA = formatDate(dataFirma[i].DATA_FIRMA,"YYYY-MM-dd","en-GB");
       }
     }
-    return this.http.put<any>(`${this.baseUrl}/GeneraDateFirma.php`, {
+    return this.http.put<void>(`${this.baseUrl}/GeneraDateFirma.php`, {
       data_firma: dataFirma
     });
   }

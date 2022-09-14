@@ -167,5 +167,88 @@ class LULManager {
         
         return [$oggetti, $count];
     }
+
+    function getDateFirma($periodo) {
+        global $panthera;
+        $anno = substr($periodo, 0, 4);
+        $mese = substr($periodo, 5, 2);
+        $primo = "DATE('$anno-$mese-01')";
+        $ultimo = "LAST_DAY($primo)";
+        $metaMeseSucc = "DATE('$anno-$mese-15') + INTERVAL 1 MONTH";
+        $primoMeseSucc = "$primo + INTERVAL 1 MONTH";
+        $ultimoMeseSucc = "LAST_DAY($primo + INTERVAL 1 MONTH)";
+
+        // Questa e' la griglia che verra' presentata all'utente
+        $query = "SELECT pwr.ID_DIPENDENTE, p.ID_PROGETTO, p.TITOLO, p.ID_SUPERVISOR
+                    FROM progetti p INNER JOIN progetti_persone pwr on p.ID_PROGETTO = pwr.ID_PROGETTO
+                    WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= $ultimo
+                    GROUP BY 1,2,3,4
+                    ORDER BY 1,3";
+        $dateFirma = select_list($query);
+
+        // ciclo precompilazione Data_firma
+        for ($i = 0 ; $i < count($dateFirma); $i++) {
+            $idSupervisor = $dateFirma[$i]['ID_SUPERVISOR'];
+            $idDipendente = $dateFirma[$i]['ID_DIPENDENTE'];
+
+            $dateFirma[$i]['ULTIMA_PRESENZA_DIP'] = $this->getUltimaPresenzaPeriodo($idDipendente, $primo, $ultimo);
+            $dateFirma[$i]['ULTIMA_PRESENZA_SUP'] = $this->getUltimaPresenzaPeriodo($idSupervisor, $primo, $ultimo);
+            $dateFirma[$i]['PRIMA_PRESENZA_SUCC_DIP'] = $this->getPrimaPresenzaPeriodo($idDipendente, $primoMeseSucc, $ultimoMeseSucc);
+            $dateFirma[$i]['PRIMA_PRESENZA_SUCC_SUP'] = $this->getPrimaPresenzaPeriodo($idSupervisor, $primoMeseSucc, $ultimoMeseSucc);
+            
+            $dateFirma[$i]['DATA_FIRMA'] = $this->getUltimoGiornoLavorativoPeriodo($primo, $ultimo);
+
+            // compilo anche nome dipendente e supervisor
+            $nome_dipendente = $panthera->getUtenteByIdDipendente($idDipendente);
+            $nome_supervisor = $panthera->getUtenteByIdDipendente($idSupervisor);
+            $dateFirma[$i]['NOME_DIPENDENTE'] = $nome_dipendente;
+            $dateFirma[$i]['NOME_SUPERVISOR'] = $nome_supervisor;
+        }
+
+        return $dateFirma;
+    }
+
+    function getPrimaPresenzaPeriodo($idDipendente, $primo, $ultimo) {
+        $query = "SELECT MIN(a.DATA) FROM ore_presenza_lul a
+                WHERE a.ORE_PRESENZA_ORDINARIE > 0
+                AND a.ID_DIPENDENTE = '$idDipendente'
+                AND a.DATA BETWEEN $primo AND $ultimo";
+        return select_single_value($query);
+    }
+
+    function getUltimaPresenzaPeriodo($idDipendente, $primo, $ultimo) {
+        $query = "SELECT MAX(a.DATA) FROM ore_presenza_lul a
+                WHERE a.ORE_PRESENZA_ORDINARIE > 0
+                AND a.ID_DIPENDENTE = '$idDipendente'
+                AND a.DATA BETWEEN $primo AND $ultimo";
+        return select_single_value($query);
+    }
+
+    function getUltimoGiornoLavorativoPeriodo($primo, $ultimo) {
+        // 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday, 7=Saturday
+        $query = "SELECT MAX(a.DATA) FROM ore_presenza_lul a
+                WHERE a.DATA BETWEEN $primo AND $ultimo
+                AND DAYOFWEEK(a.DATA) <> 1 AND DAYOFWEEK(a.DATA) <> 7";
+        return select_single_value($query);
+    }
+
+    function salvaDateFirma($annoMese, $json_data) {
+        $sql = "DELETE FROM date_firma WHERE ANNO_MESE = '$annoMese'";    
+        execute_update($sql);
+    
+        for ($i = 0; $i < count($json_data->data_firma) - 1; $i++) {
+            if ($json_data->data_firma[$i] != null) {
+                if ($json_data->data_firma[$i]->DATA_FIRMA != null) {
+                    $sql = insert("date_firma", ["ANNO_MESE" => $annoMese,
+                                                "ID_PROGETTO" => $json_data->data_firma[$i]->ID_PROGETTO,
+                                                "DATA_FIRMA" => $json_data->data_firma[$i]->DATA_FIRMA,
+                                                "ID_DIPENDENTE" => $json_data->data_firma[$i]->ID_DIPENDENTE
+                                                ]);
+                    execute_update($sql);
+                }
+            }
+        }
+    }
 }
+
 ?>

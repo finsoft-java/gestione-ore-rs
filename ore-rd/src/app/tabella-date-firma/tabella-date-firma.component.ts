@@ -1,8 +1,8 @@
 import { AlertService } from './../_services/alert.service';
 import { DatitestService } from './../_services/datitest.service';
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
-import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import * as _moment from 'moment';
 
 
@@ -31,15 +31,18 @@ export const MY_FORMATS = {
 })
 export class TabellaDateFirmaComponent implements OnInit {
   @Input() dataSourceFiglio: any;
-  @Input() annoMese:any;
+  @Input() annoMese: any;
 
-  displayedColumns: string[] = ['nome_dipendente', 'titolo', 'nome_supervisor', 'ult_pres_supervisor','ult_pres_dipendente','dataFirma'];
+  displayedColumns: string[] = ['titolo',
+    'nome_dipendente', 'ult_pres_dipendente', 'prima_pres_dipendente',
+    'nome_supervisor', 'ult_pres_supervisor', 'prima_pres_supervisor',
+    'dataFirma'];
   constructor(private datitestService: DatitestService, private alertService: AlertService) { }
 
   ngOnInit(): void {
   }
 
-  salvaDateFirma(){
+  salvaDateFirma() {
     let objAnnoMese = { "ANNO_MESE" : this.annoMese}
     this.dataSourceFiglio.data.push(objAnnoMese);
     this.datitestService.salvaDataFirma(this.dataSourceFiglio.data)
