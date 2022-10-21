@@ -10,24 +10,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // require_logged_user_JWT();
 
-$id_progetto = isset($_GET['id_progetto']) ? $con->escape_string($_GET['id_progetto']) : null;
 $cod_commessa = isset($_GET['cod_commessa']) ? $con->escape_string($_GET['cod_commessa']) : null;
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // DOWNLOAD ==========================================================
-    if (!$id_progetto) {
-        print_error(400, 'Missing id_progetto');
-    }
     if (!$cod_commessa) {
         print_error(400, 'Missing cod_commessa');
     }
-    $object = $progettiCommesseManager->get_commessa($id_progetto, $cod_commessa);
+    $object = $commesseManager->get_commessa($cod_commessa);
     if (!$object) {
         print_error(404, 'Not found');
     }
 
-    $lista = $progettiCommesseManager->download_giustificativo($id_progetto, $cod_commessa);
+    $lista = $commesseManager->download_giustificativo($cod_commessa);
         
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // UPLOAD ==========================================================
@@ -37,33 +33,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $origfilename =  $_FILES["file"]["name"];
     $tmpfilename =  $_FILES["file"]["tmp_name"];
 
-    if (!$id_progetto) {
-        print_error(400, 'Missing id_progetto');
-    }
     if (!$cod_commessa) {
         print_error(400, 'Missing cod_commessa');
     }
-    $object = $progettiCommesseManager->get_commessa($id_progetto, $cod_commessa);
+    $object = $progettiCommesseManager->get_commessa($cod_commessa);
     if (!$object) {
         print_error(404, 'Not found');
     }
 
-    $progettiCommesseManager->upload_giustificativo($id_progetto, $cod_commessa, $tmpfilename, $origfilename);
+    $progettiCommesseManager->upload_giustificativo($cod_commessa, $tmpfilename, $origfilename);
 
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     //==========================================================
-    if (!$id_progetto) {
-        print_error(400, 'Missing id_progetto');
-    }
     if (!$cod_commessa) {
         print_error(400, 'Missing cod_commessa');
     }
-    $object = $progettiCommesseManager->get_commessa($id_progetto, $cod_commessa);
+    $object = $progettiCommesseManager->get_commessa($cod_commessa);
     if (!$object) {
         print_error(404, 'Not found');
     }
 
-    $progettiCommesseManager->elimina_giustificativo($id_progetto, $cod_commessa);
+    $progettiCommesseManager->elimina_giustificativo($cod_commessa);
     
 } else {
     //==========================================================
