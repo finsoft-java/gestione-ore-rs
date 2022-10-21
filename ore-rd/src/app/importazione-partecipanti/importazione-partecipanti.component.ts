@@ -9,12 +9,12 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
   styleUrls: ['./importazione-partecipanti.component.css'],
 })
 export class ImportazionePartecipantiComponent implements OnInit {
-  selectedFiles?: FileList;
+  selectedFile?: File;
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
   eventoClick?: any;
-  nomiFile: string[] = [];
+  // nomeFile: string = '';
   loading = false;
   @ViewChild('fileInput') inputFile?: ElementRef;
 
@@ -25,21 +25,16 @@ export class ImportazionePartecipantiComponent implements OnInit {
 
   reset() {
     this.eventoClick.srcElement.value = null;
-    this.selectedFiles = undefined;
-    this.nomiFile = [];
+    this.selectedFile = undefined;
+    //this.nomeFile = '';
     this.progressInfos = { value: 0, fileName: 'Caricamento' };
     this.message_error = '';
     this.message_success = '';
   }
 
-  selectFiles(event: any) {
+  selectFile(event: any) {
     this.eventoClick = event;
-    this.selectedFiles = event.target.files;
-    if (this.selectedFiles) {
-      for (let i = 0; i < this.selectedFiles.length; i++) {
-        this.nomiFile.push(this.selectedFiles[i].name);
-      }
-    }
+    this.selectedFile = event.target.file;
   }
 
   resetAlertSuccess() {
@@ -51,19 +46,19 @@ export class ImportazionePartecipantiComponent implements OnInit {
   }
 
   uploadFiles() {
-    if (this.selectedFiles) {
-      this.upload(this.selectedFiles);
+    if (this.selectedFile) {
+      this.upload(this.selectedFile);
     }
   }
 
-  upload(files: FileList) {
+  upload(file: File) {
     this.progressInfos.value = 0;
     this.loading = true;
     this.message_error = '';
     this.message_success = 'Loading...';
 
     //TODO insert upload service
-    // this.uploadService.upload(files).subscribe(
+    // this.uploadService.upload(file).subscribe(
     //   event => {
     //   console.log("EVENT=", event);
     //     if (event.type === HttpEventType.UploadProgress) {
