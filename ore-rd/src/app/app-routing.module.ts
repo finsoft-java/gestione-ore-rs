@@ -14,6 +14,10 @@ import { StoricoAssociazioniOreComponent } from './storico-associazioni-ore/stor
 import { LoginComponent } from './login/login.component';
 import { GrigliaLulComponent } from './griglia-lul/griglia-lul.component';
 import { GrigliaOreImportateComponent } from './griglia-ore-importate/griglia-ore-importate.component';
+import { PartecipantiGlobaliComponent } from './partecipanti-globali/partecipanti-globali.component';
+import { ImportazionePartecipantiComponent } from './importazione-partecipanti/importazione-partecipanti.component';
+import { CommesseComponent } from './commesse/commesse.component';
+import { ImportazioneCommesseComponent } from './importazione-commesse/importazione-commesse.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent},
@@ -30,6 +34,10 @@ const routes: Routes = [
   { path: 'regressione', component: StoricoAssociazioniOreComponent, canActivate:[AuthGuard]},
   { path: 'ore-importate', component: GrigliaOreImportateComponent, canActivate:[AuthGuard]},
   { path: 'lul-importati', component: GrigliaLulComponent, canActivate:[AuthGuard]},
+  { path: 'partecipanti-globali', component: PartecipantiGlobaliComponent, canActivate:[AuthGuard]},
+  { path: 'importazione-partecipanti', component: ImportazionePartecipantiComponent, canActivate:[AuthGuard]},
+  { path: 'commesse', component: CommesseComponent, canActivate:[AuthGuard]},
+  { path: 'importazione-commesse', component: ImportazioneCommesseComponent, canActivate:[AuthGuard]},
   { path: '**', redirectTo: 'progetti' }
 ];
 

@@ -47,6 +47,10 @@ import { ProgettoCommesseComponent } from './progetto-commesse/progetto-commesse
 import { GrigliaLulComponent } from './griglia-lul/griglia-lul.component';
 import { GrigliaOreImportateComponent } from './griglia-ore-importate/griglia-ore-importate.component';
 import { MatEditTableComponent } from './mat-edit-table/mat-edit-table.component';
+import { PartecipantiGlobaliComponent } from './partecipanti-globali/partecipanti-globali.component';
+import { ImportazionePartecipantiComponent } from './importazione-partecipanti/importazione-partecipanti.component';
+import { CommesseComponent } from './commesse/commesse.component';
+import { ImportazioneCommesseComponent } from './importazione-commesse/importazione-commesse.component';
 
 
 registerLocaleData(localeIt);
@@ -70,7 +74,11 @@ registerLocaleData(localeIt);
     ProgettoCommesseComponent,
     GrigliaLulComponent,
     GrigliaOreImportateComponent,
-    MatEditTableComponent
+    MatEditTableComponent,
+    PartecipantiGlobaliComponent,
+    ImportazionePartecipantiComponent,
+    CommesseComponent,
+    ImportazioneCommesseComponent
   ],
   imports: [
     HttpClientModule,
