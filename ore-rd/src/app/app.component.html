@@ -9,24 +9,24 @@
         <span>Tipologia Spesa</span>
       </button>
 
-      <button mat-menu-item [matMenuTriggerFor]="partecipantiMenu">Partecipanti</button>
+      <button mat-menu-item [matMenuTriggerFor]="partecipantiMenu">Partecipanti globali</button>
       <mat-menu #partecipantiMenu="matMenu" xPosition="after" yPosition="below">
-      <button mat-menu-item routerLink="importazione-partecipanti" class="btnSubMenu">
-        <span>Importazione partecipanti</span>
-      </button>
-      <button mat-menu-item routerLink="partecipanti-globali" class="btnSubMenu">
-        <span>Partecipanti globali</span>
-      </button>
+        <button mat-menu-item routerLink="importazione-partecipanti" class="btnSubMenu">
+          <span>Importazione partecipanti</span>
+        </button>
+        <button mat-menu-item routerLink="partecipanti-globali" class="btnSubMenu">
+          <span>Partecipanti globali</span>
+        </button>
       </mat-menu>
 
       <button mat-menu-item [matMenuTriggerFor]="commesseMenu">Commesse</button>
       <mat-menu #commesseMenu="matMenu" xPosition="after" yPosition="below">
-      <button mat-menu-item routerLink="importazione-commesse" class="btnSubMenu">
-        <span>Importazione commesse</span>
-      </button>
-      <button mat-menu-item routerLink="commesse" class="btnSubMenu">
-        <span>Commesse</span>
-      </button>
+        <button mat-menu-item routerLink="importazione-commesse" class="btnSubMenu">
+          <span>Importazione commesse</span>
+        </button>
+        <button mat-menu-item routerLink="commesse" class="btnSubMenu">
+          <span>Classificazione commesse</span>
+        </button>
       </mat-menu>
 
       <button mat-menu-item [matMenuTriggerFor]="lulMenu">LUL</button>
@@ -41,19 +41,23 @@
 
       <button mat-menu-item [matMenuTriggerFor]="dipendentiMenu">Ore dipendenti</button>
       <mat-menu #dipendentiMenu="matMenu" xPosition="after" yPosition="below">
-      <button mat-menu-item routerLink="importazione-ore" class="btnSubMenu">
-        <span>Importazione Ore dipendenti</span>
-      </button>
-      <button mat-menu-item routerLink="ore-importate" class="btnSubMenu">
-        <span>Visualizzazione ore importate</span>
-      </button>
-      <button mat-menu-item routerLink="esportazione-rapportini" class="btnSubMenu">
-        <span>Esportazione Rapportini</span>
-      </button>
-      <button mat-menu-item routerLink="raccolta-date-firma" class="btnSubMenu">
-        <span>Raccolta date firma</span>
-      </button>
-    </mat-menu>
+        <button mat-menu-item routerLink="importazione-ore" class="btnSubMenu">
+          <span>Importazione Ore dipendenti</span>
+        </button>
+        <button mat-menu-item routerLink="ore-importate" class="btnSubMenu">
+          <span>Visualizzazione ore importate</span>
+        </button>
+      </mat-menu>
+
+      <button mat-menu-item [matMenuTriggerFor]="rapportiniMenu">Rapportini</button>
+      <mat-menu #rapportiniMenu="matMenu" xPosition="after" yPosition="below">
+        <button mat-menu-item routerLink="raccolta-date-firma" class="btnSubMenu">
+          <span>Raccolta date firma</span>
+        </button>
+        <button mat-menu-item routerLink="esportazione-rapportini" class="btnSubMenu">
+          <span>Esportazione Rapportini</span>
+        </button>
+      </mat-menu>
 
       <button mat-menu-item routerLink="regressione">
         <span>Utilità regressione</span>
