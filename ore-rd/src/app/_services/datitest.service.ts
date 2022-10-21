@@ -14,9 +14,8 @@ export class DatitestService {
 
   constructor(private http: HttpClient) { }
   
-  run(idProgetto: number, periodo: string) {
+  run(periodo: string) {
     return this.http.post<any>(`${this.baseUrl}/AssegnaOreProgetti.php`, {
-      idProgetto: idProgetto,
       periodo: periodo
     });
   }

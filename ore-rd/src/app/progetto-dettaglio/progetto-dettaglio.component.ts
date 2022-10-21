@@ -342,10 +342,6 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.router.navigate(["progetto", this.progetto.ID_PROGETTO, "report"]);
   }
 
-  associaOre() {
-    this.router.navigate(["progetto", this.progetto.ID_PROGETTO, "associazione-ore"]);
-  }
-
   /**
    * Arrotonda x a 2 decimali
    */

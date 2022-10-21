@@ -25,7 +25,7 @@ const routes: Routes = [
   { path: 'progetto/:id_progetto', component: ProgettoDettaglioComponent, canActivate:[AuthGuard]},
   { path: 'progetto/nuovo', component: ProgettoDettaglioComponent, canActivate:[AuthGuard]},
   { path: 'progetto/:id_progetto/report', component: ReportCompletoComponent, canActivate:[AuthGuard]},
-  { path: 'progetto/:id_progetto/associazione-ore', component: GeneraDatiTestComponent, canActivate:[AuthGuard]},
+  { path: 'associazione-ore', component: GeneraDatiTestComponent, canActivate:[AuthGuard]},
   { path: 'tipologie-spesa', component: TipologiaSpesaComponent, canActivate:[AuthGuard]},
   { path: 'importazione-lul', component: ImportazioneLulComponent, canActivate:[AuthGuard]},
   { path: 'importazione-ore', component: ImportazioneRapportiniComponent, canActivate:[AuthGuard]},

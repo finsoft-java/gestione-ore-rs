@@ -48,8 +48,8 @@ export class GeneraDatiTestComponent implements OnInit {
 
     message_success = '';
     message_error = '';
-    idProgetto: number = -1;
-    progetto?: Progetto;
+    // idProgetto: number = -1;
+    // progetto?: Progetto;
     running = false;
     
     constructor(private datitestService: DatitestService,
@@ -58,21 +58,7 @@ export class GeneraDatiTestComponent implements OnInit {
       private route: ActivatedRoute,
       private router: Router) { }
     
-    ngOnInit(): void {
-      this.route.params.subscribe(params => {
-        this.idProgetto = +params['id_progetto'];
-        this.progettiService.getById(this.idProgetto).subscribe(
-          response => {
-            this.progetto = response.value;
-          },
-          error => {
-            this.alertService.error(error);
-          });
-      },
-        error => {
-        this.alertService.error(error);
-      });
-    }
+    ngOnInit(): void {    }
 
     resetAlertSuccess() {    
       this.message_success = '';
@@ -87,7 +73,7 @@ export class GeneraDatiTestComponent implements OnInit {
       this.resetAlertDanger();
       this.running = true;
 
-      this.datitestService.run(this.idProgetto, formatDate(this.date,"YYYY-MM-dd","en-GB")).subscribe(response => {
+      this.datitestService.run(formatDate(this.date,"YYYY-MM-dd","en-GB")).subscribe(response => {
         this.message_success = 'Elaborazione terminata. I dettagli verranno visualizzati in una nuova finestra.';
         this.message_error = response.value.error;
         this.running = false;
@@ -101,9 +87,5 @@ export class GeneraDatiTestComponent implements OnInit {
         this.message_error = error;
         this.running = false;
       });
-    }
-
-    back() {
-      this.router.navigate(['/progetto', this.idProgetto])
     }
 }
