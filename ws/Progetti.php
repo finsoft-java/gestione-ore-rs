@@ -85,12 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$progetto_su_db) {
         print_error(404, 'Not found');
     }
-    if (!$progetto_su_db->utente_puo_modificarlo()) {
-        print_error(403, "Utente non autorizzato a modificare questo Progetto.");
-    }
-    if ($progetto_su_db->is_gia_compilato()) {
-        print_error(403, "Non e' possibile eliminare un progetto con questionari già compilati.");
-    }
     
     $progettiManager->elimina($id_progetto);
     
