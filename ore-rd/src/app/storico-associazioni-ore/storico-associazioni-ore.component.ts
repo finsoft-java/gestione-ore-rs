@@ -20,7 +20,7 @@ export class StoricoAssociazioniOreComponent implements OnInit {
   isCaricamentoEliminabile = false;
   
   dataSource = new MatTableDataSource<Esecuzione>();
-  displayedColumns: string[] = ['idEsecuzione', 'idProgetto', 'utente', 'tmsEsecuzione', 'totOre', 'applied', 'actions'];
+  displayedColumns: string[] = ['idEsecuzione', 'utente', 'tmsEsecuzione', 'totOre', 'applied', 'actions'];
 
   dataSource2 = new MatTableDataSource<Caricamento>();
   displayedColumns2: string[] = ['idCaricamento', 'utente', 'tmsEsecuzione', 'actions'];
