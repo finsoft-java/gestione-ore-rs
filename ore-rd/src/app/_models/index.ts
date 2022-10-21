@@ -9,3 +9,5 @@ export * from './esecuzione';
 export * from './caricamento';
 export * from './lul';
 export * from './ore.commesse';
+export * from './commesse';
+export * from './partecipanti';
