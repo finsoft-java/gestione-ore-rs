@@ -3,7 +3,7 @@ import { DataFirma } from './../_models/matricola';
 import { Router } from '@angular/router';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { DatitestService } from './../_services/datitest.service';
+import { AssociazioneOreService } from '../_services/associazione.ore';
 import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
@@ -61,7 +61,7 @@ export class RaccoltaDateFirmaComponent implements OnInit {
     this.run();
   }
 
-  constructor(private datitestService: DatitestService, private alertService: AlertService) { }
+  constructor(private associazioneOreService: AssociazioneOreService, private alertService: AlertService) { }
 
   ngOnInit(): void {
     this.dataSource.paginator = this.paginator;
@@ -70,7 +70,7 @@ export class RaccoltaDateFirmaComponent implements OnInit {
   run() {
     this.resetAlertDanger();
     this.annoMese = formatDate(this.date.value,"YYYY-MM","en-GB");
-    this.datitestService.runDateFirma(this.annoMese).subscribe(response => {
+    this.associazioneOreService.runDateFirma(this.annoMese).subscribe(response => {
       this.dataSource = new MatTableDataSource<DataFirma>(response.data);
       if (response.data == null || response.data.length == 0) {
         this.message_error = 'Nessun progetto nel periodo selezionato';
