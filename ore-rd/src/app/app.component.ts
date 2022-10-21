@@ -12,7 +12,6 @@ import { filter } from 'rxjs/operators';
 })
 export class AppComponent implements OnInit {
   title = 'ore-rd';
-  router_frontend: Router;
   showFiller = false;
   isLogged: boolean = false;
   _subscription: Subscription = new Subscription;
@@ -20,7 +19,6 @@ export class AppComponent implements OnInit {
   menuDisabled = true;
 
   constructor(private route: ActivatedRoute, private router: Router, private authenticationService: AuthenticationService) {
-    this.router_frontend = router;
   }
 
   ngOnInit(): void {
