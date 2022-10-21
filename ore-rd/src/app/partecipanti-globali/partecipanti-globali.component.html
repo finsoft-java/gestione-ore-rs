@@ -1,4 +1,60 @@
-<p>partecipanti-globali works!</p>
+<div>
+    <h5 style="margin-bottom: 20px; text-align:center">Partecipanti Globali</h5>
+    <button mat-raised-button color="primary" style="float: right; margin: 0px 0px 20px 0px;"
+        (click)="nuovoPartecipante()">Nuovo Parteciapante</button>
+</div>
 
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID Dipendente</th>
+        <td mat-cell *matCellDef="let element">
+            <label *ngIf="!element.isEditable">{{element.ID_DIPENDENTE}}</label>
+            <ng-select *ngIf="element.isEditable" [items]="allMatricole" bindLabel="DENOMINAZIONE"
+                bindValue="ID_DIPENDENTE" [(ngModel)]="element.ID_DIPENDENTE">
+            </ng-select>
+        </td>
+    </ng-container>
 
-pagina griglia editabile tipo "tipologia spesa"
+    <ng-container matColumnDef="pctUtilizzo">
+        <th mat-header-cell *matHeaderCellDef>Pct Utilizzo</th>
+        <td mat-cell *matCellDef="let element">
+            <label *ngIf="!element.isEditable">{{element.PCT_UTILIZZO}}</label>
+            <input *ngIf="element.isEditable" class="form-control" style="display: inline-block; width: 220px;
+                margin-right: 15px; border: 1px solid; padding: 0px 15px;" matInput [(ngModel)]="element.PCT_UTILIZZO">
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="mansione">
+        <th mat-header-cell *matHeaderCellDef>Mansione</th>
+        <td mat-cell *matCellDef="let element">
+            <label *ngIf="!element.isEditable">{{element.MANSIONE}}</label>
+            <input *ngIf="element.isEditable" class="form-control" style="display: inline-block; width: 220px;
+                margin-right: 15px; border: 1px solid; padding: 0px 15px;" matInput [(ngModel)]="element.MANSIONE">
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="costo">
+        <th mat-header-cell *matHeaderCellDef>Costo</th>
+        <td mat-cell *matCellDef="let element">
+            <label *ngIf="!element.isEditable">{{element.COSTO}}</label>
+            <input *ngIf="element.isEditable" class="form-control" style="display: inline-block; width: 220px;
+                margin-right: 15px; border: 1px solid; padding: 0px 15px;" matInput [(ngModel)]="element.COSTO">
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Azione</th>
+        <td mat-cell *matCellDef="let row">
+            <button *ngIf="!row.isEditable" mat-raised-button color="primary" (click)="getRecord(row)">Modifica</button>
+            <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteChange(row)">Elimina</button>
+            <button *ngIf="row.isEditable" mat-raised-button style="margin-right: 10px;" color="primary"
+                (click)="saveChange(row)">Salva</button>
+            <button *ngIf="row.isEditable" mat-raised-button color="" (click)="undoChange(row)">Annulla</button>
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+<mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
