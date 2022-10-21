@@ -1,31 +1,31 @@
 <mat-drawer-container class="example-container" autosize>
     <mat-drawer #drawer class="example-sidenav" mode="side">
         <nav style="padding:15px;">
-            <button mat-menu-item (click)="router_frontend.navigate(['progetti'])">
+            <button mat-menu-item routerLink="progetti">
                 <span>Progetti</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['tipologie-spesa'])">
+            <button mat-menu-item routerLink="tipologie-spesa">
                 <span>Tipologia Spesa</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['importazione-lul'])" >
+            <button mat-menu-item routerLink="importazione-lul">
                 <span>Importazione LUL</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['lul-importati'])" >
+            <button mat-menu-item routerLink="lul-importati">
                 <span>Visualizzazione LUL importati</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['importazione-ore'])">
+            <button mat-menu-item routerLink="importazione-ore">
                 <span>Importazione Ore dipendenti</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['ore-importate'])" >
+            <button mat-menu-item routerLink="ore-importate">
                 <span>Visualizzazione ore importate</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['regressione'])">
+            <button mat-menu-item routerLink="regressione">
                 <span>Utilità regressione</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['esportazione-rapportini'])">
+            <button mat-menu-item routerLink="esportazione-rapportini">
                 <span>Esportazione Rapportini</span>
             </button>
-            <button mat-menu-item (click)="router_frontend.navigate(['raccolta-date-firma'])">
+            <button mat-menu-item routerLink="raccolta-date-firma">
                 <span>Raccolta date firma</span>
             </button>
             <button mat-menu-item (click)="logout();drawer.toggle()">
