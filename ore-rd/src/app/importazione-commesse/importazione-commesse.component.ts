@@ -1,4 +1,4 @@
-//TODO import upload service here
+import { UploadCommesseService } from '../_services/upload.commesse.service ';
 import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { AlertService } from './../_services/alert.service';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
@@ -18,8 +18,7 @@ export class ImportazioneCommesseComponent implements OnInit {
   loading = false;
   @ViewChild('fileInput') inputFile?: ElementRef;
 
-  //TODO insert upload service in constructor
-  constructor(private alertService: AlertService) {}
+  constructor(private uploadCommesseService: UploadCommesseService, private alertService: AlertService) {}
 
   ngOnInit(): void {}
 
@@ -57,29 +56,28 @@ export class ImportazioneCommesseComponent implements OnInit {
     this.message_error = '';
     this.message_success = 'Loading...';
 
-    //TODO insert upload service
-    // this.uploadService.upload(file).subscribe(
-    //   event => {
-    //   console.log("EVENT=", event);
-    //     if (event.type === HttpEventType.UploadProgress) {
-    //       if (event.total) {
-    //         this.progressInfos.value = Math.round(100 * event.loaded / event.total);
-    //       }
-    //     } else if (event instanceof HttpResponse) {
-    //       this.message_error = event.body.value.error;
-    //       this.message_success = event.body.value.success;
-    //       this.loading = false;
-    //     }
-    //   },
-    //   err => {
-    //   console.log("ERRORE=", err);
-    //     if (err && err.error && err.error.error)
-    //         this.message_error = err.error.error.message;
-    //     else if (err && err.error)
-    //         this.message_error = err.error;
-    //     else
-    //         this.message_error = err;
-    //         this.loading = false;
-    //   });
+    this.uploadCommesseService.upload(file).subscribe(
+      event => {
+      console.log("EVENT=", event);
+        if (event.type === HttpEventType.UploadProgress) {
+          if (event.total) {
+            this.progressInfos.value = Math.round(100 * event.loaded / event.total);
+          }
+        } else if (event instanceof HttpResponse) {
+          this.message_error = event.body.value.error;
+          this.message_success = event.body.value.success;
+          this.loading = false;
+        }
+      },
+      err => {
+      console.log("ERRORE=", err);
+        if (err && err.error && err.error.error)
+            this.message_error = err.error.error.message;
+        else if (err && err.error)
+            this.message_error = err.error;
+        else
+            this.message_error = err;
+            this.loading = false;
+      });
   }
 }
