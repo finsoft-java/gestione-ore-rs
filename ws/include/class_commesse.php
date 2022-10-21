@@ -127,5 +127,9 @@ class CommesseManager {
         execute_update($sql);
     }
 
+    function importExcel($filename, &$message, $typeFile) {
+        //copiare dai LUL ?
+    }
+
 }
 ?>
