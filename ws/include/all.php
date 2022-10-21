@@ -21,3 +21,4 @@ include("class_lul.php");
 include("class_budget.php");
 include("class_consuntivi_progetti.php");
 include("class_esecuzioni.php");
+include("class_Partecipanti.php");
