@@ -1,74 +1,98 @@
 <mat-drawer-container class="example-container" autosize>
-    <mat-drawer #drawer class="example-sidenav" mode="side">
-        <nav style="padding:15px;">
-            <button mat-menu-item routerLink="progetti">
-                <span>Progetti</span>
-            </button>
-            <button mat-menu-item routerLink="tipologie-spesa">
-                <span>Tipologia Spesa</span>
-            </button>
-            <button mat-menu-item routerLink="importazione-partecipanti">
-                <span>Importazione partecipanti</span>
-            </button>
-            <button mat-menu-item routerLink="partecipanti-globali">
-                <span>Partecipanti globali</span>
-            </button>
-            <button mat-menu-item routerLink="importazione-commesse">
-                <span>Importazione commesse</span>
-            </button>
-            <button mat-menu-item routerLink="commesse">
-                <span>Commesse</span>
-            </button>
-            <button mat-menu-item routerLink="importazione-lul">
-                <span>Importazione LUL</span>
-            </button>
-            <button mat-menu-item routerLink="lul-importati">
-                <span>Visualizzazione LUL importati</span>
-            </button>
-            <button mat-menu-item routerLink="importazione-ore">
-                <span>Importazione Ore dipendenti</span>
-            </button>
-            <button mat-menu-item routerLink="ore-importate">
-                <span>Visualizzazione ore importate</span>
-            </button>
-            <button mat-menu-item routerLink="regressione">
-                <span>Utilità regressione</span>
-            </button>
-            <button mat-menu-item routerLink="esportazione-rapportini">
-                <span>Esportazione Rapportini</span>
-            </button>
-            <button mat-menu-item routerLink="raccolta-date-firma">
-                <span>Raccolta date firma</span>
-            </button>
-            <button mat-menu-item (click)="logout();drawer.toggle()">
-                <span>Logout</span>
-            </button>
-        </nav>
-    </mat-drawer>
+  <mat-drawer #drawer class="example-sidenav" mode="side">
+    <nav style="padding: 15px">
 
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation" *ngIf="!menuDisabled">
-        <div class="container">
-            <div class="navbar-header">
-                <nav style="padding:15px;">
-                    <div class="example-sidenav-content">
-                      <button mat-icon-button (click)="drawer.toggle()" aria-label="Example icon-button with a menu">
-                        <mat-icon>menu</mat-icon>
-                      </button>
-                    </div>
-                </nav>
-            </div>
-            <div class="logo"><img src="assets/img/logo.png"></div>
-        </div>
+      <button mat-menu-item routerLink="progetti">
+        <span>Progetti</span>
+      </button>
+      <button mat-menu-item routerLink="tipologie-spesa">
+        <span>Tipologia Spesa</span>
+      </button>
+
+      <button mat-menu-item [matMenuTriggerFor]="partecipantiMenu">Partecipanti</button>
+      <mat-menu #partecipantiMenu="matMenu" xPosition="after" yPosition="below">
+      <button mat-menu-item routerLink="importazione-partecipanti" class="btnSubMenu">
+        <span>Importazione partecipanti</span>
+      </button>
+      <button mat-menu-item routerLink="partecipanti-globali" class="btnSubMenu">
+        <span>Partecipanti globali</span>
+      </button>
+      </mat-menu>
+
+      <button mat-menu-item [matMenuTriggerFor]="commesseMenu">Commesse</button>
+      <mat-menu #commesseMenu="matMenu" xPosition="after" yPosition="below">
+      <button mat-menu-item routerLink="importazione-commesse" class="btnSubMenu">
+        <span>Importazione commesse</span>
+      </button>
+      <button mat-menu-item routerLink="commesse" class="btnSubMenu">
+        <span>Commesse</span>
+      </button>
+      </mat-menu>
+
+      <button mat-menu-item [matMenuTriggerFor]="lulMenu">LUL</button>
+      <mat-menu #lulMenu="matMenu" xPosition="after" yPosition="below">
+        <button mat-menu-item routerLink="importazione-lul" class="btnSubMenu">
+          <span>Importazione LUL</span>
+        </button>
+        <button mat-menu-item routerLink="lul-importati" class="btnSubMenu">
+          <span>Visualizzazione LUL importati</span>
+        </button>
+      </mat-menu>
+
+      <button mat-menu-item [matMenuTriggerFor]="dipendentiMenu">Ore dipendenti</button>
+      <mat-menu #dipendentiMenu="matMenu" xPosition="after" yPosition="below">
+      <button mat-menu-item routerLink="importazione-ore" class="btnSubMenu">
+        <span>Importazione Ore dipendenti</span>
+      </button>
+      <button mat-menu-item routerLink="ore-importate" class="btnSubMenu">
+        <span>Visualizzazione ore importate</span>
+      </button>
+    </mat-menu>
+
+      <button mat-menu-item routerLink="regressione">
+        <span>Utilità regressione</span>
+      </button>
+      <button mat-menu-item routerLink="esportazione-rapportini">
+        <span>Esportazione Rapportini</span>
+      </button>
+      <button mat-menu-item routerLink="raccolta-date-firma">
+        <span>Raccolta date firma</span>
+      </button>
+      <button mat-menu-item (click)="logout(); drawer.toggle()">
+        <span>Logout</span>
+      </button>
+    </nav>
+  </mat-drawer>
+
+  <div
+    class="navbar navbar-default navbar-fixed-top"
+    role="navigation"
+    *ngIf="!menuDisabled"
+  >
+    <div class="container">
+      <div class="navbar-header">
+        <nav style="padding: 15px">
+          <div class="example-sidenav-content">
+            <button
+              mat-icon-button
+              (click)="drawer.toggle()"
+              aria-label="Example icon-button with a menu"
+            >
+              <mat-icon>menu</mat-icon>
+            </button>
+          </div>
+        </nav>
+      </div>
+      <div class="logo"><img src="assets/img/logo.png" /></div>
     </div>
-    <div class="content" role="main">
-        <div class="container" style="padding-top: 30px;padding-bottom:30px;">
-            <alert></alert>
-            <router-outlet></router-outlet>
-        </div>
-        <footer style="background-color: black;color:#fff;padding:30px;">
-            <div class="container">
-                Finsoft 2021
-            </div>
-        </footer>
+  </div>
+  <div class="content" role="main">
+    <div class="container" style="padding-top: 30px; padding-bottom: 30px">
+      <alert></alert>
+      <router-outlet></router-outlet>
     </div>
+    <footer style="background-color: black; color: #fff; padding: 30px">
+      <div class="container">Finsoft 2021</div>
+    </footer>
+  </div>
 </mat-drawer-container>
