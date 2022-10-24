@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './_guards/auth.guard';
-import { GeneraDatiTestComponent } from './genera-dati-test/genera-dati-test.component';
 import { ReportCompletoComponent } from './report-completo/report-completo.component';
 import { RaccoltaDateFirmaComponent } from './raccolta-date-firma/raccolta-date-firma.component';
 import { EsportazioneRapportiniComponent } from './esportazione-rapportini/esportazione-rapportini.component';
@@ -18,6 +17,7 @@ import { PartecipantiGlobaliComponent } from './partecipanti-globali/partecipant
 import { ImportazionePartecipantiComponent } from './importazione-partecipanti/importazione-partecipanti.component';
 import { CommesseComponent } from './commesse/commesse.component';
 import { ImportazioneCommesseComponent } from './importazione-commesse/importazione-commesse.component';
+import { AssociazioneOreComponent } from './associazione-ore/associazione-ore.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent},
@@ -25,7 +25,7 @@ const routes: Routes = [
   { path: 'progetto/:id_progetto', component: ProgettoDettaglioComponent, canActivate:[AuthGuard]},
   { path: 'progetto/nuovo', component: ProgettoDettaglioComponent, canActivate:[AuthGuard]},
   { path: 'progetto/:id_progetto/report', component: ReportCompletoComponent, canActivate:[AuthGuard]},
-  { path: 'associazione-ore', component: GeneraDatiTestComponent, canActivate:[AuthGuard]},
+  { path: 'associazione-ore', component: AssociazioneOreComponent, canActivate:[AuthGuard]},
   { path: 'tipologie-spesa', component: TipologiaSpesaComponent, canActivate:[AuthGuard]},
   { path: 'importazione-lul', component: ImportazioneLulComponent, canActivate:[AuthGuard]},
   { path: 'importazione-ore', component: ImportazioneRapportiniComponent, canActivate:[AuthGuard]},

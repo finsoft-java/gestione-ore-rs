@@ -1,14 +1,14 @@
-import { DataFirma } from './../_models/matricola';
+import { DataFirma } from '../_models/matricola';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from './../../environments/environment';
+import { environment } from '../../environments/environment';
 import { formatDate } from '@angular/common';
 import { ListBean } from '../_models';
 
 @Injectable({
   providedIn: 'root'
 })
-export class DatitestService {
+export class AssociazioneOreService {
 
   private baseUrl = environment.wsUrl;
 

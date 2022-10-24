@@ -1,4 +1,4 @@
-import { DatitestService } from './../_services/datitest.service';
+import { AssociazioneOreService } from '../_services/associazione.ore';
 import { Component, OnInit } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
@@ -32,9 +32,9 @@ export const MY_FORMATS = {
 };
 
 @Component({
-  selector: 'app-genera-dati-test',
-  templateUrl: './genera-dati-test.component.html',
-  styleUrls: ['./genera-dati-test.component.css'],
+  selector: 'app-associazione-ore',
+  templateUrl: './associazione-ore.component.html',
+  styleUrls: ['./associazione-ore.component.css'],
   providers: [{
     provide: DateAdapter,
     useClass: MomentDateAdapter,
@@ -42,7 +42,7 @@ export const MY_FORMATS = {
   },
   {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS}]
 })
-export class GeneraDatiTestComponent implements OnInit {
+export class AssociazioneOreComponent implements OnInit {
 
     date: Date = new Date();
 
@@ -52,7 +52,7 @@ export class GeneraDatiTestComponent implements OnInit {
     // progetto?: Progetto;
     running = false;
     
-    constructor(private datitestService: DatitestService,
+    constructor(private associazioneOreService: AssociazioneOreService,
       private progettiService: ProgettiService,
       private alertService: AlertService,
       private route: ActivatedRoute,
@@ -73,7 +73,7 @@ export class GeneraDatiTestComponent implements OnInit {
       this.resetAlertDanger();
       this.running = true;
 
-      this.datitestService.run(formatDate(this.date,"YYYY-MM-dd","en-GB")).subscribe(response => {
+      this.associazioneOreService.run(formatDate(this.date,"YYYY-MM-dd","en-GB")).subscribe(response => {
         this.message_success = 'Elaborazione terminata. I dettagli verranno visualizzati in una nuova finestra.';
         this.message_error = response.value.error;
         this.running = false;

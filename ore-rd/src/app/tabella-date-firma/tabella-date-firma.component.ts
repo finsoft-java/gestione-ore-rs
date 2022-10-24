@@ -1,5 +1,5 @@
 import { AlertService } from './../_services/alert.service';
-import { DatitestService } from './../_services/datitest.service';
+import { AssociazioneOreService } from '../_services/associazione.ore';
 import { Component, Input, OnInit } from '@angular/core';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -37,7 +37,7 @@ export class TabellaDateFirmaComponent implements OnInit {
     'nome_dipendente', 'ult_pres_dipendente', 'prima_pres_dipendente',
     'nome_supervisor', 'ult_pres_supervisor', 'prima_pres_supervisor',
     'dataFirma'];
-  constructor(private datitestService: DatitestService, private alertService: AlertService) { }
+  constructor(private associazioneOreService: AssociazioneOreService, private alertService: AlertService) { }
 
   ngOnInit(): void {
   }
@@ -45,7 +45,7 @@ export class TabellaDateFirmaComponent implements OnInit {
   salvaDateFirma() {
     let objAnnoMese = { "ANNO_MESE" : this.annoMese}
     this.dataSourceFiglio.data.push(objAnnoMese);
-    this.datitestService.salvaDataFirma(this.dataSourceFiglio.data)
+    this.associazioneOreService.salvaDataFirma(this.dataSourceFiglio.data)
       .subscribe(response => {
         
         this.alertService.success("Caricamento eseguito con successo");
