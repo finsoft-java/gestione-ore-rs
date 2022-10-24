@@ -128,7 +128,6 @@ export class PartecipantiGlobaliComponent implements OnInit {
       this.partecipanteService.delete(row.ID_DIPENDENTE)
         .subscribe(response => {
           this.getAll();
-          // this.dataSource = new MatTableDataSource<Partecipante>(this.allPartecipanti);
         },
           error => {
             this.alertService.error("Impossibile eliminare questo partecipante. "
