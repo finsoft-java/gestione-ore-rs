@@ -9,20 +9,20 @@ import { ProgettiService } from './../_services/progetti.service';
 import { AlertService } from './../_services/alert.service';
 import { AuthenticationService } from './../_services/authentication.service';
 import { Component, OnInit } from '@angular/core';
-import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
 
 export const MY_FORMATS = {
   parse: {
-      dateInput: 'LL'
+    dateInput: 'LL'
   },
   display: {
-      dateInput: 'DD-MM-YYYY',
-      monthYearLabel: 'YYYY',
-      dateA11yLabel: 'LL',
-      monthYearA11yLabel: 'YYYY'
+    dateInput: 'DD-MM-YYYY',
+    monthYearLabel: 'YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'YYYY'
   }
 };
 
@@ -37,45 +37,44 @@ export const MONTE_ORE_MENSILE_PREVISTO = 1720 / 12; // 143.3333
     useClass: MomentDateAdapter,
     deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS]
   },
-  {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS}]
+  { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS }]
 })
 export class ProgettoDettaglioComponent implements OnInit {
 
   projectSubscription: Subscription;
   progetto!: Progetto;
   progetto_old!: Progetto;
-  displayedColumns: string[] = ['descrizione','importo', 'tipologia', 'actions'];
-  displayedColumnsPersone: string[] = ['nome', 'idDipendente', 'pctImpiego', 'actions'];
-  
+  displayedColumns: string[] = ['descrizione', 'importo', 'tipologia', 'actions'];
+  displayedColumnsPersone: string[] = ['nome', 'idDipendente', 'pctImpiego'];
+
   dataSource = new MatTableDataSource<ProgettoSpesa>();
   dataSourcePersone = new MatTableDataSource<ProgettoPersona>();
   allTipologie: Tipologia[] = [];
   allMatricole: Matricola[] = [];
-  allTipiCosto: {ID_TIPO_COSTO: string, DESCRIZIONE: string}[] = [];
-  idProgetto!: number|null;
+  allTipiCosto: { ID_TIPO_COSTO: string, DESCRIZIONE: string }[] = [];
+  idProgetto!: number | null;
   errore_stringa = '';
-  isPercentuali100 = true;
 
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
     private tipologiaSpesaService: TipologiaSpesaService,
-    private progettiSpesaService: ProgettiSpesaService,   
+    private progettiSpesaService: ProgettiSpesaService,
     private progettiPersoneService: ProgettiPersoneService,
     private alertService: AlertService,
     private route: ActivatedRoute,
     private router: Router) {
 
-      this.projectSubscription = this.route.params.subscribe(params => {
-        if (params['id_progetto'] == 'nuovo') {
-          this.idProgetto = null; 
-        } else {
-          this.idProgetto = +params['id_progetto']; 
-        }
-      },
-        error => {
+    this.projectSubscription = this.route.params.subscribe(params => {
+      if (params['id_progetto'] == 'nuovo') {
+        this.idProgetto = null;
+      } else {
+        this.idProgetto = +params['id_progetto'];
+      }
+    },
+      error => {
         this.alertService.error(error);
       });
-    }
+  }
 
 
   ngOnInit(): void {
@@ -83,23 +82,22 @@ export class ProgettoDettaglioComponent implements OnInit {
       this.getProgetto();
       this.getProgettoSpesa();
       this.getTipoSpesa();
-    } else{
+    } else {
       this.progetto = new Progetto;
     }
     this.getMatricole();
     this.getTipiCosto();
     this.getProgettoPersone();
   }
-  
+
   getProgettoPersone(): void {
     this.progettiPersoneService.getById(this.idProgetto!)
       .subscribe(response => {
         this.dataSourcePersone = new MatTableDataSource(response.data);
-        this.checkIsPercentuali100();
       },
-      error => {
-        this.dataSourcePersone = new MatTableDataSource();
-      });
+        error => {
+          this.dataSourcePersone = new MatTableDataSource();
+        });
   }
 
   getProgettoSpesa(): void {
@@ -107,9 +105,9 @@ export class ProgettoDettaglioComponent implements OnInit {
       .subscribe(response => {
         this.dataSource = new MatTableDataSource(response.data);
       },
-      error => {
-        this.dataSource = new MatTableDataSource();
-      });
+        error => {
+          this.dataSource = new MatTableDataSource();
+        });
   }
 
   getProgetto(): void {
@@ -119,9 +117,9 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.progetto = response.value;
         this.progetto_old = response.value;
       },
-      error => {
-        this.alertService.error(error);
-      });
+        error => {
+          this.alertService.error(error);
+        });
   }
 
   getRecord(prgSpesa: ProgettoSpesa) {
@@ -131,12 +129,6 @@ export class ProgettoDettaglioComponent implements OnInit {
     prgSpesa.isEditable = true;
   }
 
-  getRecordPersona(p: ProgettoPersona) {
-    if (this.dataSourcePersone.data) {
-      this.dataSourcePersone.data.forEach(x => x.isEditable = false);
-    }
-    p.isEditable = true;
-  }
 
   // carica l'elenco di tutte le matricole da Panthera
   getMatricole(): void {
@@ -144,9 +136,9 @@ export class ProgettoDettaglioComponent implements OnInit {
       .subscribe(response => {
         this.allMatricole = response.data;
       },
-      error => {
-        this.alertService.error(error);
-      });
+        error => {
+          this.alertService.error(error);
+        });
   }
 
   getNomeMatricola(idDipendente: string): string {
@@ -162,55 +154,55 @@ export class ProgettoDettaglioComponent implements OnInit {
       .subscribe(response => {
         this.allTipiCosto = response.data;
       },
-      error => {
-        this.alertService.error(error);
-      });
+        error => {
+          this.alertService.error(error);
+        });
   }
 
   getTipoSpesa() {
     this.tipologiaSpesaService.getAll()
-        .subscribe(response => {
-          this.allTipologie = response.data;
-        },
+      .subscribe(response => {
+        this.allTipologie = response.data;
+      },
         error => {
         });
   }
 
   salva() {
     if (this.progetto.DATA_FINE)
-      this.progetto.DATA_FINE = formatDate(this.progetto.DATA_FINE,"YYYY-MM-dd","en-GB");
+      this.progetto.DATA_FINE = formatDate(this.progetto.DATA_FINE, "YYYY-MM-dd", "en-GB");
 
     if (this.progetto.DATA_INIZIO)
-      this.progetto.DATA_INIZIO = formatDate(this.progetto.DATA_INIZIO,"YYYY-MM-dd","en-GB");
+      this.progetto.DATA_INIZIO = formatDate(this.progetto.DATA_INIZIO, "YYYY-MM-dd", "en-GB");
 
     if (this.progetto.DATA_ULTIMO_REPORT)
-      this.progetto.DATA_ULTIMO_REPORT = formatDate(this.progetto.DATA_ULTIMO_REPORT,"YYYY-MM-dd","en-GB");
-    
+      this.progetto.DATA_ULTIMO_REPORT = formatDate(this.progetto.DATA_ULTIMO_REPORT, "YYYY-MM-dd", "en-GB");
+
     if (this.idProgetto == null) {
       this.progettiService.insert(this.progetto)
-      .subscribe(response => {
-        this.alertService.success("Progetto inserito con successo");
-        this.router.navigate(['/progetto/' + response.value.ID_PROGETTO]);
-      },
-      error => {
-        this.alertService.error(error);
-      });
+        .subscribe(response => {
+          this.alertService.success("Progetto inserito con successo");
+          this.router.navigate(['/progetto/' + response.value.ID_PROGETTO]);
+        },
+          error => {
+            this.alertService.error(error);
+          });
     } else {
-        this.progettiService.update(this.progetto)
+      this.progettiService.update(this.progetto)
         .subscribe(response => {
           this.alertService.success("Progetto modificato con successo");
           this.router.navigate(['/progetto/' + response.value.ID_PROGETTO]);
         },
-        error => {
-          this.alertService.error(error);
-        });
-      }
+          error => {
+            this.alertService.error(error);
+          });
+    }
   }
 
-  nuovoProgettoSpesa() {  
+  nuovoProgettoSpesa() {
     let progettoSpesa_nuovo: any;
-    progettoSpesa_nuovo = {ID_PROGETTO:this.progetto.ID_PROGETTO,ID_SPESA:null, DESCRIZIONE:null,IMPORTO:null,TIPOLOGIA: {ID_TIPOLOGIA:null, DESCRIZIONE:null},isEditable:true,isInsert:true};
-    let data:any[] = [];
+    progettoSpesa_nuovo = { ID_PROGETTO: this.progetto.ID_PROGETTO, ID_SPESA: null, DESCRIZIONE: null, IMPORTO: null, TIPOLOGIA: { ID_TIPOLOGIA: null, DESCRIZIONE: null }, isEditable: true, isInsert: true };
+    let data: any[] = [];
     if (this.dataSource.data == null) {
       data.push(progettoSpesa_nuovo);
     } else {
@@ -218,14 +210,14 @@ export class ProgettoDettaglioComponent implements OnInit {
       data.push(progettoSpesa_nuovo);
     }
     this.dataSource.data = data;
-  } 
+  }
 
-  nuovoProgettoPersona() {  
+  nuovoProgettoPersona() {
     let nuovo: ProgettoPersona;
     nuovo = {
-      ID_PROGETTO: this.progetto.ID_PROGETTO, 
+      ID_PROGETTO: this.progetto.ID_PROGETTO,
       ID_DIPENDENTE: null,
-      PCT_IMPIEGO: 0, 
+      PCT_IMPIEGO: 0,
       isEditable: true,
       isInsert: true
     };
@@ -235,58 +227,47 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
     array.push(nuovo);
     this.dataSourcePersone.data = array;
-  } 
+  }
 
   deleteChange(prgSpesa: ProgettoSpesa) {
     if (prgSpesa.ID_PROGETTO != null && prgSpesa.ID_SPESA != null) {
       this.progettiSpesaService.delete(prgSpesa.ID_PROGETTO, prgSpesa.ID_SPESA)
-          .subscribe(response => {
-            this.getProgettoSpesa();
-          },
+        .subscribe(response => {
+          this.getProgettoSpesa();
+        },
           error => {
             this.alertService.error("Impossibile eliminare il record");
           });
     }
   }
 
-  deleteChangePersona(p: ProgettoPersona) {
-    if (p.ID_DIPENDENTE != null && p.ID_PROGETTO != null) {
-      this.progettiPersoneService.delete(p.ID_PROGETTO, p.ID_DIPENDENTE)
-      .subscribe(response => {
-        this.getProgettoPersone();
-      },
-      error => {
-        this.alertService.error(error);
-      });
-    }
-  }
-  
+
 
   salvaModifica(prgSpesa: ProgettoSpesa) {
     if (prgSpesa.ID_SPESA == null) {
       if (prgSpesa.IMPORTO != null) {
         this.progettiSpesaService.insert(prgSpesa)
-        .subscribe(response => {
-          this.dataSource.data.splice(-1, 1);
-          this.dataSource.data.push(response.value);
-          this.dataSource.data = this.dataSource.data;
-          this.alertService.success("Spesa salvata con successo");
-          prgSpesa.isEditable = false;
-        },
-        error => {
-          this.alertService.error(error);
-        });
+          .subscribe(response => {
+            this.dataSource.data.splice(-1, 1);
+            this.dataSource.data.push(response.value);
+            this.dataSource.data = this.dataSource.data;
+            this.alertService.success("Spesa salvata con successo");
+            prgSpesa.isEditable = false;
+          },
+            error => {
+              this.alertService.error(error);
+            });
       }
     } else {
       if (prgSpesa.IMPORTO != null) {
         this.progettiSpesaService.update(prgSpesa)
-        .subscribe(response => {
-          this.alertService.success("Spesa modificata con successo");
-          this.getProgettoSpesa();
-        },
-        error => {
-          this.alertService.error(error);
-        });
+          .subscribe(response => {
+            this.alertService.success("Spesa modificata con successo");
+            this.getProgettoSpesa();
+          },
+            error => {
+              this.alertService.error(error);
+            });
       }
     }
   }
@@ -295,43 +276,8 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.getProgettoSpesa();
   }
 
-  annullaModificaPersona(row: ProgettoPersona) {
-    this.getProgettoPersone();
-  }
-
-  salvaModificaPersona(p: ProgettoPersona) {    
-    console.log(p);
-
-    if (p.isInsert) {
-        this.progettiPersoneService.insert(p)
-        .subscribe(response => {
-          this.alertService.success("Matricola inserita con successo");
-          this.dataSourcePersone.data.splice(-1, 1);
-          this.dataSourcePersone.data.push(response.value);
-          this.dataSourcePersone.data = this.dataSourcePersone.data;
-          p.isEditable = false;
-          this.checkIsPercentuali100();
-        },
-        error => {
-          this.alertService.error(error);
-        });
-      
-    } else {
-        this.progettiPersoneService.update(p)
-        .subscribe(response => {
-          this.alertService.success("Matricola aggiornata con successo");
-          p.isEditable = false;
-          this.checkIsPercentuali100();
-        },
-        error => {
-          this.alertService.error(error);
-        });
-      }
-  }
-  
-
   undoChange(prgSpesa: ProgettoSpesa) {
-    prgSpesa.isEditable=false;
+    prgSpesa.isEditable = false;
     if (prgSpesa.ID_PROGETTO == null) {
       this.dataSource.data.splice(-1, 1);
       this.dataSource.data = this.dataSource.data;
@@ -362,7 +308,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   /**
    * Restituisce l'equivalente di COSTO_MEDIO_UOMO calcolato su base mensile, arrotondato a 2 decimali
    */
-   costoMensile() {
+  costoMensile() {
     if (this.progetto.COSTO_MEDIO_UOMO === null) {
       return null;
     }
@@ -382,7 +328,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   /**
    * Restituisce l'equivalente di COSTO_MEDIO_UOMO calcolato su base mensile, arrotondato a 2 decimali
    */
-   costoTotaleBudget() {
+  costoTotaleBudget() {
     if (this.progetto.COSTO_MEDIO_UOMO === null || this.progetto.OBIETTIVO_BUDGET_ORE == null) {
       return null;
     }
@@ -452,18 +398,12 @@ export class ProgettoDettaglioComponent implements OnInit {
           .subscribe(response => {
             // do nothing
           },
-          error => {
-            this.alertService.error(error);
-          });
+            error => {
+              this.alertService.error(error);
+            });
       });
     }
   }
 
   TOLLERANZA = 0.001;
-
-  checkIsPercentuali100() {
-    let sum = 0.0;
-    this.dataSourcePersone.data.forEach(x => sum += parseFloat((<any>x.PCT_IMPIEGO!)));
-    this.isPercentuali100 = (Math.abs(sum - 100) <= this.TOLLERANZA);
-  }
 }
