@@ -2,11 +2,11 @@
 
 <div style="border: 1px;border-style: dashed;padding: 30px;text-align: center;">
 
-    <div class="card mt-3" style="margin-bottom: 30px;" *ngIf="selectedFile">
+    <div class="card mt-3" style="margin-bottom: 30px;" *ngIf="selectedFiles">
         <div class="card-header">File Caricato</div>
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
-                {{ selectedFile }}
+                {{ nomeFile }}
             </li>
         </ul>
     </div>
@@ -39,13 +39,13 @@
         <div class="col-3">
             <button mat-raised-button color="primary" [disabled]="loading"  (click)="fileInput.click()">
               <span>Seleziona un file Excel</span>
-              <input #fileInput type="file" (change)="selectFile($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" />
+              <input #fileInput type="file" multiple (change)="selectFile($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" />
             </button>
         </div>
 
         <div class="col-3">
-            <button mat-raised-button color="warn" [disabled]="!selectedFile||loading" (click)="uploadFiles()" style="margin-right:15px;">Carica</button>
-            <button mat-raised-button color="primary" [disabled]="!selectedFile||loading" (click)="reset()">Reset</button>
+            <button mat-raised-button color="warn" [disabled]="!selectedFiles||loading" (click)="uploadFiles()" style="margin-right:15px;">Carica</button>
+            <button mat-raised-button color="primary" [disabled]="!selectedFiles||loading" (click)="reset()">Reset</button>
         </div>
 
     </div>

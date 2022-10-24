@@ -51,13 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
-    $object = $partecipantiManager->get_partecipante($json_data->id_dipendente);
+    $object = $partecipantiManager->get_partecipante($json_data->ID_DIPENDENTE);
     if (!$object) {
         print_error(404, 'Not found');
     }
     $partecipantiManager->aggiorna($object, $json_data);
     
-    $object = $partecipantiManager->get_partecipante($json_data->id_dipendente);
+    $object = $partecipantiManager->get_partecipante($json_data->ID_DIPENDENTE);
     header('Content-Type: application/json');
     echo json_encode(['value' => $object]);
     
