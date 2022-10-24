@@ -2,6 +2,13 @@
 
 $commesseManager = new CommesseManager();
 
+    //configurazione prime 5 colonne file excel
+    define('COL_TIPO_COMMESSA',  0);
+    define('COL_COD_COMMESSA',   1);
+    define('COL_TOT_ORE',        2);
+    define('COL_PCT_RD',         3);
+    define('COL_TOT_ORE_RD',     4);
+
 class CommesseManager {
     
     function get_commesse() {
@@ -154,19 +161,20 @@ class CommesseManager {
                 continue;
             }
 
-            $dipendente = $spreadSheetAry[$curRow][COL_DIPENDENTE];
-            $pctImpiego = $spreadSheetAry[$curRow][COL_PCT_IMPEGO];
-            $mansione = $spreadSheetAry[$curRow][COL_MANSIONE];
-            $costo = $spreadSheetAry[$curRow][COL_COSTO];
+            $tipologiaCommessa = $spreadSheetAry[$curRow][COL_TIPO_COMMESSA];
+            $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
+            $totOreCommessa = $spreadSheetAry[$curRow][COL_TOT_ORE];
+            $pctCompatibilita = $spreadSheetAry[$curRow][COL_PCT_RD];
+            $totOreRd = $spreadSheetAry[$curRow][COL_TOT_ORE_RD];
 
-            if (!$dipendente || !$pctImpiego) {
+            if (!$tipologiaCommessa || !$codCommessa || !$pctCompatibilita) {
                 $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
                 continue;
             }
 
             //TODO write query
-            $query = "REPLACE INTO partecipanti_globali (ID_DIPENDENTE,PCT_UTILIZZO,MANSIONE,COSTO) " .
-                        "VALUES('$dipendente','$pctImpiego','$mansione','$costo')";
+            $query = "REPLACE INTO commesse (COD_COMMESSA,PCT_COMPATIBILITA,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA) " .
+                        "VALUES('$codCommessa','$pctCompatibilita','$totOreCommessa','$totOreRd','$tipologiaCommessa')";
             execute_update($query);
             ++$contatore;
         }

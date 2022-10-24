@@ -14,8 +14,6 @@ export class UploadPartecipantiService {
 
   upload(file: FileList): Observable<HttpEvent<any>> {
     const formData: FormData = new FormData();
-
-    console.log("leeee ", file);
     for (let i = 0; i < file.length; i++) {
       formData.append('file[]', file[i]);
     }

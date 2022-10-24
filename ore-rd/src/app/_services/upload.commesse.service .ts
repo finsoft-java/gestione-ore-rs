@@ -14,8 +14,10 @@ export class UploadCommesseService {
 
   upload(file: FileList): Observable<HttpEvent<any>> {
     const formData: FormData = new FormData();
-
-    const req = new HttpRequest('POST', `${this.baseUrl}/ImportExcelLul.php`, formData, {
+    for (let i = 0; i < file.length; i++) {
+      formData.append('file[]', file[i]);
+    }
+    const req = new HttpRequest('POST', `${this.baseUrl}/ImportCommesse.php`, formData, {
       reportProgress: true,
       responseType: 'json'
     });
