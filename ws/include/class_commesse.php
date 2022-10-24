@@ -128,8 +128,52 @@ class CommesseManager {
     }
 
     function importExcel($filename, &$message, $typeFile) {
-        //copiare dai LUL ?
+        $spreadSheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
+        $numOfSheets = $spreadSheet->getSheetCount();
+        // Mi aspetto un unico sheet
+        $this->importSheet($spreadSheet->getSheet(0), $message);   
+     }
+
+     function importSheet($excelSheet, &$message) {
+        global $con, $panthera;
+
+        $spreadSheetAry = $excelSheet->toArray();
+        
+        // salto la header
+        $firstRow = 1;
+        $numRows = count($spreadSheetAry);
+        if ($numRows <= 1) {
+            $message->error .= 'Il file deve contenere almeno una riga (header esclusa).<br/>';
+            return;
+        }
+
+        $contatore = 0;
+        for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
+    
+            if(!isset($spreadSheetAry[$curRow][0])) {
+                continue;
+            }
+
+            $dipendente = $spreadSheetAry[$curRow][COL_DIPENDENTE];
+            $pctImpiego = $spreadSheetAry[$curRow][COL_PCT_IMPEGO];
+            $mansione = $spreadSheetAry[$curRow][COL_MANSIONE];
+            $costo = $spreadSheetAry[$curRow][COL_COSTO];
+
+            if (!$dipendente || !$pctImpiego) {
+                $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
+                continue;
+            }
+
+            //TODO write query
+            $query = "REPLACE INTO partecipanti_globali (ID_DIPENDENTE,PCT_UTILIZZO,MANSIONE,COSTO) " .
+                        "VALUES('$dipendente','$pctImpiego','$mansione','$costo')";
+            execute_update($query);
+            ++$contatore;
+        }
+
+        $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
     }
+
 
 }
 ?>
