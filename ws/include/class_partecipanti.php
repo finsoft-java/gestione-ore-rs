@@ -50,13 +50,15 @@ class PartecipantiManager {
     }
     
     function aggiorna($progetto, $json_data) {
-        $id = $con->escape_string($json_data->ID_DIPENDENTE);
+
+        global $con;
 		
         $sql = update("partecipanti_globali", [
                                     "MANSIONE" => $con->escape_string($json_data->MANSIONE),
                                     "COSTO" => $con->escape_string($json_data->COSTO),
                                     "PCT_UTILIZZO" => $con->escape_string($json_data->PCT_UTILIZZO)
-                                  ], ["ID_DIPENDENTE" => $id]);
+                                    ], ["ID_DIPENDENTE" => $con->escape_string($json_data->ID_DIPENDENTE)]);
+
         execute_update($sql);
     }
     

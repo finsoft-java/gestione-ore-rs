@@ -15,8 +15,8 @@ import { Matricola } from '../_models';
 
 export class PartecipantiGlobaliComponent implements OnInit {
 
-  displayedColumns: string[] = ['id', 'pctUtilizzo', 'mansione', 'costo', 'actions'];
   dataSource = new MatTableDataSource<Partecipante>();
+  displayedColumns: string[] = ['nome', 'id', 'pctUtilizzo', 'mansione', 'costo', 'actions'];
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   allPartecipanti: Array<any> = [];
@@ -30,6 +30,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
   ngOnInit(): void {
 
+    this.getAll();
     this.getMatricole();
   }
 
@@ -43,72 +44,13 @@ export class PartecipantiGlobaliComponent implements OnInit {
       });
   }
 
-  getRecord(par: Partecipante) {
+  getRecord(row: Partecipante) {
 
-    par.isEditable = true;
-  }
-
-  nuovoPartecipante() {
-
-    let newPartecipante: any;
-    newPartecipante = { ID_DIPENDENTE: null, PCT_UTILIZZO: 100, MANSIONE: "", COSTO: "", isEditable: true };
-
-    const data = this.dataSource.data;
-    data.push(newPartecipante);
-
-    this.dataSource.data = data;
-  }
-
-  deleteChange(par: Partecipante) {
-
-    this.partecipanteService.delete(par.ID_DIPENDENTE)
-      .subscribe(response => {
-        this.getAll();
-        this.dataSource = new MatTableDataSource<Partecipante>(this.allPartecipanti);
-      },
-        error => {
-          this.alertService.error("Impossibile eliminare questo partecipante. "
-            + "Forse è già stata utilizzato all'interno di un Progetto?");
-        });
-  }
-
-  saveChange(par: Partecipante): any {
-
-    par.isEditable = false;
-
-    if (par.ID_DIPENDENTE == null) {
-      this.partecipanteService.insert(par)
-        .subscribe(response => {
-          console.log(this.dataSource.data);
-          console.log(response.value);
-          this.alertService.success("Partecipante modificato");
-          this.dataSource.data.splice(-1, 1);
-          this.dataSource.data.push(response.value);
-          console.log(this.dataSource.data);
-          this.dataSource.data = this.dataSource.data;
-        },
-          error => {
-            this.alertService.error(error);
-          });
-    } else {
-      this.partecipanteService.update(par)
-        .subscribe(response => {
-          this.alertService.success("Partecipante aggiunto");
-        },
-          error => {
-            this.alertService.error(error);
-          });
+    if (this.dataSource.data) {
+      this.dataSource.data.forEach(x => x.isEditable = false);
     }
-  }
 
-  undoChange(par: Partecipante) {
-
-    par.isEditable = false;
-
-    if (par.ID_DIPENDENTE == null) {
-      this.dataSource.data.splice(-1, 1);
-      this.dataSource.data = this.dataSource.data;
-    }
+    row.isEditable = true;
   }
 
   getMatricole(): void {
@@ -130,6 +72,69 @@ export class PartecipantiGlobaliComponent implements OnInit {
     const pantheraObj = this.allMatricole.find(x => x.ID_DIPENDENTE == idDipendente);
 
     return pantheraObj != null && pantheraObj.DENOMINAZIONE != null ? pantheraObj.DENOMINAZIONE : '(unknown)';
+  }
+
+  addPartecipante() {
+
+    let newPartecipante: any;
+    newPartecipante = { ID_DIPENDENTE: null, PCT_UTILIZZO: 100, MANSIONE: "", COSTO: "", isEditable: true, isInsert: true };
+
+    let data: any[] = [];
+    if (this.dataSource.data != null) {
+      data = this.dataSource.data;
+    }
+    data.push(newPartecipante);
+
+    this.dataSource.data = data;
+  }
+
+  annullaEdit(row: Partecipante) {
+
+    this.getAll();
+  }
+
+  saveEdit(row: Partecipante) {
+
+    if (row.isInsert) {
+
+      this.partecipanteService.insert(row)
+        .subscribe(response => {
+          this.alertService.success("Partecipante inserito con successo");
+          this.dataSource.data.splice(-1, 1);
+          this.dataSource.data.push(response.value);
+          this.dataSource.data = this.dataSource.data;
+          row.isEditable = false;
+        },
+          error => {
+            this.alertService.error(error);
+          });
+    } else {
+
+      this.partecipanteService.update(row)
+        .subscribe(response => {
+          this.alertService.success("Partecipante aggiornato con successo");
+          row.isEditable = false;
+        },
+          error => {
+            this.alertService.error(error);
+          });
+    }
+  }
+
+  deletePartecipante(row: Partecipante) {
+
+    if (row.ID_DIPENDENTE != null) {
+
+      this.partecipanteService.delete(row.ID_DIPENDENTE)
+        .subscribe(response => {
+          this.getAll();
+          // this.dataSource = new MatTableDataSource<Partecipante>(this.allPartecipanti);
+        },
+          error => {
+            this.alertService.error("Impossibile eliminare questo partecipante. "
+              + "Forse è già stata utilizzato all'interno di un Progetto?");
+          });
+    }
   }
 
 }

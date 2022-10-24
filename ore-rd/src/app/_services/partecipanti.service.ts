@@ -15,12 +15,12 @@ export class PartecipantiService {
 
     insert(partecipante: Partecipante) {
 
-        return this.http.put<ValueBean<Partecipante>>(environment.wsUrl + `Partecipanti.php`, partecipante);
+        return this.http.post<ValueBean<Partecipante>>(environment.wsUrl + `Partecipanti.php`, partecipante);
     }
 
     update(partecipante: Partecipante) {
 
-        return this.http.post<ValueBean<Partecipante>>(environment.wsUrl + `Partecipanti.php`, partecipante);
+        return this.http.put<ValueBean<Partecipante>>(environment.wsUrl + `Partecipanti.php`, partecipante);
     }
 
     delete(id_dipendente: string) {
@@ -32,4 +32,5 @@ export class PartecipantiService {
 
         return this.http.get<ListBean<any>>(environment.wsUrl + `GetNomiUtenti.php`);
     }
+
 }
