@@ -1,5 +1,5 @@
 <div>
-    <h5 style="margin-bottom: 20px; text-align:center">Partecipanti Globali</h5>
+    <h5 style="margin-bottom: 20px; text-align: center;">Partecipanti Globali</h5>
     <button mat-raised-button color="primary" style="float: right; margin: 0px 0px 20px 0px;"
         (click)="addPartecipante()">Nuovo Parteciapante</button>
 </div>
@@ -8,10 +8,10 @@
 
     <ng-container matColumnDef="nome">
         <th mat-header-cell *matHeaderCellDef style="overflow: hidden; text-overflow: ellipsis;
-            max-width: 170px;">Denominazione</th>
-        <td mat-cell *matCellDef="let element">
+            max-width: 175px;">Denominazione</th>
+        <td mat-cell *matCellDef="let element" style="width: 175px;">
             <label *ngIf="!element.isInsert">{{getNomeMatricola(element.ID_DIPENDENTE)}}</label>
-            <div *ngIf="element.isInsert" style="display: block; margin: 0px auto; width: 170px;">
+            <div *ngIf="element.isInsert" style="display: block; margin: 0px auto;">
                 <ng-select [items]="allMatricole" bindLabel="DENOMINAZIONE" bindValue="ID_DIPENDENTE"
                     [(ngModel)]="element.ID_DIPENDENTE">
                 </ng-select>
@@ -21,9 +21,11 @@
 
     <ng-container matColumnDef="id">
         <th mat-header-cell *matHeaderCellDef style="overflow: hidden; text-overflow: ellipsis;
-            max-width: 149px;">ID Dip.</th>
+            max-width: 70px;">ID Dip.</th>
         <td mat-cell *matCellDef="let element">
-            <label>{{element.ID_DIPENDENTE}}</label>
+            <div style="display: block; margin: 0px auto; width: 70px;">
+                <label>{{element.ID_DIPENDENTE}}</label>
+            </div>
         </td>
     </ng-container>
 
@@ -31,8 +33,8 @@
         <th mat-header-cell *matHeaderCellDef style="overflow: hidden; text-overflow: ellipsis;
             max-width: 140px;">Perc. Utilizzo</th>
         <td mat-cell *matCellDef="let element">
-            <label *ngIf="!element.isEditable">{{element.PCT_UTILIZZO}}</label>
             <div style="display: block; margin: 0px auto; width: 140px;">
+            <label *ngIf="!element.isEditable">{{element.PCT_UTILIZZO}}</label>
                 <input *ngIf="element.isEditable" type="number" class="form-control"
                     style="width: 100%; margin-right: 15px;border: 1px solid;" matInput
                     [(ngModel)]="element.PCT_UTILIZZO" onkeydown="javascript:
@@ -61,10 +63,10 @@
         <td mat-cell *matCellDef="let element">
             <label *ngIf="!element.isEditable">{{element.COSTO}}</label>
             <div style="display: block; margin: 0px auto; width: 140px;">
-                <input *ngIf="element.isEditable" class="form-control" style="display: inline-block; width: 220px;
+                <input *ngIf="element.isEditable" class="form-control" style="display: inline-block; width: 140px;
                     margin-right: 15px; border: 1px solid; padding: 0px 15px;" matInput [(ngModel)]="element.COSTO"
                     onkeydown="javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true :
-                    !isNaN(Number(event.key)) && event.code!=='Space'" min="0" maxlength="10">
+                    !isNaN(Number(event.key)) || isNaN(String('.')) && event.code!=='Space'" min="0" maxlength="11">
             </div>
         </td>
     </ng-container>
