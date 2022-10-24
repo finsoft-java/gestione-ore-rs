@@ -2,6 +2,13 @@
 
 $commesseManager = new CommesseManager();
 
+    //configurazione prime 5 colonne file excel
+    define('COL_TIPO_COMMESSA',  0);
+    define('COL_COD_COMMESSA',   1);
+    define('COL_TOT_ORE',        2);
+    define('COL_PCT_RD',         3);
+    define('COL_TOT_ORE_RD',     4);
+
 class CommesseManager {
     
     function get_commesse() {
@@ -128,8 +135,53 @@ class CommesseManager {
     }
 
     function importExcel($filename, &$message, $typeFile) {
-        //copiare dai LUL ?
+        $spreadSheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
+        $numOfSheets = $spreadSheet->getSheetCount();
+        // Mi aspetto un unico sheet
+        $this->importSheet($spreadSheet->getSheet(0), $message);   
+     }
+
+     function importSheet($excelSheet, &$message) {
+        global $con, $panthera;
+
+        $spreadSheetAry = $excelSheet->toArray();
+        
+        // salto la header
+        $firstRow = 1;
+        $numRows = count($spreadSheetAry);
+        if ($numRows <= 1) {
+            $message->error .= 'Il file deve contenere almeno una riga (header esclusa).<br/>';
+            return;
+        }
+
+        $contatore = 0;
+        for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
+    
+            if(!isset($spreadSheetAry[$curRow][0])) {
+                continue;
+            }
+
+            $tipologiaCommessa = $spreadSheetAry[$curRow][COL_TIPO_COMMESSA];
+            $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
+            $totOreCommessa = $spreadSheetAry[$curRow][COL_TOT_ORE];
+            $pctCompatibilita = $spreadSheetAry[$curRow][COL_PCT_RD];
+            $totOreRd = $spreadSheetAry[$curRow][COL_TOT_ORE_RD];
+
+            if (!$tipologiaCommessa || !$codCommessa || !$pctCompatibilita) {
+                $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
+                continue;
+            }
+
+            //TODO write query
+            $query = "REPLACE INTO commesse (COD_COMMESSA,PCT_COMPATIBILITA,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA) " .
+                        "VALUES('$codCommessa','$pctCompatibilita','$totOreCommessa','$totOreRd','$tipologiaCommessa')";
+            execute_update($query);
+            ++$contatore;
+        }
+
+        $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
     }
+
 
 }
 ?>

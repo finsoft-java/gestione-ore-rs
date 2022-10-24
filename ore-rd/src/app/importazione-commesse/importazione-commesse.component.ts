@@ -9,12 +9,12 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
   styleUrls: ['./importazione-commesse.component.css']
 })
 export class ImportazioneCommesseComponent implements OnInit { 
-  selectedFile?: File;
+  selectedFiles?: FileList;
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
   eventoClick?: any;
-  // nomeFile: string = '';
+  nomeFile: string = '';
   loading = false;
   @ViewChild('fileInput') inputFile?: ElementRef;
 
@@ -24,8 +24,8 @@ export class ImportazioneCommesseComponent implements OnInit {
 
   reset() {
     this.eventoClick.srcElement.value = null;
-    this.selectedFile = undefined;
-    //this.nomeFile = '';
+    this.selectedFiles = undefined;
+    this.nomeFile = '';
     this.progressInfos = { value: 0, fileName: 'Caricamento' };
     this.message_error = '';
     this.message_success = '';
@@ -33,7 +33,8 @@ export class ImportazioneCommesseComponent implements OnInit {
 
   selectFile(event: any) {
     this.eventoClick = event;
-    this.selectedFile = event.target.file;
+    this.selectedFiles = event.target.files;
+    this.nomeFile = event.target.files[0].name;
   }
 
   resetAlertSuccess() {
@@ -45,12 +46,12 @@ export class ImportazioneCommesseComponent implements OnInit {
   }
 
   uploadFiles() {
-    if (this.selectedFile) {
-      this.upload(this.selectedFile);
+    if (this.selectedFiles) {
+      this.upload(this.selectedFiles);
     }
   }
 
-  upload(file: File) {
+  upload(file: FileList) {
     this.progressInfos.value = 0;
     this.loading = true;
     this.message_error = '';
