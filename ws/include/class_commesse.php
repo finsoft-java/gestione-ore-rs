@@ -8,6 +8,9 @@ $commesseManager = new CommesseManager();
     define('COL_TOT_ORE',        2);
     define('COL_PCT_RD',         3);
     define('COL_TOT_ORE_RD',     4);
+    //dalla 5 salvo header in array degli acronimi progetti
+    //select_value("SELECT ID_PROGETTO ... dall'acronimo")
+    // se viene null warning al'lutente e metti -1 nell'array
 
 class CommesseManager {
     
@@ -144,7 +147,7 @@ class CommesseManager {
      function importSheet($excelSheet, &$message) {
         global $con, $panthera;
 
-        $spreadSheetAry = $excelSheet->toArray();
+        $spreadSheetAry = $excelSheet->toArray(NULL, TRUE, FALSE);
         
         // salto la header
         $firstRow = 1;
@@ -172,13 +175,45 @@ class CommesseManager {
                 continue;
             }
 
-            //TODO write query
-            $query = "REPLACE INTO commesse (COD_COMMESSA,PCT_COMPATIBILITA,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA) " .
-                        "VALUES('$codCommessa','$pctCompatibilita','$totOreCommessa','$totOreRd','$tipologiaCommessa')";
+            $query = "SELECT COUNT(*) FROM commesse WHERE COD_COMMESSA='$codCommessa'";
+            $count = select_single_value($query);
+            if ($count == 0) {
+                $query = "INSERT INTO commesse (COD_COMMESSA,PCT_COMPATIBILITA,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA)
+                        VALUES('$codCommessa',100*$pctCompatibilita,'$totOreCommessa','$totOreRd','$tipologiaCommessa')";
+            } else {
+                $query = "UPDATE commesse SET PCT_COMPATIBILITA=100*$pctCompatibilita,TOT_ORE_PREVISTE='$totOreCommessa',TOT_ORE_RD_PREVISTE='$totOreRd',TIPOLOGIA='$tipologiaCommessa'
+                        WHERE COD_COMMESSA='$codCommessa'";
+            }
             execute_update($query);
             ++$contatore;
         }
-
+        
+        $cols = count($spreadSheetAry[0]);
+        $projectMap = [];
+        //ricavo idProgetto dall'acronimo nell'header
+        for ($curCol = 5; $curCol < $cols; ++$curCol) {
+            $acronimo = $spreadSheetAry[0][$curCol];
+            $query =  "SELECT ID_PROGETTO from progetti WHERE ACRONIMO = '$acronimo'";
+            $projectMap[$curCol] = select_single_value($query); //mappa acronimo -> idProgetto
+            if (empty($projectMap[$curCol])) {
+                $message->error .= "Acronimo non trovato: $acronimo <br/>";
+            }
+        }
+        
+        $contatore = 0; 
+        for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
+            foreach ($projectMap as $curCol => $idProgetto) {
+                $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
+                $valueOre =  $spreadSheetAry[$curRow][$curCol];
+                if(!empty($idProgetto)) {
+                // QUI un comando REPLACE sql sulla progetti_commesse
+                $query = "REPLACE INTO progetti_commesse (ID_PROGETTO,COD_COMMESSA,ORE_PREVISTE) 
+                    VALUES('$idProgetto','$codCommessa','$valueOre')";
+                execute_update($query);
+                }
+            }
+            ++$contatore;
+        }
         $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
     }
 
