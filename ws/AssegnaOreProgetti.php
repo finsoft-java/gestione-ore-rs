@@ -21,10 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
-    $idProgetto = $json_data->idProgetto;
-    if (! $idProgetto) {
-        print_error(400, "Missing parameter: idProgetto");
-    }
     $periodo = $json_data->periodo;
     if (! $periodo) {
         print_error(400, "Missing parameter: periodo");
@@ -38,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'error' => '',
         'success' => '',
       ];
-    $consuntiviProgettiManager->run_assegnazione($idProgetto, $date, $message);
+    $consuntiviProgettiManager->run_assegnazione($date, $message);
 
     header('Content-Type: application/json');
     echo json_encode(['value' => $message]);

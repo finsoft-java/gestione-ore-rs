@@ -17,7 +17,6 @@ import { ImportazioneRapportiniComponent } from './importazione-rapportini/impor
 import { EsportazioneRapportiniComponent } from './esportazione-rapportini/esportazione-rapportini.component';
 import { RaccoltaDateFirmaComponent } from './raccolta-date-firma/raccolta-date-firma.component';
 import { ReportCompletoComponent } from './report-completo/report-completo.component';
-import { GeneraDatiTestComponent } from './genera-dati-test/genera-dati-test.component';
 import { ProgettoDettaglioComponent } from './progetto-dettaglio/progetto-dettaglio.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { LoginComponent } from './login/login.component';
@@ -51,6 +50,7 @@ import { PartecipantiGlobaliComponent } from './partecipanti-globali/partecipant
 import { ImportazionePartecipantiComponent } from './importazione-partecipanti/importazione-partecipanti.component';
 import { CommesseComponent } from './commesse/commesse.component';
 import { ImportazioneCommesseComponent } from './importazione-commesse/importazione-commesse.component';
+import { AssociazioneOreComponent } from './associazione-ore/associazione-ore.component';
 
 
 registerLocaleData(localeIt);
@@ -65,7 +65,7 @@ registerLocaleData(localeIt);
     EsportazioneRapportiniComponent,
     RaccoltaDateFirmaComponent,
     ReportCompletoComponent,
-    GeneraDatiTestComponent,
+    AssociazioneOreComponent,
     ProgettoDettaglioComponent,
     LoginComponent,
     AlertComponent,

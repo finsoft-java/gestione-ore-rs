@@ -11,8 +11,12 @@ class ConsuntiviProgettiManager {
     /**
      * Main procedure
      */
-    function run_assegnazione($idProgetto, $dataLimite, &$message) {
+    function run_assegnazione($dataLimite, &$message) {
         global $esecuzioniManager, $panthera;
+
+        // TODO
+
+        $idProgetto = -1;
         try {
             $message->success .= "Lancio assegnazione ore progetto n.$idProgetto alla data " . $dataLimite->format('d/m/Y') . NL;
             
@@ -97,11 +101,19 @@ class ConsuntiviProgettiManager {
     }
 
     function load_commesse_e_dipendenti($idProgetto) {
-        $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA>=100";
+        $query = "SELECT DISTINCT p.COD_COMMESSA
+                FROM progetti_commesse p
+                JOIN commesse c ON c.COD_COMMESSA=p.COD_COMMESSA
+                WHERE p.ID_PROGETTO=$idProgetto and c.PCT_COMPATIBILITA>=100";
         $commesse_p = select_column($query);
-        $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA>0 and PCT_COMPATIBILITA<100";
+        $query = "SELECT DISTINCT p.COD_COMMESSA
+                FROM progetti_commesse p
+                JOIN commesse c ON c.COD_COMMESSA=p.COD_COMMESSA
+                WHERE p.ID_PROGETTO=$idProgetto and c.PCT_COMPATIBILITA>0 and c.PCT_COMPATIBILITA<100";
         $commesse_c = select_column($query);
-        $query = "SELECT DISTINCT ID_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto and PCT_IMPIEGO>0 ";
+        $query = "SELECT DISTINCT ID_DIPENDENTE
+                FROM partecipanti_globali
+                WHERE PCT_UTILIZZO>0 ";
         $matricole = select_column($query);
         return [$commesse_p, $commesse_c, $matricole];
     }
@@ -115,16 +127,14 @@ class ConsuntiviProgettiManager {
 
         $canGoOn = true;
 
-        $query = "SELECT DISTINCT COD_COMMESSA FROM progetti_commesse WHERE id_progetto=$idProgetto and PCT_COMPATIBILITA<=0";
+        $query = "SELECT DISTINCT p.COD_COMMESSA
+                    FROM progetti_commesse p
+                    JOIN commesse c ON c.COD_COMMESSA=p.COD_COMMESSA
+                    WHERE p.id_progetto=$idProgetto
+                    and c.PCT_COMPATIBILITA<=0";
         $commesse = select_column($query);
         if (count($commesse) > 0) {
             $message->success .= "<strong>WARNING</strong>: ci sono commesse con PCT_COMPATIBILITA<=0: " . implode(', ', $commesse). NL;
-        }
-
-        $query = "SELECT DISTINCT ID_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto and PCT_IMPIEGO<=0";
-        $matricole = select_column($query);
-        if (count($matricole) > 0) {
-            $message->success .= "<strong>WARNING</strong>: ci sono matricole con PCT_IMPIEGO<=0: " . implode(', ', $matricole). NL;
         }
 
         $d = "DATE('" . $dataLimite->format('Y-m-d') . "')";
@@ -133,12 +143,12 @@ class ConsuntiviProgettiManager {
                 JOIN progetti_commesse c ON c.COD_COMMESSA=oc.COD_COMMESSA
                 JOIN progetti pr ON pr.ID_PROGETTO=c.ID_PROGETTO
                 WHERE pr.id_progetto=$idProgetto
-                AND ID_DIPENDENTE NOT IN (SELECT DISTINCT ID_DIPENDENTE FROM progetti_persone WHERE id_progetto=$idProgetto)
+                AND ID_DIPENDENTE NOT IN (SELECT DISTINCT ID_DIPENDENTE FROM partecipanti_globali WHERE PCT_UTILIZZO<=0)
                 AND (oc.DATA IS NULL OR (oc.DATA >= pr.DATA_ULTIMO_REPORT and oc.DATA < $d))
                 ORDER BY 1";
         $ore = select_column($query);
         if (count($ore) > 0) {
-            $message->success .= "<strong>WARNING</strong>: ci sono ore su commesse di progetto o compatibili ma con dipendenti incompatibili: " . implode(', ', $ore). NL;
+            $message->success .= "<strong>WARNING</strong>: ci sono ore su commesse di progetto o compatibili ma con PCT_UTILIZZO<=0: " . implode(', ', $ore). NL;
         }
 
         $query = "SELECT count(*)
@@ -171,17 +181,18 @@ class ConsuntiviProgettiManager {
 
         $query = "INSERT INTO assegnazioni_dettaglio (ID_ESECUZIONE, ID_PROGETTO,
                 COD_COMMESSA, PCT_COMPATIBILITA,
-                ID_DIPENDENTE, PCT_IMPIEGO,
+                ID_DIPENDENTE, PCT_UTILIZZO,
                 DATA, RIF_SERIE_DOC, RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA,
                 NUM_ORE_RESIDUE)
             SELECT
                 $idEsecuzione, $idProgetto,
-                c.COD_COMMESSA,c.PCT_COMPATIBILITA,
-                p.ID_DIPENDENTE,p.PCT_IMPIEGO,
+                pc.COD_COMMESSA,c.PCT_COMPATIBILITA,
+                p.ID_DIPENDENTE,p.PCT_UTILIZZO,
                 oc.DATA,oc.RIF_SERIE_DOC,oc.RIF_NUMERO_DOC,oc.RIF_ATV,oc.RIF_SOTTO_COMMESSA,
                 NVL(oc.NUM_ORE_RESIDUE,0) as NUM_ORE_RESIDUE
-            FROM progetti_commesse c
-            JOIN progetti_persone p ON c.ID_PROGETTO=p.ID_PROGETTO
+            FROM progetti_commesse pc
+            JOIN commesse c ON c.COD_COMMESSA=p.COD_COMMESSA
+            JOIN partecipanti_globali p ON p.PCT_UTILIZZO>0
             JOIN progetti pr ON pr.ID_PROGETTO=p.ID_PROGETTO
             JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
                 AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE
@@ -340,8 +351,8 @@ class ConsuntiviProgettiManager {
 
         $totale_ore_compatibili_previste = select_single_value($query);
 
-        $query = "SELECT ID_DIPENDENTE,PCT_IMPIEGO,
-                    ROUND($totale_ore_compatibili_previste*PCT_IMPIEGO/100,2) AS ORE_PREVISTE
+        $query = "SELECT ID_DIPENDENTE,PCT_UTILIZZO,
+                    ROUND($totale_ore_compatibili_previste*PCT_UTILIZZO/100,2) AS ORE_PREVISTE
                 FROM progetti_persone p
                 WHERE ID_PROGETTO=$idProgetto";
         $list = select_list($query);
@@ -352,7 +363,7 @@ class ConsuntiviProgettiManager {
             $idDip = $m['ID_DIPENDENTE'];
             // $lavorate = isset($lul_d[$idDip]) ? $lul_d[$idDip] : 0; // dato interessante ma fuorviante
             $nome = isset($nomiUtenti[$idDip][0]['DENOMINAZIONE']) ? $nomiUtenti[$idDip][0]['DENOMINAZIONE'] : '';
-            $message->success .= "  $idDip $nome al $m[PCT_IMPIEGO] % = $m[ORE_PREVISTE] ore." . NL;
+            $message->success .= "  $idDip $nome al $m[PCT_UTILIZZO] % = $m[ORE_PREVISTE] ore." . NL;
         }
         return array_group_by($list, ['ID_DIPENDENTE']);
     }
@@ -571,7 +582,7 @@ class ConsuntiviProgettiManager {
                         <TD>$c[COD_COMMESSA]</TD>
                         <TD>$c[PCT_COMPATIBILITA]</TD>
                         <TD>$c[ID_DIPENDENTE]</TD>
-                        <TD>$c[PCT_IMPIEGO]</TD>
+                        <TD>$c[PCT_UTILIZZO]</TD>
                         <TD>$c[DATA]</TD>
                         <TD>$c[NUM_ORE_RESIDUE]</TD>
                         <TD>$c[NUM_ORE_PRELEVATE]</TD>
