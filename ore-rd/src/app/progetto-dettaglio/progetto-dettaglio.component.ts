@@ -387,23 +387,5 @@ export class ProgettoDettaglioComponent implements OnInit {
     return Math.round(x * 10000) / 10000;
   }
 
-  ripartisciPercentuali() {
-    const array = this.dataSourcePersone.data;
-    if (array != null && array.length > 0) {
-      const media = this.round4(100.0 / array.length);
-      array.forEach(x => x.PCT_IMPIEGO = media);
-      this.dataSourcePersone.data = array; //this is not useless!
-      array.forEach(x => {
-        this.progettiPersoneService.update(x)
-          .subscribe(response => {
-            // do nothing
-          },
-            error => {
-              this.alertService.error(error);
-            });
-      });
-    }
-  }
-
   TOLLERANZA = 0.001;
 }
