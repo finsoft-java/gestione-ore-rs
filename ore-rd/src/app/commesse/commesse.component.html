@@ -31,7 +31,19 @@
 
     <ng-container matColumnDef="giustificativo">
         <th mat-header-cell *matHeaderCellDef>Giustificativo</th>
-        <td mat-cell *matCellDef="let element">{{element.GIUSTIFICATIVO}}</td>
+        <td mat-cell *matCellDef="let element">
+            <div *ngIf="!element.isInsert">
+                <button (click)="fileInput.click()" class="spaced-button" mat-raised-button color="primary">
+                    <span>Upload</span>
+                    <input #fileInput type="file" (change)="uploadGiustificativo(element,$event)"
+                        style="display:none;" />
+                </button>
+                <button *ngIf="element.HAS_GIUSTIFICATIVO == 'Y'" mat-raised-button color="primary"
+                    class="spaced-button" (click)="downloadGiustificativo(element)">Download</button>
+                <button *ngIf="element.HAS_GIUSTIFICATIVO == 'Y'" mat-raised-button color="warn" class="spaced-button"
+                    (click)="deleteGiustificativo(element)">Delete</button>
+            </div>
+        </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
