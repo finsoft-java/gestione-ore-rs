@@ -1,0 +1,30 @@
+.mat-paginator {
+    background: initial;
+}
+
+table {
+    width: 100%;
+}
+
+.mat-header-cell {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.mat-cell {
+    justify-content: center;
+    text-align: center;
+}
+
+th.mat-header-cell:last-of-type,
+td.mat-cell:last-of-type {
+    padding-right: 0px;
+    /*Material lo mette a 24px */
+}
+
+th.mat-header-cell:first-of-type,
+td.mat-cell:first-of-type {
+    padding-left: 0px;
+    /*Material lo mette a 24px */
+}
