@@ -14,6 +14,8 @@ class ConsuntiviProgettiManager {
     function run_assegnazione($dataLimite, &$message) {
         global $esecuzioniManager, $panthera;
 
+        ini_set('max_execution_time', 300);
+
         $progetti_attivi = $this->get_progetti_attivi($dataLimite);
         if (count($progetti_attivi) == 0) {
             $message->error .= "Nessun progetto attivo trovato!" . NL;
@@ -81,10 +83,8 @@ class ConsuntiviProgettiManager {
                     $lul_p = $this->togli_ore_progetto_dai_lul($idEsecuzione);
                     $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $commesse_c);
                     $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
-// var_dump($max_dip);
                     $message->success .= "Verifica LUL...". NL;
                     $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, $message);
-// die();
                     $this->select_riepilogo_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $max_dip, $nomiUtenti, $message);
                     $message->success .= "<strong>Tot. $ore_compat ore prelevate da commesse compatibili</strong>". NL;
                     $monte_ore -= $ore_compat;
@@ -398,6 +398,7 @@ class ConsuntiviProgettiManager {
 
         $query = "SELECT ad.ID_DIPENDENTE,PCT_UTILIZZO,ROUND(NVL(SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100),0)*PCT_UTILIZZO/100,2) AS ORE_PREVISTE
                 FROM assegnazioni_dettaglio ad
+                WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)
                      ";
         $list = select_list($query);
 
@@ -441,19 +442,19 @@ class ConsuntiviProgettiManager {
         return $array;
     }
 
-    function prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, $message) {
+    function prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         $query = "SELECT *
             FROM assegnazioni_dettaglio ad
-            JOIN progetti_commesse pc ON ad.COD_COMMESSA=pc.COD_COMMESSA
+            JOIN progetti_commesse pc ON ad.COD_COMMESSA=pc.COD_COMMESSA AND pc.ID_PROGETTO=$idProgetto
             WHERE ID_ESECUZIONE=$idEsecuzione AND pc.COD_COMMESSA IN ($commesse_imploded)
-                AND NUM_ORE_RESIDUE >= 0.25 AND pc.ID_PROGETTO=$idProgetto
+                AND NUM_ORE_RESIDUE >= 0.25
             ORDER BY ID_DIPENDENTE, DATA";
         $map = array_group_by(select_list($query), ['ID_DIPENDENTE', 'DATA']);
 
         $data_corrente = "";
         $totale = 0.0;
-        
+
         foreach($map as $matricola => $map1) {
             foreach($map1 as $data => $caricamenti) {
                 $totale_data = 0.0;
@@ -461,6 +462,10 @@ class ConsuntiviProgettiManager {
                 foreach($caricamenti as $c) {
                     $ore = (float) $c['NUM_ORE_RESIDUE'];
                     $ore_max_commessa = (float) $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'];
+                    if (!array_has_key($c['ID_DIPENDENTE'], $max_dip)) {
+                        $message->success .= "<strong>WARNING</strong> Something's wrong, missing key $c[ID_DIPENDENTE]" . NL;
+                        continue;
+                    }
                     $ore_max_matricola = (float) $max_dip[$c['ID_DIPENDENTE']][0]['ORE_PREVISTE'];
                     if ($ore_max_commessa > 0 && $ore_max_matricola > 0) {
 
