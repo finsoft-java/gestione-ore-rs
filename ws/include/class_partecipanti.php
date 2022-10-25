@@ -83,7 +83,7 @@ class PartecipantiManager {
      function importSheet($excelSheet, &$message) {
         global $con, $panthera;
 
-        $spreadSheetAry = $excelSheet->toArray();
+        $spreadSheetAry = $excelSheet->toArray(NULL, TRUE, FALSE);
         
         // salto la header
         $firstRow = 1;
