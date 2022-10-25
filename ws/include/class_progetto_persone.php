@@ -6,14 +6,20 @@ class ProgettiPersoneManager {
     
     function get_persone($id_progetto) {
         $arr = array();
-        $sql = "SELECT * FROM progetti_persone WHERE id_progetto = '$id_progetto'";
+        $sql = "SELECT g.*
+                    FROM progetti_persone p
+                    JOIN persone_globali g ON p.ID_DIPENDENTE=g.ID_DIPENDENTE
+                    WHERE p.ID_PROGETTO = '$id_progetto'";
         $arr = select_list($sql);
         return $arr;
     }
     
     function get_persona($id_progetto, $matricola) {
         $arrProgettiWp = array();
-        $sql = "SELECT * FROM progetti_persone WHERE id_progetto = '$id_progetto' and ID_DIPENDENTE='$matricola'";
+        $sql = "SELECT g.*
+                    FROM progetti_persone
+                    JOIN persone_globali g ON p.ID_DIPENDENTE=g.ID_DIPENDENTE
+                    WHERE p.ID_PROGETTO = '$id_progetto' and p.ID_DIPENDENTE='$matricola'";
         $obj = select_single($sql);
         return $obj;
     }
