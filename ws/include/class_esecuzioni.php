@@ -56,10 +56,10 @@ class EsecuzioniManager {
     }
     
     function elimina_esecuzione($idEsecuzione) {
-        $query ="SELECT ID_PROGETTO,TOT_ASSEGNATE FROM assegnazioni WHERE ID_ESECUZIONE=$idEsecuzione";
-        $result = select_single($query);
-        $idProgetto = $result['ID_PROGETTO'];
-        $oreDaTogliere = $result['TOT_ASSEGNATE'];
+        $query = "SELECT ID_PROGETTO,SUM(NUM_ORE_LAVORATE)AS NUM_ORE_LAVORATE
+                FROM ore_consuntivate_progetti
+                WHERE ID_ESECUZIONE=$idEsecuzione";
+        $progetti = select_list($query);
 
         $query ="DELETE FROM ore_consuntivate_progetti WHERE ID_ESECUZIONE=$idEsecuzione";
         execute_update($query);
@@ -68,16 +68,20 @@ class EsecuzioniManager {
         $sql = "DELETE FROM assegnazioni WHERE ID_ESECUZIONE = '$idEsecuzione'";
         execute_update($sql);
 
-        if ($oreDaTogliere != null && $oreDaTogliere > 0) {
-            $sql = "UPDATE progetti SET ORE_GIA_ASSEGNATE=ORE_GIA_ASSEGNATE-$oreDaTogliere WHERE ID_PROGETTO = '$idProgetto'";
+        foreach ($progetti as $p) {
+            $idProgetto = $p['ID_PROGETTO'];
+            $oreDaTogliere = $p['NUM_ORE_LAVORATE'];
+            if ($oreDaTogliere != null && $oreDaTogliere > 0) {
+                $sql = "UPDATE progetti SET ORE_GIA_ASSEGNATE=ORE_GIA_ASSEGNATE-$oreDaTogliere WHERE ID_PROGETTO = '$idProgetto'";
+            }
+            execute_update($sql);
+            $sql = "UPDATE progetti SET DATA_ULTIMO_REPORT=(
+                        SELECT NVL(MAX(`DATA`),DATE('0001-01-01'))
+                        FROM ore_consuntivate_progetti
+                        WHERE ID_PROGETTO = '$idProgetto'
+                    ) WHERE ID_PROGETTO = '$idProgetto'";
+            execute_update($sql);
         }
-        execute_update($sql);
-        $sql = "UPDATE progetti SET DATA_ULTIMO_REPORT=(
-                    SELECT NVL(MAX(`DATA`),DATE('0001-01-01'))
-                    FROM ore_consuntivate_progetti
-                    WHERE ID_PROGETTO = '$idProgetto'
-                ) WHERE ID_PROGETTO = '$idProgetto'";
-        execute_update($sql);
     }
 }
 ?>
