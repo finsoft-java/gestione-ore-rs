@@ -9,7 +9,8 @@ class ProgettiPersoneManager {
         $sql = "SELECT g.*
                     FROM progetti_persone p
                     JOIN persone_globali g ON p.ID_DIPENDENTE=g.ID_DIPENDENTE
-                    WHERE p.ID_PROGETTO = '$id_progetto'";
+                    WHERE p.ID_PROGETTO = '$id_progetto'
+                    ORDER BY g.ID_DIPENDENTE";
         $arr = select_list($sql);
         return $arr;
     }
