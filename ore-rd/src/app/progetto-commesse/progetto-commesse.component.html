@@ -1,7 +1,7 @@
 <!--
             tabella COMMESSE DI PROGETTO
         -->
-<div style="margin-bottom:30px;">
+<div class="mbottom-7">
     <div>
         <h5 style="margin-bottom: 20px;text-align:center">Commesse di progetto</h5>
         <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;"
@@ -34,16 +34,13 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumnsCommesseP"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumnsCommesseP;"></tr>
     </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
-
-    </mat-paginator>
 </div>
 
 
 <!--
             tabella COMMESSE COMPATIBILI
         -->
-<div style="margin-bottom:30px;">
+<div class="mbottom-7">
     <div>
         <h5 style="margin-bottom: 20px;text-align:center">Commesse compatibili</h5>
         <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;"
@@ -86,7 +83,4 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumnsCommesseC"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumnsCommesseC;"></tr>
     </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
-
-    </mat-paginator>
 </div>

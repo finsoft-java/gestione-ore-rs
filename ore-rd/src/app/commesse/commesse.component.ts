@@ -1,5 +1,4 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Commessa } from '../_models';
 import { AlertService } from '../_services/alert.service';
@@ -18,7 +17,6 @@ export class CommesseComponent implements OnInit {
   displayedColumns: string[] = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste',
     'tipologia', 'giustificativo'];
 
-  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   allCommesse: Commessa[] = [];
   allProgetti: string[] = [];
 

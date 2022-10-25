@@ -83,6 +83,8 @@ class PartecipantiManager {
      function importSheet($excelSheet, &$message) {
         global $con, $panthera;
 
+        $nomiUtenti = $panthera->getMatricole();
+
         $spreadSheetAry = $excelSheet->toArray(NULL, TRUE, FALSE);
         
         // salto la header
@@ -110,10 +112,12 @@ class PartecipantiManager {
                 continue;
             }
 
-            // TODO incrociare ID_DIPENDENTE con Panthera
+            if (! in_array($dipendente, $nomiUtenti)) {
+                $message->success .= "Dipendente non riconosciuto: $dipendente<br/>";
+            }
 
             $query = "REPLACE INTO partecipanti_globali (ID_DIPENDENTE,PCT_UTILIZZO,MANSIONE,COSTO) " .
-                        "VALUES('$dipendente','$pctImpiego','$mansione','$costo')";
+                        "VALUES('$dipendente',$pctImpiego*100,'$mansione','$costo')";
             execute_update($query);
             ++$contatore;
         }

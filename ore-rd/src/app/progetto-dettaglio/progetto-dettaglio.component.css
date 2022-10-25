@@ -1,13 +1,16 @@
 .fraz2_width>.mat-form-field {
     width: calc(50% - 5px);
 }
+
 .fraz3_width>.mat-form-field {
     width: calc(33% - 6px);
 }
+
 .fraz4_width>.mat-form-field {
     width: calc(25% - 4px);
     margin-right: 4px;
 }
+
 .max_width>.mat-form-field {
     width: 100%;
 }
@@ -19,6 +22,9 @@
     margin-bottom: 15px !important;
 }
 
+.mbottom-7 {
+    margin-bottom: 7rem;
+}
 
 label {
     margin-bottom: 0px;
@@ -46,9 +52,10 @@ table {
 .mat-dialog-container {
     padding: 0px
 }
+
 ::ng-deep .ng-select .ng-select-container {
     color: #333;
-    background-color:rgba(0, 0, 0, 0.04);
+    background-color: rgba(0, 0, 0, 0.04);
     border-radius: 0px;
     border: 0px solid #ccc;
     min-height: 36px;
@@ -62,15 +69,17 @@ table {
 }
 
 ::ng-deep .ng-select.ng-select-opened>.ng-select-container {
-    background:rgba(0, 0, 0, 0.04);
+    background: rgba(0, 0, 0, 0.04);
     border-color: 1px solid rgba(0, 0, 0, 0.87);
 }
+
 .label_mat {
     font-size: 12px;
     width: 100%;
     float: left;
     background-color: rgba(0, 0, 0, 0.04);
-    padding: 10px 10px 0px 10px;color:rgba(0, 0, 0, 0.6)
+    padding: 10px 10px 0px 10px;
+    color: rgba(0, 0, 0, 0.6)
 }
 
 .alertPercentuali {
@@ -78,12 +87,16 @@ table {
     color: red;
 }
 
-th.mat-header-cell:last-of-type, td.mat-cell:last-of-type {
-    padding-right: 0px; /*Material lo mette a 24px */
+th.mat-header-cell:last-of-type,
+td.mat-cell:last-of-type {
+    padding-right: 0px;
+    /*Material lo mette a 24px */
 }
 
-td>button, td>*>button{
+td>button,
+td>*>button {
     width: 80px;
     padding: 0px;
-    margin: 5px 5px 5px 5px; /* così spazia anche se va su due righe */
+    margin: 5px 5px 5px 5px;
+    /* così spazia anche se va su due righe */
 }

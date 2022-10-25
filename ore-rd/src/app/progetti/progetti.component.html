@@ -1,6 +1,7 @@
 <div>
     <h5 style="margin-bottom: 20px;text-align:center">Lista Progetti</h5>
-    <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovoProgetto()">Nuovo Progetto</button>
+    <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;"
+        (click)="nuovoProgetto()">Nuovo Progetto</button>
 </div>
 
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
@@ -37,11 +38,6 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
 
-<mat-paginator
-(page)="handlePageEvent($event)"
-[length]="length"
-[pageSize]="pageSize"
-[showFirstLastButtons]="showFirstLastButtons"
-[pageSizeOptions]="pageSizeOptions"
-[pageIndex]="pageIndex">
+<mat-paginator (page)="handlePageEvent($event)" [length]="length" [pageSize]="pageSize"
+    [showFirstLastButtons]="showFirstLastButtons" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex">
 </mat-paginator>
