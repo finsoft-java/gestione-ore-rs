@@ -21,7 +21,7 @@ class PartecipantiManager {
             // avoid SQL-injection
             $sql .= " ORDER BY $orderby";
         } else {
-            $sql .= " ORDER BY p.id_dipendente DESC";
+            $sql .= " ORDER BY p.ID_DIPENDENTE";
         }
 
         $count = select_single_value($sql0 . $sql);

@@ -17,7 +17,8 @@ class CommesseManager {
     function get_commesse() {
         $sql = "SELECT c.*,
                 CASE WHEN GIUSTIFICATIVO IS NULL THEN 'N' ELSE 'Y' END AS HAS_GIUSTIFICATIVO
-                FROM commesse c";
+                FROM commesse c
+                ORDER BY PCT_COMPATIBILITA DESC, COD_COMMESSA";
         $arr = select_list($sql);
     
         foreach($arr as $id => $commessa) {

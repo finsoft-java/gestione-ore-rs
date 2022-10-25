@@ -9,7 +9,8 @@ class ProgettiCommesseManager {
                 CASE WHEN c.GIUSTIFICATIVO IS NULL THEN 'N' ELSE 'Y' END AS HAS_GIUSTIFICATIVO
                 FROM progetti_commesse p
                 JOIN commesse c ON c.COD_COMMESSA=p.COD_COMMESSA 
-                WHERE ID_PROGETTO = '$id_progetto'";
+                WHERE p.ID_PROGETTO = '$id_progetto' AND p.ORE_PREVISTE>0
+                ORDER BY p.COD_COMMESSA";
         $arr = select_list($sql);
         return $arr;
     }
@@ -19,7 +20,7 @@ class ProgettiCommesseManager {
                 CASE WHEN c.GIUSTIFICATIVO IS NULL THEN 'N' ELSE 'Y' END AS HAS_GIUSTIFICATIVO
                 FROM progetti_commesse p
                 JOIN commesse c ON c.COD_COMMESSA=p.COD_COMMESSA 
-                WHERE id_progetto = '$id_progetto' and cod_commessa='$codCommessa'";
+                WHERE p.ID_PROGETTO = '$id_progetto' and p.COD_COMMESSA ='$codCommessa'";
         $obj = select_single($sql);
         return $obj;
     }
