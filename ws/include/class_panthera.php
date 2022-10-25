@@ -132,6 +132,19 @@ class PantheraManager {
         return $matricole;
     }
 
+    function getMatricole() {
+        if ($this->mock) {
+            $matricole = [ 'F01234', 'F04321', 'F06666' ];
+        } else {
+            $query = "SELECT DISTINCT RTRIM(ID_DIPENDENTE) AS ID_DIPENDENTE
+                    FROM THIP.DIPENDENTI_V01
+                    WHERE ID_AZIENDA='001'
+                    ORDER BY RTRIM(ID_DIPENDENTE) ASC";
+            $matricole = $this->select_column($query);
+        }        
+        return $matricole;
+    }
+
     function getUtenteByMatricola($matricola) {
         if ($this->mock) {
             $matricola = 'Rossi Mario';
