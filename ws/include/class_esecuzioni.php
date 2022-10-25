@@ -4,17 +4,14 @@ $esecuzioniManager = new EsecuzioniManager();
 
 class EsecuzioniManager {
 
-    function get_id_esecuzione($idProgetto, &$message) {
+    function get_id_esecuzione() {
         global $con, $logged_user;
         
         $con->begin_transaction();
         try {
             $query_max = "SELECT NVL(MAX(ID_ESECUZIONE),0)+1 FROM assegnazioni WHERE 1";
             $idEsecuzione = select_single_value($query_max);
-
-            $message->success .= "Salvo i dati ottenuti con <strong>ID_ESECUZIONE=$idEsecuzione</strong>" . NL;
-
-            $query ="INSERT INTO assegnazioni (ID_ESECUZIONE, ID_PROGETTO, UTENTE) VALUES ('$idEsecuzione', '$idProgetto', '$logged_user->nome_utente')";
+            $query ="INSERT INTO assegnazioni (ID_ESECUZIONE, UTENTE) VALUES ('$idEsecuzione', '$logged_user->nome_utente')";
             execute_update($query);
 
             $con->commit();
