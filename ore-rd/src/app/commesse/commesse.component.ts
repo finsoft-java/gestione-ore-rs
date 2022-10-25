@@ -14,35 +14,44 @@ import { CommesseService } from '../_services/commesse.service';
 export class CommesseComponent implements OnInit {
 
   dataSource = new MatTableDataSource<Commessa>();
-  displayedColumns: string[] = ['codCommessa', 'pctCompatibilita', 'totOrePreviste', 'totOreRdPreviste',
+
+  displayedColumns: string[] = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste',
     'tipologia', 'giustificativo'];
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
-  allCommesse: Array<any> = [];
+  allCommesse: Commessa[] = [];
+  allProgetti: string[] = [];
 
-  constructor(private alertService: AlertService,
+  constructor(
+    private alertService: AlertService,
     private commesseService: CommesseService) {
   }
 
   ngOnInit(): void {
 
-    this.getAll();
+    this.getAllCommesse();
   }
 
-  getAll() {
+  getAllCommesse() {
 
     this.commesseService.getAll().subscribe(response => {
       this.allCommesse = response.data;
       this.dataSource = new MatTableDataSource<Commessa>(response.data);
-    },
-      error => {
+      this.allCommesse.forEach(x => {
+        x.PROGETTI.forEach(y => {
+          if (!this.allProgetti.includes(y.ACRONIMO)) { this.allProgetti.push(y.ACRONIMO); }
+        })
       });
+      this.displayedColumns = this.displayedColumns.concat(this.allProgetti);
+    });
   }
 
   uploadGiustificativo(p: Commessa, event: any) {
+
     console.log(event);
     let file = event.target.files && event.target.files[0];
     console.log('Going to upload:', file);
+
     if (file) {
       console.log(file);
       this.commesseService.uploadGiustificativo(p.COD_COMMESSA!, file).subscribe(response => {
@@ -57,7 +66,7 @@ export class CommesseComponent implements OnInit {
   }
 
   deleteGiustificativo(p: Commessa) {
-    // TODO Some warning?
+
     this.commesseService.deleteGiustificativo(p.COD_COMMESSA!).subscribe(response => {
       p.HAS_GIUSTIFICATIVO = 'N';
       p.GIUSTIFICATIVO_FILENAME = null;
@@ -69,6 +78,7 @@ export class CommesseComponent implements OnInit {
   }
 
   downloadGiustificativo(p: Commessa) {
+
     this.commesseService.downloadGiustificativo(p.COD_COMMESSA!).subscribe(response => {
       this.downloadFile(response, p.GIUSTIFICATIVO_FILENAME!);
     },
@@ -78,9 +88,11 @@ export class CommesseComponent implements OnInit {
   }
 
   downloadFile(data: any, filename: string) {
+
     const blob = new Blob([data] /* , { type: 'applicazion/zip' } */);
     const url = window.URL.createObjectURL(blob);
     var anchor = document.createElement("a");
+
     anchor.download = filename;
     anchor.href = url;
     anchor.click();

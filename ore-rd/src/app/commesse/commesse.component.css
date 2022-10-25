@@ -1,7 +1,3 @@
-.mat-paginator {
-    background: initial;
-}
-
 table {
     width: 100%;
 }
@@ -15,6 +11,7 @@ table {
 .mat-cell {
     justify-content: center;
     text-align: center;
+    width: 200px;
 }
 
 th.mat-header-cell:last-of-type,

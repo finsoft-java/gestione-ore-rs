@@ -54,6 +54,8 @@ export class ProgettoCommesseComponent implements OnInit {
       HAS_GIUSTIFICATIVO: 'N',
       GIUSTIFICATIVO_FILENAME: null,
       NOTE: null,
+      ORE_PREVISTE: null,
+      ACRONIMO: '',
       isEditable: true,
       isInsert: true
     };

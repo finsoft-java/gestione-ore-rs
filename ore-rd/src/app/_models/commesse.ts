@@ -1,4 +1,6 @@
-﻿export class Commessa {
+﻿import { ProgettoCommessa } from "./progetto";
+
+export class Commessa {
 
   constructor(
     public COD_COMMESSA: string,
@@ -9,6 +11,7 @@
     public TOT_ORE_PREVISTE: number = 0,
     public TOT_ORE_RD_PREVISTE: number = 0,
     public TIPOLOGIA: string | null = null,
+    public PROGETTI: ProgettoCommessa[] = [],
     public isEditable: boolean = false,
     public isInsert: boolean = false
   ) { }

@@ -49,7 +49,9 @@ export class ProgettoCommessa {
     public NOTE: string|null,
     public HAS_GIUSTIFICATIVO: string = 'N',
     public GIUSTIFICATIVO_FILENAME: string|null = null,
+    public ORE_PREVISTE: number | null = null,
+    public ACRONIMO: string = '',
     public isEditable: boolean = false,
     public isInsert: boolean = false
-    ) {}   
+    ) {}
 }
