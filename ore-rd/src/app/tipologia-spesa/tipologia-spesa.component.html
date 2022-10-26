@@ -1,6 +1,7 @@
 <div>
     <h5 style="margin-bottom: 20px;text-align:center">Tipologia Spesa</h5>
-    <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;" (click)="nuovaTipologia()">Nuova Tipologia</button>
+    <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;"
+        (click)="nuovaTipologia()">Nuova Tipologia</button>
 </div>
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
     <!-- Position Column -->
@@ -16,9 +17,13 @@
             <label *ngIf="!element.isEditable"> {{element.DESCRIZIONE}} </label>
             <!--<input matInput [value]="element.descrizione" [(ngModel)]="element.descrizione">-->
             <div style="display: block;margin: 0px auto;width: 423px;">
-                <input class="form-control" style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;" *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
-                <button style="margin-right:10px;" *ngIf="element.isEditable" mat-raised-button color="primary" (click)="saveChange(element)">Salva</button>
-                <button *ngIf="element.isEditable" mat-raised-button color="" (click)="undoChange(element)">Annulla</button>
+                <input class="form-control"
+                    style="display: inline-block;width: 220px;margin-right: 15px;border: 1px solid;padding: 0px 15px;"
+                    *ngIf="element.isEditable" matInput [(ngModel)]="element.DESCRIZIONE">
+                <button style="margin-right:10px;" *ngIf="element.isEditable" mat-raised-button color="primary"
+                    (click)="saveChange(element)">Salva</button>
+                <button *ngIf="element.isEditable" mat-raised-button color=""
+                    (click)="undoChange(element)">Annulla</button>
             </div>
         </td>
 
@@ -27,7 +32,7 @@
     <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef> Azione </th>
         <td mat-cell *matCellDef="let row">
-            <button *ngIf="!row.isEditable" mat-raised-button color="primary" (click)="getRecord(row)" >Modifica</button>
+            <button *ngIf="!row.isEditable" mat-raised-button color="primary" (click)="getRecord(row)">Modifica</button>
             <button *ngIf="!row.isEditable" mat-raised-button color="warn" (click)="deleteChange(row)">Elimina</button>
         </td>
     </ng-container>
@@ -35,4 +40,3 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
-<mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
