@@ -48,7 +48,9 @@
 
     <ng-container [matColumnDef]="acronimo" *ngFor="let acronimo of allProgetti">
         <th mat-header-cell *matHeaderCellDef>{{acronimo}}</th>
-        <td mat-cell *matCellDef="let element">{{element.PROGETTI[0].ORE_PREVISTE}}</td>
+        <td mat-cell *matCellDef="let element">
+            <label>{{getOrePreviste(element.COD_COMMESSA, acronimo)}}</label>
+        </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

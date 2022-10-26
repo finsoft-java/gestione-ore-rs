@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Commessa } from '../_models';
+import { Commessa, ProgettoCommessa } from '../_models';
 import { AlertService } from '../_services/alert.service';
 
 import { CommesseService } from '../_services/commesse.service';
@@ -94,6 +94,17 @@ export class CommesseComponent implements OnInit {
     anchor.download = filename;
     anchor.href = url;
     anchor.click();
+  }
+
+  getOrePreviste(codCommessa: string, acronimo: string): number | null {
+
+    let ore: number = 0;
+
+    console.log(codCommessa, acronimo);
+    let comm = this.allCommesse.find(x => x.COD_COMMESSA == codCommessa);
+    let orePrev = comm?.PROGETTI.find(x => x.ACRONIMO == acronimo);
+
+    return orePrev && orePrev.ORE_PREVISTE ? orePrev.ORE_PREVISTE : null;
   }
 
 }
