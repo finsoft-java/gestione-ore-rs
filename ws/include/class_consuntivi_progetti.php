@@ -35,6 +35,7 @@ class ConsuntiviProgettiManager {
         $nomi_progetti = implode(', ', array_map(function($x){ return $x["ACRONIMO"]; }, $progetti_attivi));
         $message->success .= "Data limite: " . $dataLimite->format('d/m/Y') . " progetti attivi trovati: " . $nomi_progetti . NL;
         $message->success .= "Salvo i dati ottenuti con <strong>ID_ESECUZIONE=$idEsecuzione</strong>" . NL;
+        $message->success .= "Ore " . date("H:i:s"). NL;
 
         foreach($progetti_attivi as $progetto) {
             $idProgetto = $progetto["ID_PROGETTO"];
@@ -64,16 +65,19 @@ class ConsuntiviProgettiManager {
 
                 $message->success .= "<strong>Tot. " . ($ore_progetto_teoriche + $ore_compat_teoriche) .
                                                                 " ore prelevabili teoriche (di progetto+compatibili)</strong>". NL;
+                $message->success .= "Ore " . date("H:i:s"). NL;
 
                 $lul = $this->estrazione_lul($idEsecuzione, $message);
 
                 $message->success .= "Verifica LUL...". NL;
                 $ore_progetto = $this->prelievo_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $lul, $message);
                 $message->success .= "<strong>Tot. $ore_progetto ore prelevate da commesse di progetto</strong>". NL;
+                $message->success .= "Ore " . date("H:i:s"). NL;
                 if ($ore_progetto > $this->get_ore_previste($idProgetto, $commesse_p)) {
                     $message->success .= "<strong>WARNING</strong> Le ore di progetto consuntivate sono più di quelle previste!";
                 }
 
+                
                 $monte_ore -= $ore_progetto;
 
                 if ($monte_ore <= 0) {
@@ -85,7 +89,6 @@ class ConsuntiviProgettiManager {
                     $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
                     $message->success .= "Verifica LUL...". NL;
                     $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, $message);
-                    $this->select_riepilogo_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $max_dip, $nomiUtenti, $message);
                     $message->success .= "<strong>Tot. $ore_compat ore prelevate da commesse compatibili</strong>". NL;
                     $monte_ore -= $ore_compat;
                 }
@@ -104,17 +107,18 @@ class ConsuntiviProgettiManager {
                 $message->success .= "Ore assegnate." . NL;
                 
                 $message->success .= "Monte ore residuo dopo l'assegnazione: $monte_ore ore" . NL;
-                
+                $message->success .= "Ore " . date("H:i:s"). NL;
+
             } catch (Exception $exception) {
                 $message->error .= $exception->getMessage();
             }
         }
-        $this->riepilogo($idEsecuzione, $message);
+        $this->riepilogo_per_commessa($idEsecuzione, $message);
+        $this->riepilogo_per_commessa_dipendente($idEsecuzione, $message);
         $this->log($idEsecuzione, $message);
 
         $message->success .= "Fine." . NL;
-        
-        
+        $message->success .= "Ore " . date("H:i:s"). NL;
     }
 
     function load_partecipanti_globali() {
@@ -292,7 +296,7 @@ class ConsuntiviProgettiManager {
         $query = "SELECT COD_COMMESSA,
                     SUM(NUM_ORE_RESIDUE) AS ORE,
                     MAX(PCT_COMPATIBILITA) AS PCT_COMPATIBILITA,
-                    SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100) AS ORE_COMP
+                    ROUND(SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100),2) AS ORE_COMP
                 FROM assegnazioni_dettaglio ad
                 WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)
                 GROUP BY COD_COMMESSA";
@@ -399,7 +403,7 @@ class ConsuntiviProgettiManager {
         $query = "SELECT ad.ID_DIPENDENTE,PCT_UTILIZZO,ROUND(NVL(SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100),0)*PCT_UTILIZZO/100,2) AS ORE_PREVISTE
                 FROM assegnazioni_dettaglio ad
                 WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)
-                     ";
+                GROUP BY  ad.ID_DIPENDENTE";
         $list = select_list($query);
 
         //$lul_d = $this->ore_lul_residue_per_dip($lul_p); // dato interessante ma fuorviante
@@ -462,9 +466,13 @@ class ConsuntiviProgettiManager {
                 foreach($caricamenti as $c) {
                     $ore = (float) $c['NUM_ORE_RESIDUE'];
                     $ore_max_commessa = (float) $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'];
-                    if (!array_has_key($c['ID_DIPENDENTE'], $max_dip)) {
+                    if (!array_key_exists($c['ID_DIPENDENTE'], $max_dip)) {
                         $message->success .= "<strong>WARNING</strong> Something's wrong, missing key $c[ID_DIPENDENTE]" . NL;
-                        continue;
+
+                        var_dump($query);
+                        var_dump($max_dip);
+                        var_dump($map);
+                        return;
                     }
                     $ore_max_matricola = (float) $max_dip[$c['ID_DIPENDENTE']][0]['ORE_PREVISTE'];
                     if ($ore_max_commessa > 0 && $ore_max_matricola > 0) {
@@ -498,27 +506,6 @@ class ConsuntiviProgettiManager {
             if ($totale >= $monte_ore) break;
         }
         return $totale;
-    }
-
-    /**
-     * Diagnostica, serve solo per dare un confronto rispetto alla select_max_per_dipendenti
-     */
-    function select_riepilogo_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $max_dip, $nomiUtenti, &$message) {
-        $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
-        
-        $query = "SELECT ID_DIPENDENTE,NVL(SUM(NUM_ORE_PRELEVATE),0) AS ORE_PREL
-                FROM assegnazioni_dettaglio ad
-                WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)
-                GROUP BY ID_DIPENDENTE";
-        $list = select_list($query);
-        $message->success .= "  Riepilogo suddivisione delle commesse compatibili tra i dipendenti:" . NL;
-        foreach($list as $m) {
-            // se servisse, $max = $max_dip[$m['ID_DIPENDENTE']][0]['ORE_PREVISTE'];
-            $idDip = $m['ID_DIPENDENTE'];
-            $nome = isset($nomiUtenti[$idDip][0]['DENOMINAZIONE']) ? $nomiUtenti[$idDip][0]['DENOMINAZIONE'] : '';
-            $message->success .= "  $idDip $nome => $m[ORE_PREL] ore" . NL;
-        }
-        return array_group_by($list, ['ID_DIPENDENTE']);
     }
 
     /**
@@ -561,14 +548,14 @@ class ConsuntiviProgettiManager {
     }
 
     /**
-     * Stampa il riepilogo per commessa/dipendente
+     * Stampa il riepilogo per commessa
      */
-    function riepilogo($idEsecuzione, &$message) {
-        $query = "SELECT ID_DIPENDENTE, COD_COMMESSA, SUM(NUM_ORE_PRELEVATE) as NUM_ORE_PRELEVATE
+    function riepilogo_per_commessa($idEsecuzione, &$message) {
+        $query = "SELECT ID_PROGETTO, COD_COMMESSA, SUM(NUM_ORE_PRELEVATE) as NUM_ORE_PRELEVATE
             FROM assegnazioni_dettaglio ad
             WHERE ID_ESECUZIONE=$idEsecuzione
-            GROUP BY COD_COMMESSA, ID_DIPENDENTE
-            ORDER BY COD_COMMESSA, ID_DIPENDENTE";
+            GROUP BY COD_COMMESSA, ID_PROGETTO
+            ORDER BY COD_COMMESSA, ID_PROGETTO";
         $caricamenti = select_list($query);
 
         $message->success .= NL . "Riepilogo delle ore prelevate per commessa/dipendente:" . NL;
@@ -576,6 +563,45 @@ class ConsuntiviProgettiManager {
         $message->success .= "<THEAD>
                 <TR>
                     <TH>COMMESSA</TH>
+                    <TH>PROGETTO</TH>
+                    <TH>ORE PRELEVATE</TH>
+                </TR>
+            </THEAD>";
+        $message->success .= "<TBODY>";
+        if (count($caricamenti) > 0) {
+            foreach($caricamenti as $c) {
+
+                $message->success .= "
+                    <TR>
+                        <TD>$c[COD_COMMESSA]</TD>
+                        <TD>$c[ID_PROGETTO]</TD>
+                        <TD>$c[NUM_ORE_PRELEVATE]</TD>
+                    </TR>";
+            }
+        } else {
+            $message->success .= "<TR><TD COLSPAN=3>Nessuna riga estratta</TD></TR>";
+        }
+        $message->success .= "</TBODY>";
+        $message->success .= "</TABLE>" . NL;
+    }
+
+    /**
+     * Stampa il riepilogo per commessa/dipendente
+     */
+    function riepilogo_per_commessa_dipendente($idEsecuzione, &$message) {
+        $query = "SELECT ID_DIPENDENTE, ID_PROGETTO, COD_COMMESSA, SUM(NUM_ORE_PRELEVATE) as NUM_ORE_PRELEVATE
+            FROM assegnazioni_dettaglio ad
+            WHERE ID_ESECUZIONE=$idEsecuzione
+            GROUP BY COD_COMMESSA, ID_PROGETTO, ID_DIPENDENTE
+            ORDER BY COD_COMMESSA, ID_PROGETTO, ID_DIPENDENTE";
+        $caricamenti = select_list($query);
+
+        $message->success .= NL . "Riepilogo delle ore prelevate per commessa/dipendente:" . NL;
+        $message->success .= "<TABLE BORDER='1'>";
+        $message->success .= "<THEAD>
+                <TR>
+                    <TH>COMMESSA</TH>
+                    <TH>PROGETTO</TH>
                     <TH>DIPENDENTE</TH>
                     <TH>ORE PRELEVATE</TH>
                 </TR>
@@ -587,12 +613,13 @@ class ConsuntiviProgettiManager {
                 $message->success .= "
                     <TR>
                         <TD>$c[COD_COMMESSA]</TD>
+                        <TD>$c[ID_PROGETTO]</TD>
                         <TD>$c[ID_DIPENDENTE]</TD>
                         <TD>$c[NUM_ORE_PRELEVATE]</TD>
                     </TR>";
             }
         } else {
-            $message->success .= "<TR><TD COLSPAN=7>Nessuna riga estratta</TD></TR>";
+            $message->success .= "<TR><TD COLSPAN=4>Nessuna riga estratta</TD></TR>";
         }
         $message->success .= "</TBODY>";
         $message->success .= "</TABLE>" . NL;
@@ -614,6 +641,7 @@ class ConsuntiviProgettiManager {
         $message->success .= "<THEAD>
                 <TR>
                     <TH>COMMESSA</TH>
+                    <TD>PROGETTO</TD>
                     <TH>PCT. COMPAT.</TH>
                     <TH>DIPENDENTE</TH>
                     <TH>PCT. IMPIEGO</TH>
@@ -630,6 +658,7 @@ class ConsuntiviProgettiManager {
                 $message->success .= "
                     <TR>
                         <TD>$c[COD_COMMESSA]</TD>
+                        <TD>$c[ID_PROGETTO]</TD>
                         <TD>$c[PCT_COMPATIBILITA]</TD>
                         <TD>$c[ID_DIPENDENTE]</TD>
                         <TD>$c[PCT_UTILIZZO]</TD>
