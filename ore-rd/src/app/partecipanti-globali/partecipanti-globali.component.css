@@ -98,9 +98,11 @@ td>*>button {
 }
 
 .loading-p {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    color: #6d6d6d;
     margin-top: 30px;
     margin-bottom: 30px;
-    font-size: 26px;
+    font-size: 18px;
     display: flex;
     justify-content: center;
 }
