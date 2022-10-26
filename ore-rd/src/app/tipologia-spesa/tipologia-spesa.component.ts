@@ -14,6 +14,7 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
   displayedColumns: string[] = ['id', 'descrizione', 'actions'];
   dataSource = new MatTableDataSource<Tipologia>();
   allTipologie: Array<any> = [];
+  isLoading: Boolean = true;
 
   ngOnInit() {
     //this.dataSource.paginator = this.paginator;
@@ -28,8 +29,10 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
       .subscribe(response => {
         this.allTipologie = response.data;
         this.dataSource = new MatTableDataSource<Tipologia>(response.data);
+        this.isLoading = false;
       },
         error => {
+          this.isLoading = false;
         });
   }
 

@@ -22,6 +22,7 @@ export class ProgettiComponent implements OnInit {
   dataSource = new MatTableDataSource<Progetto>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;
+  isLoading: Boolean = true;
 
   constructor(private router: Router, private progettiService: ProgettiService) {
     this.router_frontend = router;
@@ -37,8 +38,10 @@ export class ProgettiComponent implements OnInit {
       .subscribe(response => {
         this.length = response.count;
         this.dataSource = new MatTableDataSource<Progetto>(response.data);
+        this.isLoading = false;
       },
         error => {
+          this.isLoading = false;
         });
   }
 

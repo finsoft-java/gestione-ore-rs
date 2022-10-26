@@ -19,6 +19,7 @@ export class CommesseComponent implements OnInit {
 
   allCommesse: Commessa[] = [];
   allProgetti: string[] = [];
+  isLoading: Boolean = true;
 
   constructor(
     private alertService: AlertService,
@@ -35,6 +36,7 @@ export class CommesseComponent implements OnInit {
     this.commesseService.getAll().subscribe(response => {
       this.allCommesse = response.data;
       this.dataSource = new MatTableDataSource<Commessa>(response.data);
+      this.isLoading = false;
       this.allCommesse.forEach(x => {
         x.PROGETTI.forEach(y => {
           if (!this.allProgetti.includes(y.ACRONIMO)) { this.allProgetti.push(y.ACRONIMO); }

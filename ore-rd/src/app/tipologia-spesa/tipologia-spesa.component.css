@@ -17,12 +17,24 @@ table {
     justify-content: center;
 }
 
-th.mat-header-cell:last-of-type, td.mat-cell:last-of-type {
-    padding-right: 0px; /*Material lo mette a 24px */
+th.mat-header-cell:last-of-type,
+td.mat-cell:last-of-type {
+    padding-right: 0px;
+    /*Material lo mette a 24px */
 }
 
-td>button{
+td>button {
     width: 80px;
     padding: 0px;
-    margin: 5px 5px 5px 5px; /* così spazia anche se va su due righe */
+    margin: 5px 5px 5px 5px;
+    /* così spazia anche se va su due righe */
+}
+
+.loading-p {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    color: #6d6d6d;
+    margin-top: 16px;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
 }
