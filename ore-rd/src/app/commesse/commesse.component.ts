@@ -100,13 +100,10 @@ export class CommesseComponent implements OnInit {
 
   getOrePreviste(codCommessa: string, acronimo: string): number | null {
 
-    let ore: number = 0;
-
-    console.log(codCommessa, acronimo);
     let comm = this.allCommesse.find(x => x.COD_COMMESSA == codCommessa);
-    let orePrev = comm?.PROGETTI.find(x => x.ACRONIMO == acronimo);
+    let progettoComm = comm?.PROGETTI.find(x => x.ACRONIMO == acronimo);
 
-    return orePrev && orePrev.ORE_PREVISTE ? orePrev.ORE_PREVISTE : null;
+    return progettoComm && progettoComm.ORE_PREVISTE ? progettoComm.ORE_PREVISTE : null;
   }
 
 }
