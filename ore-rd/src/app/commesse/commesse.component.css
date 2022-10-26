@@ -25,3 +25,12 @@ td.mat-cell:first-of-type {
     padding-left: 0px;
     /*Material lo mette a 24px */
 }
+
+.loading-p {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    color: #6d6d6d;
+    margin-top: 16px;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+}

@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -17,7 +17,7 @@ import { MockService } from '.';
  * Editable Material Table
  * @see https://muhimasri.com/blogs/create-an-editable-dynamic-table-using-angular-material/
  */
-export class MatEditTableComponent<T> implements OnInit {
+export class MatEditTableComponent<T> implements OnInit, OnDestroy {
   @Input()
   labels: MatEditTableLabels = {
     add: 'Nuovo',
@@ -80,6 +80,8 @@ export class MatEditTableComponent<T> implements OnInit {
   filtro: any = {};
   searchValue: any = {};
 
+  timeout: any = null;
+
   ACTIONS_INDEX = '$$actions';
   XLSX_FILE_NAME = 'Export.xlsx';
   XLSX_SHEET_NAME = 'Data';
@@ -109,9 +111,16 @@ export class MatEditTableComponent<T> implements OnInit {
     this.getAll();
 
     if (this.autorefresh) {
-      setInterval(() => {
+      this.timeout = setInterval(() => {
         this.refresh();
       }, this.autorefresh * 1000);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.timeout) {
+      console.log(this.timeout);
+      clearTimeout(this.timeout);
     }
   }
 
