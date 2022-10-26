@@ -19,6 +19,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
   allPartecipanti: Array<any> = [];
   allMatricole: Matricola[] = [];
+  isLoading: Boolean = true;
 
   constructor(
     private router: Router,
@@ -37,8 +38,11 @@ export class PartecipantiGlobaliComponent implements OnInit {
     this.partecipanteService.getAll().subscribe(response => {
       this.allPartecipanti = response.data;
       this.dataSource = new MatTableDataSource<Partecipante>(response.data);
+      this.isLoading = false;
     },
       error => {
+        this.alertService.error(error);
+        this.isLoading = false;
       });
   }
 

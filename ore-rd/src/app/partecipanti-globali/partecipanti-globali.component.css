@@ -96,3 +96,11 @@ td>*>button {
     margin: 5px 5px 5px 5px;
     /* così spazia anche se va su due righe */
 }
+
+.loading-p {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    font-size: 26px;
+    display: flex;
+    justify-content: center;
+}
