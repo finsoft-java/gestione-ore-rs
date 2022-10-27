@@ -6,24 +6,27 @@ table {
     flex-direction: column;
     justify-content: center;
     text-align: center;
+    padding-left: 20px;
+    padding-right: 20px;
+    white-space: nowrap;
 }
 
 .mat-cell {
     justify-content: center;
     text-align: center;
-    width: 200px;
+    padding-left: 20px;
+    padding-right: 20px;
+    white-space: nowrap;
 }
 
 th.mat-header-cell:last-of-type,
 td.mat-cell:last-of-type {
-    padding-right: 0px;
-    /*Material lo mette a 24px */
+    padding-right: 20px;
 }
 
 th.mat-header-cell:first-of-type,
 td.mat-cell:first-of-type {
-    padding-left: 0px;
-    /*Material lo mette a 24px */
+    padding-left: 20px;
 }
 
 .loading-p {
