@@ -36,3 +36,8 @@
 .btnSubMenu {
     padding-left: 12%;
 }
+
+.container {
+    /* Override grid.scss */
+    max-width: none;
+}
