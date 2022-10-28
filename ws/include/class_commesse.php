@@ -15,12 +15,12 @@ $commesseManager = new CommesseManager();
 class CommesseManager {
     
     function get_commesse() {
-        $sql = "SELECT c.*,
+        $sql = "SELECT COD_COMMESSA,PCT_COMPATIBILITA,NOTE,GIUSTIFICATIVO_FILENAME,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA,
                 CASE WHEN GIUSTIFICATIVO IS NULL THEN 'N' ELSE 'Y' END AS HAS_GIUSTIFICATIVO
                 FROM commesse c
                 ORDER BY PCT_COMPATIBILITA DESC, COD_COMMESSA";
         $arr = select_list($sql);
-    
+
         foreach($arr as $id => $commessa) {
             $arr[$id]["PROGETTI"] = $this->get_progetti($commessa["COD_COMMESSA"]);
         }

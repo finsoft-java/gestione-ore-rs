@@ -103,7 +103,7 @@ export class CommesseComponent implements OnInit {
     let comm = this.allCommesse.find(x => x.COD_COMMESSA == codCommessa);
     let progettoComm = comm?.PROGETTI.find(x => x.ACRONIMO == acronimo);
 
-    return progettoComm && progettoComm.ORE_PREVISTE ? progettoComm.ORE_PREVISTE : null;
+    return (progettoComm && progettoComm.ORE_PREVISTE != null && progettoComm.ORE_PREVISTE > 0) ? progettoComm.ORE_PREVISTE : null;
   }
 
 }
