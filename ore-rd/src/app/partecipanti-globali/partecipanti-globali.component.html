@@ -11,16 +11,15 @@
         <td mat-cell *matCellDef="let element">
             <div *ngIf="!element.isInsert">{{getNomeMatricola(element.ID_DIPENDENTE)}}</div>
             <div *ngIf="element.isInsert">
-                <ng-select [items]="allMatricole" bindLabel="DENOMINAZIONE" bindValue="ID_DIPENDENTE"
-                    [(ngModel)]="element.ID_DIPENDENTE">
-                </ng-select>
+                <ng-select [items]="allNomeMatricole" bindLabel="DENOMINAZIONE" bindValue="MATRICOLA"
+                    [(ngModel)]="element.MATRICOLA"></ng-select>
             </div>
         </td>
     </ng-container>
 
-    <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef>ID Dip.</th>
-        <td mat-cell *matCellDef="let element">{{element.ID_DIPENDENTE}}</td>
+    <ng-container matColumnDef="matricola">
+        <th mat-header-cell *matHeaderCellDef>Matricola</th>
+        <td mat-cell *matCellDef="let element">{{element.MATRICOLA}}</td>
     </ng-container>
 
     <ng-container matColumnDef="pctUtilizzo">
@@ -48,7 +47,7 @@
     </ng-container>
 
     <ng-container matColumnDef="costo">
-        <th mat-header-cell *matHeaderCellDef>Costo</th>
+        <th mat-header-cell *matHeaderCellDef>Costo Orario</th>
         <td mat-cell *matCellDef="let element">
             <div *ngIf="!element.isEditable">{{element.COSTO}}</div>
             <div *ngIf="element.isEditable">
@@ -66,8 +65,8 @@
             <button *ngIf="!row.isEditable" mat-raised-button color="primary" (click)="getRecord(row)">Modifica</button>
             <button *ngIf="!row.isEditable" mat-raised-button color="warn"
                 (click)="deletePartecipante(row)">Elimina</button>
-            <button *ngIf="row.isEditable" mat-raised-button color="primary" (click)="saveEdit(row)"
-                [disabled]="row.ID_DIPENDENTE == null">Salva</button>
+            <button *ngIf="row.isEditable" mat-raised-button color="primary" (click)="saveEdit(row, row.MATRICOLA)"
+                [disabled]="row.MATRICOLA == null">Salva</button>
             <button *ngIf="row.isEditable" mat-raised-button color="secondary"
                 (click)="annullaEdit(row)">Annulla</button>
         </td>

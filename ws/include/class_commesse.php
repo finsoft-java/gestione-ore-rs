@@ -149,15 +149,15 @@ class CommesseManager
         execute_update($sql);
     }
 
-    public function importExcel($filename, &$message, $typeFile)
+    public function importExcel($filename, &$message, $typeFile, $dataInizio, $dataFine)
     {
         $spreadSheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
         $numOfSheets = $spreadSheet->getSheetCount();
         // Mi aspetto un unico sheet
-        $this->importSheet($spreadSheet->getSheet(0), $message);
+        $this->importSheet($spreadSheet->getSheet(0), $message, $dataInizio, $dataFine);
     }
 
-    public function importSheet($excelSheet, &$message)
+    public function importSheet($excelSheet, &$message, $dataInizio, $dataFine)
     {
         global $con, $panthera;
 
@@ -220,9 +220,8 @@ class CommesseManager
                 $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
                 $valueOre = $spreadSheetAry[$curRow][$curCol];
                 if (!empty($idProgetto)) {
-                    // QUI un comando REPLACE sql sulla progetti_commesse
-                    $query = "REPLACE INTO progetti_commesse (ID_PROGETTO,COD_COMMESSA,ORE_PREVISTE)
-                    VALUES('$idProgetto','$codCommessa','$valueOre')";
+                    $query = "REPLACE INTO progetti_commesse (ID_PROGETTO,COD_COMMESSA,ORE_PREVISTE, DATA_INIZIO, DATA_FINE)
+                    VALUES('$idProgetto','$codCommessa','$valueOre', '$dataInizio', '$dataFine')";
                     execute_update($query);
                 }
             }
@@ -231,4 +230,10 @@ class CommesseManager
         $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
     }
 
+    public function get_periodi()
+    {
+        global $panthera;
+        $sql = "SELECT DISTINCT DATE_FORMAT(DATA_INIZIO,'%Y-%m-%d'),DATE_FORMAT(DATA_FINE,'%Y-%m-%d') FROM progetti_commesse";
+        return $panthera->select_list($sql);
+    }
 }

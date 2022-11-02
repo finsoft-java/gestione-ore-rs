@@ -2,6 +2,8 @@ import { UploadCommesseService } from '../_services/upload.commesse.service ';
 import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { AlertService } from './../_services/alert.service';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { formatDate } from '@angular/common';
+
 
 @Component({
   selector: 'app-importazione-commesse',
@@ -10,6 +12,8 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 })
 export class ImportazioneCommesseComponent implements OnInit { 
   selectedFiles?: FileList;
+  dataInizio?:Date;
+  dataFine?:Date;
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
@@ -46,18 +50,20 @@ export class ImportazioneCommesseComponent implements OnInit {
   }
 
   uploadFiles() {
-    if (this.selectedFiles) {
-      this.upload(this.selectedFiles);
+    if( this.dataFine && this.dataInizio && this.selectedFiles) {
+      const dataInizioString :string = formatDate(this.dataInizio, 'YYYY-MM-dd', 'en-GB');
+      const dataFineString :string = formatDate(this.dataFine, 'YYYY-MM-dd', 'en-GB');
+      this.upload(this.selectedFiles, dataInizioString, dataFineString);
     }
   }
 
-  upload(file: FileList) {
+  upload(file: FileList, dataInizio: string, dataFine: string) {
     this.progressInfos.value = 0;
     this.loading = true;
     this.message_error = '';
     this.message_success = 'Loading...';
 
-    this.uploadCommesseService.upload(file).subscribe(
+    this.uploadCommesseService.upload(file, dataInizio, dataFine).subscribe(
       event => {
       console.log("EVENT=", event);
         if (event.type === HttpEventType.UploadProgress) {
