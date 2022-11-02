@@ -8,7 +8,7 @@ class ProgettiPersoneManager {
         $arr = array();
         $sql = "SELECT g.*
                     FROM progetti_persone p
-                    JOIN persone_globali g ON p.ID_DIPENDENTE=g.ID_DIPENDENTE
+                    JOIN partecipanti_globali g ON p.ID_DIPENDENTE=g.ID_DIPENDENTE
                     WHERE p.ID_PROGETTO = '$id_progetto'
                     ORDER BY g.ID_DIPENDENTE";
         $arr = select_list($sql);
@@ -19,7 +19,7 @@ class ProgettiPersoneManager {
         $arrProgettiWp = array();
         $sql = "SELECT g.*
                     FROM progetti_persone
-                    JOIN persone_globali g ON p.ID_DIPENDENTE=g.ID_DIPENDENTE
+                    JOIN partecipanti_globali g ON p.ID_DIPENDENTE=g.ID_DIPENDENTE
                     WHERE p.ID_PROGETTO = '$id_progetto' and p.ID_DIPENDENTE='$matricola'";
         $obj = select_single($sql);
         return $obj;
