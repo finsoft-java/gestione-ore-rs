@@ -1,6 +1,5 @@
 import { AlertService } from './../_services/alert.service';
 import { PartecipantiService } from './../_services/partecipanti.service';
-import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { Partecipante } from './../_models/partecipanti';
 import { Component, OnInit, ViewChild } from '@angular/core';
@@ -15,14 +14,13 @@ import { Matricola } from '../_models';
 export class PartecipantiGlobaliComponent implements OnInit {
 
   dataSource = new MatTableDataSource<Partecipante>();
-  displayedColumns: string[] = ['nome', 'id', 'pctUtilizzo', 'mansione', 'costo', 'actions'];
+  displayedColumns: string[] = ['nome', 'matricola', 'pctUtilizzo', 'mansione', 'costo', 'actions'];
 
-  allPartecipanti: Array<any> = [];
-  allMatricole: Matricola[] = [];
+  allPartecipanti: Partecipante[] = [];
+  allNomeMatricole: Matricola[] = [];
   isLoading: Boolean = true;
 
   constructor(
-    private router: Router,
     private partecipanteService: PartecipantiService,
     private alertService: AlertService) {
   }
@@ -58,7 +56,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
   getMatricole(): void {
 
     this.partecipanteService.getAllMatricole().subscribe(response => {
-      this.allMatricole = response.data;
+      this.allNomeMatricole = response.data;
     },
       error => {
         this.alertService.error(error);
@@ -67,11 +65,11 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
   getNomeMatricola(idDipendente: string): string {
 
-    if (this.allMatricole == null) {
+    if (this.allNomeMatricole == null) {
       return '(unknown)';
     }
 
-    const pantheraObj = this.allMatricole.find(x => x.ID_DIPENDENTE == idDipendente);
+    const pantheraObj = this.allNomeMatricole.find(x => x.ID_DIPENDENTE == idDipendente);
 
     return pantheraObj != null && pantheraObj.DENOMINAZIONE != null ? pantheraObj.DENOMINAZIONE : '(unknown)';
   }
@@ -79,7 +77,9 @@ export class PartecipantiGlobaliComponent implements OnInit {
   addPartecipante() {
 
     let newPartecipante: any;
-    newPartecipante = { ID_DIPENDENTE: null, PCT_UTILIZZO: 100, MANSIONE: "", COSTO: "", isEditable: true, isInsert: true };
+    newPartecipante = {
+      ID_DIPENDENTE: null, MATRICOLA: null, PCT_UTILIZZO: 100, MANSIONE: "", COSTO: "", isEditable: true, isInsert: true
+    };
 
     let data: any[] = [];
     if (this.dataSource.data != null) {
@@ -95,9 +95,15 @@ export class PartecipantiGlobaliComponent implements OnInit {
     this.getAll();
   }
 
-  saveEdit(row: Partecipante) {
+  saveEdit(row: Partecipante, matricola: number) {
 
     if (row.isInsert) {
+
+      let idDip = this.allNomeMatricole.find(x => x.MATRICOLA == matricola);
+
+      console.log(idDip?.ID_DIPENDENTE);
+
+      row.ID_DIPENDENTE = idDip?.ID_DIPENDENTE!;
 
       this.partecipanteService.insert(row)
         .subscribe(response => {

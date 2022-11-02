@@ -3,10 +3,11 @@
 $partecipantiManager = new PartecipantiManager();
 
     //configurazione colonne file excel
-    define('COL_DIPENDENTE',     0);
-    define('COL_PCT_IMPEGO',    1);
-    define('COL_MANSIONE',      2);
-    define('COL_COSTO',         3);
+    define('COL_PARTECIPANTI_NOME_COGNOME',  0); // verra' ignorata
+    define('COL_PARTECIPANTI_MATRICOLA',     1);
+    define('COL_PARTECIPANTI_PCT_IMPEGO',    2);
+    define('COL_PARTECIPANTI_MANSIONE',      3);
+    define('COL_PARTECIPANTI_COSTO',         4);
 
 class PartecipantiManager {
     
@@ -47,9 +48,10 @@ class PartecipantiManager {
         global $con, $logged_user;
         $id = $con->escape_string($json_data->ID_DIPENDENTE);
         $sql = insert("partecipanti_globali", ["ID_DIPENDENTE" => $id,
-                                   "MANSIONE" => $con->escape_string($json_data->MANSIONE),
-                                   "COSTO" => $con->escape_string($json_data->COSTO),
-                                   "PCT_UTILIZZO" => $con->escape_string($json_data->PCT_UTILIZZO)
+                                    "MATRICOLA" => $con->escape_string($json_data->MATRICOLA),
+                                    "MANSIONE" => $con->escape_string($json_data->MANSIONE),
+                                    "COSTO" => $con->escape_string($json_data->COSTO),
+                                    "PCT_UTILIZZO" => $con->escape_string($json_data->PCT_UTILIZZO)
                                   ]);
         execute_update($sql);
         return $this->get_partecipante($id);
@@ -60,6 +62,7 @@ class PartecipantiManager {
         global $con;
 		
         $sql = update("partecipanti_globali", [
+                                    "MATRICOLA" => $con->escape_string($json_data->MATRICOLA),
                                     "MANSIONE" => $con->escape_string($json_data->MANSIONE),
                                     "COSTO" => $con->escape_string($json_data->COSTO),
                                     "PCT_UTILIZZO" => $con->escape_string($json_data->PCT_UTILIZZO)
@@ -83,7 +86,7 @@ class PartecipantiManager {
      function importSheet($excelSheet, &$message) {
         global $con, $panthera;
 
-        $nomiUtenti = $panthera->getMatricole();
+        $mapMatricoleUtenti = array_group_by($panthera->getUtenti(), ['MATRICOLA']);
 
         $spreadSheetAry = $excelSheet->toArray(NULL, TRUE, FALSE);
         
@@ -102,22 +105,27 @@ class PartecipantiManager {
                 continue;
             }
 
-            $dipendente = $spreadSheetAry[$curRow][COL_DIPENDENTE];
-            $pctImpiego = $spreadSheetAry[$curRow][COL_PCT_IMPEGO];
-            $mansione = $spreadSheetAry[$curRow][COL_MANSIONE];
-            $costo = $spreadSheetAry[$curRow][COL_COSTO];
+            $matricola = $spreadSheetAry[$curRow][COL_PARTECIPANTI_MATRICOLA];
+            $dipendente = null;
+            $pctImpiego = $spreadSheetAry[$curRow][COL_PARTECIPANTI_PCT_IMPEGO];
+            $mansione = $spreadSheetAry[$curRow][COL_PARTECIPANTI_MANSIONE];
+            $costo = $spreadSheetAry[$curRow][COL_PARTECIPANTI_COSTO];
 
-            if (!$dipendente || !$pctImpiego) {
+            if (empty($matricola) || empty($pctImpiego)) {
                 $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
                 continue;
             }
 
-            if (! in_array($dipendente, $nomiUtenti)) {
-                $message->success .= "Dipendente non riconosciuto: $dipendente<br/>";
+            if (array_key_exists($matricola, $mapMatricoleUtenti)) {
+                $dipendente = $mapMatricoleUtenti[$matricola]['ID_DIPENDENTE'];
+            } else {
+                $message->error .= "Matricola non riconosciuta: $matricola<br/>";
+                // non posso continuare perchè l'ID_DIPENDENTE è chiave primaria
+                continue;
             }
 
-            $query = "REPLACE INTO partecipanti_globali (ID_DIPENDENTE,PCT_UTILIZZO,MANSIONE,COSTO) " .
-                        "VALUES('$dipendente',$pctImpiego*100,'$mansione','$costo')";
+            $query = "REPLACE INTO partecipanti_globali (ID_DIPENDENTE,MATRICOLA,PCT_UTILIZZO,MANSIONE,COSTO) " .
+                        "VALUES('$dipendente','$matricola',$pctImpiego*100,'$mansione','$costo')";
             execute_update($query);
             ++$contatore;
         }

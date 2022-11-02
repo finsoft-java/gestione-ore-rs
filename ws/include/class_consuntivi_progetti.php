@@ -41,10 +41,6 @@ class ConsuntiviProgettiManager {
             $idProgetto = $progetto["ID_PROGETTO"];
             try {
                 $message->success .= "Lancio assegnazione ore <strong>progetto n.$idProgetto - $progetto[ACRONIMO]</strong>" . NL;
-                
-                $monte_ore = floatval($progetto["MONTE_ORE_TOT"]) - floatval($progetto["ORE_GIA_ASSEGNATE"]);
-                // $monte_ore > 0 per costruzione...
-                $message->success .= "Monte ore residuo $monte_ore ore." . NL;
 
                 list($commesse_p, $commesse_c) = $this->load_commesse($idProgetto);
 
@@ -77,21 +73,12 @@ class ConsuntiviProgettiManager {
                     $message->success .= "<strong>WARNING</strong> Le ore di progetto consuntivate sono più di quelle previste!";
                 }
 
-                
-                $monte_ore -= $ore_progetto;
-
-                if ($monte_ore <= 0) {
-                    $message->success .= "<strong>WARNING</strong> Monte ore esaurito, non saranno prelevate ore dalle commesse compatibili". NL;
-                    $ore_compat = 0.0;
-                } else {
-                    $lul_p = $this->togli_ore_progetto_dai_lul($idEsecuzione);
-                    $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $commesse_c);
-                    $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
-                    $message->success .= "Verifica LUL...". NL;
-                    $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, $message);
-                    $message->success .= "<strong>Tot. $ore_compat ore prelevate da commesse compatibili</strong>". NL;
-                    $monte_ore -= $ore_compat;
-                }
+                $lul_p = $this->togli_ore_progetto_dai_lul($idEsecuzione);
+                $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $commesse_c);
+                $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
+                $message->success .= "Verifica LUL...". NL;
+                $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $max_compat, $max_dip, $message);
+                $message->success .= "<strong>Tot. $ore_compat ore prelevate da commesse compatibili</strong>". NL;
 
                 $tot_ore_assegnate = $ore_progetto + $ore_compat;
                 $message->success .= "<strong>Tot. $tot_ore_assegnate ore assegnate</strong>". NL;
@@ -105,8 +92,7 @@ class ConsuntiviProgettiManager {
 
                 $this->apply($idEsecuzione, $idProgetto, $dataLimite, $tot_ore_assegnate);
                 $message->success .= "Ore assegnate." . NL;
-                
-                $message->success .= "Monte ore residuo dopo l'assegnazione: $monte_ore ore" . NL;
+
                 $message->success .= "Ore " . date("H:i:s"). NL;
 
             } catch (Exception $exception) {
@@ -198,7 +184,7 @@ class ConsuntiviProgettiManager {
         $dataLimite = $dataLimite->format('Y-m-d');
         $query = "SELECT *
             FROM progetti p
-            WHERE p.DATA_FINE >= DATE($dataLimite) AND MONTE_ORE_TOT > ORE_GIA_ASSEGNATE";
+            WHERE p.DATA_FINE >= DATE($dataLimite)";
         return select_list($query);
     }
 
@@ -446,7 +432,7 @@ class ConsuntiviProgettiManager {
         return $array;
     }
 
-    function prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $monte_ore, $max_compat, $max_dip, &$message) {
+    function prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $max_compat, $max_dip, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         $query = "SELECT *
             FROM assegnazioni_dettaglio ad
@@ -498,12 +484,7 @@ class ConsuntiviProgettiManager {
                     }
                 }
                 $totale += $totale_data;
-                if ($totale >= $monte_ore) {
-                    $message->success .= "Interrompo i prelievi per raggiungimento del monte ore" . NL;
-                    break;
-                }
             }
-            if ($totale >= $monte_ore) break;
         }
         return $totale;
     }
