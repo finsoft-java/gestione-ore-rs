@@ -42,3 +42,8 @@
     margin-top: 5%;
     margin-right: 0% !important;
 }
+
+.container {
+    /* Override grid.scss */
+    max-width: none;
+}

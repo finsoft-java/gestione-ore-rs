@@ -150,7 +150,7 @@
 
         <!-- TABELLA SPESE  -->
 
-        <div style="margin-bottom:30px;">
+        <div class="mbottom-7">
             <div>
                 <h5 style="margin-bottom: 20px;text-align:center">Budget Spese</h5>
                 <button mat-raised-button color="primary" style="float: right;margin: 0px 0px 20px 0px;"
@@ -214,9 +214,6 @@
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
-            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
-
-            </mat-paginator>
         </div>
 
 
@@ -227,13 +224,11 @@
         <!--
                 tabella PERSONE
             -->
-        <div style="margin-bottom:30px;">
+        <div class="mbottom-7">
             <div>
                 <h5 style="margin-bottom: 20px;text-align:center">Persone assegnate</h5>
                 <button mat-raised-button color="primary" style="float: right;margin: 0px 10px 20px 0px;"
                     (click)="nuovoProgettoPersona()">Nuovo</button>
-                <button mat-raised-button color="secondary" style="float: right;margin: 0px 10px 20px 0px;"
-                    (click)="ripartisciPercentuali()">Ripartisci perc.</button>
             </div>
             <table mat-table [dataSource]="dataSourcePersone" class="mat-elevation-z8">
                 <ng-container matColumnDef="nome">
@@ -276,8 +271,5 @@
                 <tr mat-header-row *matHeaderRowDef="displayedColumnsPersone"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumnsPersone;"></tr>
             </table>
-            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
-
-            </mat-paginator>
         </div>
     </div>

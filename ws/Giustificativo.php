@@ -36,24 +36,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!$cod_commessa) {
         print_error(400, 'Missing cod_commessa');
     }
-    $object = $progettiCommesseManager->get_commessa($cod_commessa);
+    $object = $commesseManager->get_commessa($cod_commessa);
     if (!$object) {
         print_error(404, 'Not found');
     }
 
-    $progettiCommesseManager->upload_giustificativo($cod_commessa, $tmpfilename, $origfilename);
+    $commesseManager->upload_giustificativo($cod_commessa, $tmpfilename, $origfilename);
 
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     //==========================================================
     if (!$cod_commessa) {
         print_error(400, 'Missing cod_commessa');
     }
-    $object = $progettiCommesseManager->get_commessa($cod_commessa);
+    $object = $commesseManager->get_commessa($cod_commessa);
     if (!$object) {
         print_error(404, 'Not found');
     }
 
-    $progettiCommesseManager->elimina_giustificativo($cod_commessa);
+    $commesseManager->elimina_giustificativo($cod_commessa);
     
 } else {
     //==========================================================

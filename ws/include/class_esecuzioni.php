@@ -4,17 +4,14 @@ $esecuzioniManager = new EsecuzioniManager();
 
 class EsecuzioniManager {
 
-    function get_id_esecuzione($idProgetto, &$message) {
+    function get_id_esecuzione() {
         global $con, $logged_user;
         
         $con->begin_transaction();
         try {
             $query_max = "SELECT NVL(MAX(ID_ESECUZIONE),0)+1 FROM assegnazioni WHERE 1";
             $idEsecuzione = select_single_value($query_max);
-
-            $message->success .= "Salvo i dati ottenuti con <strong>ID_ESECUZIONE=$idEsecuzione</strong>" . NL;
-
-            $query ="INSERT INTO assegnazioni (ID_ESECUZIONE, ID_PROGETTO, UTENTE) VALUES ('$idEsecuzione', '$idProgetto', '$logged_user->nome_utente')";
+            $query ="INSERT INTO assegnazioni (ID_ESECUZIONE, UTENTE) VALUES ('$idEsecuzione', '$logged_user->nome_utente')";
             execute_update($query);
 
             $con->commit();
@@ -59,10 +56,10 @@ class EsecuzioniManager {
     }
     
     function elimina_esecuzione($idEsecuzione) {
-        $query ="SELECT ID_PROGETTO,TOT_ASSEGNATE FROM assegnazioni WHERE ID_ESECUZIONE=$idEsecuzione";
-        $result = select_single($query);
-        $idProgetto = $result['ID_PROGETTO'];
-        $oreDaTogliere = $result['TOT_ASSEGNATE'];
+        $query = "SELECT ID_PROGETTO,SUM(NUM_ORE_LAVORATE)AS NUM_ORE_LAVORATE
+                FROM ore_consuntivate_progetti
+                WHERE ID_ESECUZIONE=$idEsecuzione";
+        $progetti = select_list($query);
 
         $query ="DELETE FROM ore_consuntivate_progetti WHERE ID_ESECUZIONE=$idEsecuzione";
         execute_update($query);
@@ -71,16 +68,20 @@ class EsecuzioniManager {
         $sql = "DELETE FROM assegnazioni WHERE ID_ESECUZIONE = '$idEsecuzione'";
         execute_update($sql);
 
-        if ($oreDaTogliere != null && $oreDaTogliere > 0) {
-            $sql = "UPDATE progetti SET ORE_GIA_ASSEGNATE=ORE_GIA_ASSEGNATE-$oreDaTogliere WHERE ID_PROGETTO = '$idProgetto'";
+        foreach ($progetti as $p) {
+            $idProgetto = $p['ID_PROGETTO'];
+            $oreDaTogliere = $p['NUM_ORE_LAVORATE'];
+            if ($oreDaTogliere != null && $oreDaTogliere > 0) {
+                $sql = "UPDATE progetti SET ORE_GIA_ASSEGNATE=ORE_GIA_ASSEGNATE-$oreDaTogliere WHERE ID_PROGETTO = '$idProgetto'";
+            }
+            execute_update($sql);
+            $sql = "UPDATE progetti SET DATA_ULTIMO_REPORT=(
+                        SELECT NVL(MAX(`DATA`),DATE('0001-01-01'))
+                        FROM ore_consuntivate_progetti
+                        WHERE ID_PROGETTO = '$idProgetto'
+                    ) WHERE ID_PROGETTO = '$idProgetto'";
+            execute_update($sql);
         }
-        execute_update($sql);
-        $sql = "UPDATE progetti SET DATA_ULTIMO_REPORT=(
-                    SELECT NVL(MAX(`DATA`),DATE('0001-01-01'))
-                    FROM ore_consuntivate_progetti
-                    WHERE ID_PROGETTO = '$idProgetto'
-                ) WHERE ID_PROGETTO = '$idProgetto'";
-        execute_update($sql);
     }
 }
 ?>

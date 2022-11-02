@@ -15,34 +15,37 @@ $commesseManager = new CommesseManager();
 class CommesseManager {
     
     function get_commesse() {
-        $sql = "SELECT ID_PROGETTO,COD_COMMESSA,PCT_COMPATIBILITA,NOTE,GIUSTIFICATIVO_FILENAME,
+        $sql = "SELECT COD_COMMESSA,PCT_COMPATIBILITA,NOTE,GIUSTIFICATIVO_FILENAME,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA,
                 CASE WHEN GIUSTIFICATIVO IS NULL THEN 'N' ELSE 'Y' END AS HAS_GIUSTIFICATIVO
-                FROM commesse ";
+                FROM commesse c
+                ORDER BY PCT_COMPATIBILITA DESC, COD_COMMESSA";
         $arr = select_list($sql);
-    
-        foreach($arr as $id => $codCommessa) {
-            $arr[$id]["PROGETTI"] = $this->get_progetti($cod_commessa);
+
+        foreach($arr as $id => $commessa) {
+            $arr[$id]["PROGETTI"] = $this->get_progetti($commessa["COD_COMMESSA"]);
         }
         return $arr;
     }
 
     function get_commessa($codCommessa) {
-        $sql = "SELECT COD_COMMESSA,PCT_COMPATIBILITA,NOTE,GIUSTIFICATIVO_FILENAME,
+        $sql = "SELECT c.*,
                 CASE WHEN GIUSTIFICATIVO IS NULL THEN 'false' ELSE 'true' END AS HAS_GIUSTIFICATIVO
-                FROM commesse
+                FROM commesse c
                 WHERE COD_COMMESSA='$codCommessa'";
         $obj = select_single($sql);
         if ($obj) {
-            $obj["PROGETTI"] = $this->get_progetti($cod_commessa);
+            $obj["PROGETTI"] = $this->get_progetti($codCommessa);
         }
         return $obj;
     }
     
-    function get_progetti($cod_commessa) {
-        $sql = "SELECT ID_PROGETTO,ORE_PREVISTE
-                FROM progetti_commesse
-                WHERE COD_COMMESSA='$cod_commessa'";
+    function get_progetti($codCommessa) {
+        $sql = "SELECT p.ID_PROGETTO,p.ACRONIMO,pc.ORE_PREVISTE
+                FROM progetti p
+                JOIN progetti_commesse pc ON p.ID_PROGETTO=pc.ID_PROGETTO
+                WHERE pc.COD_COMMESSA='$codCommessa'";
         $arr = select_list($sql);
+        return $arr;
     }
     
     function crea($json_data) {

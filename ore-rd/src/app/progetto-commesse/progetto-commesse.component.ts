@@ -12,7 +12,7 @@ import { ProgettiCommesseService } from '../_services/progetti.commesse.service'
 export class ProgettoCommesseComponent implements OnInit {
 
   displayedColumnsCommesseP: string[] = ['codCommessa', 'note'];
-  displayedColumnsCommesseC: string[] = ['codCommessa', 'pctCompatibilita', 'giustificativo', 'note'];
+  displayedColumnsCommesseC: string[] = ['codCommessa', 'pctCompatibilita', 'note'];
   dataSourceCommesseDiProgetto = new MatTableDataSource<ProgettoCommessa>();
   dataSourceCommesseCompatibili = new MatTableDataSource<ProgettoCommessa>();
 
@@ -54,6 +54,8 @@ export class ProgettoCommesseComponent implements OnInit {
       HAS_GIUSTIFICATIVO: 'N',
       GIUSTIFICATIVO_FILENAME: null,
       NOTE: null,
+      ORE_PREVISTE: null,
+      ACRONIMO: '',
       isEditable: true,
       isInsert: true
     };
@@ -68,50 +70,4 @@ export class ProgettoCommesseComponent implements OnInit {
     }
   }
 
-
-  uploadGiustificativo(p: ProgettoCommessa, event: any) {
-    console.log(event);
-    let file = event.target.files && event.target.files[0];
-    console.log('Going to upload:', file);
-    if (file) {
-      this.progettiCommesseService.uploadGiustificativo(p.ID_PROGETTO!, p.COD_COMMESSA!, file).subscribe(response => {
-        p.HAS_GIUSTIFICATIVO = 'Y';
-        p.GIUSTIFICATIVO_FILENAME = file.name;
-        this.alertService.success('Giustificativo caricato con successo');
-      },
-        error => {
-          this.alertService.error(error);
-        });
-    }
-  }
-
-  deleteGiustificativo(p: ProgettoCommessa) {
-    // TODO Some warning?
-    this.progettiCommesseService.deleteGiustificativo(p.ID_PROGETTO!, p.COD_COMMESSA!).subscribe(response => {
-      p.HAS_GIUSTIFICATIVO = 'N';
-      p.GIUSTIFICATIVO_FILENAME = null;
-      this.alertService.success('Giustificativo eliminato con successo');
-    },
-      error => {
-        this.alertService.error(error);
-      });
-  }
-
-  downloadGiustificativo(p: ProgettoCommessa) {
-    this.progettiCommesseService.downloadGiustificativo(p.ID_PROGETTO!, p.COD_COMMESSA!).subscribe(response => {
-      this.downloadFile(response, p.GIUSTIFICATIVO_FILENAME!);
-    },
-      error => {
-        this.alertService.error(error);
-      });
-  }
-
-  downloadFile(data: any, filename: string) {
-    const blob = new Blob([data] /* , { type: 'applicazion/zip' } */);
-    const url = window.URL.createObjectURL(blob);
-    var anchor = document.createElement("a");
-    anchor.download = filename;
-    anchor.href = url;
-    anchor.click();
-  }
 }

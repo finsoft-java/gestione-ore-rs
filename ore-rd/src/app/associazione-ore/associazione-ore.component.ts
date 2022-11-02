@@ -1,5 +1,5 @@
 import { AssociazioneOreService } from '../_services/associazione.ore';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 
@@ -38,7 +38,7 @@ export const MY_FORMATS = {
   },
   {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS}]
 })
-export class AssociazioneOreComponent implements OnInit {
+export class AssociazioneOreComponent {
 
   date: Date = new Date();
 
@@ -52,8 +52,6 @@ export class AssociazioneOreComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router) { }
 
-  ngOnInit(): void { }
-
   resetAlertSuccess() {
     this.message_success = '';
   }
@@ -63,7 +61,7 @@ export class AssociazioneOreComponent implements OnInit {
   }
 
   run() {
-    this.resetAlertSuccess();
+    this.message_success = 'Running, please wait...';
     this.resetAlertDanger();
     this.running = true;
 

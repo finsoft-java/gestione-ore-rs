@@ -2,7 +2,6 @@ import { AlertService } from './../_services/alert.service';
 import { PartecipantiService } from './../_services/partecipanti.service';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
 import { Partecipante } from './../_models/partecipanti';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Matricola } from '../_models';
@@ -18,9 +17,9 @@ export class PartecipantiGlobaliComponent implements OnInit {
   dataSource = new MatTableDataSource<Partecipante>();
   displayedColumns: string[] = ['nome', 'id', 'pctUtilizzo', 'mansione', 'costo', 'actions'];
 
-  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   allPartecipanti: Array<any> = [];
   allMatricole: Matricola[] = [];
+  isLoading: Boolean = true;
 
   constructor(
     private router: Router,
@@ -39,8 +38,11 @@ export class PartecipantiGlobaliComponent implements OnInit {
     this.partecipanteService.getAll().subscribe(response => {
       this.allPartecipanti = response.data;
       this.dataSource = new MatTableDataSource<Partecipante>(response.data);
+      this.isLoading = false;
     },
       error => {
+        this.alertService.error(error);
+        this.isLoading = false;
       });
   }
 
