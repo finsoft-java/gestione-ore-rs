@@ -140,14 +140,14 @@ class CommesseManager {
         execute_update($sql);
     }
 
-    function importExcel($filename, &$message, $typeFile) {
+    function importExcel($filename, &$message, $typeFile, $dataInizio, $dataFine) {
         $spreadSheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
         $numOfSheets = $spreadSheet->getSheetCount();
         // Mi aspetto un unico sheet
-        $this->importSheet($spreadSheet->getSheet(0), $message);   
+        $this->importSheet($spreadSheet->getSheet(0), $message, $dataInizio, $dataFine);   
      }
 
-     function importSheet($excelSheet, &$message) {
+     function importSheet($excelSheet, &$message, $dataInizio, $dataFine) {
         global $con, $panthera;
 
         $spreadSheetAry = $excelSheet->toArray(NULL, TRUE, FALSE);
@@ -209,9 +209,8 @@ class CommesseManager {
                 $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
                 $valueOre =  $spreadSheetAry[$curRow][$curCol];
                 if(!empty($idProgetto)) {
-                // QUI un comando REPLACE sql sulla progetti_commesse
-                $query = "REPLACE INTO progetti_commesse (ID_PROGETTO,COD_COMMESSA,ORE_PREVISTE) 
-                    VALUES('$idProgetto','$codCommessa','$valueOre')";
+                $query = "REPLACE INTO progetti_commesse (ID_PROGETTO,COD_COMMESSA,ORE_PREVISTE, DATA_INIZIO, DATA_FINE) 
+                    VALUES('$idProgetto','$codCommessa','$valueOre', '$dataInizio', '$dataFine')";
                 execute_update($query);
                 }
             }

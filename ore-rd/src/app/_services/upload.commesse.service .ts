@@ -12,11 +12,13 @@ export class UploadCommesseService {
 
   constructor(private http: HttpClient) { }
 
-  upload(file: FileList): Observable<HttpEvent<any>> {
+  upload(file: FileList, dataInizio: string, dataFine: string): Observable<HttpEvent<any>> {
     const formData: FormData = new FormData();
     for (let i = 0; i < file.length; i++) {
       formData.append('file[]', file[i]);
     }
+    formData.append("DATA_FINE", dataFine);
+    formData.append("DATA_INIZIO", dataInizio);
     const req = new HttpRequest('POST', `${this.baseUrl}/ImportCommesse.php`, formData, {
       reportProgress: true,
       responseType: 'json'

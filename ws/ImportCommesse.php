@@ -29,11 +29,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     ];
 
+    if (!isset($_REQUEST['DATA_INIZIO'])) {
+        print_error(400, 'Missing parameter: DATA_INIZIO');
+    }
+    if (!isset($_REQUEST['DATA_FINE'])) {
+        print_error(400, 'Missing parameter: DATA_FINE');
+    }
+    $dataInizio = $_REQUEST['DATA_INIZIO'];
+    $dataFine = $_REQUEST['DATA_FINE'];
+    // $dataInizio = DateTime::createFromFormat('Y-m-d', $_REQUEST['DATA_INIZIO']);
+    // $dataFine = DateTime::createFromFormat('Y-m-d', $_REQUEST['DATA_FINE']);
+
     for ($filenum = 0; $filenum < count($_FILES["file"]["name"]); ++$filenum) {
         $message->success .= "Analysing file " . $_FILES["file"]["name"][$filenum] . "...<br/>";
         $filename =  $_FILES["file"]["tmp_name"][$filenum];
         if (in_array($_FILES["file"]["type"][$filenum], $allowedFileType)) {
-            $commesseManager->importExcel($filename, $message, $_FILES["file"]["type"][$filenum]);
+            $commesseManager->importExcel($filename, $message, $_FILES["file"]["type"][$filenum], $dataInizio, $dataFine);
         } else {
             $message->error .= "Invalid File Type. Upload Excel File.<br/>";
         }
