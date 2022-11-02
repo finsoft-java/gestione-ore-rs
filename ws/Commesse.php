@@ -12,11 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // require_logged_user_JWT();
 
 $cod_commessa = isset($_GET['cod_commessa']) ? $con->escape_string($_GET['cod_commessa']) : null;
+$dataInizio = isset($_GET['DATA_INIZIO']) ? $con->escape_string($_GET['DATA_INIZIO']) : null;
+$dataFine = isset($_GET['DATA_FINE']) ? $con->escape_string($_GET['DATA_FINE']) : null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     
     //==========================================================
-    $lista = $commesseManager->get_commesse($cod_commessa);
+    $lista = $commesseManager->get_commesse_periodo($dataInizio, $dataFine);
 
     header('Content-Type: application/json');
     echo json_encode(['data' => $lista]);

@@ -1,7 +1,7 @@
  <div class="headerDiv row">
     <h5 class="title col-4 offset-4">Classificazione Commesse</h5>
-   <div class="formDiv col-4">
-    <mat-form-field appearance="fill">
+   <div class="col-4">
+    <mat-form-field appearance="fill" class="dropdownDate">
         <mat-label>Periodo</mat-label>
         <mat-select [(ngModel)]="filtroPeriodo" name="x" required>
           <mat-option *ngFor="let x of allPeriodi" [value]="x" (click)="filtraPeriodo()">

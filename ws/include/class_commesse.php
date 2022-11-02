@@ -40,6 +40,22 @@ class CommesseManager
         return $obj;
     }
 
+    public function get_commesse_periodo($dataInizio, $dataFine)
+    {
+        $sql = "SELECT c.COD_COMMESSA,c.PCT_COMPATIBILITA,c.NOTE,c.GIUSTIFICATIVO_FILENAME,c.TOT_ORE_PREVISTE,c.TOT_ORE_RD_PREVISTE,c.TIPOLOGIA 
+        FROM commesse c 
+                JOIN progetti_commesse pc ON c.COD_COMMESSA = pc.COD_COMMESSA 
+                    WHERE pc.DATA_INIZIO='$dataInizio' 
+                    AND pc.DATA_FINE='$dataFine' 
+                ORDER BY PCT_COMPATIBILITA DESC, COD_COMMESSA";
+        $arr = select_list($sql);
+
+        foreach ($arr as $id => $commessa) {
+            $arr[$id]["PROGETTI"] = $this->get_progetti($commessa["COD_COMMESSA"]);
+        }
+        return $arr;
+    }
+
     public function get_progetti($codCommessa)
     {
         $sql = "SELECT p.ID_PROGETTO,p.ACRONIMO,pc.ORE_PREVISTE

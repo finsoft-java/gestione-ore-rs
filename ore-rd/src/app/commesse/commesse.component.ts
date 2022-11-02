@@ -37,6 +37,7 @@ export class CommesseComponent implements OnInit {
 
   getAllCommesseFiltrate(dataInizio :string, dataFine :string) {
     this.commesseService.getAll(dataInizio, dataFine).subscribe(response => {
+      console.log("reeeee ", response);
       this.allCommesse = response.data;
       this.dataSource = new MatTableDataSource<Commessa>(response.data);
       this.isLoading = false;
@@ -116,10 +117,14 @@ export class CommesseComponent implements OnInit {
   }
 
   filtraPeriodo() {
-    this.allCommesse = [];
-    this.allProgetti = [];
-    this.displayedColumns = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste',
-    'tipologia', 'giustificativo'];
-      this.getAllCommesseFiltrate(this.dataInizio, this.dataFine);
+    if(this.filtroPeriodo) {
+      this.dataInizio = this.filtroPeriodo.DATA_INIZIO;
+      this.dataFine = this.filtroPeriodo.DATA_FINE;
+      this.allCommesse = [];
+      this.allProgetti = [];
+      this.displayedColumns = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste',
+      'tipologia', 'giustificativo'];
+        this.getAllCommesseFiltrate(this.dataInizio, this.dataFine);
+    }
   }
 }

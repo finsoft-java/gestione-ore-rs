@@ -42,7 +42,7 @@ button {
   margin: 2px;
 }
 
-/* .headerDiv {
+.headerDiv {
   display: flex;
 }
 
@@ -51,5 +51,7 @@ button {
   margin-top: 0.8%;
 }
 
-.formDiv {
-} */
+.dropdownDate {
+  display: grid;
+  margin-left: 25%;
+}
