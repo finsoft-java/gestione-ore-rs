@@ -10,7 +10,7 @@ export class ProgettiService {
     getAll(top: number, skip: number) {
         return this.http.get<ListBean<Progetto>>(environment.wsUrl + `Progetti.php?top=${top}&skip=${skip}`);
     }
-    
+
     getById(id_progetto: number) {
         return this.http.get<ValueBean<Progetto>>(environment.wsUrl + `Progetti.php?id_progetto=${id_progetto}`);
     }
@@ -34,4 +34,26 @@ export class ProgettiService {
     getAllMatricole() {
         return this.http.get<ListBean<any>>(environment.wsUrl + `GetNomiUtenti.php`);;
     }
+
+    downloadGiustificativo(idProgetto: number) {
+
+        return this.http.get(environment.wsUrl + `Giustificativo.php?id_progetto=${idProgetto}`, {
+            responseType: 'arraybuffer'
+        });
+    }
+
+    deleteGiustificativo(idProgetto: number) {
+
+        return this.http.delete<void>(environment.wsUrl + `Giustificativo.php?id_progetto=${idProgetto}`);
+    }
+
+    uploadGiustificativo(idProgetto: number, file: File) {
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        return this.http.post<void>(environment.wsUrl + `Giustificativo.php?id_progetto=${idProgetto}`, formData);
+    }
+
+
 }
