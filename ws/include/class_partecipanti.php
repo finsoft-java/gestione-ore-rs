@@ -47,9 +47,10 @@ class PartecipantiManager {
         global $con, $logged_user;
         $id = $con->escape_string($json_data->ID_DIPENDENTE);
         $sql = insert("partecipanti_globali", ["ID_DIPENDENTE" => $id,
-                                   "MANSIONE" => $con->escape_string($json_data->MANSIONE),
-                                   "COSTO" => $con->escape_string($json_data->COSTO),
-                                   "PCT_UTILIZZO" => $con->escape_string($json_data->PCT_UTILIZZO)
+                                    "MATRICOLA" => $con->escape_string($json_data->MATRICOLA),
+                                    "MANSIONE" => $con->escape_string($json_data->MANSIONE),
+                                    "COSTO" => $con->escape_string($json_data->COSTO),
+                                    "PCT_UTILIZZO" => $con->escape_string($json_data->PCT_UTILIZZO)
                                   ]);
         execute_update($sql);
         return $this->get_partecipante($id);
@@ -60,6 +61,7 @@ class PartecipantiManager {
         global $con;
 		
         $sql = update("partecipanti_globali", [
+                                    "MATRICOLA" => $con->escape_string($json_data->MATRICOLA),
                                     "MANSIONE" => $con->escape_string($json_data->MANSIONE),
                                     "COSTO" => $con->escape_string($json_data->COSTO),
                                     "PCT_UTILIZZO" => $con->escape_string($json_data->PCT_UTILIZZO)

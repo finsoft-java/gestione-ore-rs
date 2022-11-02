@@ -23,7 +23,12 @@ table {
     width: 17%;
 }
 
-.mat-column-id {
+/* .mat-column-id {
+    width: 10%;
+    Rimosso dalla view della tabella
+} */
+
+.mat-column-matricola {
     width: 10%;
 }
 
