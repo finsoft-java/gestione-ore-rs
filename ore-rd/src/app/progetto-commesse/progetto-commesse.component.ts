@@ -51,8 +51,6 @@ export class ProgettoCommesseComponent implements OnInit {
       ID_PROGETTO: this.idProgetto,
       COD_COMMESSA: null,
       PCT_COMPATIBILITA: compat ? 50 : 100,
-      HAS_GIUSTIFICATIVO: 'N',
-      GIUSTIFICATIVO_FILENAME: null,
       NOTE: null,
       ORE_PREVISTE: null,
       ACRONIMO: '',
