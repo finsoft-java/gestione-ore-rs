@@ -9,7 +9,7 @@
         <span>Tipologia Spesa</span>
       </button>
 
-      <button mat-menu-item [matMenuTriggerFor]="partecipantiMenu">Partecipanti globali</button>
+      <button mat-menu-item [matMenuTriggerFor]="partecipantiMenu">Partecipanti globali <mat-icon class="arrowIcon">keyboard_arrow_down</mat-icon></button>
       <mat-menu #partecipantiMenu="matMenu" xPosition="after" yPosition="below">
         <button mat-menu-item routerLink="importazione-partecipanti" class="btnSubMenu">
           <span>Importazione partecipanti</span>
@@ -19,7 +19,7 @@
         </button>
       </mat-menu>
 
-      <button mat-menu-item [matMenuTriggerFor]="commesseMenu">Commesse</button>
+      <button mat-menu-item [matMenuTriggerFor]="commesseMenu">Commesse <mat-icon class="arrowIcon">keyboard_arrow_down</mat-icon></button>
       <mat-menu #commesseMenu="matMenu" xPosition="after" yPosition="below">
         <button mat-menu-item routerLink="importazione-commesse" class="btnSubMenu">
           <span>Importazione commesse</span>
@@ -29,7 +29,7 @@
         </button>
       </mat-menu>
 
-      <button mat-menu-item [matMenuTriggerFor]="lulMenu">LUL</button>
+      <button mat-menu-item [matMenuTriggerFor]="lulMenu">LUL <mat-icon class="arrowIcon">keyboard_arrow_down</mat-icon></button>
       <mat-menu #lulMenu="matMenu" xPosition="after" yPosition="below">
         <button mat-menu-item routerLink="importazione-lul" class="btnSubMenu">
           <span>Importazione LUL</span>
@@ -39,7 +39,7 @@
         </button>
       </mat-menu>
 
-      <button mat-menu-item [matMenuTriggerFor]="dipendentiMenu">Ore dipendenti</button>
+      <button mat-menu-item [matMenuTriggerFor]="dipendentiMenu">Ore dipendenti <mat-icon class="arrowIcon">keyboard_arrow_down</mat-icon></button>
       <mat-menu #dipendentiMenu="matMenu" xPosition="after" yPosition="below">
         <button mat-menu-item routerLink="importazione-ore" class="btnSubMenu">
           <span>Importazione Ore dipendenti</span>
@@ -49,7 +49,7 @@
         </button>
       </mat-menu>
 
-      <button mat-menu-item [matMenuTriggerFor]="rapportiniMenu">Rapportini</button>
+      <button mat-menu-item [matMenuTriggerFor]="rapportiniMenu">Rapportini <mat-icon class="arrowIcon">keyboard_arrow_down</mat-icon></button>
       <mat-menu #rapportiniMenu="matMenu" xPosition="after" yPosition="below">
         <button mat-menu-item routerLink="raccolta-date-firma" class="btnSubMenu">
           <span>Raccolta date firma</span>
