@@ -45,7 +45,7 @@ export class ProgettoDettaglioComponent implements OnInit {
   progetto!: Progetto;
   progetto_old!: Progetto;
   displayedColumns: string[] = ['descrizione', 'importo', 'tipologia', 'actions'];
-  displayedColumnsPersone: string[] = ['nome', 'idDipendente', 'pctImpiego'];
+  //displayedColumnsPersone: string[] = ['nome', 'idDipendente', 'pctImpiego'];
 
   dataSource = new MatTableDataSource<ProgettoSpesa>();
   dataSourcePersone = new MatTableDataSource<ProgettoPersona>();
@@ -199,6 +199,61 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
   }
 
+  uploadGiustificativo(p: Progetto, event: any) {
+
+    console.log(event);
+    let file = event.target.files && event.target.files[0];
+    console.log('Going to upload:', file);
+
+    if (file) {
+      console.log(file);
+      this.progettiService.uploadGiustificativo(p.ID_PROGETTO!, file).subscribe(response => {
+        p.HAS_GIUSTIFICATIVO = 'Y';
+        p.GIUSTIFICATIVO_FILENAME = file.name;
+        this.alertService.success('Giustificativo caricato con successo');
+      },
+        error => {
+          this.alertService.error(error);
+        });
+    }
+  }
+
+  downloadGiustificativo(p: Progetto) {
+
+    this.progettiService.downloadGiustificativo(p.ID_PROGETTO!).subscribe(response => {
+      this.downloadFile(response, p.GIUSTIFICATIVO_FILENAME!);
+    },
+      error => {
+        this.alertService.error(error);
+      });
+  }
+
+  downloadFile(data: any, filename: string) {
+
+    const blob = new Blob([data] /* , { type: 'applicazion/zip' } */);
+    const url = window.URL.createObjectURL(blob);
+    var anchor = document.createElement("a");
+
+    anchor.download = filename;
+    anchor.href = url;
+    anchor.click();
+  }
+
+  deleteGiustificativo(p: Progetto) {
+
+    this.progettiService.deleteGiustificativo(p.ID_PROGETTO!).subscribe(response => {
+      p.HAS_GIUSTIFICATIVO = 'N';
+      p.GIUSTIFICATIVO_FILENAME = null;
+      this.alertService.success('Giustificativo eliminato con successo');
+    },
+      error => {
+        this.alertService.error(error);
+      });
+  }
+
+
+
+
   nuovoProgettoSpesa() {
     let progettoSpesa_nuovo: any;
     progettoSpesa_nuovo = { ID_PROGETTO: this.progetto.ID_PROGETTO, ID_SPESA: null, DESCRIZIONE: null, IMPORTO: null, TIPOLOGIA: { ID_TIPOLOGIA: null, DESCRIZIONE: null }, isEditable: true, isInsert: true };
@@ -212,22 +267,22 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.dataSource.data = data;
   }
 
-  nuovoProgettoPersona() {
-    let nuovo: ProgettoPersona;
-    nuovo = {
-      ID_PROGETTO: this.progetto.ID_PROGETTO,
-      ID_DIPENDENTE: null,
-      PCT_IMPIEGO: 0,
-      isEditable: true,
-      isInsert: true
-    };
-    let array: any[] = [];
-    if (this.dataSourcePersone.data != null) {
-      array = this.dataSourcePersone.data;
-    }
-    array.push(nuovo);
-    this.dataSourcePersone.data = array;
-  }
+  // nuovoProgettoPersona() {
+  //   let nuovo: ProgettoPersona;
+  //   nuovo = {
+  //     ID_PROGETTO: this.progetto.ID_PROGETTO,
+  //     ID_DIPENDENTE: null,
+  //     PCT_IMPIEGO: 0,
+  //     isEditable: true,
+  //     isInsert: true
+  //   };
+  //   let array: any[] = [];
+  //   if (this.dataSourcePersone.data != null) {
+  //     array = this.dataSourcePersone.data;
+  //   }
+  //   array.push(nuovo);
+  //   this.dataSourcePersone.data = array;
+  // }
 
   deleteChange(prgSpesa: ProgettoSpesa) {
     if (prgSpesa.ID_PROGETTO != null && prgSpesa.ID_SPESA != null) {

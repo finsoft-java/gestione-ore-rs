@@ -15,7 +15,7 @@ export class CommesseComponent implements OnInit {
   dataSource = new MatTableDataSource<Commessa>();
 
   displayedColumns: string[] = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste',
-    'tipologia', 'giustificativo'];
+    'tipologia'];
 
   allCommesse: Commessa[] = [];
   allProgetti: string[] = [];
@@ -46,58 +46,6 @@ export class CommesseComponent implements OnInit {
       });
       this.displayedColumns = this.displayedColumns.concat(this.allProgetti);
     });
-  }
-
-  uploadGiustificativo(p: Commessa, event: any) {
-
-    console.log(event);
-    let file = event.target.files && event.target.files[0];
-    console.log('Going to upload:', file);
-
-    if (file) {
-      console.log(file);
-      this.commesseService.uploadGiustificativo(p.COD_COMMESSA!, file).subscribe(response => {
-        p.HAS_GIUSTIFICATIVO = 'Y';
-        p.GIUSTIFICATIVO_FILENAME = file.name;
-        this.alertService.success('Giustificativo caricato con successo');
-      },
-        error => {
-          this.alertService.error(error);
-        });
-    }
-  }
-
-  deleteGiustificativo(p: Commessa) {
-
-    this.commesseService.deleteGiustificativo(p.COD_COMMESSA!).subscribe(response => {
-      p.HAS_GIUSTIFICATIVO = 'N';
-      p.GIUSTIFICATIVO_FILENAME = null;
-      this.alertService.success('Giustificativo eliminato con successo');
-    },
-      error => {
-        this.alertService.error(error);
-      });
-  }
-
-  downloadGiustificativo(p: Commessa) {
-
-    this.commesseService.downloadGiustificativo(p.COD_COMMESSA!).subscribe(response => {
-      this.downloadFile(response, p.GIUSTIFICATIVO_FILENAME!);
-    },
-      error => {
-        this.alertService.error(error);
-      });
-  }
-
-  downloadFile(data: any, filename: string) {
-
-    const blob = new Blob([data] /* , { type: 'applicazion/zip' } */);
-    const url = window.URL.createObjectURL(blob);
-    var anchor = document.createElement("a");
-
-    anchor.download = filename;
-    anchor.href = url;
-    anchor.click();
   }
 
   getOrePreviste(codCommessa: string, acronimo: string): number | null {

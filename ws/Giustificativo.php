@@ -1,6 +1,6 @@
 <?php
 
-include("include/all.php");
+include "include/all.php";
 $con = connect();
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -10,55 +10,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // require_logged_user_JWT();
 
-$cod_commessa = isset($_GET['cod_commessa']) ? $con->escape_string($_GET['cod_commessa']) : null;
-
+$id_progetto = isset($_GET['id_progetto']) ? $con->escape_string($_GET['id_progetto']) : null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // DOWNLOAD ==========================================================
-    if (!$cod_commessa) {
-        print_error(400, 'Missing cod_commessa');
+    if (!$id_progetto) {
+        print_error(400, 'Missing id_progetto');
     }
-    $object = $commesseManager->get_commessa($cod_commessa);
+    $object = $progettiManager->get_progetto($id_progetto);
     if (!$object) {
         print_error(404, 'Not found');
     }
 
-    $lista = $commesseManager->download_giustificativo($cod_commessa);
-        
+    $lista = $progettiManager->download_giustificativo($id_progetto);
+
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // UPLOAD ==========================================================
     if (!isset($_FILES["file"]["name"])) {
         print_error(400, "Missing uploaded file.");
     }
-    $origfilename =  $_FILES["file"]["name"];
-    $tmpfilename =  $_FILES["file"]["tmp_name"];
+    $origfilename = $_FILES["file"]["name"];
+    $tmpfilename = $_FILES["file"]["tmp_name"];
 
-    if (!$cod_commessa) {
-        print_error(400, 'Missing cod_commessa');
+    if (!$id_progetto) {
+        print_error(400, 'Missing id_progetto');
     }
-    $object = $commesseManager->get_commessa($cod_commessa);
+    $object = $progettiManager->get_progetto($id_progetto);
     if (!$object) {
         print_error(404, 'Not found');
     }
 
-    $commesseManager->upload_giustificativo($cod_commessa, $tmpfilename, $origfilename);
+    $progettiManager->upload_giustificativo($id_progetto, $tmpfilename, $origfilename);
 
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     //==========================================================
-    if (!$cod_commessa) {
-        print_error(400, 'Missing cod_commessa');
+    if (!$id_progetto) {
+        print_error(400, 'Missing id_progetto');
     }
-    $object = $commesseManager->get_commessa($cod_commessa);
+    $object = $progettiManager->get_progetto($id_progetto);
     if (!$object) {
         print_error(404, 'Not found');
     }
 
-    $commesseManager->elimina_giustificativo($cod_commessa);
-    
+    $progettiManager->elimina_giustificativo($id_progetto);
+
 } else {
     //==========================================================
     print_error(400, "Unsupported method in request: " . $_SERVER['REQUEST_METHOD']);
 }
-
-
-?>

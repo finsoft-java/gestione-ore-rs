@@ -117,4 +117,42 @@ class ProgettiManager
         execute_update($sql);
     }
 
+    public function download_giustificativo($idProgetto)
+    {
+        //TODO: cambiare la query perchè prende il cod commessa ma ora è progetto
+        $sql = "SELECT GIUSTIFICATIVO_FILENAME, LENGTH(GIUSTIFICATIVO) AS LEN, GIUSTIFICATIVO
+                FROM commesse
+                WHERE cod_commessa = '$idProgetto'";
+        $result = select_single($sql);
+
+        header("Content-length: $result[LEN]");
+        // header("Content-type: ???");
+        header("Content-Disposition: attachment; filename=$result[GIUSTIFICATIVO_FILENAME]");
+        ob_clean();
+        flush();
+        echo $result["GIUSTIFICATIVO"];
+    }
+
+    public function upload_giustificativo($idProgetto, $tmpfilename, $origfilename)
+    {
+        global $con;
+
+        $fileContent = addslashes(file_get_contents($tmpfilename));
+        // speriamo non sia enorme
+
+        $origfilename = $con->escape_string($origfilename);
+        $sql = "UPDATE commesse
+                SET GIUSTIFICATIVO_FILENAME='$origfilename', GIUSTIFICATIVO='$fileContent'
+                WHERE cod_commessa = '$idProgetto'";
+        execute_update($sql);
+    }
+
+    public function elimina_giustificativo($idProgetto)
+    {
+        $sql = "UPDATE commesse
+                SET GIUSTIFICATIVO=NULL,GIUSTIFICATIVO_FILENAME=NULL
+                WHERE cod_commessa = '$idProgetto'";
+        execute_update($sql);
+    }
+
 }
