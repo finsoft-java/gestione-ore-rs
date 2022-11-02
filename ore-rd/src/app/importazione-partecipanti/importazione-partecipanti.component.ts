@@ -8,7 +8,11 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
   templateUrl: './importazione-partecipanti.component.html',
   styleUrls: ['./importazione-partecipanti.component.css'],
 })
+
 export class ImportazionePartecipantiComponent implements OnInit {
+
+  displayedColumns: string[] = ['nome', 'matricola', 'pctUtilizzo', 'mansione', 'costo'];
+
   selectedFiles?: FileList;
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
@@ -16,11 +20,14 @@ export class ImportazionePartecipantiComponent implements OnInit {
   eventoClick?: any;
   nomeFile: string = '';
   loading = false;
+
   @ViewChild('fileInput') inputFile?: ElementRef;
 
-  constructor(private uploadPartecipantiService: UploadPartecipantiService, private alertService: AlertService) {}
+  constructor(
+    private uploadPartecipantiService: UploadPartecipantiService,
+    private alertService: AlertService) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   reset() {
     this.eventoClick.srcElement.value = null;
@@ -59,7 +66,7 @@ export class ImportazionePartecipantiComponent implements OnInit {
 
     this.uploadPartecipantiService.upload(file).subscribe(
       event => {
-      console.log("EVENT=", event);
+        console.log("EVENT=", event);
         if (event.type === HttpEventType.UploadProgress) {
           if (event.total) {
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
@@ -71,14 +78,14 @@ export class ImportazionePartecipantiComponent implements OnInit {
         }
       },
       err => {
-      console.log("ERRORE=", err);
+        console.log("ERRORE=", err);
         if (err && err.error && err.error.error)
-            this.message_error = err.error.error.message;
+          this.message_error = err.error.error.message;
         else if (err && err.error)
-            this.message_error = err.error;
+          this.message_error = err.error;
         else
-            this.message_error = err;
-            this.loading = false;
+          this.message_error = err;
+        this.loading = false;
       });
   }
 }

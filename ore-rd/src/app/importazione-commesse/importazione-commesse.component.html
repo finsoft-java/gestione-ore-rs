@@ -1,8 +1,47 @@
 <h5 style="margin-bottom: 30px; text-align: center">Importazione Commesse</h5>
 
-<div
-  style="border: 1px; border-style: dashed; padding: 30px; text-align: center"
->
+<div style="border: 1px; border-style: dashed; padding: 30px; text-align: center">
+
+  <div>
+    <table mat-table class="mat-elevation-z8">
+  
+      <ng-container matColumnDef="codCommessa">
+        <th mat-header-cell *matHeaderCellDef>Cod. Commessa</th>
+      </ng-container>
+  
+      <ng-container matColumnDef="totOrePreviste">
+        <th mat-header-cell *matHeaderCellDef>Tot. Ore. Previste</th>
+      </ng-container>
+  
+      <ng-container matColumnDef="pctCompatibilita">
+        <th mat-header-cell *matHeaderCellDef>Perc. Compatibilità</th>
+      </ng-container>
+  
+      <ng-container matColumnDef="totOreRdPreviste">
+        <th mat-header-cell *matHeaderCellDef>Tot. Ore. RD Previste</th>
+      </ng-container>
+  
+      <ng-container matColumnDef="tipologia">
+        <th mat-header-cell *matHeaderCellDef>Tipologia</th>
+      </ng-container>
+
+      <ng-container matColumnDef="progetto1">
+        <th mat-header-cell *matHeaderCellDef>Progetto 1</th>
+      </ng-container>
+
+      <ng-container matColumnDef="progetto2">
+        <th mat-header-cell *matHeaderCellDef>Progetto 2</th>
+      </ng-container>
+
+      <ng-container matColumnDef="altri">
+        <th mat-header-cell *matHeaderCellDef>...</th>
+      </ng-container>
+  
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    </table>
+    <br>
+  </div>
+
   <div class="card mt-3" style="margin-bottom: 30px" *ngIf="selectedFiles">
     <div class="card-header">File Caricato</div>
     <ul class="list-group list-group-flush">

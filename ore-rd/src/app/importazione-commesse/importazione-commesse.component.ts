@@ -10,10 +10,13 @@ import { formatDate } from '@angular/common';
   templateUrl: './importazione-commesse.component.html',
   styleUrls: ['./importazione-commesse.component.css']
 })
-export class ImportazioneCommesseComponent implements OnInit { 
+export class ImportazioneCommesseComponent implements OnInit {
+
+  displayedColumns: string[] = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste', 'tipologia', 'progetto1', 'progetto2', 'altri'];
+
   selectedFiles?: FileList;
-  dataInizio?:Date;
-  dataFine?:Date;
+  dataInizio?: Date;
+  dataFine?: Date;
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
@@ -22,9 +25,9 @@ export class ImportazioneCommesseComponent implements OnInit {
   loading = false;
   @ViewChild('fileInput') inputFile?: ElementRef;
 
-  constructor(private uploadCommesseService: UploadCommesseService, private alertService: AlertService) {}
+  constructor(private uploadCommesseService: UploadCommesseService, private alertService: AlertService) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   reset() {
     this.eventoClick.srcElement.value = null;
@@ -50,9 +53,9 @@ export class ImportazioneCommesseComponent implements OnInit {
   }
 
   uploadFiles() {
-    if( this.dataFine && this.dataInizio && this.selectedFiles) {
-      const dataInizioString :string = formatDate(this.dataInizio, 'YYYY-MM-dd', 'en-GB');
-      const dataFineString :string = formatDate(this.dataFine, 'YYYY-MM-dd', 'en-GB');
+    if (this.dataFine && this.dataInizio && this.selectedFiles) {
+      const dataInizioString: string = formatDate(this.dataInizio, 'YYYY-MM-dd', 'en-GB');
+      const dataFineString: string = formatDate(this.dataFine, 'YYYY-MM-dd', 'en-GB');
       this.upload(this.selectedFiles, dataInizioString, dataFineString);
     }
   }
@@ -65,7 +68,7 @@ export class ImportazioneCommesseComponent implements OnInit {
 
     this.uploadCommesseService.upload(file, dataInizio, dataFine).subscribe(
       event => {
-      console.log("EVENT=", event);
+        console.log("EVENT=", event);
         if (event.type === HttpEventType.UploadProgress) {
           if (event.total) {
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
@@ -77,14 +80,14 @@ export class ImportazioneCommesseComponent implements OnInit {
         }
       },
       err => {
-      console.log("ERRORE=", err);
+        console.log("ERRORE=", err);
         if (err && err.error && err.error.error)
-            this.message_error = err.error.error.message;
+          this.message_error = err.error.error.message;
         else if (err && err.error)
-            this.message_error = err.error;
+          this.message_error = err.error;
         else
-            this.message_error = err;
-            this.loading = false;
+          this.message_error = err;
+        this.loading = false;
       });
   }
 }
