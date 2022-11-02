@@ -11,12 +11,14 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 })
 export class ImportazioneRapportiniComponent implements OnInit {
 
+  displayedColumns: string[] = ['idDipendente', 'data', 'nrDoc', 'codCommessa', 'sottoCommessa', 'rifAtv', 'numOreLavorate'];
+
   selectedFiles?: FileList;
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
-  eventoClick?:any;
-  nomiFile:string[] = [];
+  eventoClick?: any;
+  nomiFile: string[] = [];
   loading = false;
   @ViewChild('fileInput') inputFile?: ElementRef;
 
@@ -39,15 +41,15 @@ export class ImportazioneRapportiniComponent implements OnInit {
     this.selectedFiles = event.target.files;
     if (this.selectedFiles) {
       for (let i = 0; i < this.selectedFiles.length; i++) {
-          this.nomiFile.push(this.selectedFiles[i].name);
+        this.nomiFile.push(this.selectedFiles[i].name);
       }
     }
   }
 
-  resetAlertSuccess() {    
+  resetAlertSuccess() {
     this.message_success = '';
   }
-  
+
   resetAlertDanger() {
     this.message_error = '';
   }
@@ -63,10 +65,10 @@ export class ImportazioneRapportiniComponent implements OnInit {
     this.loading = true;
     this.message_error = '';
     this.message_success = 'Loading...';
-  
+
     this.uploadService.upload(files).subscribe(
       event => {
-		  console.log("EVENT=", event);
+        console.log("EVENT=", event);
         if (event.type === HttpEventType.UploadProgress) {
           if (event.total) {
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
@@ -78,14 +80,14 @@ export class ImportazioneRapportiniComponent implements OnInit {
         }
       },
       err => {
-		  console.log("ERRORE=", err);
+        console.log("ERRORE=", err);
         if (err && err.error && err.error.error)
-            this.message_error = err.error.error.message;
+          this.message_error = err.error.error.message;
         else if (err && err.error)
-            this.message_error = err.error;
+          this.message_error = err.error;
         else
-            this.message_error = err;
-            this.loading = false;
+          this.message_error = err;
+        this.loading = false;
       });
   }
 

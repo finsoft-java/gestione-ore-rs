@@ -2,3 +2,66 @@
   width: 20%;
   margin: 1% 2%;
 }
+
+table {
+  width: 100%;
+}
+
+.mat-header-cell {
+  justify-content: center;
+  flex-direction: column;
+  white-space: nowrap;
+  text-align: center;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.mat-cell {
+  justify-content: center;
+  white-space: nowrap;
+  text-align: center;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.mat-column-codCommessa {
+  width: 12.5%;
+}
+
+.mat-column-totOrePreviste {
+  width: 12.5%;
+}
+
+.mat-column-percCompatibilita {
+  width: 12.5%;
+}
+
+.mat-column-totOreRdPreviste {
+  width: 12.5%;
+}
+
+.mat-column-tipologia {
+  width: 12.5%;
+}
+
+.mat-column-progetto1 {
+  width: 12.5%;
+}
+
+.mat-column-progetto2 {
+  width: 12.5%;
+}
+
+.mat-column-altri {
+  width: 12.5%;
+}
+
+th.mat-header-cell:first-of-type,
+td.mat-cell:first-of-type {
+  padding-left: 15px;
+}
+
+th.mat-header-cell:last-of-type,
+td.mat-cell:last-of-type {
+  padding-right: 15px;
+}
