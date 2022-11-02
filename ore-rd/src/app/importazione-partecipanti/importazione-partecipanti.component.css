@@ -1,0 +1,50 @@
+table {
+    width: 100%;
+}
+
+.mat-header-cell {
+    justify-content: center;
+    flex-direction: column;
+    white-space: nowrap;
+    text-align: center;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.mat-cell {
+    justify-content: center;
+    white-space: nowrap;
+    text-align: center;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.mat-column-nome {
+    width: 20%;
+}
+
+.mat-column-matricola {
+    width: 20%;
+}
+
+.mat-column-pctUtilizzo {
+    width: 20%;
+}
+
+.mat-column-mansione {
+    width: 20%;
+}
+
+.mat-column-costo {
+    width: 20%;
+}
+
+th.mat-header-cell:first-of-type,
+td.mat-cell:first-of-type {
+    padding-left: 15px;
+}
+
+th.mat-header-cell:last-of-type,
+td.mat-cell:last-of-type {
+    padding-right: 15px;
+}

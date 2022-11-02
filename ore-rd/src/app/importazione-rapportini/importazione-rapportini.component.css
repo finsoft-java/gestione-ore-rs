@@ -1,0 +1,58 @@
+table {
+    width: 100%;
+}
+
+.mat-header-cell {
+    justify-content: center;
+    flex-direction: column;
+    white-space: nowrap;
+    text-align: center;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.mat-cell {
+    justify-content: center;
+    white-space: nowrap;
+    text-align: center;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.mat-column-idDipendente {
+    width: 14%;
+}
+
+.mat-column-data {
+    width: 14%;
+}
+
+.mat-column-nrDoc {
+    width: 14%;
+}
+
+.mat-column-codCommessa {
+    width: 14%;
+}
+
+.mat-column-sottoCommessa {
+    width: 14%;
+}
+
+.mat-column-rifAtv {
+    width: 14%;
+}
+
+.mat-column-numOreLavorate {
+    width: 14%;
+}
+
+th.mat-header-cell:first-of-type,
+td.mat-cell:first-of-type {
+    padding-left: 15px;
+}
+
+th.mat-header-cell:last-of-type,
+td.mat-cell:last-of-type {
+    padding-right: 15px;
+}
