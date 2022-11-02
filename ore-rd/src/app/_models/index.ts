@@ -11,3 +11,4 @@ export * from './lul';
 export * from './ore.commesse';
 export * from './commesse';
 export * from './partecipanti';
+export * from './periodo';
