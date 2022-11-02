@@ -20,6 +20,8 @@ export class CommesseComponent implements OnInit {
   allCommesse: Commessa[] = [];
   allProgetti: string[] = [];
   isLoading: Boolean = true;
+  // filtroDataInizio?: Date;
+  // filtroDataFine?: Date;
 
   constructor(
     private alertService: AlertService,
