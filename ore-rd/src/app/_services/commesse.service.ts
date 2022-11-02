@@ -8,9 +8,8 @@ export class CommesseService {
 
     constructor(private http: HttpClient) { }
 
-    getAll() {
-
-        return this.http.get<ListBean<Commessa>>(environment.wsUrl + `Commesse.php`);
+    getAll(dataInizio: string, dataFine: string) {
+        return this.http.get<ListBean<Commessa>>(environment.wsUrl + `Commesse.php?DATA_INIZIO=${dataInizio}&DATA_FINE=${dataFine}`);
     }
 
     downloadGiustificativo(codCommessa: string) {

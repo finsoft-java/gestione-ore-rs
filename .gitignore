@@ -96,3 +96,6 @@ ore-rd/dist
 # PHP Composer
 ws/composer.lock
 ws/composer.phar
+package-lock.json
+.gitignore
+ore-rd/package-lock.json

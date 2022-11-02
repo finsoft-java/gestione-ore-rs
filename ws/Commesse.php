@@ -8,7 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-require_logged_user_JWT();
+//TODO scommenta
+// require_logged_user_JWT();
 
 $cod_commessa = isset($_GET['cod_commessa']) ? $con->escape_string($_GET['cod_commessa']) : null;
 

@@ -1,39 +1,19 @@
  <div class="headerDiv row">
     <h5 class="title col-4 offset-4">Classificazione Commesse</h5>
-<!--    <div class="formDiv col-4">
-    <mat-form-field appearance="fill" class="dataForm">
-        <mat-label>Data Inizio</mat-label>
-        <input
-          matInput
-          readonly
-          [ngModelOptions]="{ standalone: true }"
-          [(ngModel)]="filtroDataInizio"
-          [matDatepicker]="picker1"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker1">
-          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-        </mat-datepicker-toggle>
-        <mat-datepicker #picker1></mat-datepicker>
+   <div class="formDiv col-4">
+    <mat-form-field appearance="fill">
+        <mat-label>Periodo</mat-label>
+        <mat-select [(ngModel)]="filtroPeriodo" name="x" required>
+          <mat-option *ngFor="let x of allPeriodi" [value]="x" (click)="filtraPeriodo()">
+            {{"Da: " + x.DATA_INIZIO + " A: " + x.DATA_FINE}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
-      <mat-form-field appearance="fill" class="dataForm">
-        <mat-label>Data Fine</mat-label>
-        <input
-          matInput
-          readonly
-          [ngModelOptions]="{ standalone: true }"
-          [(ngModel)]="filtroDataFine"
-          [matDatepicker]="picker2"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker2">
-          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-        </mat-datepicker-toggle>
-        <mat-datepicker #picker2></mat-datepicker>
-      </mat-form-field>
-      <button
+      <!-- <button
       mat-raised-button
       color="primary"
-    > Cerca </button>
-    </div> -->
+    > Cerca </button> -->
+    </div>
 </div>
 
 <div style="overflow-x: auto;" class="mat-elevation-z8">

@@ -8,7 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-require_logged_user_JWT();
+//TODO scommenta
+// require_logged_user_JWT();
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {

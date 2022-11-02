@@ -220,9 +220,11 @@ class CommesseManager {
     }
 
     function get_periodi() {
-        global $panthera;
-        $sql = "SELECT DISTINCT DATE_FORMAT(DATA_INIZIO,'%Y-%m-%d'),DATE_FORMAT(DATA_FINE,'%Y-%m-%d') FROM progetti_commesse";
-        return $panthera->select_list($sql);
+        $sql = "SELECT DISTINCT
+                    DATE_FORMAT(DATA_INIZIO,'%Y-%m-%d') AS DATA_INIZIO,
+                    DATE_FORMAT(DATA_FINE,'%Y-%m-%d') AS DATA_FINE
+                FROM progetti_commesse";
+        return select_list($sql);
     }
 }
 ?>

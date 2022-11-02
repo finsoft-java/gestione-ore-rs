@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Commessa, ProgettoCommessa } from '../_models';
+import { Commessa, Periodo, ProgettoCommessa } from '../_models';
 import { AlertService } from '../_services/alert.service';
-
 import { CommesseService } from '../_services/commesse.service';
+import { PeriodiService } from '../_services/periodi.service';
 
 @Component({
   selector: 'app-commesse',
@@ -19,23 +19,24 @@ export class CommesseComponent implements OnInit {
 
   allCommesse: Commessa[] = [];
   allProgetti: string[] = [];
+  allPeriodi: Periodo[] = [];
   isLoading: Boolean = true;
-  // filtroDataInizio?: Date;
-  // filtroDataFine?: Date;
+  dataInizio: string = '';
+  dataFine: string = '';
+  filtroPeriodo?: Periodo;
 
   constructor(
     private alertService: AlertService,
-    private commesseService: CommesseService) {
+    private commesseService: CommesseService, 
+    private periodiService: PeriodiService ) {
   }
 
   ngOnInit(): void {
-
-    this.getAllCommesse();
+    this.getAllPeriodi();
   }
 
-  getAllCommesse() {
-
-    this.commesseService.getAll().subscribe(response => {
+  getAllCommesseFiltrate(dataInizio :string, dataFine :string) {
+    this.commesseService.getAll(dataInizio, dataFine).subscribe(response => {
       this.allCommesse = response.data;
       this.dataSource = new MatTableDataSource<Commessa>(response.data);
       this.isLoading = false;
@@ -46,6 +47,12 @@ export class CommesseComponent implements OnInit {
       });
       this.displayedColumns = this.displayedColumns.concat(this.allProgetti);
     });
+  }
+
+  getAllPeriodi() {
+    this.periodiService.getAll().subscribe(response => {
+      this.allPeriodi = response.data;
+    })
   }
 
   uploadGiustificativo(p: Commessa, event: any) {
@@ -108,4 +115,11 @@ export class CommesseComponent implements OnInit {
     return (progettoComm && progettoComm.ORE_PREVISTE != null && progettoComm.ORE_PREVISTE > 0) ? progettoComm.ORE_PREVISTE : null;
   }
 
+  filtraPeriodo() {
+    this.allCommesse = [];
+    this.allProgetti = [];
+    this.displayedColumns = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste',
+    'tipologia', 'giustificativo'];
+      this.getAllCommesseFiltrate(this.dataInizio, this.dataFine);
+  }
 }
