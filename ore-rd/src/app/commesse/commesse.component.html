@@ -9,10 +9,7 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <!-- <button
-      mat-raised-button
-      color="primary"
-    > Cerca </button> -->
+
     </div>
 </div>
 
@@ -57,5 +54,6 @@
 </div>
 
 <div class="loading-p">
-    <p *ngIf="isLoading">Caricamento commesse in corso...</p>
+    <p *ngIf="!filtroPeriodo">Selezionare un periodo</p>
+    <p *ngIf="isLoading && filtroPeriodo">Caricamento commesse in corso...</p>
 </div>

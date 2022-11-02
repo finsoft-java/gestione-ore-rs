@@ -13,9 +13,9 @@ import { PeriodiService } from '../_services/periodi.service';
 export class CommesseComponent implements OnInit {
 
   dataSource = new MatTableDataSource<Commessa>();
-
-  displayedColumns: string[] = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste',
-    'tipologia'];
+  colonneConstants : string[] = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste',
+  'tipologia']; 
+  displayedColumns = this.colonneConstants;
 
   allCommesse: Commessa[] = [];
   allProgetti: string[] = [];
@@ -70,8 +70,7 @@ export class CommesseComponent implements OnInit {
       this.dataFine = this.filtroPeriodo.DATA_FINE;
       this.allCommesse = [];
       this.allProgetti = [];
-      this.displayedColumns = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste',
-        'tipologia', 'giustificativo'];
+      this.displayedColumns = this.colonneConstants;
       this.getAllCommesseFiltrate(this.dataInizio, this.dataFine);
     }
   }
