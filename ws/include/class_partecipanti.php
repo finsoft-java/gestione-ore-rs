@@ -3,11 +3,11 @@
 $partecipantiManager = new PartecipantiManager();
 
     //configurazione colonne file excel
-    define('COL_NOME_COGNOME',  0); // verra' ignorata
-    define('COL_MATRICOLA',     1);
-    define('COL_PCT_IMPEGO',    2);
-    define('COL_MANSIONE',      3);
-    define('COL_COSTO',         4);
+    define('COL_PARTECIPANTI_NOME_COGNOME',  0); // verra' ignorata
+    define('COL_PARTECIPANTI_MATRICOLA',     1);
+    define('COL_PARTECIPANTI_PCT_IMPEGO',    2);
+    define('COL_PARTECIPANTI_MANSIONE',      3);
+    define('COL_PARTECIPANTI_COSTO',         4);
 
 class PartecipantiManager {
     
@@ -105,11 +105,11 @@ class PartecipantiManager {
                 continue;
             }
 
-            $matricola = $spreadSheetAry[$curRow][COL_MATRICOLA];
+            $matricola = $spreadSheetAry[$curRow][COL_PARTECIPANTI_MATRICOLA];
             $dipendente = null;
-            $pctImpiego = $spreadSheetAry[$curRow][COL_PCT_IMPEGO];
-            $mansione = $spreadSheetAry[$curRow][COL_MANSIONE];
-            $costo = $spreadSheetAry[$curRow][COL_COSTO];
+            $pctImpiego = $spreadSheetAry[$curRow][COL_PARTECIPANTI_PCT_IMPEGO];
+            $mansione = $spreadSheetAry[$curRow][COL_PARTECIPANTI_MANSIONE];
+            $costo = $spreadSheetAry[$curRow][COL_PARTECIPANTI_COSTO];
 
             if (empty($matricola) || empty($pctImpiego)) {
                 $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
