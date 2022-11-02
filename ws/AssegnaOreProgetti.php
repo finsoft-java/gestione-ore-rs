@@ -21,20 +21,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$json_data) {
         print_error(400, "Missing JSON data");
     }
-    $periodo = $json_data->periodo;
-    if (! $periodo) {
-        print_error(400, "Missing parameter: periodo");
+    $dataInizio = $json_data->dataInizio;
+    if (! $dataInizio) {
+        print_error(400, "Missing parameter: dataInizio");
     }
-    if (strlen($periodo) != 10) {
-        print_error(400, "Bad parameter: Il periodo di lancio deve essere nella forma YYYY-MM-DD");
+    $dataFine = $json_data->dataFine;
+    if (! $dataFine) {
+        print_error(400, "Missing parameter: dataFine");
     }
-    $date = DateTime::createFromFormat('Y-m-d', $periodo);
+    if (strlen($dataInizio) != 10 || strlen($dataFine) != 10) {
+        print_error(400, "Bad parameter: dataInizio e dataFine devono essere nella forma YYYY-MM-DD");
+    }
+    $dataInizio = DateTime::createFromFormat('Y-m-d', $dataInizio);
+    $dataFine = DateTime::createFromFormat('Y-m-d', $dataFine);
     
     $message = (object) [
         'error' => '',
         'success' => '',
       ];
-    $consuntiviProgettiManager->run_assegnazione($date, $message);
+    $consuntiviProgettiManager->run_assegnazione($dataInizio, $dataFine, $message);
 
     header('Content-Type: application/json');
     echo json_encode(['value' => $message]);

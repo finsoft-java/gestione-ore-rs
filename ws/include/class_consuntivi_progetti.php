@@ -11,12 +11,12 @@ class ConsuntiviProgettiManager {
     /**
      * Main procedure
      */
-    function run_assegnazione($dataLimite, &$message) {
+    function run_assegnazione($dataInizio, $dataFine, &$message) {
         global $esecuzioniManager, $panthera;
 
         ini_set('max_execution_time', 300);
 
-        $progetti_attivi = $this->get_progetti_attivi($dataLimite);
+        $progetti_attivi = $this->get_progetti_attivi($dataInizio, $dataFine);
         if (count($progetti_attivi) == 0) {
             $message->error .= "Nessun progetto attivo trovato!" . NL;
             return;
@@ -33,7 +33,7 @@ class ConsuntiviProgettiManager {
         $idEsecuzione = $esecuzioniManager->get_id_esecuzione();
 
         $nomi_progetti = implode(', ', array_map(function($x){ return $x["ACRONIMO"]; }, $progetti_attivi));
-        $message->success .= "Data limite: " . $dataLimite->format('d/m/Y') . " progetti attivi trovati: " . $nomi_progetti . NL;
+        $message->success .= "Periodo: " . $dataInizio->format('d/m/Y') . " - " . $dataFine->format('d/m/Y') ." progetti attivi trovati: " . $nomi_progetti . NL;
         $message->success .= "Salvo i dati ottenuti con <strong>ID_ESECUZIONE=$idEsecuzione</strong>" . NL;
         $message->success .= "Ore " . date("H:i:s"). NL;
 
@@ -49,12 +49,12 @@ class ConsuntiviProgettiManager {
                     continue;
                 }
 
-                $canGoOn = $this->check_commesse_dipendenti($idProgetto, $dataLimite, $message);
+                $canGoOn = $this->check_commesse_dipendenti($idProgetto, $dataInizio, $dataFine, $message);
                 if (!$canGoOn) {
                     continue;
                 }
 
-                $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, $message);
+                $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataInizio, $dataFine, $message);
 
                 $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $message);
                 $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $message);
@@ -90,7 +90,7 @@ class ConsuntiviProgettiManager {
                     continue;
                 }
 
-                $this->apply($idEsecuzione, $idProgetto, $dataLimite, $tot_ore_assegnate);
+                $this->apply($idEsecuzione, $idProgetto, $tot_ore_assegnate);
                 $message->success .= "Ore assegnate." . NL;
 
                 $message->success .= "Ore " . date("H:i:s"). NL;
@@ -180,11 +180,12 @@ class ConsuntiviProgettiManager {
         return $canGoOn;
     }
 
-    function get_progetti_attivi($dataLimite) {
-        $dataLimite = $dataLimite->format('Y-m-d');
+    function get_progetti_attivi($dataInizio, $dataFine) {
+        $dataInizio = $dataInizio->format('Y-m-d');
+        $dataFine = $dataFine->format('Y-m-d');
         $query = "SELECT *
             FROM progetti p
-            WHERE p.DATA_FINE >= DATE($dataLimite)";
+            WHERE p.DATA_FINE >= DATE($dataInizio) AND p.DATA_INIZIO <= DATE($dataFine)";
         return select_list($query);
     }
 
@@ -194,9 +195,10 @@ class ConsuntiviProgettiManager {
      * 
      * Salva il risultato nella tabella di lavoro
      */
-    function estrazione_caricamenti($idEsecuzione, $idProgetto, $dataLimite, &$message) {
+    function estrazione_caricamenti($idEsecuzione, $idProgetto, $dataInizio, $dataFine, &$message) {
 
-        $d = $dataLimite->format('Y-m-d');
+        $dataInizio = $dataInizio->format('Y-m-d');
+        $dataFine = $dataFine->format('Y-m-d');
 
         $query = "INSERT INTO assegnazioni_dettaglio (ID_ESECUZIONE, ID_PROGETTO,
                 COD_COMMESSA, PCT_COMPATIBILITA,
@@ -215,7 +217,7 @@ class ConsuntiviProgettiManager {
             JOIN partecipanti_globali p ON p.PCT_UTILIZZO>0
             JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
                 AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE
-                AND oc.DATA >= pr.DATA_ULTIMO_REPORT AND oc.DATA < DATE('$d')
+                AND oc.DATA >= DATE('$dataInizio') AND oc.DATA < DATE('$dataFine')
             WHERE pr.ID_PROGETTO=$idProgetto";
         return execute_update($query);
     }
@@ -492,7 +494,7 @@ class ConsuntiviProgettiManager {
     /**
      * Copia le rettifiche dalla tabella di lavoro alla ore_consuntivate_progetti
      */
-    function apply($idEsecuzione, $idProgetto, $dataLimite, $tot_ore_assegnate) {
+    function apply($idEsecuzione, $idProgetto, $tot_ore_assegnate) {
         global $con;
 
         // QUI ASSUMO tot_ore_assegnate > 0
@@ -514,7 +516,7 @@ class ConsuntiviProgettiManager {
                         WHERE ID_ESECUZIONE=$idEsecuzione";
             execute_update($query);
 
-            $d = $dataLimite->format('Y-m-d');
+            $d = date('Y-m-d');
             $query = "UPDATE progetti
                         SET ORE_GIA_ASSEGNATE=NVL(ORE_GIA_ASSEGNATE,0)+$tot_ore_assegnate,
                         DATA_ULTIMO_REPORT=DATE('$d')
