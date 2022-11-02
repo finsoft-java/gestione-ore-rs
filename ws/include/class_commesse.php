@@ -2,34 +2,35 @@
 
 $commesseManager = new CommesseManager();
 
-    //configurazione prime 5 colonne file excel
-    define('COL_TIPO_COMMESSA',  0);
-    define('COL_COD_COMMESSA',   1);
-    define('COL_TOT_ORE',        2);
-    define('COL_PCT_RD',         3);
-    define('COL_TOT_ORE_RD',     4);
-    //dalla 5 salvo header in array degli acronimi progetti
-    //select_value("SELECT ID_PROGETTO ... dall'acronimo")
-    // se viene null warning al'lutente e metti -1 nell'array
+//configurazione prime 5 colonne file excel
+define('COL_TIPO_COMMESSA', 0);
+define('COL_COD_COMMESSA', 1);
+define('COL_TOT_ORE', 2);
+define('COL_PCT_RD', 3);
+define('COL_TOT_ORE_RD', 4);
+//dalla 5 salvo header in array degli acronimi progetti
+//select_value("SELECT ID_PROGETTO ... dall'acronimo")
+// se viene null warning al'lutente e metti -1 nell'array
 
-class CommesseManager {
-    
-    function get_commesse() {
-        $sql = "SELECT COD_COMMESSA,PCT_COMPATIBILITA,NOTE,GIUSTIFICATIVO_FILENAME,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA,
-                CASE WHEN GIUSTIFICATIVO IS NULL THEN 'N' ELSE 'Y' END AS HAS_GIUSTIFICATIVO
+class CommesseManager
+{
+
+    public function get_commesse()
+    {
+        $sql = "SELECT COD_COMMESSA,PCT_COMPATIBILITA,NOTE,GIUSTIFICATIVO_FILENAME,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA
                 FROM commesse c
                 ORDER BY PCT_COMPATIBILITA DESC, COD_COMMESSA";
         $arr = select_list($sql);
 
-        foreach($arr as $id => $commessa) {
+        foreach ($arr as $id => $commessa) {
             $arr[$id]["PROGETTI"] = $this->get_progetti($commessa["COD_COMMESSA"]);
         }
         return $arr;
     }
 
-    function get_commessa($codCommessa) {
-        $sql = "SELECT c.*,
-                CASE WHEN GIUSTIFICATIVO IS NULL THEN 'false' ELSE 'true' END AS HAS_GIUSTIFICATIVO
+    public function get_commessa($codCommessa)
+    {
+        $sql = "SELECT c.*
                 FROM commesse c
                 WHERE COD_COMMESSA='$codCommessa'";
         $obj = select_single($sql);
@@ -38,8 +39,9 @@ class CommesseManager {
         }
         return $obj;
     }
-    
-    function get_progetti($codCommessa) {
+
+    public function get_progetti($codCommessa)
+    {
         $sql = "SELECT p.ID_PROGETTO,p.ACRONIMO,pc.ORE_PREVISTE
                 FROM progetti p
                 JOIN progetti_commesse pc ON p.ID_PROGETTO=pc.ID_PROGETTO
@@ -47,39 +49,42 @@ class CommesseManager {
         $arr = select_list($sql);
         return $arr;
     }
-    
-    function crea($json_data) {
+
+    public function crea($json_data)
+    {
         global $con;
 
         $this->controllo_pct_commessa($json_data);
 
         $sql = insert("progetti_commesse", [
-                                    "ID_PROGETTO" => $json_data->ID_PROGETTO,
-                                    "COD_COMMESSA" => $con->escape_string($json_data->COD_COMMESSA),
-                                    "PCT_COMPATIBILITA" => $json_data->PCT_COMPATIBILITA,
-                                    "NOTE" => $con->escape_string($json_data->NOTE)
-                                  ]);
+            "ID_PROGETTO" => $json_data->ID_PROGETTO,
+            "COD_COMMESSA" => $con->escape_string($json_data->COD_COMMESSA),
+            "PCT_COMPATIBILITA" => $json_data->PCT_COMPATIBILITA,
+            "NOTE" => $con->escape_string($json_data->NOTE),
+        ]);
         execute_update($sql);
         return $this->get_commessa($json_data->ID_PROGETTO, $json_data->COD_COMMESSA);
     }
-    
-    function aggiorna($progetto, $json_data) {
+
+    public function aggiorna($progetto, $json_data)
+    {
         global $con;
 
         $this->controllo_pct_commessa($json_data);
 
         $sql = update("progetti_commesse", [
-                                    "PCT_COMPATIBILITA" => $json_data->PCT_COMPATIBILITA,
-                                    "NOTE" => $con->escape_string($json_data->NOTE)
-                                  ], [
-                                    "ID_PROGETTO" => $json_data->ID_PROGETTO,
-                                    "COD_COMMESSA" => $con->escape_string($json_data->COD_COMMESSA)
-                                  ]);
-        execute_update($sql);        
+            "PCT_COMPATIBILITA" => $json_data->PCT_COMPATIBILITA,
+            "NOTE" => $con->escape_string($json_data->NOTE),
+        ], [
+            "ID_PROGETTO" => $json_data->ID_PROGETTO,
+            "COD_COMMESSA" => $con->escape_string($json_data->COD_COMMESSA),
+        ]);
+        execute_update($sql);
         return $this->get_commessa($json_data->ID_PROGETTO, $json_data->COD_COMMESSA);
     }
-    
-    function controllo_pct_commessa($json_data) {
+
+    public function controllo_pct_commessa($json_data)
+    {
         if ($json_data->PCT_COMPATIBILITA >= 100) {
             // commessa di progetto
             $sql = "SELECT count(*)
@@ -95,21 +100,23 @@ class CommesseManager {
                     FROM progetti_commesse
                     WHERE id_progetto <> '$json_data->ID_PROGETTO' and cod_commessa='$json_data->COD_COMMESSA'";
             $pct = select_single_value($sql);
-            if ($pct +  $json_data->PCT_COMPATIBILITA > 100.01) {
+            if ($pct + $json_data->PCT_COMPATIBILITA > 100.01) {
                 print_error(400, "La commessa $json_data->COD_COMMESSA &egrave; gi&agrave; utilizzata al $pct% in altri progetti");
             }
         }
     }
 
-    function elimina($codCommessa) {
+    public function elimina($codCommessa)
+    {
         $sql = "DELETE FROM commesse WHERE AND cod_commessa = '$codCommessa'";
         execute_update($sql);
     }
-    
-    function upload_giustificativo($codCommessa, $tmpfilename, $origfilename) {
+
+    public function upload_giustificativo($codCommessa, $tmpfilename, $origfilename)
+    {
         global $con;
 
-        $fileContent = addslashes(file_get_contents($tmpfilename)); 
+        $fileContent = addslashes(file_get_contents($tmpfilename));
         // speriamo non sia enorme
 
         $origfilename = $con->escape_string($origfilename);
@@ -118,8 +125,9 @@ class CommesseManager {
                 WHERE cod_commessa = '$codCommessa'";
         execute_update($sql);
     }
-    
-    function download_giustificativo($codCommessa) {
+
+    public function download_giustificativo($codCommessa)
+    {
         $sql = "SELECT GIUSTIFICATIVO_FILENAME, LENGTH(GIUSTIFICATIVO) AS LEN, GIUSTIFICATIVO
                 FROM commesse
                 WHERE cod_commessa = '$codCommessa'";
@@ -132,26 +140,29 @@ class CommesseManager {
         flush();
         echo $result["GIUSTIFICATIVO"];
     }
-    
-    function elimina_giustificativo($codCommessa) {
+
+    public function elimina_giustificativo($codCommessa)
+    {
         $sql = "UPDATE commesse
                 SET GIUSTIFICATIVO=NULL,GIUSTIFICATIVO_FILENAME=NULL
                 WHERE cod_commessa = '$codCommessa'";
         execute_update($sql);
     }
 
-    function importExcel($filename, &$message, $typeFile) {
+    public function importExcel($filename, &$message, $typeFile)
+    {
         $spreadSheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filename);
         $numOfSheets = $spreadSheet->getSheetCount();
         // Mi aspetto un unico sheet
-        $this->importSheet($spreadSheet->getSheet(0), $message);   
-     }
+        $this->importSheet($spreadSheet->getSheet(0), $message);
+    }
 
-     function importSheet($excelSheet, &$message) {
+    public function importSheet($excelSheet, &$message)
+    {
         global $con, $panthera;
 
-        $spreadSheetAry = $excelSheet->toArray(NULL, TRUE, FALSE);
-        
+        $spreadSheetAry = $excelSheet->toArray(null, true, false);
+
         // salto la header
         $firstRow = 1;
         $numRows = count($spreadSheetAry);
@@ -162,8 +173,8 @@ class CommesseManager {
 
         $contatore = 0;
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
-    
-            if(!isset($spreadSheetAry[$curRow][0])) {
+
+            if (!isset($spreadSheetAry[$curRow][0])) {
                 continue;
             }
 
@@ -190,29 +201,29 @@ class CommesseManager {
             execute_update($query);
             ++$contatore;
         }
-        
+
         $cols = count($spreadSheetAry[0]);
         $projectMap = [];
         //ricavo idProgetto dall'acronimo nell'header
         for ($curCol = 5; $curCol < $cols; ++$curCol) {
             $acronimo = $spreadSheetAry[0][$curCol];
-            $query =  "SELECT ID_PROGETTO from progetti WHERE ACRONIMO = '$acronimo'";
+            $query = "SELECT ID_PROGETTO from progetti WHERE ACRONIMO = '$acronimo'";
             $projectMap[$curCol] = select_single_value($query); //mappa acronimo -> idProgetto
             if (empty($projectMap[$curCol])) {
                 $message->error .= "Acronimo non trovato: $acronimo <br/>";
             }
         }
-        
-        $contatore = 0; 
+
+        $contatore = 0;
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
             foreach ($projectMap as $curCol => $idProgetto) {
                 $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
-                $valueOre =  $spreadSheetAry[$curRow][$curCol];
-                if(!empty($idProgetto)) {
-                // QUI un comando REPLACE sql sulla progetti_commesse
-                $query = "REPLACE INTO progetti_commesse (ID_PROGETTO,COD_COMMESSA,ORE_PREVISTE) 
+                $valueOre = $spreadSheetAry[$curRow][$curCol];
+                if (!empty($idProgetto)) {
+                    // QUI un comando REPLACE sql sulla progetti_commesse
+                    $query = "REPLACE INTO progetti_commesse (ID_PROGETTO,COD_COMMESSA,ORE_PREVISTE)
                     VALUES('$idProgetto','$codCommessa','$valueOre')";
-                execute_update($query);
+                    execute_update($query);
                 }
             }
             ++$contatore;
@@ -220,6 +231,4 @@ class CommesseManager {
         $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
     }
 
-
 }
-?>
