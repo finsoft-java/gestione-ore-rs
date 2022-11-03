@@ -42,11 +42,11 @@ class CommesseManager
 
     public function get_commesse_periodo($dataInizio, $dataFine)
     {
-        $sql = "SELECT c.COD_COMMESSA,c.PCT_COMPATIBILITA,c.NOTE,c.GIUSTIFICATIVO_FILENAME,c.TOT_ORE_PREVISTE,c.TOT_ORE_RD_PREVISTE,c.TIPOLOGIA 
-        FROM commesse c 
-                JOIN progetti_commesse pc ON c.COD_COMMESSA = pc.COD_COMMESSA 
-                    WHERE pc.DATA_INIZIO='$dataInizio' 
-                    AND pc.DATA_FINE='$dataFine' 
+        $sql = "SELECT c.COD_COMMESSA,c.PCT_COMPATIBILITA,c.NOTE,c.GIUSTIFICATIVO_FILENAME,c.TOT_ORE_PREVISTE,c.TOT_ORE_RD_PREVISTE,c.TIPOLOGIA
+        FROM commesse c
+                JOIN progetti_commesse pc ON c.COD_COMMESSA = pc.COD_COMMESSA
+                    WHERE pc.DATA_INIZIO='$dataInizio'
+                    AND pc.DATA_FINE='$dataFine'
                 ORDER BY PCT_COMPATIBILITA DESC, COD_COMMESSA";
         $arr = select_list($sql);
 
@@ -125,43 +125,6 @@ class CommesseManager
     public function elimina($codCommessa)
     {
         $sql = "DELETE FROM commesse WHERE AND cod_commessa = '$codCommessa'";
-        execute_update($sql);
-    }
-
-    public function upload_giustificativo($codCommessa, $tmpfilename, $origfilename)
-    {
-        global $con;
-
-        $fileContent = addslashes(file_get_contents($tmpfilename));
-        // speriamo non sia enorme
-
-        $origfilename = $con->escape_string($origfilename);
-        $sql = "UPDATE commesse
-                SET GIUSTIFICATIVO_FILENAME='$origfilename', GIUSTIFICATIVO='$fileContent'
-                WHERE cod_commessa = '$codCommessa'";
-        execute_update($sql);
-    }
-
-    public function download_giustificativo($codCommessa)
-    {
-        $sql = "SELECT GIUSTIFICATIVO_FILENAME, LENGTH(GIUSTIFICATIVO) AS LEN, GIUSTIFICATIVO
-                FROM commesse
-                WHERE cod_commessa = '$codCommessa'";
-        $result = select_single($sql);
-
-        header("Content-length: $result[LEN]");
-        // header("Content-type: ???");
-        header("Content-Disposition: attachment; filename=$result[GIUSTIFICATIVO_FILENAME]");
-        ob_clean();
-        flush();
-        echo $result["GIUSTIFICATIVO"];
-    }
-
-    public function elimina_giustificativo($codCommessa)
-    {
-        $sql = "UPDATE commesse
-                SET GIUSTIFICATIVO=NULL,GIUSTIFICATIVO_FILENAME=NULL
-                WHERE cod_commessa = '$codCommessa'";
         execute_update($sql);
     }
 
@@ -246,7 +209,8 @@ class CommesseManager
         $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
     }
 
-    function get_periodi() {
+    public function get_periodi()
+    {
         $sql = "SELECT DISTINCT
                     DATE_FORMAT(DATA_INIZIO,'%Y-%m-%d') AS DATA_INIZIO,
                     DATE_FORMAT(DATA_FINE,'%Y-%m-%d') AS DATA_FINE
