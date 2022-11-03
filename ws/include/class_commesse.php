@@ -64,7 +64,7 @@ class CommesseManager
         return $arr;
     }
 
-    public function crea($json_data)
+    /*public function crea($json_data)
     {
         global $con;
 
@@ -95,7 +95,7 @@ class CommesseManager
         ]);
         execute_update($sql);
         return $this->get_commessa($json_data->ID_PROGETTO, $json_data->COD_COMMESSA);
-    }
+    }*/
 
     public function controllo_pct_commessa($json_data)
     {
@@ -120,11 +120,11 @@ class CommesseManager
         }
     }
 
-    public function elimina($codCommessa)
+    /*public function elimina($codCommessa)
     {
         $sql = "DELETE FROM commesse WHERE AND cod_commessa = '$codCommessa'";
         execute_update($sql);
-    }
+    }*/
 
     public function importExcel($filename, &$message, $typeFile, $dataInizio, $dataFine)
     {
