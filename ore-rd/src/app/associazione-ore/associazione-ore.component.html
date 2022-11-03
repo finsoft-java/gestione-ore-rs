@@ -2,16 +2,15 @@
     Associazione ore commesse</h5>
 <div>
     <div style="width: 75%;display: block;margin: 0px auto;" class="fraz2_width">
-        <mat-form-field appearance="fill" style="margin-right: 10px;">
-            <mat-label>Data</mat-label>
-            <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="date" [matDatepicker]="picker">
-            <mat-datepicker-toggle matSuffix [for]="picker">
-                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-            </mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <mat-hint>required</mat-hint>
+        <mat-form-field appearance="fill" class="dropdownDate">
+            <mat-label>Periodo</mat-label>
+            <mat-select [(ngModel)]="filtroPeriodo" name="x" required>
+                <mat-option *ngFor="let x of allPeriodi" [value]="x">
+                    {{"Da: " + x.DATA_INIZIO + " A: " + x.DATA_FINE}}
+                </mat-option>
+            </mat-select>
         </mat-form-field>
-        <button mat-raised-button color="primary" [disabled]="running" (click)="run()">RUN HERE</button>
+        <button mat-raised-button color="primary" [disabled]="running||!filtroPeriodo" (click)="run()">RUN HERE</button>
     </div>
     
     <div class="alert alert-success" role="alert" *ngIf="message_success">

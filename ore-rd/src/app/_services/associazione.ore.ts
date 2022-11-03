@@ -1,9 +1,9 @@
-import { DataFirma } from '../_models/matricola';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 import { formatDate } from '@angular/common';
+import { environment } from '../../environments/environment';
 import { ListBean } from '../_models';
+import { DataFirma } from '../_models/matricola';
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +14,10 @@ export class AssociazioneOreService {
 
   constructor(private http: HttpClient) { }
   
-  run(periodo: string) {
+  run(dataInizio: string, dataFine: string) {
     return this.http.post<any>(`${this.baseUrl}/AssegnaOreProgetti.php`, {
-      periodo: periodo
+      dataInizio: dataInizio,
+      dataFine: dataFine,
     });
   }
 

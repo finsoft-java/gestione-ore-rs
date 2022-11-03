@@ -208,7 +208,8 @@ class CommesseManager
         $sql = "SELECT DISTINCT
                     DATE_FORMAT(DATA_INIZIO,'%Y-%m-%d') AS DATA_INIZIO,
                     DATE_FORMAT(DATA_FINE,'%Y-%m-%d') AS DATA_FINE
-                FROM commesse";
+                FROM commesse
+                ORDER BY DATA_FINE DESC, DATA_INIZIO DESC";
         return select_list($sql);
     }
 }

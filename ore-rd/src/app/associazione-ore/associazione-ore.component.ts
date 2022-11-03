@@ -1,56 +1,42 @@
-import { AssociazioneOreService } from '../_services/associazione.ore';
-import { Component } from '@angular/core';
-import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
-import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
-
-// Depending on whether rollup is used, moment needs to be imported differently.
-// Since Moment.js doesn't have a default export, we normally need to import using the `* as`
-// syntax. However, rollup creates a synthetic default module and we thus need to import it using
-// the `default as` syntax.
-import * as _moment from 'moment';
-import { formatDate } from '@angular/common';
-import { AlertService } from '../_services/alert.service';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AssociazioneOreService } from '../_services/associazione.ore';
+import { AlertService } from '../_services/alert.service';
 import { ProgettiService } from '../_services/progetti.service';
+import { Periodo } from '../_models';
+import { PeriodiService } from '../_services/periodi.service';
 // tslint:disable-next-line:no-duplicate-imports
 
-const moment = _moment;
-export const MY_FORMATS = {
-  parse: {
-    dateInput: 'LL'
-  },
-  display: {
-    dateInput: 'DD-MM-YYYY',
-    monthYearLabel: 'YYYY',
-    dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'YYYY'
-  }
-};
 
 @Component({
   selector: 'app-associazione-ore',
   templateUrl: './associazione-ore.component.html',
-  styleUrls: ['./associazione-ore.component.css'],
-  providers: [{
-    provide: DateAdapter,
-    useClass: MomentDateAdapter,
-    deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS]
-  },
-  {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS}]
+  styleUrls: ['./associazione-ore.component.css']
 })
-export class AssociazioneOreComponent {
-
-  date: Date = new Date();
+export class AssociazioneOreComponent implements OnInit {
 
   message_success = '';
   message_error = '';
+  allPeriodi: Periodo[] = [];
+  filtroPeriodo?: Periodo;
   running = false;
 
   constructor(private associazioneOreService: AssociazioneOreService,
     private progettiService: ProgettiService,
+    private periodiService: PeriodiService,
     private alertService: AlertService,
     private route: ActivatedRoute,
     private router: Router) { }
+
+  ngOnInit(): void {
+    this.getAllPeriodi();
+  }
+
+  getAllPeriodi() {
+    this.periodiService.getAll().subscribe(response => {
+      this.allPeriodi = response.data;
+    })
+  }
 
   resetAlertSuccess() {
     this.message_success = '';
@@ -65,7 +51,7 @@ export class AssociazioneOreComponent {
     this.resetAlertDanger();
     this.running = true;
 
-    this.associazioneOreService.run(formatDate(this.date, 'YYYY-MM-dd', 'en-GB')).subscribe(response => {
+    this.associazioneOreService.run(this.filtroPeriodo!.DATA_INIZIO, this.filtroPeriodo!.DATA_FINE).subscribe(response => {
       this.message_success = 'Elaborazione terminata. I dettagli verranno visualizzati in una nuova finestra.';
       this.message_error = response.value.error;
       this.running = false;
