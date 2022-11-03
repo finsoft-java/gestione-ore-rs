@@ -1,7 +1,6 @@
 import { UploadRapportiniService } from './../_services/upload.rapportini.service';
 import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { AlertService } from './../_services/alert.service';
-import { Observable } from 'rxjs';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 
 @Component({
@@ -11,7 +10,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 })
 export class ImportazioneRapportiniComponent implements OnInit {
 
-  displayedColumns: string[] = ['idDipendente', 'data', 'nrDoc', 'codCommessa', 'sottoCommessa', 'rifAtv', 'numOreLavorate'];
+  displayedColumns: string[] = ['serieDoc', 'nrDoc', 'data', 'altri', 'idDipendente', 'rifAtv', 'codCommessa', 'sottoCommessa', 'more'];
 
   selectedFiles?: FileList;
   progressInfos = { value: 0, fileName: 'Caricamento' };

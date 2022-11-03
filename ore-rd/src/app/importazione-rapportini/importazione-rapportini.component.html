@@ -5,16 +5,28 @@
     <div>
         <table mat-table class="mat-elevation-z8">
     
+            <ng-container matColumnDef="serieDoc">
+                <th mat-header-cell *matHeaderCellDef>Serie Doc.</th>
+            </ng-container>
+    
+            <ng-container matColumnDef="nrDoc">
+                <th mat-header-cell *matHeaderCellDef>Nr. Doc.</th>
+            </ng-container>
+    
+            <ng-container matColumnDef="data">
+                <th mat-header-cell *matHeaderCellDef>Data Doc.</th>
+            </ng-container>
+    
+            <ng-container matColumnDef="altri">
+                <th mat-header-cell *matHeaderCellDef>...</th>
+            </ng-container>
+    
             <ng-container matColumnDef="idDipendente">
                 <th mat-header-cell *matHeaderCellDef>Dipendente</th>
             </ng-container>
     
-            <ng-container matColumnDef="data">
-                <th mat-header-cell *matHeaderCellDef>Data</th>
-            </ng-container>
-    
-            <ng-container matColumnDef="nrDoc">
-                <th mat-header-cell *matHeaderCellDef>Nr. Doc</th>
+            <ng-container matColumnDef="rifAtv">
+                <th mat-header-cell *matHeaderCellDef>Atv.</th>
             </ng-container>
     
             <ng-container matColumnDef="codCommessa">
@@ -25,12 +37,8 @@
                 <th mat-header-cell *matHeaderCellDef>Sottocommessa</th>
             </ng-container>
     
-            <ng-container matColumnDef="rifAtv">
-                <th mat-header-cell *matHeaderCellDef>Atv.</th>
-            </ng-container>
-    
-            <ng-container matColumnDef="numOreLavorate">
-                <th mat-header-cell *matHeaderCellDef>Ore Lavorate</th>
+            <ng-container matColumnDef="more">
+                <th mat-header-cell *matHeaderCellDef>...</th>
             </ng-container>
     
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
