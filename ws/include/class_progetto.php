@@ -121,8 +121,8 @@ class ProgettiManager
     {
         //TODO: cambiare la query perchè prende il cod commessa ma ora è progetto
         $sql = "SELECT GIUSTIFICATIVO_FILENAME, LENGTH(GIUSTIFICATIVO) AS LEN, GIUSTIFICATIVO
-                FROM commesse
-                WHERE cod_commessa = '$idProgetto'";
+                FROM progetti
+                WHERE id_progetto = '$idProgetto'";
         $result = select_single($sql);
 
         header("Content-length: $result[LEN]");
@@ -141,17 +141,17 @@ class ProgettiManager
         // speriamo non sia enorme
 
         $origfilename = $con->escape_string($origfilename);
-        $sql = "UPDATE commesse
+        $sql = "UPDATE progetti
                 SET GIUSTIFICATIVO_FILENAME='$origfilename', GIUSTIFICATIVO='$fileContent'
-                WHERE cod_commessa = '$idProgetto'";
+                WHERE id_progetto = '$idProgetto'";
         execute_update($sql);
     }
 
     public function elimina_giustificativo($idProgetto)
     {
-        $sql = "UPDATE commesse
+        $sql = "UPDATE progetti
                 SET GIUSTIFICATIVO=NULL,GIUSTIFICATIVO_FILENAME=NULL
-                WHERE cod_commessa = '$idProgetto'";
+                WHERE id_progetto = '$idProgetto'";
         execute_update($sql);
     }
 
