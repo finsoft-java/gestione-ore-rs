@@ -24,7 +24,7 @@ class ConsuntiviProgettiManager {
 
         $matricole = $this->load_partecipanti_globali();
         if (count($matricole) == 0) {
-            $message->error .= "Nessun dipendente configurato con percentuale utilizzabile configurato!" . NL;
+            $message->error .= "Nessun dipendente con percentuale utilizzabile configurato!" . NL;
             return;
         }
 
@@ -45,7 +45,8 @@ class ConsuntiviProgettiManager {
                 list($commesse_p, $commesse_c) = $this->load_commesse($idProgetto);
 
                 if (count($commesse_p) == 0 && count($commesse_c) == 0) {
-                    $message->error .= "Nessuna commessa &egrave; stata configurata su questo progetto!" . NL;
+                    $message->error .= "Nessuna commessa &egrave; stata configurata sul progetto n.$idProgetto!" . NL;
+                    $message->success .= "Nessuna commessa &egrave; stata configurata sul progetto n.$idProgetto!" . NL;
                     continue;
                 }
 
@@ -185,7 +186,7 @@ class ConsuntiviProgettiManager {
         $dataFine = $dataFine->format('Y-m-d');
         $query = "SELECT *
             FROM progetti p
-            WHERE p.DATA_FINE >= DATE($dataInizio) AND p.DATA_INIZIO <= DATE($dataFine)";
+            WHERE p.DATA_FINE >= DATE('$dataInizio') AND p.DATA_INIZIO <= DATE('$dataFine')";
         return select_list($query);
     }
 
@@ -652,7 +653,7 @@ class ConsuntiviProgettiManager {
                     </TR>";
             }
         } else {
-            $message->success .= "<TR><TD COLSPAN=7>Nessuna riga estratta</TD></TR>";
+            $message->success .= "<TR><TD COLSPAN=9>Nessuna riga estratta</TD></TR>";
         }
         $message->success .= "</TBODY>";
         $message->success .= "</TABLE>" . NL;
