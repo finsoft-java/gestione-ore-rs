@@ -18,7 +18,7 @@ class ProgettiManager
         $sql = "FROM progetti p ";
 
         if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
-            // avoid SQL-injectio
+            // avoid SQL-injection
             $sql .= " ORDER BY $orderby";
         } else {
             $sql .= " ORDER BY p.id_progetto DESC";
@@ -119,7 +119,6 @@ class ProgettiManager
 
     public function download_giustificativo($idProgetto)
     {
-        //TODO: cambiare la query perchè prende il cod commessa ma ora è progetto
         $sql = "SELECT GIUSTIFICATIVO_FILENAME, LENGTH(GIUSTIFICATIVO) AS LEN, GIUSTIFICATIVO
                 FROM progetti
                 WHERE id_progetto = '$idProgetto'";
