@@ -12,7 +12,7 @@ import { formatDate } from '@angular/common';
 })
 export class ImportazioneCommesseComponent implements OnInit {
 
-  displayedColumns: string[] = ['codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste', 'tipologia', 'progetto1', 'progetto2', 'altri'];
+  displayedColumns: string[] = ['tipologia', 'codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste', 'progetto1', 'progetto2', 'altri'];
 
   selectedFiles?: FileList;
   dataInizio?: Date;

@@ -5,6 +5,10 @@
   <div>
     <table mat-table class="mat-elevation-z8">
   
+      <ng-container matColumnDef="tipologia">
+        <th mat-header-cell *matHeaderCellDef>Tipologia</th>
+      </ng-container>
+  
       <ng-container matColumnDef="codCommessa">
         <th mat-header-cell *matHeaderCellDef>Cod. Commessa</th>
       </ng-container>
@@ -19,10 +23,6 @@
   
       <ng-container matColumnDef="totOreRdPreviste">
         <th mat-header-cell *matHeaderCellDef>Tot. Ore. RD Previste</th>
-      </ng-container>
-  
-      <ng-container matColumnDef="tipologia">
-        <th mat-header-cell *matHeaderCellDef>Tipologia</th>
       </ng-container>
 
       <ng-container matColumnDef="progetto1">

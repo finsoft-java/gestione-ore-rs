@@ -42,26 +42,24 @@ class CommesseManager
 
     public function get_commesse_periodo($dataInizio, $dataFine)
     {
-        $sql = "SELECT c.COD_COMMESSA,c.PCT_COMPATIBILITA,c.NOTE,c.GIUSTIFICATIVO_FILENAME,c.TOT_ORE_PREVISTE,c.TOT_ORE_RD_PREVISTE,c.TIPOLOGIA
-        FROM commesse c
-                JOIN progetti_commesse pc ON c.COD_COMMESSA = pc.COD_COMMESSA
-                    WHERE pc.DATA_INIZIO='$dataInizio'
-                    AND pc.DATA_FINE='$dataFine'
+        $sql = "SELECT c.*
+                FROM commesse c
+                WHERE DATA_INIZIO='$dataInizio' AND DATA_FINE='$dataFine'
                 ORDER BY PCT_COMPATIBILITA DESC, COD_COMMESSA";
         $arr = select_list($sql);
 
         foreach ($arr as $id => $commessa) {
-            $arr[$id]["PROGETTI"] = $this->get_progetti($commessa["COD_COMMESSA"]);
+            $arr[$id]["PROGETTI"] = $this->get_progetti($commessa["COD_COMMESSA"], $dataInizio, $dataFine);
         }
         return $arr;
     }
 
-    public function get_progetti($codCommessa)
+    public function get_progetti($codCommessa, $dataInizio, $dataFine)
     {
         $sql = "SELECT p.ID_PROGETTO,p.ACRONIMO,pc.ORE_PREVISTE
                 FROM progetti p
                 JOIN progetti_commesse pc ON p.ID_PROGETTO=pc.ID_PROGETTO
-                WHERE pc.COD_COMMESSA='$codCommessa'";
+                WHERE pc.COD_COMMESSA='$codCommessa' AND pc.DATA_INIZIO='$dataInizio' AND pc.DATA_FINE='$dataFine'";
         $arr = select_list($sql);
         return $arr;
     }
@@ -153,29 +151,25 @@ class CommesseManager
         $contatore = 0;
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
 
-            if (!isset($spreadSheetAry[$curRow][0])) {
-                continue;
-            }
-
             $tipologiaCommessa = $spreadSheetAry[$curRow][COL_TIPO_COMMESSA];
             $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
             $totOreCommessa = $spreadSheetAry[$curRow][COL_TOT_ORE];
             $pctCompatibilita = $spreadSheetAry[$curRow][COL_PCT_RD];
             $totOreRd = $spreadSheetAry[$curRow][COL_TOT_ORE_RD];
 
-            if (!$tipologiaCommessa || !$codCommessa || !$pctCompatibilita) {
+            if (!$codCommessa || !$pctCompatibilita) {
                 $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
                 continue;
             }
 
-            $query = "SELECT COUNT(*) FROM commesse WHERE COD_COMMESSA='$codCommessa'";
+            $query = "SELECT COUNT(*) FROM commesse WHERE COD_COMMESSA='$codCommessa' AND DATA_INIZIO='$dataInizio' AND DATA_FINE='$dataFine'";
             $count = select_single_value($query);
             if ($count == 0) {
-                $query = "INSERT INTO commesse (COD_COMMESSA,PCT_COMPATIBILITA,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA)
-                        VALUES('$codCommessa',100*$pctCompatibilita,'$totOreCommessa','$totOreRd','$tipologiaCommessa')";
+                $query = "INSERT INTO commesse (COD_COMMESSA,PCT_COMPATIBILITA,TOT_ORE_PREVISTE,TOT_ORE_RD_PREVISTE,TIPOLOGIA, DATA_INIZIO, DATA_FINE)
+                        VALUES('$codCommessa',100*$pctCompatibilita,'$totOreCommessa','$totOreRd','$tipologiaCommessa', '$dataInizio', '$dataFine')";
             } else {
                 $query = "UPDATE commesse SET PCT_COMPATIBILITA=100*$pctCompatibilita,TOT_ORE_PREVISTE='$totOreCommessa',TOT_ORE_RD_PREVISTE='$totOreRd',TIPOLOGIA='$tipologiaCommessa'
-                        WHERE COD_COMMESSA='$codCommessa'";
+                        WHERE COD_COMMESSA='$codCommessa' AND DATA_INIZIO='$dataInizio' AND DATA_FINE='$dataFine'";
             }
             execute_update($query);
             ++$contatore;
@@ -214,7 +208,7 @@ class CommesseManager
         $sql = "SELECT DISTINCT
                     DATE_FORMAT(DATA_INIZIO,'%Y-%m-%d') AS DATA_INIZIO,
                     DATE_FORMAT(DATA_FINE,'%Y-%m-%d') AS DATA_FINE
-                FROM progetti_commesse";
+                FROM commesse";
         return select_list($sql);
     }
 }
