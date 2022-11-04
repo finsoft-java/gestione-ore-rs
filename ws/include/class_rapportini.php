@@ -15,19 +15,18 @@ class RapportiniManager {
         $primo = "DATE('$anno-$mese-01')";
 
         // Con questa query cerco di stampare solo i rapportini dei dipendenti che mi interessano
-        $query_matricole = "SELECT DISTINCT r.ID_DIPENDENTE, p.* " .
-            "FROM progetti p " .
-            "JOIN progetti_persone r ON p.ID_PROGETTO=r.ID_PROGETTO " .
-            "WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= LAST_DAY($primo)";
+        $query_matricole = "SELECT DISTINCT ID_DIPENDENTE, ID_PROGETTO
+            FROM ore_consuntivate_progetti oc
+            WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
         $matricole = select_list($query_matricole);
 
         if (count($matricole) == 0) {
             return [];
         }
 
-        $query_consuntivo = "SELECT ID_PROGETTO,ID_DIPENDENTE,DATA,NUM_ORE_LAVORATE " .
-                    "FROM ore_consuntivate_progetti " .
-                    "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
+        $query_consuntivo = "SELECT ID_PROGETTO,ID_DIPENDENTE,DATA,NUM_ORE_LAVORATE
+                    FROM ore_consuntivate_progetti
+                    WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
         $consuntivo = select_list($query_consuntivo);
 
         // trasformo i vari array in una struttura $map_dipendenti_progetti
@@ -49,7 +48,7 @@ class RapportiniManager {
             $map_progetti = new DateTime($row["DATA"]);
             $map_dipendenti_progetti[$idDipendente][$idprogetto]['DATE'][$map_progetti->format('j')] = 0.0 + $row["NUM_ORE_LAVORATE"];
         }
-    return $map_dipendenti_progetti;
+        return $map_dipendenti_progetti;
     }
 
     function creaZip($anno, $mese, $isEsploso) {
