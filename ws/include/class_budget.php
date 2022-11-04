@@ -41,9 +41,9 @@ class ReportBudgetManager {
     }
 
     function get_consuntivi_matricola($id_progetto, $matricola, $anno=null) {
-        $sql = "SELECT c.DATA, c.NUM_ORE_LAVORATE, c.COSTO " .
-                "FROM ore_consuntivate_progetti c " .
-                "WHERE ID_PROGETTO=$id_progetto AND ID_DIPENDENTE='$matricola'";
+        $sql = "SELECT c.DATA, c.NUM_ORE_LAVORATE, c.COSTO
+                FROM ore_consuntivate_progetti c
+                WHERE ID_PROGETTO=$id_progetto AND ID_DIPENDENTE='$matricola' ";
         if (!empty($anno) and !empty($mese)) {
             $primo = "DATE('$anno-$mese-01')";
             $sql .= "AND c.DATA >= $primo AND c.DATA <= LAST_DAY($primo) ";
