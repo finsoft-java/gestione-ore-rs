@@ -179,8 +179,9 @@ class LULManager {
         $ultimoMeseSucc = "LAST_DAY($primo + INTERVAL 1 MONTH)";
 
         // Questa e' la griglia che verra' presentata all'utente
-        $query = "SELECT pwr.ID_DIPENDENTE, p.ID_PROGETTO, p.TITOLO, p.ID_SUPERVISOR
-                    FROM progetti p INNER JOIN progetti_persone pwr on p.ID_PROGETTO = pwr.ID_PROGETTO
+        $query = "SELECT DISTINCT oc.ID_DIPENDENTE, p.ID_PROGETTO, p.TITOLO, p.ID_SUPERVISOR
+                    FROM ore_consuntivate_progetti oc
+                    JOIN progetti p ON p.ID_PROGETTO = oc.ID_PROGETTO
                     WHERE p.DATA_FINE >= $primo AND p.DATA_INIZIO <= $ultimo
                     GROUP BY 1,2,3,4
                     ORDER BY 1,3";
