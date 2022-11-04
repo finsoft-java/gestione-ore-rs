@@ -32,8 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (strlen($dataInizio) != 10 || strlen($dataFine) != 10) {
         print_error(400, "Bad parameter: dataInizio e dataFine devono essere nella forma YYYY-MM-DD");
     }
-    $dataInizio = DateTime::createFromFormat('Y-m-d', $dataInizio);
-    $dataFine = DateTime::createFromFormat('Y-m-d', $dataFine);
     
     $message = (object) [
         'error' => '',

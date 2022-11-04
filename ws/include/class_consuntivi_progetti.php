@@ -16,6 +16,11 @@ class ConsuntiviProgettiManager {
 
         ini_set('max_execution_time', 300);
 
+
+        // human readable dates
+        $dataInizioHR = DateTime::createFromFormat('Y-m-d', $dataInizio)->format('d/m/Y');
+        $dataFineHR = DateTime::createFromFormat('Y-m-d', $dataFine)->format('d/m/Y');
+
         $progetti_attivi = $this->get_progetti_attivi($dataInizio, $dataFine);
         if (count($progetti_attivi) == 0) {
             $message->error .= "Nessun progetto attivo trovato!" . NL;
@@ -33,7 +38,7 @@ class ConsuntiviProgettiManager {
         $idEsecuzione = $esecuzioniManager->get_id_esecuzione();
 
         $nomi_progetti = implode(', ', array_map(function($x){ return $x["ACRONIMO"]; }, $progetti_attivi));
-        $message->success .= "Periodo: " . $dataInizio->format('d/m/Y') . " - " . $dataFine->format('d/m/Y') ." progetti attivi trovati: " . $nomi_progetti . NL;
+        $message->success .= "Periodo: " . $dataInizioHR . " - " . $dataFineHR ." progetti attivi trovati: " . $nomi_progetti . NL;
         $message->success .= "Salvo i dati ottenuti con <strong>ID_ESECUZIONE=$idEsecuzione</strong>" . NL;
         $message->success .= "Ore " . date("H:i:s"). NL;
 
@@ -56,8 +61,8 @@ class ConsuntiviProgettiManager {
 
                 $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataInizio, $dataFine, $message);
 
-                $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $message);
-                $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $message);
+                $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $dataInizio, $dataFine, $message);
+                $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
 
                 $message->success .= "<strong>Tot. " . ($ore_progetto_teoriche + $ore_compat_teoriche) .
                                                                 " ore prelevabili teoriche (di progetto+compatibili)</strong>". NL;
@@ -69,7 +74,7 @@ class ConsuntiviProgettiManager {
                 $ore_progetto = $this->prelievo_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $lul, $dataInizio, $dataFine, $message);
                 $message->success .= "<strong>Tot. $ore_progetto ore prelevate da commesse di progetto</strong>". NL;
                 $message->success .= "Ore " . date("H:i:s"). NL;
-                if ($ore_progetto > $this->get_ore_previste($idProgetto, $commesse_p)) {
+                if ($ore_progetto > $this->get_ore_previste($idProgetto, $commesse_p, $dataInizio, $dataFine)) {
                     $message->success .= "<strong>WARNING</strong> Le ore di progetto consuntivate sono più di quelle previste!";
                 }
 
@@ -134,16 +139,13 @@ class ConsuntiviProgettiManager {
      * 
      * @return canGoOn (true/false)
      */
-    function check_commesse_dipendenti($idProgetto, $dataInizio, $dataFine, &$message) { // FIXME DATE
-
-        $dataInizio = "DATE('" . $dataInizio->format('Y-m-d') . "')";
-        $dataFine = "DATE('" . $dataFine->format('Y-m-d') . "')";
+    function check_commesse_dipendenti($idProgetto, $dataInizio, $dataFine, &$message) {
 
         $canGoOn = true;
         $query = "SELECT DISTINCT pc.COD_COMMESSA
                     FROM progetti_commesse pc
                     JOIN commesse c ON c.COD_COMMESSA=pc.COD_COMMESSA AND c.DATA_INIZIO=pc.DATA_INIZIO AND c.DATA_FINE=pc.DATA_FINE
-                    WHERE pc.ID_PROGETTO=$idProgetto AND pc.DATA_INIZIO=$dataInizio AND pc.DATA_FINE=$dataFine
+                    WHERE pc.ID_PROGETTO=$idProgetto AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
                     and c.PCT_COMPATIBILITA<=0";
         $commesse = select_column($query);
         if (count($commesse) > 0) {
@@ -156,7 +158,7 @@ class ConsuntiviProgettiManager {
                 JOIN progetti pr ON pr.ID_PROGETTO=c.ID_PROGETTO
                 WHERE pr.id_progetto=$idProgetto
                 AND ID_DIPENDENTE NOT IN (SELECT DISTINCT ID_DIPENDENTE FROM partecipanti_globali WHERE PCT_UTILIZZO<=0)
-                AND (oc.DATA IS NULL OR (oc.DATA >= $dataInizio and oc.DATA <= $dataFine))
+                AND (oc.DATA IS NULL OR (oc.DATA >= DATE('$dataInizio') and oc.DATA <= DATE('$dataFine')))
                 ORDER BY 1";
         $ore = select_column($query);
         if (count($ore) > 0) {
@@ -165,17 +167,16 @@ class ConsuntiviProgettiManager {
 
         $query = "SELECT count(*)
             FROM progetti_commesse pc
-            JOIN partecipanti_globali p ON 1=1
             JOIN progetti pr ON pr.ID_PROGETTO=pc.ID_PROGETTO
             JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=pc.COD_COMMESSA 
-                AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE
-                AND oc.DATA >= $dataInizio AND oc.DATA <= $dataFine
+                AND oc.DATA >= DATE('$dataInizio') AND oc.DATA <= DATE('$dataFine')
                 AND NUM_ORE_RESIDUE > 0
-            WHERE pr.ID_PROGETTO=$idProgetto AND oc.DATA >= $dataInizio and oc.DATA <= $dataFine
-            AND pc.DATA_INIZIO=$dataInizio AND pc.DATA_FINE=$dataFine";
+            JOIN partecipanti_globali p ON  oc.ID_DIPENDENTE=p.ID_DIPENDENTE
+            WHERE pr.ID_PROGETTO=$idProgetto AND oc.DATA >= DATE('$dataInizio') and oc.DATA <= DATE('$dataFine')
+            AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')";
         $cnt = select_single_value($query);
         if ($cnt == 0) {
-            $message->error .= "Nessun caricamento trovato per questo progetto!" . NL;
+            $message->error .= "Nessun caricamento trovato per il progetto n.$idProgetto!" . NL;
             $canGoOn = false;
         }
 
@@ -183,8 +184,6 @@ class ConsuntiviProgettiManager {
     }
 
     function get_progetti_attivi($dataInizio, $dataFine) {
-        $dataInizio = $dataInizio->format('Y-m-d');
-        $dataFine = $dataFine->format('Y-m-d');
         $query = "SELECT *
             FROM progetti p
             WHERE p.DATA_FINE >= DATE('$dataInizio') AND p.DATA_INIZIO <= DATE('$dataFine')";
@@ -198,9 +197,6 @@ class ConsuntiviProgettiManager {
      * Salva il risultato nella tabella di lavoro
      */
     function estrazione_caricamenti($idEsecuzione, $idProgetto, $dataInizio, $dataFine, &$message) {
-
-        $dataInizio = $dataInizio->format('Y-m-d');
-        $dataFine = $dataFine->format('Y-m-d');
 
         $query = "INSERT INTO assegnazioni_dettaglio (ID_ESECUZIONE, ID_PROGETTO,
                 COD_COMMESSA, PCT_COMPATIBILITA,
@@ -254,7 +250,7 @@ class ConsuntiviProgettiManager {
     /**
      * Mostra un riepilogo delle ore caricate su commesse di progetto e restituisce il totale
      */
-    function show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, &$message) {
+    function show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $dataInizio, $dataFine, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_p) . "'";
         $query = "SELECT COD_COMMESSA, SUM(NUM_ORE_RESIDUE) AS ORE
                 FROM assegnazioni_dettaglio ad
@@ -273,7 +269,7 @@ class ConsuntiviProgettiManager {
             $totale += (float) $t['ORE'];
         }
 
-        $ore_previste = $this->get_ore_previste($idProgetto, $commesse_p);
+        $ore_previste = $this->get_ore_previste($idProgetto, $commesse_p, $dataInizio, $dataFine);
         
         $message->success .= "<strong>Tot. $totale ore di progetto, contro $ore_previste previste</strong>". NL;
 
@@ -283,7 +279,7 @@ class ConsuntiviProgettiManager {
     /**
      * Mostra un riepilogo delle ore caricate su commesse compatibili e restituisce il totale
      */
-    function show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, &$message) {
+    function show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         $query = "SELECT COD_COMMESSA,
                     SUM(NUM_ORE_RESIDUE) AS ORE,
@@ -305,7 +301,7 @@ class ConsuntiviProgettiManager {
             $totale += (float) $t['ORE_COMP'];
         }
 
-        $ore_previste = $this->get_ore_previste($idProgetto, $commesse_c);
+        $ore_previste = $this->get_ore_previste($idProgetto, $commesse_c, $dataInizio, $dataFine);
         
         $totale = round($totale*100)/100;
         $message->success .= "<strong>Tot. $totale ore su commesse compatibili, contro $ore_previste previste</strong>". NL;
@@ -628,7 +624,7 @@ class ConsuntiviProgettiManager {
         $message->success .= "<THEAD>
                 <TR>
                     <TH>COMMESSA</TH>
-                    <TD>PROGETTO</TD>
+                    <TH>PROGETTO</TH>
                     <TH>PCT. COMPAT.</TH>
                     <TH>DIPENDENTE</TH>
                     <TH>PCT. IMPIEGO</TH>
