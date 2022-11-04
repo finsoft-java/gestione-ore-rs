@@ -20,9 +20,19 @@ class ReportBudgetManager {
         return select_single($sql);
     }
 
-    function get_matricole_progetto($id_progetto) {
+    function get_matricole_progetto($id_progetto, $anno=null, $mese=null) {
         global $panthera;
-        $sql = "SELECT DISTINCT ID_DIPENDENTE FROM progetti_persone WHERE ID_PROGETTO = '$id_progetto' ORDER BY 1";
+
+        $sql = "SELECT DISTINCT ID_DIPENDENTE, ID_PROGETTO
+                FROM ore_consuntivate_progetti oc
+                WHERE ID_PROGETTO=$id_progetto";
+
+        if (!empty($anno) && !empty($mese)) {
+            $primo = "DATE('$anno-$mese-01')";
+            $sql .= " AND DATA >= $primo AND DATA <= LAST_DAY($primo)";
+        }
+
+        $sql .= " ORDER BY 1";
         $matricole = select_list($sql); // voglio proprio una lista di oggetti, non una colonna
         foreach ($matricole as $key => $m) {
             $matricole[$key]['COGNOME_NOME'] = $panthera->getUtenteByIdDipendente($m['ID_DIPENDENTE']);
@@ -44,7 +54,7 @@ class ReportBudgetManager {
 
     function get_matrice_consuntivi_progetto($progetto, $anno=null, $mese=null) {
         
-        $lista_matricole = $this->get_matricole_progetto($progetto['ID_PROGETTO']);
+        $lista_matricole = $this->get_matricole_progetto($progetto['ID_PROGETTO'], $anno, $mese);
 
         foreach($lista_matricole as $key => $matricola) {
             $consuntivi = $this->get_consuntivi_matricola($progetto['ID_PROGETTO'], $matricola['ID_DIPENDENTE']);
