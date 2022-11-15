@@ -117,7 +117,7 @@ class PartecipantiManager {
             }
 
             if (array_key_exists($matricola, $mapMatricoleUtenti)) {
-                $dipendente = $mapMatricoleUtenti[$matricola]['ID_DIPENDENTE'];
+                $dipendente = $mapMatricoleUtenti[$matricola][0]['ID_DIPENDENTE'];
             } else {
                 $message->error .= "Matricola non riconosciuta: $matricola<br/>";
                 // non posso continuare perchè l'ID_DIPENDENTE è chiave primaria
