@@ -191,7 +191,7 @@ class CommesseManager
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
             foreach ($projectMap as $curCol => $idProgetto) {
                 $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
-                $valueOre = $spreadSheetAry[$curRow][$curCol];
+                $valueOre = empty($spreadSheetAry[$curRow][$curCol]) ? 0.0 : $spreadSheetAry[$curRow][$curCol];
                 if (!empty($idProgetto)) {
                     $query = "REPLACE INTO progetti_commesse (ID_PROGETTO,COD_COMMESSA,ORE_PREVISTE, DATA_INIZIO, DATA_FINE)
                     VALUES('$idProgetto','$codCommessa','$valueOre', '$dataInizio', '$dataFine')";
