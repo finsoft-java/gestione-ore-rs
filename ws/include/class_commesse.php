@@ -144,7 +144,9 @@ class CommesseManager
             $query = "SELECT ID_PROGETTO from progetti WHERE ACRONIMO = '$acronimo'";
             $projectMap[$curCol] = select_single_value($query); //mappa acronimo -> idProgetto
             if (empty($projectMap[$curCol])) {
-                $message->error .= "Acronimo non trovato: $acronimo <br/>";
+                if ($acronimo !== NULL && $acronimo !== '') {
+                    $message->error .= "Acronimo non trovato: $acronimo <br/>";
+                }
             }
         }
 
