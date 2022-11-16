@@ -37,7 +37,7 @@
         <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
             <mat-form-field appearance="fill" style="margin-right: 10px;">
                 <mat-label>Data Inizio</mat-label>
-                <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_INIZIO"
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="dataInizio"
                     [matDatepicker]="picker">
                 <mat-datepicker-toggle matSuffix [for]="picker">
                     <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
@@ -47,7 +47,7 @@
             </mat-form-field>
             <mat-form-field appearance="fill">
                 <mat-label>Data Fine</mat-label>
-                <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.DATA_FINE"
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="dataFine"
                     [matDatepicker]="picker2">
                 <mat-datepicker-toggle matSuffix [for]="picker2">
                     <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
@@ -122,7 +122,7 @@
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Data Ultimo report</mat-label>
                     <input matInput readonly [ngModelOptions]="{standalone: true}"
-                        [(ngModel)]="progetto.DATA_ULTIMO_REPORT" [matDatepicker]="picker3">
+                        [(ngModel)]="dataUltimoReport" [matDatepicker]="picker3">
                     <mat-datepicker-toggle matSuffix [for]="picker3">
                         <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                     </mat-datepicker-toggle>
