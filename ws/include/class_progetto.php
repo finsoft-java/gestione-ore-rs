@@ -115,12 +115,15 @@ class ProgettiManager
     {
         $sql = "SELECT COUNT(*) FROM assegnazioni_dettaglio WHERE ID_PROGETTO='$id_progetto'";
         $count = select_single_value($sql);
-        if ($sql > 0) {
-            print_error(400, 'Impossibile eliminare un porgetto se ha delle ore assegnate');
+        if ($count > 0) {
+            print_error(400, 'Impossibile eliminare un progetto se ha delle ore assegnate');
         }
         $sql = "DELETE FROM progetti_commesse WHERE id_progetto = '$id_progetto'";
+        execute_update($sql);
         $sql = "DELETE FROM progetti_persone WHERE id_progetto = '$id_progetto'";
+        execute_update($sql);
         $sql = "DELETE FROM progetti_spese WHERE id_progetto = '$id_progetto'";
+        execute_update($sql);
         $sql = "DELETE FROM progetti WHERE id_progetto = '$id_progetto'";
         execute_update($sql);
     }
