@@ -534,11 +534,12 @@ class ConsuntiviProgettiManager {
      * Stampa il riepilogo per commessa
      */
     function riepilogo_per_commessa($idEsecuzione, &$message) {
-        $query = "SELECT ID_PROGETTO, COD_COMMESSA, SUM(NUM_ORE_PRELEVATE) as NUM_ORE_PRELEVATE
+        $query = "SELECT ad.ID_PROGETTO, p.ACRONIMO, COD_COMMESSA, SUM(NUM_ORE_PRELEVATE) as NUM_ORE_PRELEVATE
             FROM assegnazioni_dettaglio ad
+            LEFT JOIN progetti p ON ad.ID_PROGETTO=p.ID_PROGETTO
             WHERE ID_ESECUZIONE=$idEsecuzione
-            GROUP BY COD_COMMESSA, ID_PROGETTO
-            ORDER BY COD_COMMESSA, ID_PROGETTO";
+            GROUP BY ad.COD_COMMESSA, ad.ID_PROGETTO, p.ACRONIMO
+            ORDER BY ad.COD_COMMESSA, ad.ID_PROGETTO";
         $caricamenti = select_list($query);
 
         $message->success .= NL . "Riepilogo delle ore prelevate per commessa/dipendente:" . NL;
@@ -557,7 +558,7 @@ class ConsuntiviProgettiManager {
                 $message->success .= "
                     <TR>
                         <TD>$c[COD_COMMESSA]</TD>
-                        <TD>$c[ID_PROGETTO]</TD>
+                        <TD>$c[ACRONIMO]</TD>
                         <TD>$c[NUM_ORE_PRELEVATE]</TD>
                     </TR>";
             }
@@ -572,11 +573,12 @@ class ConsuntiviProgettiManager {
      * Stampa il riepilogo per commessa/dipendente
      */
     function riepilogo_per_commessa_dipendente($idEsecuzione, &$message) {
-        $query = "SELECT ID_DIPENDENTE, ID_PROGETTO, COD_COMMESSA, SUM(NUM_ORE_PRELEVATE) as NUM_ORE_PRELEVATE
+        $query = "SELECT ad.ID_DIPENDENTE, ad.ID_PROGETTO, p.ACRONIMO, ad.COD_COMMESSA, SUM(NUM_ORE_PRELEVATE) as NUM_ORE_PRELEVATE
             FROM assegnazioni_dettaglio ad
+            LEFT JOIN progetti p ON ad.ID_PROGETTO=p.ID_PROGETTO
             WHERE ID_ESECUZIONE=$idEsecuzione
-            GROUP BY COD_COMMESSA, ID_PROGETTO, ID_DIPENDENTE
-            ORDER BY COD_COMMESSA, ID_PROGETTO, ID_DIPENDENTE";
+            GROUP BY ad.COD_COMMESSA, ad.ID_PROGETTO, ad.ID_DIPENDENTE, p.ACRONIMO
+            ORDER BY ad.COD_COMMESSA, ad.ID_PROGETTO, ad.ID_DIPENDENTE";
         $caricamenti = select_list($query);
 
         $message->success .= NL . "Riepilogo delle ore prelevate per commessa/dipendente:" . NL;
@@ -596,7 +598,7 @@ class ConsuntiviProgettiManager {
                 $message->success .= "
                     <TR>
                         <TD>$c[COD_COMMESSA]</TD>
-                        <TD>$c[ID_PROGETTO]</TD>
+                        <TD>$c[ACRONIMO]</TD>
                         <TD>$c[ID_DIPENDENTE]</TD>
                         <TD>$c[NUM_ORE_PRELEVATE]</TD>
                     </TR>";
@@ -613,8 +615,10 @@ class ConsuntiviProgettiManager {
      */
     function log($idEsecuzione, &$message) {
         $query = "SELECT ad.*,
-                (SELECT ORE_PRESENZA_ORDINARIE FROM ore_presenza_lul l WHERE l.DATA=ad.DATA and l.ID_DIPENDENTE=ad.ID_DIPENDENTE) AS ORE_LUL
+                (SELECT ORE_PRESENZA_ORDINARIE FROM ore_presenza_lul l WHERE l.DATA=ad.DATA and l.ID_DIPENDENTE=ad.ID_DIPENDENTE) AS ORE_LUL,
+                p.ACRONIMO
             FROM assegnazioni_dettaglio ad
+            LEFT JOIN progetti p ON ad.ID_PROGETTO=p.ID_PROGETTO
             WHERE ID_ESECUZIONE=$idEsecuzione
             ORDER BY ID_DIPENDENTE, DATA, COD_COMMESSA";
         $caricamenti = select_list($query);
@@ -641,7 +645,7 @@ class ConsuntiviProgettiManager {
                 $message->success .= "
                     <TR>
                         <TD>$c[COD_COMMESSA]</TD>
-                        <TD>$c[ID_PROGETTO]</TD>
+                        <TD>$c[ACRONIMO]</TD>
                         <TD>$c[PCT_COMPATIBILITA]</TD>
                         <TD>$c[ID_DIPENDENTE]</TD>
                         <TD>$c[PCT_UTILIZZO]</TD>
