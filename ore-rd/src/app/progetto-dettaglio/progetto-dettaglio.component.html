@@ -39,8 +39,8 @@
         <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
             <mat-form-field appearance="fill" style="margin-right: 10px;">
                 <mat-label>Data Inizio</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="dataInizio"
-                    [matDatepicker]="picker" required>
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="dataInizio" [matDatepicker]="picker"
+                    required>
                 <mat-datepicker-toggle matSuffix [for]="picker">
                     <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                 </mat-datepicker-toggle>
@@ -49,8 +49,8 @@
 
             <mat-form-field appearance="fill">
                 <mat-label>Data Fine</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="dataFine"
-                    [matDatepicker]="picker2" required>
+                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="dataFine" [matDatepicker]="picker2"
+                    required>
                 <mat-datepicker-toggle matSuffix [for]="picker2">
                     <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                 </mat-datepicker-toggle>
@@ -134,8 +134,8 @@
             <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
                     <mat-label>Data Ultimo report</mat-label>
-                    <input matInput readonly [ngModelOptions]="{standalone: true}"
-                        [(ngModel)]="dataUltimoReport" [matDatepicker]="picker3">
+                    <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="dataUltimoReport"
+                        [matDatepicker]="picker3">
                     <mat-datepicker-toggle matSuffix [for]="picker3">
                         <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                     </mat-datepicker-toggle>
