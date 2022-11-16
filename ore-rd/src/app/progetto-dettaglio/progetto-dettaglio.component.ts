@@ -199,6 +199,15 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
   }
 
+  deleteProgetto() {
+
+    this.progettiService.delete(this.progetto.ID_PROGETTO!)
+      .subscribe(res => {
+        this.router.navigate(['/progetti']);
+      }
+      );
+  }
+
   uploadGiustificativo(p: Progetto, event: any) {
 
     console.log(event);
