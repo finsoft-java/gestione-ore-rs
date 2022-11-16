@@ -86,7 +86,7 @@ export class StoricoAssociazioniOreComponent implements OnInit {
   }
 
   eliminaPeriodo(p: Periodo) {
-    if (confirm(`Stai per eliminare il periodo ${p.DATA_INIZIO}-${p.DATA_FINE}, sei sicuro?`)) {
+    if (confirm(`Stai per eliminare il periodo ${p.DATA_INIZIO} - ${p.DATA_FINE}, sei sicuro?`)) {
       this.periodiService.eliminaPeriodo(p.DATA_INIZIO, p.DATA_FINE).subscribe(
         response => { this.loadPeriodi(); },
         error => { this.alertService.error(error); }
