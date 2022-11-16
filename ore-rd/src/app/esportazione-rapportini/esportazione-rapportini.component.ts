@@ -39,7 +39,7 @@ export const MY_FORMATS = {
   },
   {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS}],
 })
-export class EsportazioneRapportiniComponent implements OnInit {
+export class EsportazioneRapportiniComponent {
     date = new FormControl(moment());
     isEsploso = false;
 
@@ -58,9 +58,6 @@ export class EsportazioneRapportiniComponent implements OnInit {
       ctrlValue.month(normalizedMonth.month());
       this.date.setValue(ctrlValue);
       datepicker.close();
-    }
-
-    ngOnInit(): void {
     }
 
     download() {

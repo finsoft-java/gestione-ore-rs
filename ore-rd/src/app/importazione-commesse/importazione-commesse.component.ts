@@ -1,33 +1,52 @@
-import { UploadCommesseService } from '../_services/upload.commesse.service ';
 import { HttpResponse, HttpEventType } from '@angular/common/http';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AlertService } from './../_services/alert.service';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { formatDate } from '@angular/common';
+import { UploadCommesseService } from '../_services/upload.commesse.service ';
+import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
+import * as _moment from 'moment';
+
+export const MY_FORMATS = {
+  parse: {
+    dateInput: 'LL'
+  },
+  display: {
+    dateInput: 'DD/MM/YYYY',
+    monthYearLabel: 'YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'YYYY'
+  }
+};
 
 
 @Component({
   selector: 'app-importazione-commesse',
   templateUrl: './importazione-commesse.component.html',
-  styleUrls: ['./importazione-commesse.component.css']
+  styleUrls: ['./importazione-commesse.component.css'],
+  providers: [{
+    provide: DateAdapter,
+    useClass: MomentDateAdapter,
+    deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS]
+  },
+  { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS }]
 })
-export class ImportazioneCommesseComponent implements OnInit {
+export class ImportazioneCommesseComponent {
 
   displayedColumns: string[] = ['tipologia', 'codCommessa', 'totOrePreviste', 'pctCompatibilita', 'totOreRdPreviste', 'progetto1', 'progetto2', 'altri'];
 
   selectedFiles?: FileList;
-  dataInizio?: Date;
-  dataFine?: Date;
+  dataInizio?: _moment.Moment;
+  dataFine?: _moment.Moment;
   progressInfos = { value: 0, fileName: 'Caricamento' };
   message_success = '';
   message_error = '';
   eventoClick?: any;
   nomeFile: string = '';
   loading = false;
+
   @ViewChild('fileInput') inputFile?: ElementRef;
 
   constructor(private uploadCommesseService: UploadCommesseService, private alertService: AlertService) { }
-
-  ngOnInit(): void { }
 
   reset() {
     this.eventoClick.srcElement.value = null;
@@ -54,8 +73,8 @@ export class ImportazioneCommesseComponent implements OnInit {
 
   uploadFiles() {
     if (this.dataFine && this.dataInizio && this.selectedFiles) {
-      const dataInizioString: string = formatDate(this.dataInizio, 'YYYY-MM-dd', 'en-GB');
-      const dataFineString: string = formatDate(this.dataFine, 'YYYY-MM-dd', 'en-GB');
+      const dataInizioString: string = this.dataInizio.format('YYYY-MM-DD');
+      const dataFineString: string = this.dataFine.format('YYYY-MM-DD');
       this.upload(this.selectedFiles, dataInizioString, dataFineString);
     }
   }

@@ -12,14 +12,13 @@ import { Component, OnInit } from '@angular/core';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import * as _moment from 'moment';
-import { formatDate } from '@angular/common';
 
 export const MY_FORMATS = {
   parse: {
     dateInput: 'LL'
   },
   display: {
-    dateInput: 'DD-MM-YYYY',
+    dateInput: 'DD/MM/YYYY',
     monthYearLabel: 'YYYY',
     dateA11yLabel: 'LL',
     monthYearA11yLabel: 'YYYY'
@@ -54,6 +53,9 @@ export class ProgettoDettaglioComponent implements OnInit {
   allTipiCosto: { ID_TIPO_COSTO: string, DESCRIZIONE: string }[] = [];
   idProgetto!: number | null;
   errore_stringa = '';
+  dataInizio?: _moment.Moment;
+  dataFine?: _moment.Moment;
+  dataUltimoReport?: _moment.Moment;
 
   constructor(private authenticationService: AuthenticationService,
     private progettiService: ProgettiService,
@@ -116,6 +118,9 @@ export class ProgettoDettaglioComponent implements OnInit {
         this.progetto = new Progetto;
         this.progetto = response.value;
         this.progetto_old = response.value;
+        this.dataInizio = _moment(this.progetto.DATA_INIZIO);
+        this.dataFine = _moment(this.progetto.DATA_FINE);
+        this.dataUltimoReport = _moment(this.progetto.DATA_ULTIMO_REPORT);
       },
         error => {
           this.alertService.error(error);
@@ -169,14 +174,10 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   salva() {
-    if (this.progetto.DATA_FINE)
-      this.progetto.DATA_FINE = formatDate(this.progetto.DATA_FINE, "YYYY-MM-dd", "en-GB");
 
-    if (this.progetto.DATA_INIZIO)
-      this.progetto.DATA_INIZIO = formatDate(this.progetto.DATA_INIZIO, "YYYY-MM-dd", "en-GB");
-
-    if (this.progetto.DATA_ULTIMO_REPORT)
-      this.progetto.DATA_ULTIMO_REPORT = formatDate(this.progetto.DATA_ULTIMO_REPORT, "YYYY-MM-dd", "en-GB");
+    this.progetto.DATA_INIZIO = this.dataInizio ? this.dataInizio!.format('YYYY-MM-DD') : null;
+    this.progetto.DATA_FINE = this.dataFine ? this.dataFine!.format('YYYY-MM-DD') : null;
+    this.progetto.DATA_ULTIMO_REPORT = this.dataUltimoReport ? this.dataUltimoReport!.format('YYYY-MM-DD') : null;
 
     if (this.idProgetto == null) {
       this.progettiService.insert(this.progetto)
@@ -275,23 +276,6 @@ export class ProgettoDettaglioComponent implements OnInit {
     }
     this.dataSource.data = data;
   }
-
-  // nuovoProgettoPersona() {
-  //   let nuovo: ProgettoPersona;
-  //   nuovo = {
-  //     ID_PROGETTO: this.progetto.ID_PROGETTO,
-  //     ID_DIPENDENTE: null,
-  //     PCT_IMPIEGO: 0,
-  //     isEditable: true,
-  //     isInsert: true
-  //   };
-  //   let array: any[] = [];
-  //   if (this.dataSourcePersone.data != null) {
-  //     array = this.dataSourcePersone.data;
-  //   }
-  //   array.push(nuovo);
-  //   this.dataSourcePersone.data = array;
-  // }
 
   deleteChange(prgSpesa: ProgettoSpesa) {
     if (prgSpesa.ID_PROGETTO != null && prgSpesa.ID_SPESA != null) {
