@@ -182,8 +182,9 @@ export class ProgettoDettaglioComponent implements OnInit {
     if (this.idProgetto == null) {
       this.progettiService.insert(this.progetto)
         .subscribe(response => {
-          this.alertService.success("Progetto inserito con successo");
+          this.progetto = response.value;
           this.router.navigate(['/progetto/' + response.value.ID_PROGETTO]);
+          this.alertService.success("Progetto inserito con successo");
         },
           error => {
             this.alertService.error(error);
@@ -191,8 +192,9 @@ export class ProgettoDettaglioComponent implements OnInit {
     } else {
       this.progettiService.update(this.progetto)
         .subscribe(response => {
-          this.alertService.success("Progetto modificato con successo");
+          this.progetto = response.value;
           this.router.navigate(['/progetto/' + response.value.ID_PROGETTO]);
+          this.alertService.success("Progetto modificato con successo");
         },
           error => {
             this.alertService.error(error);
