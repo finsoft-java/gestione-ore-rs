@@ -113,7 +113,15 @@ class ProgettiManager
 
     public function elimina($id_progetto)
     {
-        $sql = "DELETE FROM progetti WHERE id_progetto = '$id_progetto'"; //on delete cascade! (FIXME funziona anche con i questionari?!?)
+        $sql = "SELECT COUNT(*) FROM assegnazioni_dettaglio WHERE ID_PROGETTO='$id_progetto'";
+        $count = select_single_value($sql);
+        if ($sql > 0) {
+            print_error(400, 'Impossibile eliminare un porgetto se ha delle ore assegnate');
+        }
+        $sql = "DELETE FROM progetti_commesse WHERE id_progetto = '$id_progetto'";
+        $sql = "DELETE FROM progetti_persone WHERE id_progetto = '$id_progetto'";
+        $sql = "DELETE FROM progetti_spese WHERE id_progetto = '$id_progetto'";
+        $sql = "DELETE FROM progetti WHERE id_progetto = '$id_progetto'";
         execute_update($sql);
     }
 
