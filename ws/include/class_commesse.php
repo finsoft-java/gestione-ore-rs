@@ -64,39 +64,6 @@ class CommesseManager
         return $arr;
     }
 
-    /*public function crea($json_data)
-    {
-        global $con;
-
-        $this->controllo_pct_commessa($json_data);
-
-        $sql = insert("progetti_commesse", [
-            "ID_PROGETTO" => $json_data->ID_PROGETTO,
-            "COD_COMMESSA" => $con->escape_string($json_data->COD_COMMESSA),
-            "PCT_COMPATIBILITA" => $json_data->PCT_COMPATIBILITA,
-            "NOTE" => $con->escape_string($json_data->NOTE),
-        ]);
-        execute_update($sql);
-        return $this->get_commessa($json_data->ID_PROGETTO, $json_data->COD_COMMESSA);
-    }
-
-    public function aggiorna($progetto, $json_data)
-    {
-        global $con;
-
-        $this->controllo_pct_commessa($json_data);
-
-        $sql = update("progetti_commesse", [
-            "PCT_COMPATIBILITA" => $json_data->PCT_COMPATIBILITA,
-            "NOTE" => $con->escape_string($json_data->NOTE),
-        ], [
-            "ID_PROGETTO" => $json_data->ID_PROGETTO,
-            "COD_COMMESSA" => $con->escape_string($json_data->COD_COMMESSA),
-        ]);
-        execute_update($sql);
-        return $this->get_commessa($json_data->ID_PROGETTO, $json_data->COD_COMMESSA);
-    }*/
-
     public function controllo_pct_commessa($json_data)
     {
         if ($json_data->PCT_COMPATIBILITA >= 100) {
@@ -119,12 +86,6 @@ class CommesseManager
             }
         }
     }
-
-    /*public function elimina($codCommessa)
-    {
-        $sql = "DELETE FROM commesse WHERE AND cod_commessa = '$codCommessa'";
-        execute_update($sql);
-    }*/
 
     public function importExcel($filename, &$message, $typeFile, $dataInizio, $dataFine)
     {
@@ -212,4 +173,13 @@ class CommesseManager
                 ORDER BY DATA_FINE DESC, DATA_INIZIO DESC";
         return select_list($sql);
     }
+
+    public function elimina_periodo($dataInizio, $dataFine)
+    {
+        $sql = "DELETE FROM commesse WHERE
+                    DATA_INIZIO=DATE('$dataInizio') AND
+                    DATA_FINE=DATE('$dataFine')";
+        execute_update($sql);
+    }
+
 }

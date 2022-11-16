@@ -1,10 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Caricamento, Esecuzione } from '../_models';
+import { Caricamento, Esecuzione, Periodo } from '../_models';
 import { AlertService } from '../_services/alert.service';
 import { CaricamentiService } from '../_services/caricamenti.service';
 import { EsecuzioniService } from '../_services/esecuzioni.service';
+import { PeriodiService } from '../_services/periodi.service';
 
 @Component({
   selector: 'app-storico-associazioni-ore',
@@ -24,13 +24,18 @@ export class StoricoAssociazioniOreComponent implements OnInit {
 
   dataSource2 = new MatTableDataSource<Caricamento>();
   displayedColumns2: string[] = ['idCaricamento', 'utente', 'tmsEsecuzione', 'actions'];
+  
+  allPeriodiCommesse: Periodo[] = [];
+  periodoCommessa?: Periodo;
 
   constructor(private esecuzioniService: EsecuzioniService,
     private caricamentiService: CaricamentiService,
+    private periodiService: PeriodiService,
     private alertService: AlertService) { }
 
   ngOnInit(): void {
     this.getLast();
+    this.loadPeriodi();
   }
 
   getLast() {
@@ -78,6 +83,21 @@ export class StoricoAssociazioniOreComponent implements OnInit {
         error => { this.alertService.error(error); }
       );
     }
+  }
+
+  eliminaPeriodo(p: Periodo) {
+    if (confirm(`Stai per eliminare il periodo ${p.DATA_INIZIO}-${p.DATA_FINE}, sei sicuro?`)) {
+      this.periodiService.eliminaPeriodo(p.DATA_INIZIO, p.DATA_FINE).subscribe(
+        response => { this.loadPeriodi(); },
+        error => { this.alertService.error(error); }
+      );
+    }
+  }
+
+  loadPeriodi() {
+    this.periodiService.getAll().subscribe(response => {
+      this.allPeriodiCommesse = response.data;
+    });
   }
 
 }

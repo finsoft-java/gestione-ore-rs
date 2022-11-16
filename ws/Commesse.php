@@ -57,10 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     //==========================================================
-    if (!$cod_commessa) {
-        print_error(400, 'Missing cod_commessa');
+    if (!$dataInizio) {
+        print_error(400, 'Missing DATA_INIZIO');
     }
-    $commesseManager->elimina($cod_commessa);
+    if (!$dataFine) {
+        print_error(400, 'Missing DATA_FINE');
+    }
+    $commesseManager->elimina_periodo($dataInizio, $dataFine);
     
 } else {
     //==========================================================

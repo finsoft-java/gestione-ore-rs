@@ -78,3 +78,21 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns2"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns2;"></tr>
 </table>
+
+<!-- ====================================================================================== -->
+<hr/>
+
+<p><b>Classificazioni commesse</b></p>
+
+
+<div style="display: block; margin: 0px auto;width: 40%;">
+    <mat-form-field appearance="fill" style="width: calc(100% - 105px); margin-right: 5px;">
+        <mat-label>Periodo</mat-label>
+        <mat-select [(ngModel)]="periodoCommessa" name="x" required>
+            <mat-option *ngFor="let x of allPeriodiCommesse" [value]="x">
+                {{"Da: " + x.DATA_INIZIO + " A: " + x.DATA_FINE}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <button mat-raised-button color="warn" [disabled]="!periodoCommessa" (click)="eliminaPeriodo(periodoCommessa!)">Elimina</button>
+</div>

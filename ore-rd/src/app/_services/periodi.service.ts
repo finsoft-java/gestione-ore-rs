@@ -12,4 +12,8 @@ export class PeriodiService {
         return this.http.get<ListBean<Periodo>>(environment.wsUrl + `Periodi.php`);
     }
 
+    eliminaPeriodo(dataInizio: string, dataFine: string) {
+        return this.http.delete<void>(environment.wsUrl + `Commesse.php?DATA_INIZIO=${dataInizio}&DATA_FINE=${dataFine}`);
+    }
+
 }
