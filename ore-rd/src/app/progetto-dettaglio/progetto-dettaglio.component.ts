@@ -269,23 +269,6 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.dataSource.data = data;
   }
 
-  // nuovoProgettoPersona() {
-  //   let nuovo: ProgettoPersona;
-  //   nuovo = {
-  //     ID_PROGETTO: this.progetto.ID_PROGETTO,
-  //     ID_DIPENDENTE: null,
-  //     PCT_IMPIEGO: 0,
-  //     isEditable: true,
-  //     isInsert: true
-  //   };
-  //   let array: any[] = [];
-  //   if (this.dataSourcePersone.data != null) {
-  //     array = this.dataSourcePersone.data;
-  //   }
-  //   array.push(nuovo);
-  //   this.dataSourcePersone.data = array;
-  // }
-
   deleteChange(prgSpesa: ProgettoSpesa) {
     if (prgSpesa.ID_PROGETTO != null && prgSpesa.ID_SPESA != null) {
       this.progettiSpesaService.delete(prgSpesa.ID_PROGETTO, prgSpesa.ID_SPESA)
