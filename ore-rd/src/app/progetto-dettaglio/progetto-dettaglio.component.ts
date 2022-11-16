@@ -205,7 +205,10 @@ export class ProgettoDettaglioComponent implements OnInit {
     this.progettiService.delete(this.progetto.ID_PROGETTO!)
       .subscribe(res => {
         this.router.navigate(['/progetti']);
-      }
+      },
+        error => {
+          this.alertService.error(error);
+        }
       );
   }
 
