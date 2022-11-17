@@ -35,8 +35,10 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
     this.partecipanteService.getAll().subscribe(response => {
       this.allPartecipanti = response.data;
-      this.dataSource = new MatTableDataSource<Partecipante>(response.data);
+      console.log(this.allPartecipanti);
       this.isLoading = false;
+      this.getMatricole();
+      
     },
       error => {
         this.alertService.error(error);
@@ -57,6 +59,13 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
     this.partecipanteService.getAllMatricole().subscribe(response => {
       this.allNomeMatricole = response.data;
+
+      this.allPartecipanti.forEach(x => {
+        x.DENOMINAZIONE = this.getNomeMatricola(x.ID_DIPENDENTE);
+      });
+
+      this.allPartecipanti.sort((a, b) => a.DENOMINAZIONE.localeCompare(b.DENOMINAZIONE));
+      this.dataSource = new MatTableDataSource<Partecipante>(this.allPartecipanti);
     },
       error => {
         this.alertService.error(error);

@@ -117,18 +117,25 @@ class PantheraManager {
     }
 
     function getUtenti() {
+
         if ($this->mock) {
-            $matricole = [ [ 'MATRICOLA' => '1234', 'ID_DIPENDENTE' => 'F01234', 'DENOMINAZIONE' => 'Rossi Mario' ],
-                      [ 'MATRICOLA' => '4321', 'ID_DIPENDENTE' => 'F04321', 'DENOMINAZIONE' => 'Verdi Carlo' ],
-                      [ 'MATRICOLA' => '6666', 'ID_DIPENDENTE' => 'F06666', 'DENOMINAZIONE' => 'Bianchi Gianni' ]
-                     ];
+            $matricole = [ [ 'MATRICOLA' => '5', 'ID_DIPENDENTE' => 'F000005', 'DENOMINAZIONE' => 'Mario Molinari' ],
+                        [ 'MATRICOLA' => '8', 'ID_DIPENDENTE' => 'F000008', 'DENOMINAZIONE' => 'Rio Contra' ],
+                        [ 'MATRICOLA' => '42', 'ID_DIPENDENTE' => 'F000042', 'DENOMINAZIONE' => 'Bianchi Bianca' ],
+                        [ 'MATRICOLA' => '276', 'ID_DIPENDENTE' => 'F000276', 'DENOMINAZIONE' => 'Cicci Virginia' ],
+                        [ 'MATRICOLA' => '297', 'ID_DIPENDENTE' => 'F000297', 'DENOMINAZIONE' => 'Bello Figo' ],
+                        [ 'MATRICOLA' => '1234', 'ID_DIPENDENTE' => 'F01234', 'DENOMINAZIONE' => 'Rossi Mario' ],
+                        [ 'MATRICOLA' => '4321', 'ID_DIPENDENTE' => 'F04321', 'DENOMINAZIONE' => 'Verdi Carlo' ],
+                        [ 'MATRICOLA' => '6666', 'ID_DIPENDENTE' => 'F06666', 'DENOMINAZIONE' => 'Bianchi Gianni' ] ];
         } else {
             $query = "SELECT DISTINCT RTRIM(ID_DIPENDENTE) AS ID_DIPENDENTE,RTRIM(DENOMINAZIONE) AS DENOMINAZIONE,RTRIM(MATRICOLA) AS MATRICOLA
                     FROM THIP.DIPENDENTI_V01
                     WHERE ID_AZIENDA='001'
                     ORDER BY RTRIM(DENOMINAZIONE) ASC";
+
             $matricole = $this->select_list($query);
-        }        
+        }
+
         return $matricole;
     }
 
