@@ -108,7 +108,7 @@ class PartecipantiManager {
             $matricola = $spreadSheetAry[$curRow][COL_PARTECIPANTI_MATRICOLA];
             $dipendente = null;
             $pctImpiego = $spreadSheetAry[$curRow][COL_PARTECIPANTI_PCT_IMPEGO];
-            $mansione = $spreadSheetAry[$curRow][COL_PARTECIPANTI_MANSIONE];
+            $mansione = $con->escape_string($spreadSheetAry[$curRow][COL_PARTECIPANTI_MANSIONE]);
             $costo = $spreadSheetAry[$curRow][COL_PARTECIPANTI_COSTO];
 
             if (empty($matricola) || empty($pctImpiego)) {

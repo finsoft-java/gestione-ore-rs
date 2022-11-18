@@ -112,8 +112,8 @@ class CommesseManager
         $contatore = 0;
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
 
-            $tipologiaCommessa = $spreadSheetAry[$curRow][COL_TIPO_COMMESSA];
-            $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
+            $tipologiaCommessa = $con->escape_string($spreadSheetAry[$curRow][COL_TIPO_COMMESSA]);
+            $codCommessa = $con->escape_string($spreadSheetAry[$curRow][COL_COD_COMMESSA]);
             $totOreCommessa = $spreadSheetAry[$curRow][COL_TOT_ORE];
             $pctCompatibilita = $spreadSheetAry[$curRow][COL_PCT_RD];
             $totOreRd = $spreadSheetAry[$curRow][COL_TOT_ORE_RD];
