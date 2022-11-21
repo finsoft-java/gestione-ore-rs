@@ -50,4 +50,6 @@ define('COL_COMMESSA',      14);
 define('COL_NUM_ORE',       16);
 define('DATE_FORMAT', 'n/j/Y H:i'); // Anche se a video vedo gg/mm/aaaa hh:mm:ss, PHP lo vede in formato m/g/aaaa hh:mm
 
+define('MAX_EXECUTION_TIME_ASSEGNAZIONE', 10*60); // timeout in secondi
+
 ?>

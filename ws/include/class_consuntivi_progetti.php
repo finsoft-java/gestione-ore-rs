@@ -14,7 +14,7 @@ class ConsuntiviProgettiManager {
     function run_assegnazione($dataInizio, $dataFine, &$message) {
         global $esecuzioniManager, $panthera;
 
-        ini_set('max_execution_time', 300);
+        ini_set('max_execution_time', MAX_EXECUTION_TIME_ASSEGNAZIONE);
 
 
         // human readable dates
@@ -79,7 +79,8 @@ class ConsuntiviProgettiManager {
                 }
 
                 $lul_p = $this->togli_ore_progetto_dai_lul($idEsecuzione);
-                $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $commesse_c);
+                $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
+
                 $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
                 $message->success .= "Verifica LUL...". NL;
                 $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $max_compat, $max_dip, $dataInizio, $dataFine, $message);
@@ -251,6 +252,10 @@ class ConsuntiviProgettiManager {
      * Mostra un riepilogo delle ore caricate su commesse di progetto e restituisce il totale
      */
     function show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $dataInizio, $dataFine, &$message) {
+        if (count($commesse_p) == 0) {
+            $message->success .= "Commesse di progetto assegnate: nessuna." . NL;
+            return 0;
+        }
         $commesse_imploded = "'" . implode("','", $commesse_p) . "'";
         $query = "SELECT COD_COMMESSA, SUM(NUM_ORE_RESIDUE) AS ORE
                 FROM assegnazioni_dettaglio ad
@@ -280,6 +285,10 @@ class ConsuntiviProgettiManager {
      * Mostra un riepilogo delle ore caricate su commesse compatibili e restituisce il totale
      */
     function show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, &$message) {
+        if (count($commesse_c) == 0) {
+            $message->success .= "Commesse compatibili assegnate: nessuna." . NL;
+            return 0;
+        }
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         $query = "SELECT COD_COMMESSA,
                     SUM(NUM_ORE_RESIDUE) AS ORE,
@@ -369,14 +378,27 @@ class ConsuntiviProgettiManager {
         execute_update($query);
     }
 
-    function select_max_per_commesse_compatibili($idEsecuzione, $commesse_c) {
+    function select_max_per_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
-        $query = "SELECT COD_COMMESSA,
-                    NVL(SUM(NUM_ORE_RESIDUE*PCT_COMPATIBILITA/100),0) AS ORE_PREVISTE
+        $query = "SELECT ad.COD_COMMESSA,
+                    NVL(SUM(ad.NUM_ORE_RESIDUE*ad.PCT_COMPATIBILITA/100),0) AS ORE_RD_MAX,
+                    pc.ORE_PREVISTE
                 FROM assegnazioni_dettaglio ad
-                WHERE ID_ESECUZIONE=$idEsecuzione AND COD_COMMESSA IN($commesse_imploded)
-                GROUP BY COD_COMMESSA";
-        return array_group_by(select_list($query), ['COD_COMMESSA']);
+                LEFT JOIN progetti_commesse pc
+                        ON ad.ID_PROGETTO=pc.ID_PROGETTO AND ad.COD_COMMESSA=pc.COD_COMMESSA
+                        AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
+                WHERE ad.ID_ESECUZIONE=$idEsecuzione AND ad.ID_PROGETTO='$idProgetto' AND ad.COD_COMMESSA IN($commesse_imploded)
+                GROUP BY ad.COD_COMMESSA, pc.ORE_PREVISTE";
+        $result = select_list($query);
+        foreach($result as $id => $row) {
+            $oreMax = (float) $row['ORE_RD_MAX'];
+            $orePreviste = (float) $row['ORE_PREVISTE'];
+            if ($oreMax < $orePreviste - 0.5) {
+                $message->error .= "<strong>WARNING</strong> Commessa $row[COD_COMMESSA] - Risultano caricate meno ore di quelle previste ($oreMax < $orePreviste)" . NL;
+            }
+            $result[$id]['ORE_PREVISTE'] = min($orePreviste, $oreMax);
+        }
+        return array_group_by($result, ['COD_COMMESSA']);
     }
 
     function select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, &$message) {
@@ -428,17 +450,18 @@ class ConsuntiviProgettiManager {
                 $array[$id_dip] = 0.0;
             }
             foreach($x as $data => $record) {
-                $array[$id_dip] += floatval($record[0]['ORE_PRESENZA_ORDINARIE']);
+                $array[$id_dip] += (float) $record[0]['ORE_PRESENZA_ORDINARIE'];
             }
         }
         return $array;
     }
 
-    function prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $max_compat, $max_dip, $dataInizio, $dataFine, &$message) { // FIXME DATE
+    function prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $max_compat, $max_dip, $dataInizio, $dataFine, &$message) {
         $commesse_imploded = "'" . implode("','", $commesse_c) . "'";
         $query = "SELECT *
             FROM assegnazioni_dettaglio ad
             JOIN progetti_commesse pc ON ad.COD_COMMESSA=pc.COD_COMMESSA AND pc.ID_PROGETTO=$idProgetto
+                AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
             WHERE ID_ESECUZIONE=$idEsecuzione AND pc.COD_COMMESSA IN ($commesse_imploded)
                 AND NUM_ORE_RESIDUE >= 0.25
             ORDER BY ID_DIPENDENTE, DATA";
