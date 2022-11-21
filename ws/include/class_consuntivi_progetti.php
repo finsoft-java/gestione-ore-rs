@@ -37,8 +37,7 @@ class ConsuntiviProgettiManager {
 
         $idEsecuzione = $esecuzioniManager->get_id_esecuzione();
 
-        $nomi_progetti = implode(', ', array_map(function($x){ return $x["ACRONIMO"]; }, $progetti_attivi));
-        $message->success .= "Periodo: " . $dataInizioHR . " - " . $dataFineHR ." progetti attivi trovati: " . $nomi_progetti . NL;
+        $message->success .= "Periodo: " . $dataInizioHR . " - " . $dataFineHR . NL;
         $message->success .= "Salvo i dati ottenuti con <strong>ID_ESECUZIONE=$idEsecuzione</strong>" . NL;
 
         $idProgetto = $progetto["ID_PROGETTO"];
@@ -218,9 +217,7 @@ class ConsuntiviProgettiManager {
                 AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE
                 AND oc.DATA >= DATE('$dataInizio') AND oc.DATA < DATE('$dataFine')
             WHERE pr.ID_PROGETTO=$idProgetto";
-        echo "Sto per inserire...";
         $r = execute_update($query);
-        echo "Fatto.";
         return $r;
     }
 

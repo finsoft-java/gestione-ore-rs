@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (strlen($dataInizio) != 10 || strlen($dataFine) != 10) {
         print_error(400, "Bad parameter: dataInizio e dataFine devono essere nella forma YYYY-MM-DD");
     }
-    $idProgetto = $json_data->ID_PROGETTO;
+    $idProgetto = $json_data->idProgetto;
     if (! $idProgetto) {
         print_error(400, "Missing parameter: idProgetto");
     }
