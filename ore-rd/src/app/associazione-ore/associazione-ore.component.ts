@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AssociazioneOreService } from '../_services/associazione.ore';
 import { AlertService } from '../_services/alert.service';
 import { ProgettiService } from '../_services/progetti.service';
-import { Periodo } from '../_models';
+import { Periodo, Progetto } from '../_models';
 import { PeriodiService } from '../_services/periodi.service';
 // tslint:disable-next-line:no-duplicate-imports
 
@@ -18,7 +18,9 @@ export class AssociazioneOreComponent implements OnInit {
   message_success = '';
   message_error = '';
   allPeriodi: Periodo[] = [];
+  progettiAttivi: Progetto[] = [];
   filtroPeriodo?: Periodo;
+  filtroProgetto?: Progetto;
   running = false;
 
   constructor(private associazioneOreService: AssociazioneOreService,
@@ -38,6 +40,13 @@ export class AssociazioneOreComponent implements OnInit {
     })
   }
 
+  getProgettiAttivi() {
+    this.filtroProgetto = undefined;
+    this.associazioneOreService.getProgettiAttivi(this.filtroPeriodo!.DATA_INIZIO, this.filtroPeriodo!.DATA_FINE).subscribe(response => {
+      this.progettiAttivi = response.data;
+    })
+  }
+
   resetAlertSuccess() {
     this.message_success = '';
   }
@@ -51,7 +60,7 @@ export class AssociazioneOreComponent implements OnInit {
     this.resetAlertDanger();
     this.running = true;
 
-    this.associazioneOreService.run(this.filtroPeriodo!.DATA_INIZIO, this.filtroPeriodo!.DATA_FINE).subscribe(response => {
+    this.associazioneOreService.run(this.filtroPeriodo!.DATA_INIZIO, this.filtroPeriodo!.DATA_FINE, this.filtroProgetto!.ID_PROGETTO!).subscribe(response => {
       this.message_success = 'Elaborazione terminata. I dettagli verranno visualizzati in una nuova finestra.';
       this.message_error = response.value.error;
       this.running = false;

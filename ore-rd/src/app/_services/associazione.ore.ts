@@ -18,10 +18,11 @@ export class AssociazioneOreService {
     return this.http.get<ListBean<Progetto>>(`${this.baseUrl}/GetProgettiAttivi.php?dataInizio=${dataInizio}&dataFine=${dataFine}`);
   }
   
-  run(dataInizio: string, dataFine: string) {
+  run(dataInizio: string, dataFine: string, idProgetto: number) {
     return this.http.post<any>(`${this.baseUrl}/AssegnaOreProgetti.php`, {
       dataInizio: dataInizio,
       dataFine: dataFine,
+      idProgetto: idProgetto
     });
   }
 

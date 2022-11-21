@@ -3,15 +3,25 @@
 <div>
     <div>
         <div style="display: block; margin: 0px auto;width: 40%;">
-            <mat-form-field appearance="fill" style="width: calc(100% - 105px); margin-right: 5px;">
+            <mat-form-field appearance="fill" style="width: calc(100% - 185px - 105px); margin-right: 5px;">
                 <mat-label>Periodo</mat-label>
-                <mat-select [(ngModel)]="filtroPeriodo" name="x" required>
+                <mat-select [(ngModel)]="filtroPeriodo" name="x" required (selectionChange)="getProgettiAttivi()">
                     <mat-option *ngFor="let x of allPeriodi" [value]="x">
                         {{"Da: " + x.DATA_INIZIO + " A: " + x.DATA_FINE}}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-raised-button color="primary" [disabled]="running||!filtroPeriodo" (click)="run()">RUN HERE</button>
+
+            <mat-form-field appearance="fill" style="width: 180px; margin-right: 5px;">
+                <mat-label>Progetto</mat-label>
+                <mat-select [(ngModel)]="filtroProgetto" name="p" required>
+                    <mat-option *ngFor="let p of progettiAttivi" [value]="p">
+                        {{p.ACRONIMO}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <button mat-raised-button color="primary" [disabled]="running||!filtroPeriodo||!filtroProgetto" (click)="run()">RUN HERE</button>
         </div>
     </div>
     
