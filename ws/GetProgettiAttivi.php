@@ -28,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         print_error(400, "Bad parameter: dataInizio e dataFine devono essere nella forma YYYY-MM-DD");
     }
 
-    $consuntiviProgettiManager->get_progetti_attivi($dataInizio, $dataFine);
+    $data = $consuntiviProgettiManager->get_progetti_attivi($dataInizio, $dataFine);
 
     header('Content-Type: application/json');
-    echo json_encode(['data' => $message]);
+    echo json_encode(['data' => $data]);
     
 } else {
     //==========================================================

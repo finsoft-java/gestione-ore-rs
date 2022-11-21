@@ -11,8 +11,8 @@ class ConsuntiviProgettiManager {
     /**
      * Main procedure
      */
-    function run_assegnazione($dataInizio, $dataFine, &$message) {
-        global $esecuzioniManager, $panthera;
+    function run_assegnazione($dataInizio, $dataFine, $idProgetto, &$message) {
+        global $esecuzioniManager, $progettiManager, $panthera;
 
         ini_set('max_execution_time', MAX_EXECUTION_TIME_ASSEGNAZIONE);
 
@@ -21,9 +21,9 @@ class ConsuntiviProgettiManager {
         $dataInizioHR = DateTime::createFromFormat('Y-m-d', $dataInizio)->format('d/m/Y');
         $dataFineHR = DateTime::createFromFormat('Y-m-d', $dataFine)->format('d/m/Y');
 
-        $progetti_attivi = $this->get_progetti_attivi($dataInizio, $dataFine);
-        if (count($progetti_attivi) == 0) {
-            $message->error .= "Nessun progetto attivo trovato!" . NL;
+        $progetto = $progettiManager->get_progetto($idProgetto);
+        if ($progetto == null) {
+            $message->error .= "Progetto non trovato: $idProgetto" . NL;
             return;
         }
 
@@ -40,71 +40,70 @@ class ConsuntiviProgettiManager {
         $nomi_progetti = implode(', ', array_map(function($x){ return $x["ACRONIMO"]; }, $progetti_attivi));
         $message->success .= "Periodo: " . $dataInizioHR . " - " . $dataFineHR ." progetti attivi trovati: " . $nomi_progetti . NL;
         $message->success .= "Salvo i dati ottenuti con <strong>ID_ESECUZIONE=$idEsecuzione</strong>" . NL;
-        $message->success .= "Ore " . date("H:i:s"). NL;
 
-        foreach($progetti_attivi as $progetto) {
-            $idProgetto = $progetto["ID_PROGETTO"];
-            try {
-                $message->success .= "Lancio assegnazione ore <strong>progetto n.$idProgetto - $progetto[ACRONIMO]</strong>" . NL;
+        $idProgetto = $progetto["ID_PROGETTO"];
+        try {
+            $message->success .= "Lancio assegnazione ore <strong>progetto n.$idProgetto - $progetto[ACRONIMO]</strong>" . NL;
+            $message->success .= "Ore " . date("H:i:s"). NL;
 
-                list($commesse_p, $commesse_c) = $this->load_commesse($idProgetto); // FIXME load per che date???
+            list($commesse_p, $commesse_c) = $this->load_commesse($idProgetto); // FIXME load per che date???
 
-                if (count($commesse_p) == 0 && count($commesse_c) == 0) {
-                    $message->error .= "Nessuna commessa &egrave; stata configurata sul progetto n.$idProgetto!" . NL;
-                    continue;
-                }
-
-                $canGoOn = $this->check_commesse_dipendenti($idProgetto, $dataInizio, $dataFine, $message);
-                if (!$canGoOn) {
-                    continue;
-                }
-
-                $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataInizio, $dataFine, $message);
-
-                $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $dataInizio, $dataFine, $message);
-                $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
-
-                $message->success .= "<strong>Tot. " . ($ore_progetto_teoriche + $ore_compat_teoriche) .
-                                                                " ore prelevabili teoriche (di progetto+compatibili)</strong>". NL;
-                $message->success .= "Ore " . date("H:i:s"). NL;
-
-                $lul = $this->estrazione_lul($idEsecuzione, $message);
-
-                $message->success .= "Verifica LUL...". NL;
-                $ore_progetto = $this->prelievo_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $lul, $dataInizio, $dataFine, $message);
-                $message->success .= "<strong>Tot. $ore_progetto ore prelevate da commesse di progetto</strong>". NL;
-                $message->success .= "Ore " . date("H:i:s"). NL;
-                if ($ore_progetto > $this->get_ore_previste($idProgetto, $commesse_p, $dataInizio, $dataFine)) {
-                    $message->success .= "<strong>WARNING</strong> Le ore di progetto consuntivate sono più di quelle previste!";
-                }
-
-                $lul_p = $this->togli_ore_progetto_dai_lul($idEsecuzione);
-                $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
-
-                $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
-                $message->success .= "Verifica LUL...". NL;
-                $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $max_compat, $max_dip, $dataInizio, $dataFine, $message);
-                $message->success .= "<strong>Tot. $ore_compat ore prelevate da commesse compatibili</strong>". NL;
-
-                $tot_ore_assegnate = $ore_progetto + $ore_compat;
-                $message->success .= "<strong>Tot. $tot_ore_assegnate ore assegnate</strong>". NL;
-                
-                if ($tot_ore_assegnate < 0 ) {
-                    // in caso di errori evitiamo di sottrarre ore!!! 
-                    $message->success .= "<b> Qualcosa non va: ore assegnate negative. Ignoro questo progetto.</b>" . NL;
-                    $this->log($idEsecuzione, $message);
-                    continue;
-                }
-
-                $this->apply($idEsecuzione, $idProgetto, $tot_ore_assegnate);
-                $message->success .= "Ore assegnate." . NL;
-
-                $message->success .= "Ore " . date("H:i:s"). NL;
-
-            } catch (Exception $exception) {
-                $message->error .= $exception->getMessage();
+            if (count($commesse_p) == 0 && count($commesse_c) == 0) {
+                $message->error .= "Nessuna commessa &egrave; stata configurata sul progetto n.$idProgetto!" . NL;
+                return;
             }
+
+            $canGoOn = $this->check_commesse_dipendenti($idProgetto, $dataInizio, $dataFine, $message);
+            if (!$canGoOn) {
+                return;
+            }
+
+            $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataInizio, $dataFine, $message);
+
+            $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $dataInizio, $dataFine, $message);
+            $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
+
+            $message->success .= "<strong>Tot. " . ($ore_progetto_teoriche + $ore_compat_teoriche) .
+                                                            " ore prelevabili teoriche (di progetto+compatibili)</strong>". NL;
+            $message->success .= "Ore " . date("H:i:s"). NL;
+
+            $lul = $this->estrazione_lul($idEsecuzione, $message);
+
+            $message->success .= "Verifica LUL...". NL;
+            $ore_progetto = $this->prelievo_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $lul, $dataInizio, $dataFine, $message);
+            $message->success .= "<strong>Tot. $ore_progetto ore prelevate da commesse di progetto</strong>". NL;
+            $message->success .= "Ore " . date("H:i:s"). NL;
+            if ($ore_progetto > $this->get_ore_previste($idProgetto, $commesse_p, $dataInizio, $dataFine)) {
+                $message->success .= "<strong>WARNING</strong> Le ore di progetto consuntivate sono più di quelle previste!";
+            }
+
+            $lul_p = $this->togli_ore_progetto_dai_lul($idEsecuzione);
+            $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
+
+            $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
+            $message->success .= "Verifica LUL...". NL;
+            $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $max_compat, $max_dip, $dataInizio, $dataFine, $message);
+            $message->success .= "<strong>Tot. $ore_compat ore prelevate da commesse compatibili</strong>". NL;
+
+            $tot_ore_assegnate = $ore_progetto + $ore_compat;
+            $message->success .= "<strong>Tot. $tot_ore_assegnate ore assegnate</strong>". NL;
+            
+            if ($tot_ore_assegnate < 0 ) {
+                // in caso di errori evitiamo di sottrarre ore!!! 
+                $message->success .= "<b> Qualcosa non va: ore assegnate negative. Ignoro questo progetto.</b>" . NL;
+                $this->log($idEsecuzione, $message);
+                return;
+            }
+
+            $this->apply($idEsecuzione, $idProgetto, $tot_ore_assegnate);
+            $message->success .= "Ore assegnate." . NL;
+
+            $message->success .= "Ore " . date("H:i:s"). NL;
+
+        } catch (Exception $exception) {
+            $message->error .= $exception->getMessage();
         }
+
         $this->riepilogo_per_commessa($idEsecuzione, $message);
         $this->riepilogo_per_commessa_dipendente($idEsecuzione, $message);
         $this->log($idEsecuzione, $message);
@@ -219,7 +218,10 @@ class ConsuntiviProgettiManager {
                 AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE
                 AND oc.DATA >= DATE('$dataInizio') AND oc.DATA < DATE('$dataFine')
             WHERE pr.ID_PROGETTO=$idProgetto";
-        return execute_update($query);
+        echo "Sto per inserire...";
+        $r = execute_update($query);
+        echo "Fatto.";
+        return $r;
     }
 
     /**
@@ -366,7 +368,7 @@ class ConsuntiviProgettiManager {
 
     function preleva($idEsecuzione, $idProgetto, $caricamento, $ore) {
         $query = "UPDATE assegnazioni_dettaglio ad
-            SET NUM_ORE_PRELEVATE = $ore, ID_PROGETTO = $idProgetto
+            SET NUM_ORE_PRELEVATE = $ore
             WHERE ID_ESECUZIONE=$idEsecuzione
                 AND ID_DIPENDENTE='$caricamento[ID_DIPENDENTE]'
                 AND DATA='$caricamento[DATA]'
@@ -374,7 +376,8 @@ class ConsuntiviProgettiManager {
                 AND RIF_SERIE_DOC='$caricamento[RIF_SERIE_DOC]'
                 AND RIF_NUMERO_DOC='$caricamento[RIF_NUMERO_DOC]'
                 AND RIF_ATV='$caricamento[RIF_ATV]'
-                AND  RIF_SOTTO_COMMESSA ='$caricamento[RIF_SOTTO_COMMESSA]'";
+                AND  RIF_SOTTO_COMMESSA ='$caricamento[RIF_SOTTO_COMMESSA]'
+                AND ID_PROGETTO='$idProgetto' ";
         execute_update($query);
     }
 
@@ -529,13 +532,13 @@ class ConsuntiviProgettiManager {
                      SELECT ID_PROGETTO, ID_DIPENDENTE, DATA,
                         SUM(NUM_ORE_PRELEVATE), $idEsecuzione
                      FROM assegnazioni_dettaglio ad
-                     WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_PRELEVATE>0
+                     WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_PRELEVATE>0 AND ID_PROGETTO=$idProgetto
                      GROUP BY ID_PROGETTO, ID_DIPENDENTE, DATA
                      ";
             execute_update($query);
 
             $query = "UPDATE assegnazioni
-                        SET TOT_ASSEGNATE=$tot_ore_assegnate,IS_ASSEGNATE=1
+                        SET TOT_ASSEGNATE=NVL(TOT_ASSEGNATE,0)+$tot_ore_assegnate,IS_ASSEGNATE=1
                         WHERE ID_ESECUZIONE=$idEsecuzione";
             execute_update($query);
 
