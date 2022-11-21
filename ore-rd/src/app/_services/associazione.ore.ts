@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { formatDate } from '@angular/common';
 import { environment } from '../../environments/environment';
-import { ListBean } from '../_models';
+import { ListBean, Progetto } from '../_models';
 import { DataFirma } from '../_models/matricola';
 
 @Injectable({
@@ -13,6 +13,10 @@ export class AssociazioneOreService {
   private baseUrl = environment.wsUrl;
 
   constructor(private http: HttpClient) { }
+  
+  getProgettiAttivi(dataInizio: string, dataFine: string) {
+    return this.http.get<ListBean<Progetto>>(`${this.baseUrl}/GetProgettiAttivi.php?dataInizio=${dataInizio}&dataFine=${dataFine}`);
+  }
   
   run(dataInizio: string, dataFine: string) {
     return this.http.post<any>(`${this.baseUrl}/AssegnaOreProgetti.php`, {
