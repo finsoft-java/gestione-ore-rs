@@ -277,7 +277,7 @@ class ConsuntiviProgettiManager {
 
         $ore_previste = $this->get_ore_previste($idProgetto, $commesse_p, $dataInizio, $dataFine);
         
-        $message->success .= "<strong>Tot. $totale ore di progetto, contro $ore_previste previste</strong>". NL;
+        $message->success .= "<strong>Tot. $totale ore di progetto, contro $ore_previste previste (manca ancora controllo LUL)</strong>". NL;
 
         return $totale;
     }
@@ -314,7 +314,7 @@ class ConsuntiviProgettiManager {
         $ore_previste = $this->get_ore_previste($idProgetto, $commesse_c, $dataInizio, $dataFine);
         
         $totale = round($totale*100)/100;
-        $message->success .= "<strong>Tot. $totale ore su commesse compatibili, contro $ore_previste previste</strong>". NL;
+        $message->success .= "<strong>Tot. $totale ore su commesse compatibili, contro $ore_previste previste (manca ancora controllo LUL)</strong>". NL;
 
         return $totale;
     }
