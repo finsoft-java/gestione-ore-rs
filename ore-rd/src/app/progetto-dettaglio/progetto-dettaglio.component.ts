@@ -203,15 +203,16 @@ export class ProgettoDettaglioComponent implements OnInit {
   }
 
   deleteProgetto() {
-
-    this.progettiService.delete(this.progetto.ID_PROGETTO!)
+    if (confirm('Stai per eliminare il progetto! Procedere?')) {
+      this.progettiService.delete(this.progetto.ID_PROGETTO!)
       .subscribe(res => {
-        this.router.navigate(['/progetti']);
-      },
+          this.router.navigate(['/progetti']);
+        },
         error => {
           this.alertService.error(error);
         }
       );
+    }
   }
 
   uploadGiustificativo(p: Progetto, event: any) {
