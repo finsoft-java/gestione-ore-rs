@@ -123,12 +123,14 @@ class ConsuntiviProgettiManager {
         $query = "SELECT DISTINCT pc.COD_COMMESSA
                 FROM progetti_commesse pc
                 JOIN commesse c ON c.COD_COMMESSA=pc.COD_COMMESSA AND c.DATA_INIZIO=pc.DATA_INIZIO AND c.DATA_FINE=pc.DATA_FINE
-                WHERE pc.ID_PROGETTO=$idProgetto and c.PCT_COMPATIBILITA>=100 AND pc.ORE_PREVISTE>0";
+                WHERE pc.ID_PROGETTO=$idProgetto and c.PCT_COMPATIBILITA>=100 AND pc.ORE_PREVISTE>0
+                ORDER BY 1";
         $commesse_p = select_column($query);
         $query = "SELECT DISTINCT pc.COD_COMMESSA
                 FROM progetti_commesse pc
                 JOIN commesse c ON c.COD_COMMESSA=pc.COD_COMMESSA AND c.DATA_INIZIO=pc.DATA_INIZIO AND c.DATA_FINE=pc.DATA_FINE
-                WHERE pc.ID_PROGETTO=$idProgetto and c.PCT_COMPATIBILITA>0 and c.PCT_COMPATIBILITA<100 AND pc.ORE_PREVISTE>0";
+                WHERE pc.ID_PROGETTO=$idProgetto and c.PCT_COMPATIBILITA>0 and c.PCT_COMPATIBILITA<100 AND pc.ORE_PREVISTE>0
+                ORDER BY 1";
         $commesse_c = select_column($query);
         return [$commesse_p, $commesse_c];
     }
@@ -156,7 +158,7 @@ class ConsuntiviProgettiManager {
                 JOIN progetti_commesse c ON c.COD_COMMESSA=oc.COD_COMMESSA
                 JOIN progetti pr ON pr.ID_PROGETTO=c.ID_PROGETTO
                 WHERE pr.id_progetto=$idProgetto
-                AND ID_DIPENDENTE NOT IN (SELECT DISTINCT ID_DIPENDENTE FROM partecipanti_globali WHERE PCT_UTILIZZO<=0)
+                AND ID_DIPENDENTE NOT IN (SELECT DISTINCT ID_DIPENDENTE FROM partecipanti_globali WHERE PCT_UTILIZZO>0)
                 AND (oc.DATA IS NULL OR (oc.DATA >= DATE('$dataInizio') and oc.DATA <= DATE('$dataFine')))
                 ORDER BY 1";
         $ore = select_column($query);
