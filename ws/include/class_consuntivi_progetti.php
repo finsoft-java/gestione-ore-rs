@@ -7,7 +7,7 @@ define('PRE', "1");
 define('POST', "2");
 
 class ConsuntiviProgettiManager {
-    
+
     /**
      * Main procedure
      */
@@ -15,7 +15,7 @@ class ConsuntiviProgettiManager {
         global $esecuzioniManager, $progettiManager, $panthera;
 
         ini_set('max_execution_time', MAX_EXECUTION_TIME_ASSEGNAZIONE);
-
+        $this->updateInCoda = '';
 
         // human readable dates
         $dataInizioHR = DateTime::createFromFormat('Y-m-d', $dataInizio)->format('d/m/Y');
@@ -43,7 +43,7 @@ class ConsuntiviProgettiManager {
         $idProgetto = $progetto["ID_PROGETTO"];
         try {
             $message->success .= "Lancio assegnazione ore <strong>progetto n.$idProgetto - $progetto[ACRONIMO]</strong>" . NL;
-            $message->success .= "Ore " . date("H:i:s"). NL;
+            $message->success .= "Ore " . date("H:i:s") . " - Load commesse...". NL;
 
             list($commesse_p, $commesse_c) = $this->load_commesse($idProgetto); // FIXME load per che date???
 
@@ -52,26 +52,28 @@ class ConsuntiviProgettiManager {
                 return;
             }
 
+            $message->success .= "Ore " . date("H:i:s") . " - Check commesse/dipendenti...". NL;
             $canGoOn = $this->check_commesse_dipendenti($idProgetto, $dataInizio, $dataFine, $message);
             if (!$canGoOn) {
                 return;
             }
 
+            $message->success .= "Ore " . date("H:i:s") . " - Estrazione caricamenti...". NL;
             $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataInizio, $dataFine, $message);
 
+            $message->success .= "Ore " . date("H:i:s") . " - Prospetto...". NL;
             $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $dataInizio, $dataFine, $message);
             $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
 
             $message->success .= "<strong>Tot. " . ($ore_progetto_teoriche + $ore_compat_teoriche) .
                                                             " ore prelevabili teoriche (di progetto+compatibili)</strong>". NL;
-            $message->success .= "Ore " . date("H:i:s"). NL;
 
+            $message->success .= "Ore " . date("H:i:s") . " - Estrazione LUL...". NL;
             $lul = $this->estrazione_lul($idEsecuzione, $message);
 
-            $message->success .= "Verifica LUL...". NL;
+            $message->success .= "Ore " . date("H:i:s") . " - Verifica LUL...". NL;
             $ore_progetto = $this->prelievo_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $lul, $dataInizio, $dataFine, $message);
             $message->success .= "<strong>Tot. $ore_progetto ore prelevate da commesse di progetto</strong>". NL;
-            $message->success .= "Ore " . date("H:i:s"). NL;
             if ($ore_progetto > $this->get_ore_previste($idProgetto, $commesse_p, $dataInizio, $dataFine)) {
                 $message->success .= "<strong>WARNING</strong> Le ore di progetto consuntivate sono più di quelle previste!";
             }
@@ -80,7 +82,7 @@ class ConsuntiviProgettiManager {
             $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
 
             $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
-            $message->success .= "Verifica LUL...". NL;
+            $message->success .= "Ore " . date("H:i:s") . " - Verifica LUL...". NL;
             $ore_compat = $this->prelievo_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $max_compat, $max_dip, $dataInizio, $dataFine, $message);
             $message->success .= "<strong>Tot. $ore_compat ore prelevate da commesse compatibili</strong>". NL;
 
@@ -94,10 +96,9 @@ class ConsuntiviProgettiManager {
                 return;
             }
 
+            $message->success .= "Ore " . date("H:i:s") . " - Applicazione...". NL;
             $this->apply($idEsecuzione, $idProgetto, $tot_ore_assegnate);
-            $message->success .= "Ore assegnate." . NL;
-
-            $message->success .= "Ore " . date("H:i:s"). NL;
+            $message->success .= "Ore " . date("H:i:s") . " - Ore assegnate.". NL;
 
         } catch (Exception $exception) {
             $message->error .= $exception->getMessage();
@@ -107,8 +108,7 @@ class ConsuntiviProgettiManager {
         $this->riepilogo_per_commessa_dipendente($idEsecuzione, $message);
         $this->log($idEsecuzione, $message);
 
-        $message->success .= "Fine." . NL;
-        $message->success .= "Ore " . date("H:i:s"). NL;
+        $message->success .= "Ore " . date("H:i:s") . " - Fine.". NL;
     }
 
     function load_partecipanti_globali() {
@@ -166,17 +166,19 @@ class ConsuntiviProgettiManager {
             $message->success .= "<strong>WARNING</strong>: ci sono ore su commesse di progetto o compatibili ma con PCT_UTILIZZO<=0: " . implode(', ', $ore). NL;
         }
 
-        $query = "SELECT count(*)
-            FROM progetti_commesse pc
-            JOIN progetti pr ON pr.ID_PROGETTO=pc.ID_PROGETTO
+        $query = "SELECT 1
+            FROM progetti pr
+            JOIN progetti_commesse pc ON pr.ID_PROGETTO=pc.ID_PROGETTO
             JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=pc.COD_COMMESSA 
                 AND oc.DATA >= DATE('$dataInizio') AND oc.DATA <= DATE('$dataFine')
-                AND NUM_ORE_RESIDUE > 0
-            JOIN partecipanti_globali p ON  oc.ID_DIPENDENTE=p.ID_DIPENDENTE
-            WHERE pr.ID_PROGETTO=$idProgetto AND oc.DATA >= DATE('$dataInizio') and oc.DATA <= DATE('$dataFine')
-            AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')";
-        $cnt = select_single_value($query);
-        if ($cnt == 0) {
+            WHERE
+                pr.ID_PROGETTO=$idProgetto
+                AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
+                AND oc.DATA >= DATE('$dataInizio') and oc.DATA <= DATE('$dataFine')
+                AND oc.NUM_ORE_RESIDUE > 0
+            LIMIT 1";
+        $result = select_single_value($query);
+        if (empty($result)) {
             $message->error .= "Nessun caricamento trovato per il progetto n.$idProgetto!" . NL;
             $canGoOn = false;
         }
@@ -355,6 +357,7 @@ class ConsuntiviProgettiManager {
                 $totale += $totale_data;
             }
         }
+        $this->preleva_really();
         return $totale;
     }
 
@@ -376,8 +379,14 @@ class ConsuntiviProgettiManager {
                 AND RIF_NUMERO_DOC='$caricamento[RIF_NUMERO_DOC]'
                 AND RIF_ATV='$caricamento[RIF_ATV]'
                 AND  RIF_SOTTO_COMMESSA ='$caricamento[RIF_SOTTO_COMMESSA]'
-                AND ID_PROGETTO='$idProgetto' ";
-        execute_update($query);
+                AND ID_PROGETTO='$idProgetto'; ";
+        $this->updateInCoda .= $query;
+        //execute_update($query);
+    }
+
+    function preleva_really() {
+        //execute_update($this->updateInCoda);
+        $this->updateInCoda = '';
     }
 
     function select_max_per_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, &$message) {
@@ -513,6 +522,7 @@ class ConsuntiviProgettiManager {
                 $totale += $totale_data;
             }
         }
+        $this->preleva_really();
         return $totale;
     }
 
