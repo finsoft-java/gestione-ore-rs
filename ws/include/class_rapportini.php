@@ -15,9 +15,10 @@ class RapportiniManager {
         $primo = "DATE('$anno-$mese-01')";
 
         // Con questa query cerco di stampare solo i rapportini dei dipendenti che mi interessano
-        $query_matricole = "SELECT DISTINCT ID_DIPENDENTE, ID_PROGETTO
+        $query_matricole = "SELECT DISTINCT oc.ID_DIPENDENTE, p.*
             FROM ore_consuntivate_progetti oc
-            WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
+            JOIN progetti p ON oc.ID_PROGETTO=p.ID_PROGETTO
+            WHERE oc.DATA >= $primo AND oc.DATA <= LAST_DAY($primo)";
         $matricole = select_list($query_matricole);
 
         if (count($matricole) == 0) {
