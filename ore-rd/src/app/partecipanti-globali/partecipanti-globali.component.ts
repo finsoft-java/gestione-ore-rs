@@ -61,10 +61,10 @@ export class PartecipantiGlobaliComponent implements OnInit {
       this.allNomeMatricole = response.data;
 
       this.allPartecipanti.forEach(x => {
-        x.DENOMINAZIONE = this.getNomeMatricola(x.ID_DIPENDENTE);
+        x.DENOMINAZIONE = this.getNomeMatricola(x.ID_DIPENDENTE!);
       });
 
-      this.allPartecipanti.sort((a, b) => a.DENOMINAZIONE.localeCompare(b.DENOMINAZIONE));
+      this.allPartecipanti.sort((a, b) => a.DENOMINAZIONE!.localeCompare(b.DENOMINAZIONE!));
       this.dataSource = new MatTableDataSource<Partecipante>(this.allPartecipanti);
     },
       error => {
@@ -85,16 +85,15 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
   addPartecipante() {
 
-    let newPartecipante: any;
+    let newPartecipante: Partecipante;
     newPartecipante = {
-      ID_DIPENDENTE: null, MATRICOLA: null, PCT_UTILIZZO: 100, MANSIONE: "", COSTO: "", isEditable: true, isInsert: true
+      ID_DIPENDENTE: null, MATRICOLA: null, PCT_UTILIZZO: 100, MANSIONE: null, COSTO: null, DENOMINAZIONE: null, isEditable: true, isInsert: true
     };
 
-    let data: any[] = [];
+    let data: any[] = [newPartecipante];
     if (this.dataSource.data != null) {
-      data = this.dataSource.data;
+      data = data.concat(this.dataSource.data);
     }
-    data.push(newPartecipante);
 
     this.dataSource.data = data;
   }
@@ -121,6 +120,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
           this.dataSource.data.push(response.value);
           this.dataSource.data = this.dataSource.data;
           row.isEditable = false;
+          row.isInsert = false;
         },
           error => {
             this.alertService.error(error);
