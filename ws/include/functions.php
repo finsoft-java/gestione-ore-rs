@@ -194,13 +194,21 @@ function select_single_value($sql, $connessione=null) {
 
 /*
 Esegue un comado SQL UPDATE/INSERT/DELETE e se serve lancia un print_error
+
+@param $sql puo' essere un singolo comando oppure un array di comandi
 */
 function execute_update($sql, $connessione=null) {
     global $con;
     if ($connessione == null) {
         $connessione = $con;
     }
-    mysqli_query($connessione, $sql);
+    if (is_array($sql)) {
+        foreach($sql as $single_sql) {
+            mysqli_query($connessione, $single_sql);
+        }
+    } else {
+        mysqli_query($connessione, $sql);
+    }
     if ($connessione ->error) {
         print_error(500, $connessione ->error);
     }

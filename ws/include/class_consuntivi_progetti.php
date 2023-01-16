@@ -15,7 +15,7 @@ class ConsuntiviProgettiManager {
         global $esecuzioniManager, $progettiManager, $panthera;
 
         ini_set('max_execution_time', MAX_EXECUTION_TIME_ASSEGNAZIONE);
-        $this->updateInCoda = '';
+        $this->updateInCoda = [];
 
         // human readable dates
         $dataInizioHR = DateTime::createFromFormat('Y-m-d', $dataInizio)->format('d/m/Y');
@@ -105,8 +105,8 @@ class ConsuntiviProgettiManager {
         }
 
         $this->riepilogo_per_commessa($idEsecuzione, $message);
-        $this->riepilogo_per_commessa_dipendente($idEsecuzione, $message);
-        $this->log($idEsecuzione, $message);
+        // $this->riepilogo_per_commessa_dipendente($idEsecuzione, $message);
+        // $this->log($idEsecuzione, $message);
 
         $message->success .= "Ore " . date("H:i:s") . " - Fine.". NL;
     }
@@ -380,13 +380,14 @@ class ConsuntiviProgettiManager {
                 AND RIF_ATV='$caricamento[RIF_ATV]'
                 AND  RIF_SOTTO_COMMESSA ='$caricamento[RIF_SOTTO_COMMESSA]'
                 AND ID_PROGETTO='$idProgetto'; ";
-        $this->updateInCoda .= $query;
+        $this->updateInCoda[] = $query;
+
         //execute_update($query);
     }
 
     function preleva_really() {
-        //execute_update($this->updateInCoda);
-        $this->updateInCoda = '';
+        execute_update($this->updateInCoda);
+        $this->updateInCoda = [];
     }
 
     function select_max_per_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, &$message) {
