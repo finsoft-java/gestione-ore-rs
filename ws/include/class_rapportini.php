@@ -6,6 +6,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
 $rapportini = new RapportiniManager();
 
@@ -172,6 +173,8 @@ class RapportiniManager {
 
         $this->creaFooter($sheet, $curRow, $nomecognome, $nomecognome_super, $data_firma);
 
+		$sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+		$sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
         $sheet->getPageSetup()->setPrintArea('A1:AG' . $curRow);
         $sheet->getPageSetup()->setFitToPage(true);
         
