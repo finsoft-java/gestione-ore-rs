@@ -329,12 +329,13 @@ class RapportiniManager {
         $curRow++;
 
         // prima riga intestazione di progetto
-        $numMese = $this->getMeseProgetto($anno, $mese, $data_inizio_progetto);
-        $sheet->setCellValue('A' . $curRow, "M$numMese");
-        $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        // 2023-01-19 elimino il mese progetto
+        // $numMese = $this->getMeseProgetto($anno, $mese, $data_inizio_progetto);
+        // $sheet->setCellValue('A' . $curRow, "M$numMese");
+        // $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         $unProgettoACaso = $map_progetti[array_keys($map_progetti)[0]];
-        $title = "$unProgettoACaso[ACRONIMO] - Grant $unProgettoACaso[GRANT_NUMBER] - $unProgettoACaso[TITOLO]";
+        $title = "Projects list";
         $sheet->setCellValue('B' . $curRow, $title);
         $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->mergeCells("B$curRow:AG$curRow");
@@ -367,7 +368,7 @@ class RapportiniManager {
 
         // Totali di colonna
         $curRow +=2;
-        $sheet->setCellValue('A' . $curRow, "TOT - $unProgettoACaso[ACRONIMO]");
+        $sheet->setCellValue('A' . $curRow, "TOTAL PROJECTS");
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $formula = "=SUM(C$curRow:AG$curRow)";
         $sheet->setCellValue('B' . $curRow, $formula);
