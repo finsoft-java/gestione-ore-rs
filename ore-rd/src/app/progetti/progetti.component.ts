@@ -18,7 +18,7 @@ export class ProgettiComponent implements OnInit {
   pageIndex = 0;
   pageSizeOptions = [5, 10, 25];
   showFirstLastButtons = true;
-  displayedColumns: string[] = ['titolo', 'acronimo', 'dataInizio', 'dataFine', 'actions'];
+  displayedColumns: string[] = ['acronimo', 'titolo', 'dataInizio', 'dataFine', 'actions'];
   dataSource = new MatTableDataSource<Progetto>();
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   router_frontend?: Router;
