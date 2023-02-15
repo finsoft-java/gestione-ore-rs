@@ -67,14 +67,19 @@ export class ImportazioneRapportiniComponent implements OnInit {
 
     this.uploadService.upload(files).subscribe(
       event => {
-        console.log("EVENT=", event);
+        // console.log("EVENT=", event);
         if (event.type === HttpEventType.UploadProgress) {
           if (event.total) {
             this.progressInfos.value = Math.round(100 * event.loaded / event.total);
           }
         } else if (event instanceof HttpResponse) {
-          this.message_error = event.body.value.error;
-          this.message_success = event.body.value.success;
+          if (event.body && event.body.value) {
+            this.message_error = event.body.value.error;
+            this.message_success = event.body.value.success;
+          } else {
+            this.message_error = 'Errore in fase di upload, verificare i log di Apache';
+            this.message_success = '';
+          }
           this.loading = false;
         }
       },
