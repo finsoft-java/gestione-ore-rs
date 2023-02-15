@@ -417,7 +417,7 @@ class RapportiniManager {
     function importSheet($excelSheet, &$message) {
         global $con, $panthera;
 
-        $spreadSheetAry = $excelSheet->toArray();
+        $spreadSheetAry = $excelSheet->toArray(NULL, TRUE, FALSE);
         
         // salto la header
         $firstRow = 1;
@@ -453,7 +453,7 @@ class RapportiniManager {
                 $numOre = 0.0;
             }
 
-            $dataDocDt = DateTime::createFromFormat(DATE_FORMAT, $dataDoc);
+            $dataDocDt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dataDoc);
             if (!$dataDocDt) {
                 $message->error .= "Formato data errato alla riga $curRow: $dataDoc<br/>";
                 continue;
