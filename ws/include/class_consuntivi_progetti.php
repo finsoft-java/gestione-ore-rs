@@ -45,7 +45,7 @@ class ConsuntiviProgettiManager {
             $message->success .= "Lancio assegnazione ore <strong>progetto n.$idProgetto - $progetto[ACRONIMO]</strong>" . NL;
             $message->success .= "Ore " . date("H:i:s") . " - Load commesse...". NL;
 
-            list($commesse_p, $commesse_c) = $this->load_commesse($idProgetto); // FIXME load per che date???
+            list($commesse_p, $commesse_c) = $this->load_commesse($idProgetto);
 
             if (count($commesse_p) == 0 && count($commesse_c) == 0) {
                 $message->error .= "Nessuna commessa &egrave; stata configurata sul progetto n.$idProgetto!" . NL;
@@ -78,7 +78,7 @@ class ConsuntiviProgettiManager {
                 $message->success .= "<strong>WARNING</strong> Le ore di progetto consuntivate sono più di quelle previste!";
             }
 
-            $lul_p = $this->togli_ore_progetto_dai_lul($idEsecuzione);
+            $lul_p = $this->estrazione_lul($idEsecuzione, $message);
             $max_compat = $this->select_max_per_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
 
             $max_dip = $this->select_max_per_dipendenti($idEsecuzione, $idProgetto, $commesse_c, $lul_p, $nomiUtenti, $message);
@@ -229,11 +229,11 @@ class ConsuntiviProgettiManager {
      * Restituisce le informazioni derivanti dai LUL
      */
     function estrazione_lul($idEsecuzione, &$message) {
-        $query = "SELECT t.ID_DIPENDENTE,t.DATA,NVL(l.ORE_PRESENZA_ORDINARIE,0) AS ORE_PRESENZA_ORDINARIE
+        $query = "SELECT t.ID_DIPENDENTE,t.DATA,l.ORE_PRESENZA_ORDINARIE
                 FROM (SELECT DISTINCT ID_DIPENDENTE,DATA
                     FROM assegnazioni_dettaglio ad
                     WHERE ID_ESECUZIONE=$idEsecuzione) t
-                LEFT JOIN ore_presenza_lul l
+                LEFT JOIN ore_lul_residuo l
                 ON l.ID_DIPENDENTE=t.ID_DIPENDENTE AND l.DATA=t.DATA";
         $array = select_list($query);
         return array_group_by($array, ['ID_DIPENDENTE', 'DATA']);
@@ -437,19 +437,6 @@ class ConsuntiviProgettiManager {
             $message->success .= "  $idDip $nome al $m[PCT_UTILIZZO] % = $m[ORE_PREVISTE] ore." . NL;
         }
         return array_group_by($list, ['ID_DIPENDENTE']);
-    }
-
-    function togli_ore_progetto_dai_lul($idEsecuzione) {
-        // rifaccio l'estrazione dei lul, questa volta tenendo conto delle ore già prelevate
-        $query = "SELECT t.ID_DIPENDENTE,t.DATA,NVL(l.ORE_PRESENZA_ORDINARIE,0)-ORE_PRELEVATE AS ORE_PRESENZA_ORDINARIE
-                FROM (SELECT ID_DIPENDENTE,DATA,SUM(NUM_ORE_PRELEVATE) AS ORE_PRELEVATE
-                    FROM assegnazioni_dettaglio ad
-                    WHERE ID_ESECUZIONE=$idEsecuzione
-                    GROUP BY ID_DIPENDENTE,DATA) t
-                LEFT JOIN ore_presenza_lul l
-                ON l.ID_DIPENDENTE=t.ID_DIPENDENTE AND l.DATA=t.DATA";
-        $array = select_list($query);
-        return array_group_by($array, ['ID_DIPENDENTE', 'DATA']);
     }
 
     /**
