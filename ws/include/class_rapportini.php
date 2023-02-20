@@ -387,19 +387,23 @@ class RapportiniManager {
 
     function creaFooter($sheet, &$curRow, $nomecognome, $nomecognome_super, $data_firma) {
         $curRow++;
+        /*
         $sheet->setCellValue('B' . $curRow, 'Working person:  ');
         $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('B' . $curRow)->getFont()->setBold(true);
         $sheet->getStyle("C$curRow:L$curRow")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        */
         $sheet->setCellValue('S' . $curRow, 'Supervisor:  ');
         $sheet->getStyle('S' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('S' . $curRow)->getFont()->setBold(true);
         $sheet->getStyle("T$curRow:AC$curRow")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
         $curRow++;
+        /*
         $sheet->setCellValue('B' . $curRow, 'Date:');
         $sheet->getStyle('B' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('B' . $curRow)->getFont()->setBold(true);
         $sheet->setCellValue('C' . $curRow, $data_firma);
+        */
         $sheet->setCellValue('S' . $curRow, 'Date:');
         $sheet->getStyle('S' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('S' . $curRow)->getFont()->setBold(true);
