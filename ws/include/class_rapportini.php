@@ -416,7 +416,7 @@ class RapportiniManager {
 
     function importSheet($excelSheet, &$message) {
         global $con, $panthera;
-
+        //questo ($excelSheet->toArray) può dare problemi se file grosso (con questa combinazione non fa conversione e le date funzionano ) modifica fatta per fix errore 
         $spreadSheetAry = $excelSheet->toArray(NULL, TRUE, FALSE);
         
         // salto la header
