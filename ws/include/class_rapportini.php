@@ -357,7 +357,8 @@ class RapportiniManager {
             if (isset($row['DATE']) && ! empty($row['DATE'])) {
                 for ($i = 1; $i <= 31; ++$i) {
                     if (isset($row['DATE'][$i])) {
-                        $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $row['DATE'][$i]);
+                        $val = $this->arrotonda05($row['DATE'][$i]);
+                        $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $val);
                     }
                 }
             }
@@ -574,6 +575,14 @@ class RapportiniManager {
         $oggetti = select_list($sql1 . $sql);
         
         return [$oggetti, $count];
+    }
+
+    /**
+     * Arrotonda un numero a 0.5
+     */
+    function arrotonda05($number_or_str) {
+        $number = floatval($number_or_str);
+        return round($number * 2) / 2;
     }
 }
 ?>
