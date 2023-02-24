@@ -84,7 +84,7 @@ export class ImportazioneRapportiniComponent implements OnInit {
         }
       },
       err => {
-        console.log("ERRORE=", err);
+        console.error("ERRORE=", err);
         if (err && err.error && err.error.error)
           this.message_error = err.error.error.message;
         else if (err && err.error)
