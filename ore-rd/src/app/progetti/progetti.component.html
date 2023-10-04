@@ -15,11 +15,11 @@
         <td mat-cell *matCellDef="let element" style="text-align: left;"> {{element.TITOLO}} </td>
     </ng-container>
     <ng-container matColumnDef="dataInizio">
-        <th mat-header-cell *matHeaderCellDef> Data Inizio </th>
+        <th mat-header-cell *matHeaderCellDef> Inizio periodo di riferimento </th>
         <td mat-cell *matCellDef="let element"> {{element.DATA_INIZIO}} </td>
     </ng-container>
     <ng-container matColumnDef="dataFine">
-        <th mat-header-cell *matHeaderCellDef> Data Fine </th>
+        <th mat-header-cell *matHeaderCellDef> Fine periodo di riferimento </th>
         <td mat-cell *matCellDef="let element"> {{element.DATA_FINE}} </td>
     </ng-container>
 
@@ -27,6 +27,7 @@
         <th mat-header-cell *matHeaderCellDef> Azione </th>
         <td mat-cell *matCellDef="let row">
             <button mat-raised-button color="primary" (click)="getRecord(row)">Modifica</button>
+            <button mat-raised-button color="primary" (click)="report(row)">Report</button>
         </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
