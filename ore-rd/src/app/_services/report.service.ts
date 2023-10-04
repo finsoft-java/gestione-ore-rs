@@ -11,12 +11,16 @@ export class ReportService {
 
   constructor(private http: HttpClient) { }
 
-  downloadReportBudget(id_progetto: number, periodo: string, isCompleto: boolean) {
+  downloadReportBudget(id_progetto: number, periodo: string, isCompleto: boolean, dataInizio: string, dataFine: string) {
     let periodoUrl = '';
+    let rangeUrl = '';
     if (periodo != '') {
       periodoUrl = `&periodo=${periodo}`;
     }
-    return this.http.get(`${this.baseUrl}/ReportBudget.php?id_progetto=${id_progetto}${periodoUrl}&completo=${isCompleto}`, {
+    if (dataInizio != '' && dataFine != '') {
+      rangeUrl = `&dataInizio=${dataInizio}&dataFine=${dataFine}`;
+    }
+    return this.http.get(`${this.baseUrl}/ReportBudget.php?id_progetto=${id_progetto}${periodoUrl}${rangeUrl}&completo=${isCompleto}`, {
       responseType: 'arraybuffer'
     });
   }

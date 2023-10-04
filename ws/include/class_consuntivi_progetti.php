@@ -220,7 +220,7 @@ class ConsuntiviProgettiManager {
             JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
                 AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE
                 AND oc.DATA >= DATE('$dataInizio') AND oc.DATA < DATE('$dataFine')
-            WHERE pr.ID_PROGETTO=$idProgetto";
+            WHERE pr.ID_PROGETTO=$idProgetto and pc.DATA_INIZIO >= DATE('$dataInizio') AND pc.DATA_FINE < DATE('$dataFine')";
         $r = execute_update($query);
         return $r;
     }

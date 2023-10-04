@@ -8,15 +8,20 @@ $budget = new ReportBudgetManager();
 class ReportBudgetManager {
 
 
-    function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null) {
+    function get_consuntivi_per_progetto($id_progetto, $anno=null, $mese=null, $dataInizio=null, $dataFine=null) {
         $sql = "SELECT NVL(SUM(c.NUM_ORE_LAVORATE),0) as NUM_ORE_LAVORATE, NVL(SUM(c.NUM_ORE_LAVORATE * c.COSTO_ORARIO),0.0) as COSTO " .
             "FROM progetti p " .
             "LEFT JOIN ore_consuntivate_progetti c ON p.id_progetto=c.id_progetto ";
         if (!empty($anno) and !empty($mese)) {
             $sql .= "AND c.DATA >= DATE('$anno-$mese-01') AND c.DATA <= LAST_DAY(DATE('$anno-$mese-01')) ";
         }
+        if (!empty($dataInizio) and !empty($dataFine)) {
+            $sql .= "AND c.DATA >= '$dataInizio' AND c.DATA <= '$dataFine' ";
+        }
+
         $sql .= "WHERE p.ID_PROGETTO = $id_progetto " .
             "GROUP BY c.ID_PROGETTO";
+
         return select_single($sql);
     }
 
@@ -40,7 +45,7 @@ class ReportBudgetManager {
         return $matricole;
     }
 
-    function get_consuntivi_matricola($id_progetto, $matricola, $anno=null) {
+    function get_consuntivi_matricola($id_progetto, $matricola, $anno=null, $dataInizio=null, $dataFine=null) {
         $sql = "SELECT c.DATA, c.NUM_ORE_LAVORATE, c.COSTO
                 FROM ore_consuntivate_progetti c
                 WHERE ID_PROGETTO=$id_progetto AND ID_DIPENDENTE='$matricola' ";
@@ -48,16 +53,19 @@ class ReportBudgetManager {
             $primo = "DATE('$anno-$mese-01')";
             $sql .= "AND c.DATA >= $primo AND c.DATA <= LAST_DAY($primo) ";
         }
+        if (!empty($dataInizio) and !empty($dataFine)) {
+            $sql .= "AND c.DATA >= '$dataInizio' AND c.DATA <= '$dataFine' ";
+        }
         $sql .= "ORDER BY c.DATA";
         return select_list($sql);
     }
 
-    function get_matrice_consuntivi_progetto($progetto, $anno=null, $mese=null) {
+    function get_matrice_consuntivi_progetto($progetto, $anno=null, $mese=null, $dataInizio=null, $dataFine=null) {
         
         $lista_matricole = $this->get_matricole_progetto($progetto['ID_PROGETTO'], $anno, $mese);
 
         foreach($lista_matricole as $key => $matricola) {
-            $consuntivi = $this->get_consuntivi_matricola($progetto['ID_PROGETTO'], $matricola['ID_DIPENDENTE']);
+            $consuntivi = $this->get_consuntivi_matricola($progetto['ID_PROGETTO'], $matricola['ID_DIPENDENTE'], $dataInizio, $dataFine);
 
             // completo le date con quelle del range temporale
             $dates = $this->get_range_temporale($progetto, $anno, $mese);
@@ -258,7 +266,7 @@ class ReportBudgetManager {
         $pdf->Output('Budget.pdf', 'I'); // Download
     }*/
     
-    function getReportData($idprogetto, $anno, $mese, $completo) {
+    function getReportData($idprogetto, $anno, $mese, $completo, $dataInizio, $dataFine) {
 
         global $progettiManager, $panthera;
 
@@ -275,7 +283,7 @@ class ReportBudgetManager {
         
         $report['budget'] = $report['progetto']['MONTE_ORE_TOT'] * $report['progetto']['COSTO_MEDIO_UOMO'];
 
-        $report['consuntivi'] = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese);
+        $report['consuntivi'] = $this->get_consuntivi_per_progetto($idprogetto, $anno, $mese, $dataInizio, $dataFine);
         // ha due campi, NUM_ORE_LAVORATE e COSTO
         // var_dump($report['consuntivi']); die();
         
@@ -300,7 +308,7 @@ class ReportBudgetManager {
         }
         
         if ($completo) {
-            $report['consuntivi']['dettagli'] = $this->get_matrice_consuntivi_progetto($report['progetto'], $anno, $mese);
+            $report['consuntivi']['dettagli'] = $this->get_matrice_consuntivi_progetto($report['progetto'], $anno, $mese, $dataInizio, $dataFine);
         }
 
         return $report;
@@ -324,8 +332,8 @@ class ReportBudgetManager {
         return $result;
     }
 
-    function getReportHtml($idprogetto, $anno, $mese, $completo) {
-        $data = $this->getReportData($idprogetto, $anno, $mese, $completo);
+    function getReportHtml($idprogetto, $anno, $mese, $completo, $dataInizio, $dataFine) {
+        $data = $this->getReportData($idprogetto, $anno, $mese, $completo, $dataInizio, $dataFine);
         $dates = $this->get_range_temporale($data['progetto'], $anno, $mese);
         $context = [
             'completo' => $completo,

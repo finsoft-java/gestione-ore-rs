@@ -9,14 +9,24 @@
     <div style="width: 75%;display: block;margin: 0px auto; text-align:center" class="fraz2_width">
         <mat-checkbox class="example-margin" title="Nel report Completo sono riportati i dettagli di matricole e date" [(ngModel)]="isCompleto" style="margin-right:10px;">Completo</mat-checkbox>
         <mat-checkbox class="example-margin" title="Scegliere se il report si riferisce all'intero progetto o alla singola mensilit&agrave;" [checked]="singoloMese" (change)="changeSingoloMese($event)" style="margin-right:10px;">Singolo mese</mat-checkbox>
-        <mat-form-field appearance="fill" style="margin-right: 10px;" [style.visibility]="singoloMese ? 'visible' : 'hidden'">
-            <mat-label>Data</mat-label>
-            <input matInput readonly [matDatepicker]="picker" [formControl]="date">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker startView="multi-year" (yearSelected)="chosenYearHandler($event)" (monthSelected)="chosenMonthHandler($event, picker)" panelClass="example-month-picker">
-            </mat-datepicker>
-        </mat-form-field>
-        <br/>
+        <mat-checkbox class="example-margin" title="Scegliere se il report si riferisce all'intero progetto o al periodo" [checked]="periodo" (change)="changePeriodo($event)" style="margin-right:10px;">Periodo</mat-checkbox>
+        <div>
+            <mat-form-field appearance="fill" style="margin-right: 10px;" [style.display]="singoloMese ? '' : 'none'">
+                <mat-label>Data</mat-label>
+                <input matInput readonly [matDatepicker]="picker" [formControl]="date">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker startView="multi-year" (yearSelected)="chosenYearHandler($event)" (monthSelected)="chosenMonthHandler($event, picker)" panelClass="example-month-picker">
+                </mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="fill" style="margin-right: 10px;" [style.display]="periodo ? '' : 'none'">
+                <mat-label>Periodo</mat-label>
+                <mat-select [(ngModel)]="filtroPeriodo" name="x" required>
+                    <mat-option *ngFor="let x of allPeriodi" [value]="x" ><!--(click)="filtraPeriodo()"-->
+                        {{"Da: " + x.DATA_INIZIO + " A: " + x.DATA_FINE}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
         <button mat-raised-button color="primary" (click)="download()">Genera report</button>
     </div>
 

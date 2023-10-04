@@ -35,6 +35,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $anno = substr($periodo, 0, 4);
         $mese = substr($periodo, 5, 2);
     }
+
+
+    if ((! isset($_GET['dataInizio']) or ! $_GET['dataInizio']) && (! isset($_GET['dataFine']) or ! $_GET['dataFine'])) {
+        $dataInizio = null;
+        $dataFine = null;
+    } else {
+        $dataInizio =  $_GET['dataInizio'];
+        $dataFine =  $_GET['dataFine'];
+    }
+
     
     if (! isset($_GET['completo']) or ! $_GET['completo']) {
         $completo = false;
@@ -43,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
     
     //$budget->sendReport($idprogetto, $anno, $mese, $completo);   // PER IL PDF
-    $report = $budget->getReportHtml($idprogetto, $anno, $mese, $completo);
+    $report = $budget->getReportHtml($idprogetto, $anno, $mese, $completo, $dataInizio, $dataFine);
     
     header('Content-Type: text/html');
     echo $report;
