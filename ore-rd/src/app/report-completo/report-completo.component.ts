@@ -46,7 +46,7 @@ export const MY_FORMATS = {
 })
 export class ReportCompletoComponent implements OnInit {
     
-    isCompleto = false;
+    isCompleto = true;
     singoloMese = false;
     periodo = false;
     allPeriodi: Periodo[] = [];
