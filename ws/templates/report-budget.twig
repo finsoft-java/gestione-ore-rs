@@ -8,7 +8,7 @@
         .calendario { width: 3% }
         .numbers { text-align: right }
         .rotate { transform: rotate(270deg); }
-        table { border-collapse: collapse; border: 1px solid; width:300px; }
+        table { border-collapse: collapse; border: 1px solid; width:450px; }
         td { padding:4px; }
         </style>
     </head>
@@ -120,14 +120,15 @@
 
             {% if completo %}
 
-            <h3>Dettaglio ore</h3>
+            <h3>Dettaglio</h3>
 <!-- Ci è stato chiesto di mostrare solo il totale, non il dettaglio per date -->
 
             <table class='table-calendario'>
                 <thead>
                     <tr>
-                        <th class="title col-md-6">Dipendente</th>
-                        <th class="title col-md-6 numbers">Numero ore</th>
+                        <th class="title">Dipendente</th>
+                        <th class="title numbers">Numero ore</th>
+                        <th class="title numbers">Costo &euro;</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -141,31 +142,6 @@
                                 {% endif %}
                             {% endfor %}
                         </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            {% endif %}
-
-<!-- ============================================================================ -->
-
-            {% if completo %}
-
-            <h3>Dettaglio costi</h3>
-            <!-- Ci è stato chiesto di mostrare solo il totale, non il dettaglio per date -->
-
-            <table class='table-calendario'>
-                <thead>
-                    <tr>
-                        <th class="title col-md-6">Dipendente</th>
-                        <th class="title col-md-6 numbers">Costo &euro;</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for dip in consuntivi.dettagli %}
-                    <tr>
-                        <td class="">{{dip.COGNOME_NOME }}</td>
                         <td class="numbers">
                             {% for d in dip.DETTAGLI %}
                                 {% if(d.DATA is null) %}
@@ -179,8 +155,6 @@
             </table>
 
             {% endif %}
-
-<!-- ============================================================================ -->
 
         </div> <!-- container-->
     </body>
