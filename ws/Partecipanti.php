@@ -9,6 +9,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_logged_user_JWT();
+$filter = isset($_GET['filter']) ? $_GET['filter'] : null;
+$denominazione = isset($_GET['denominazione']) ? $con->escape_string($_GET['denominazione']) : null;
+$matricola = isset($_GET['matricola']) ? $con->escape_string($_GET['matricola']) : null;
+$prcUtilizzo = isset($_GET['prcUtilizzo']) ? $con->escape_string($_GET['prcUtilizzo']) : null;
+$mansione = isset($_GET['mansione']) ? $con->escape_string($_GET['mansione']) : null;
+
 
 $id_dipendente = isset($_GET['id_dipendente']) ? $con->escape_string($_GET['id_dipendente']) : null;
 $top = isset($_GET['top']) ? $con->escape_string($_GET['top']) : null;
@@ -26,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo json_encode(['value' => $progetto]);
     } else {
         //==========================================================
-        [$progetti, $count] = $partecipantiManager->get_partecipanti($top, $skip, $orderby);
-          
+        [$progetti, $count] = $partecipantiManager->get_partecipanti($top, $skip, $orderby, $denominazione, $matricola, $prcUtilizzo, $mansione);
+        
         header('Content-Type: application/json');
         echo json_encode(['data' => $progetti, 'count' => $count]);
     }

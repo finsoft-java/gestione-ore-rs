@@ -8,9 +8,14 @@ export class PartecipantiService {
 
     constructor(private http: HttpClient) { }
 
-    getAll() {
+    getAll(top: number, skip: number) {
 
-        return this.http.get<ListBean<Partecipante>>(environment.wsUrl + `Partecipanti.php`);
+        return this.http.get<ListBean<Partecipante>>(environment.wsUrl + `Partecipanti.php?top=${top}&skip=${skip}`);
+    }
+
+    getAllWithFilter(top:number, skip:number, denominazione: string, matricola: string, prcUtilizzo:string, mansione: string) {
+
+        return this.http.get<ListBean<Partecipante>>(environment.wsUrl + `Partecipanti.php?filter=Y&top=${top}&skip=${skip}&denominazione=${denominazione}&matricola=${matricola}&prcUtilizzo=${prcUtilizzo}&mansione=${mansione}`);
     }
 
     insert(partecipante: Partecipante) {

@@ -4,6 +4,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Partecipante } from './../_models/partecipanti';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Matricola } from '../_models';
+import { PageEvent } from '@angular/material/paginator';
+import { ColumnDefinition } from '../mat-edit-table';
 
 @Component({
   selector: 'app-partecipanti-globali',
@@ -13,9 +15,21 @@ import { Matricola } from '../_models';
 
 export class PartecipantiGlobaliComponent implements OnInit {
 
+  filter: any = {
+    denominazione : "",
+    matricola : "",
+    prcUtilizzo : "",
+    mansione : ""
+  };
+  length?= 0;
   dataSource = new MatTableDataSource<Partecipante>();
+  pageSize = 500;
+  pageIndex = 0;
+  pageSizeOptions = [50, 100, 250, 500];
+  showFirstLastButtons = true;
   displayedColumns: string[] = ['nome', 'matricola', 'pctUtilizzo', 'mansione', 'costo', 'actions'];
-
+  
+  service!: PartecipantiService;
   allPartecipanti: Partecipante[] = [];
   allNomeMatricole: Matricola[] = [];
   isLoading: Boolean = true;
@@ -27,18 +41,31 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.getAll();
+    this.getAll(0, this.pageSize);
     this.getMatricole();
   }
 
-  getAll() {
-
-    this.partecipanteService.getAll().subscribe(response => {
+  getAllWithFilter(top: number, skip: number, filter: any) {
+    this.partecipanteService.getAllWithFilter(top,skip,filter.denominazione,filter.matricola,filter.prcUtilizzo,filter.mansione).subscribe(response => {
       this.allPartecipanti = response.data;
-      console.log(this.allPartecipanti);
+      this.length = response.count;
       this.isLoading = false;
       this.getMatricole();
       
+    },
+      error => {
+        this.alertService.error(error);
+        this.isLoading = false;
+    });
+  }
+
+  getAll(top: number, skip: number) {
+
+    this.partecipanteService.getAll(top,skip).subscribe(response => {
+      this.allPartecipanti = response.data;
+      this.length = response.count;
+      this.isLoading = false;
+      this.getMatricole();
     },
       error => {
         this.alertService.error(error);
@@ -100,7 +127,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
   annullaEdit(row: Partecipante) {
 
-    this.getAll();
+    this.getAll(0, this.pageSize);
   }
 
   saveEdit(row: Partecipante, matricola: number) {
@@ -144,7 +171,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
       this.partecipanteService.delete(row.ID_DIPENDENTE)
         .subscribe(response => {
-          this.getAll();
+          this.getAll(0, this.pageSize);
         },
           error => {
             this.alertService.error("Impossibile eliminare questo partecipante. "
@@ -152,5 +179,48 @@ export class PartecipantiGlobaliComponent implements OnInit {
           });
     }
   }
+  handlePageEvent(event: PageEvent) {
+    console.log(event);
+    this.length = event.length;
+    this.pageSize = event.pageSize;
+    this.pageIndex = event.pageIndex;
+    if (this.pageIndex > 0) {
+      this.getAllWithFilter((this.pageIndex) * this.pageSize,this.pageSize,this.filter);
+    } else {
+      this.getAllWithFilter(0,this.pageSize,this.filter);
+    }
+  }
+  
+  resetFilter(): void {
+    delete this.filter.matricola;
+    delete this.filter.denominazione;
+    delete this.filter.prcUtilizzo;
+    delete this.filter.mansione;  
+    this.getAll(0, this.pageSize);
+  }
 
+  filterRow(): void {
+    console.log("filter", this.filter);
+    if (this.filter.matricola) {
+      this.filter.matricola = this.filter.matricola.trim();
+    } else {
+      this.filter.matricola = "";
+    }
+    if (this.filter.denominazione) {
+      this.filter.denominazione = this.filter.denominazione.trim();
+    } else {
+      this.filter.denominazione = "";
+    }
+    if (this.filter.prcUtilizzo) {
+      this.filter.prcUtilizzo = this.filter.prcUtilizzo.trim();
+    } else {
+      this.filter.prcUtilizzo = "";
+    }
+    if (this.filter.mansione) {
+      this.filter.mansione = this.filter.mansione.trim();
+    } else {
+      this.filter.mansione = "";
+    }
+    this.getAllWithFilter(0,10,this.filter);
+  }
 }

@@ -11,20 +11,36 @@ $partecipantiManager = new PartecipantiManager();
 
 class PartecipantiManager {
     
-    function get_partecipanti($skip=null, $top=null, $orderby=null) {
+    function get_partecipanti($skip=null, $top=null, $orderby=null, $denominazione=null, $matricola=null, $ptcUtilizzo=null, $mansione=null) {
         global $con;
         
         $sql0 = "SELECT COUNT(*) AS cnt ";
         $sql1 = "SELECT * ";
         $sql = "FROM partecipanti_globali p ";
         
+        if( $denominazione != "" || $matricola != "" || $ptcUtilizzo != "" || $mansione != "") {    
+            $sql .= "WHERE 1 ";
+        }
+        if($denominazione != "") {    
+            //$sql .= "AND DENOMINAZIONE = '$denominazione' ";
+        }
+        if($matricola != "") {    
+            $sql .= "AND MATRICOLA = '$matricola' ";
+        }
+        if($ptcUtilizzo != "") {    
+            $sql .= "AND PCT_UTILIZZO = '$ptcUtilizzo' ";
+        }
+        if($mansione != "") {    
+            $sql .= "AND MANSIONE like '%$mansione%' ";
+        }
+
         if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
             // avoid SQL-injection
             $sql .= " ORDER BY $orderby";
         } else {
             $sql .= " ORDER BY p.ID_DIPENDENTE";
         }
-
+        
         $count = select_single_value($sql0 . $sql);
 
         if ($top != null){
@@ -34,6 +50,7 @@ class PartecipantiManager {
                 $sql .= " LIMIT $top";
             }
         }        
+        //echo $sql;
         $data = select_list($sql1 . $sql);
         
         return [$data, $count];
