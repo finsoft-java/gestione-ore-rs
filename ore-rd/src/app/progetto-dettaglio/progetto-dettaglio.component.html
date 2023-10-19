@@ -23,22 +23,22 @@
 
             <mat-form-field appearance="fill">
                 <mat-label>Grant Number</mat-label>
-                <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.GRANT_NUMBER"
-                    placeholder="Inserisci il Grant Number">
+                <input matInput disabled [ngModelOptions]="{standalone: true}" [(ngModel)]="progetto.GRANT_NUMBER"
+                    placeholder="Inserisci il Grant Number" >
             </mat-form-field>
         </div>
 
         <div style="width: 75%; display: block; margin: 0px auto;" class="max_width">
             <mat-form-field appearance="fill" style="float: right;">
                 <mat-label>Abstract</mat-label>
-                <textarea matInput maxlength="2000" [ngModelOptions]="{standalone: true}"
-                    [(ngModel)]="progetto.ABSTRACT" placeholder="Inserisci l'Abstract"></textarea>
+                <textarea matInput disabled maxlength="2000" [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="progetto.ABSTRACT" placeholder="Inserisci l'Abstract" ></textarea>
             </mat-form-field>
         </div>
 
         <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
             <mat-form-field appearance="fill" style="margin-right: 10px;">
-                <mat-label>Data Inizio</mat-label>
+                <mat-label>Periodo di riferimento data inizio</mat-label>
                 <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="dataInizio" [matDatepicker]="picker"
                     required>
                 <mat-datepicker-toggle matSuffix [for]="picker">
@@ -48,7 +48,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="fill">
-                <mat-label>Data Fine</mat-label>
+                <mat-label>Periodo di riferimento data fine</mat-label>
                 <input matInput [ngModelOptions]="{standalone: true}" [(ngModel)]="dataFine" [matDatepicker]="picker2"
                     required>
                 <mat-datepicker-toggle matSuffix [for]="picker2">
@@ -133,7 +133,7 @@
 
             <div style="width: 75%; display: block; margin: 0px auto;" class="fraz2_width">
                 <mat-form-field appearance="fill" style="margin-right: 10px;">
-                    <mat-label>Data Ultimo report</mat-label>
+                    <mat-label>Ultimo periodo</mat-label>
                     <input matInput readonly [ngModelOptions]="{standalone: true}" [(ngModel)]="dataUltimoReport"
                         [matDatepicker]="picker3">
                     <mat-datepicker-toggle matSuffix [for]="picker3">
@@ -143,7 +143,7 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="fill">
-                    <mat-label>Ore già assegnate</mat-label>
+                    <mat-label>Tot ore assegnate nel periodo di riferimento</mat-label>
                     <input matInput [value]="this.progetto.ORE_GIA_ASSEGNATE|number:'1.0'"
                         (change)="setOreGiaAssegnateFmt($event)">
                 </mat-form-field>
