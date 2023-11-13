@@ -1,28 +1,30 @@
 <div>
-    <h5 style="margin-bottom: 20px; text-align: center;">Partecipanti Globali</h5>
-    <button mat-raised-button color="primary" style="float: right; margin: 0px 0px 20px 0px;"
+    <h5 class="title col-4 offset-4" style="margin-bottom: 20px; text-align: center;">Partecipanti Globali</h5>
+    <button mat-raised-button color="primary" style="position: absolute;top: 130px;right: 15px;"
         (click)="addPartecipante()">Nuovo Parteciapante</button>
 </div>
 
-
-<app-mat-edit-table
-  [editable]="false"
-  #myTable
->
   <mat-expansion-panel hideToggle>
     <mat-expansion-panel-header>
       <mat-panel-description>
         Pannello Filtri
       </mat-panel-description>
     </mat-expansion-panel-header>
-    <mat-form-field appearance="fill" style="margin-right:15px;">
-        <mat-label>Denominazione</mat-label>
-        <input matInput [(ngModel)]="filter.denominazione">
-    </mat-form-field>
+
+    <div style="width:6cm" class="mat-form-field-wrapper">
+        <mat-label class="label_mat">Nome e cognome</mat-label>
+        <ng-select [items]="allNomeMatricole" 
+            bindLabel="DENOMINAZIONE" 
+            bindValue="MATRICOLA" 
+            [(ngModel)]="filter.matricola">
+        </ng-select>
+    </div>
     <mat-form-field appearance="fill" style="margin-right:15px;">
         <mat-label>Matricola</mat-label>
         <input matInput [(ngModel)]="filter.matricola">
     </mat-form-field>
+
+
     <mat-form-field appearance="fill" style="margin-right:15px;">
         <mat-label>Perc. Utilizzo</mat-label>
         <input matInput [(ngModel)]="filter.prcUtilizzo">
@@ -31,16 +33,27 @@
         <mat-label>Mansione</mat-label>
         <input matInput [(ngModel)]="filter.mansione">
     </mat-form-field>
+    <mat-form-field appearance="fill" class="dropdownDate" style="margin-right: 15px;min-width: 225px;">
+        <mat-label>Periodo</mat-label>
+        <mat-select [(ngModel)]="filtroPeriodo" name="x" required>
+            <mat-option *ngFor="let x of allPeriodi" [value]="x" (click)="filtraPeriodo()">
+                {{"Da: " + x.DATA_INIZIO + " A: " + x.DATA_FINE}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
 
     <button mat-raised-button color="primary" style="margin-right:15px;" (click)="filterRow()">Filtra</button>
     <button mat-raised-button color="secondary" style="margin-right:15px;" (click)="resetFilter()">Reset</button>
   </mat-expansion-panel>
-</app-mat-edit-table>
 
-<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+<mat-paginator (page)="handlePageEvent($event)" [length]="length" [pageSize]="pageSize"
+    [showFirstLastButtons]="showFirstLastButtons" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" style="float:left; width:100%">
+</mat-paginator>
 
-    <ng-container matColumnDef="nome">
-        <th mat-header-cell *matHeaderCellDef>Denominazione</th>
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort #empTbSort="matSort">
+
+    <ng-container matColumnDef="DENOMINAZIONE">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Denominazione</th>
         <td mat-cell *matCellDef="let element">
             <div *ngIf="!element.isInsert">{{getNomeMatricola(element.ID_DIPENDENTE)}}</div>
             <div *ngIf="element.isInsert">
@@ -50,13 +63,13 @@
         </td>
     </ng-container>
 
-    <ng-container matColumnDef="matricola">
-        <th mat-header-cell *matHeaderCellDef>Matricola</th>
+    <ng-container matColumnDef="MATRICOLA">
+        <th mat-header-cell *matHeaderCellDef  mat-sort-header sortActionDescription="Sort by MATRICOLA">Matricola</th>
         <td mat-cell *matCellDef="let element">{{element.MATRICOLA}}</td>
     </ng-container>
 
-    <ng-container matColumnDef="pctUtilizzo">
-        <th mat-header-cell *matHeaderCellDef>Perc. Utilizzo</th>
+    <ng-container matColumnDef="PCT_UTILIZZO">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by PCT_UTILIZZO">Perc. Utilizzo</th>
         <td mat-cell *matCellDef="let element">
             <div *ngIf="!element.isEditable">{{element.PCT_UTILIZZO}}</div>
             <div *ngIf="element.isEditable">
@@ -66,8 +79,8 @@
         </td>
     </ng-container>
 
-    <ng-container matColumnDef="mansione">
-        <th mat-header-cell *matHeaderCellDef>Mansione</th>
+    <ng-container matColumnDef="MANSIONE">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by MANSIONE">Mansione</th>
         <td mat-cell *matCellDef="let element">
             <div *ngIf="!element.isEditable">{{element.MANSIONE}}</div>
             <div *ngIf="element.isEditable">
@@ -77,8 +90,8 @@
         </td>
     </ng-container>
 
-    <ng-container matColumnDef="costo">
-        <th mat-header-cell *matHeaderCellDef>Costo Orario</th>
+    <ng-container matColumnDef="COSTO">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by COSTO">Costo Orario</th>
         <td mat-cell *matCellDef="let element">
             <div *ngIf="!element.isEditable">{{element.COSTO}}</div>
             <div *ngIf="element.isEditable">
@@ -105,11 +118,10 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
-
+<mat-paginator (page)="handlePageEvent($event)" [length]="length" [pageSize]="pageSize"
+    [showFirstLastButtons]="showFirstLastButtons" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" style="float:left; width:100%">
+</mat-paginator>
 <div class="loading-p">
     <p *ngIf="isLoading">Caricamento partecipanti in corso...</p>
 </div>
 
-<mat-paginator (page)="handlePageEvent($event)" [length]="length" [pageSize]="pageSize"
-    [showFirstLastButtons]="showFirstLastButtons" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex">
-</mat-paginator>

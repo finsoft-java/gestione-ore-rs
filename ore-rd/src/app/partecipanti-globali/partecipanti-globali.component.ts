@@ -2,10 +2,13 @@ import { AlertService } from './../_services/alert.service';
 import { PartecipantiService } from './../_services/partecipanti.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Partecipante } from './../_models/partecipanti';
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { Matricola } from '../_models';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Matricola, Periodo } from '../_models';
 import { PageEvent } from '@angular/material/paginator';
 import { ColumnDefinition } from '../mat-edit-table';
+import {LiveAnnouncer} from '@angular/cdk/a11y';
+import {MatSort, Sort, MatSortModule} from '@angular/material/sort';
+import { PeriodiService } from '../_services/periodi.service';
 
 @Component({
   selector: 'app-partecipanti-globali',
@@ -25,33 +28,47 @@ export class PartecipantiGlobaliComponent implements OnInit {
   dataSource = new MatTableDataSource<Partecipante>();
   pageSize = 500;
   pageIndex = 0;
+  dataInizio: string = '';
+  dataFine: string = '';
   pageSizeOptions = [50, 100, 250, 500];
   showFirstLastButtons = true;
-  displayedColumns: string[] = ['nome', 'matricola', 'pctUtilizzo', 'mansione', 'costo', 'actions'];
+  displayedColumns: string[] = ['DENOMINAZIONE', 'MATRICOLA', 'PCT_UTILIZZO', 'MANSIONE', 'COSTO', 'actions'];
   
   service!: PartecipantiService;
   allPartecipanti: Partecipante[] = [];
+  allPeriodi: Periodo[] = [];
   allNomeMatricole: Matricola[] = [];
   isLoading: Boolean = true;
+  filtroPeriodo?: Periodo;
+  
 
   constructor(
     private partecipanteService: PartecipantiService,
-    private alertService: AlertService) {
+    private alertService: AlertService,
+    private periodiService: PeriodiService,
+    private _liveAnnouncer: LiveAnnouncer) {
   }
+  @ViewChild('empTbSort') empTbSort = new MatSort();
 
   ngOnInit(): void {
 
     this.getAll(0, this.pageSize);
     this.getMatricole();
+    this.getAllPeriodi();
+  }
+
+  getAllPeriodi() {
+    this.periodiService.getAll().subscribe(response => {
+      this.allPeriodi = response.data;
+    })
   }
 
   getAllWithFilter(top: number, skip: number, filter: any) {
-    this.partecipanteService.getAllWithFilter(top,skip,filter.denominazione,filter.matricola,filter.prcUtilizzo,filter.mansione).subscribe(response => {
+    this.partecipanteService.getAllWithFilter(top,skip,filter.denominazione,filter.matricola,filter.prcUtilizzo,filter.mansione,filter.dataInizio, filter.dataFine).subscribe(response => {
       this.allPartecipanti = response.data;
       this.length = response.count;
       this.isLoading = false;
-      this.getMatricole();
-      
+      this.getMatricole();      
     },
       error => {
         this.alertService.error(error);
@@ -93,6 +110,8 @@ export class PartecipantiGlobaliComponent implements OnInit {
 
       this.allPartecipanti.sort((a, b) => a.DENOMINAZIONE!.localeCompare(b.DENOMINAZIONE!));
       this.dataSource = new MatTableDataSource<Partecipante>(this.allPartecipanti);
+      this.empTbSort.disableClear = true;
+      this.dataSource.sort = this.empTbSort;
     },
       error => {
         this.alertService.error(error);
@@ -223,4 +242,12 @@ export class PartecipantiGlobaliComponent implements OnInit {
     }
     this.getAllWithFilter(0,10,this.filter);
   }
+  
+  filtraPeriodo() {
+    if (this.filtroPeriodo) {
+      this.filter.dataInizio = this.filtroPeriodo.DATA_INIZIO;
+      this.filter.dataFine = this.filtroPeriodo.DATA_FINE;
+    }
+  }
+
 }
