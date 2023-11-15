@@ -37,6 +37,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
   service!: PartecipantiService;
   allPartecipanti: Partecipante[] = [];
   allPeriodi: Periodo[] = [];
+  maxDate: String = '';
   allNomeMatricole: Matricola[] = [];
   isLoading: Boolean = true;
   filtroPeriodo?: Periodo;
@@ -240,7 +241,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
     } else {
       this.filter.mansione = "";
     }
-    this.getAllWithFilter(0,10,this.filter);
+    this.getAllWithFilter(0,500,this.filter);
   }
   
   filtraPeriodo() {

@@ -14,6 +14,8 @@ $denominazione = isset($_GET['denominazione']) ? $con->escape_string($_GET['deno
 $matricola = isset($_GET['matricola']) ? $con->escape_string($_GET['matricola']) : null;
 $prcUtilizzo = isset($_GET['prcUtilizzo']) ? $con->escape_string($_GET['prcUtilizzo']) : null;
 $mansione = isset($_GET['mansione']) ? $con->escape_string($_GET['mansione']) : null;
+$dataInizio = isset($_GET['dataInizio']) ? $con->escape_string($_GET['dataInizio']) : null;
+$dataFine = isset($_GET['dataFine']) ? $con->escape_string($_GET['dataFine']) : null;
 
 
 $id_dipendente = isset($_GET['id_dipendente']) ? $con->escape_string($_GET['id_dipendente']) : null;
@@ -32,7 +34,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo json_encode(['value' => $progetto]);
     } else {
         //==========================================================
-        [$progetti, $count] = $partecipantiManager->get_partecipanti($top, $skip, $orderby, $denominazione, $matricola, $prcUtilizzo, $mansione);
+        if($dataInizio == null && $dataFine == null) {
+            $allPeriodi = $commesseManager->get_periodi();
+            foreach ($allPeriodi as $data) {
+                $dataInizio = $data['DATA_INIZIO'];
+                $dataFine = $data['DATA_FINE'];
+                break;
+            }
+        }
+        [$progetti, $count] = $partecipantiManager->get_partecipanti($top, $skip, $orderby, $denominazione, $matricola, $prcUtilizzo, $mansione, $dataInizio, $dataFine);
         
         header('Content-Type: application/json');
         echo json_encode(['data' => $progetti, 'count' => $count]);

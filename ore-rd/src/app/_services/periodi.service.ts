@@ -12,6 +12,10 @@ export class PeriodiService {
         return this.http.get<ListBean<Periodo>>(environment.wsUrl + `Periodi.php`);
     }
 
+    getMaxPeriodo() {
+        return this.http.get<ListBean<Periodo>>(environment.wsUrl + `Periodi.php?max=Y`);
+    }
+
     eliminaPeriodo(dataInizio: string, dataFine: string) {
         return this.http.delete<void>(environment.wsUrl + `Commesse.php?DATA_INIZIO=${dataInizio}&DATA_FINE=${dataFine}`);
     }

@@ -12,6 +12,18 @@
     </div>
 </div>
 
+<mat-expansion-panel hideToggle [expanded]="checkRiepilogo ? true : false" style="margin-bottom:15px">
+    <mat-expansion-panel-header>
+        <mat-panel-description>
+            Riepilogo
+        </mat-panel-description>
+    </mat-expansion-panel-header>
+    <p>Commesse "R" : {{cntR}}</p>
+    <p>Commesse compatibili : {{cntC}}</p>
+    <p>Totale Ore importate : {{totaleOre}}</p>    
+</mat-expansion-panel>
+
+
 <div style="overflow-x: auto;" class="mat-elevation-z8">
     <table mat-table [dataSource]="dataSource">
 

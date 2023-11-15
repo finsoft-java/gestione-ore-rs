@@ -24,7 +24,10 @@ export class CommesseComponent implements OnInit {
   dataInizio: string = '';
   dataFine: string = '';
   filtroPeriodo?: Periodo;
-
+  checkRiepilogo: Boolean = false;
+  cntR:number=0;
+  cntC:number=0;
+  totaleOre:number=0;
   constructor(
     private alertService: AlertService,
     private commesseService: CommesseService,
@@ -41,9 +44,26 @@ export class CommesseComponent implements OnInit {
       this.allCommesse = response.data;
       this.dataSource = new MatTableDataSource<Commessa>(response.data);
       this.isLoading = false;
+      this.checkRiepilogo = true;
+      this.cntR=0;
+      this.cntC=0;
+      this.totaleOre = 0;
       this.allCommesse.forEach(x => {
+        console.log(x.TIPOLOGIA);
+        switch (x.TIPOLOGIA?.toUpperCase()) {
+          case "COMMESSE \"R\"":
+            this.cntR++
+            break;
+          case "COMMESSE COMPATIBILI":
+            this.cntC++
+            break;
+          default:
+            break;
+        }
+        this.totaleOre = this.totaleOre+Number(x.TOT_ORE_PREVISTE);
         x.PROGETTI.forEach(y => {
           if (!this.allProgetti.includes(y.ACRONIMO)) { this.allProgetti.push(y.ACRONIMO); }
+
         })
       });
       this.displayedColumns = this.displayedColumns.concat(this.allProgetti);

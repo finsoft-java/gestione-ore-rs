@@ -109,17 +109,40 @@ class CommesseManager
             return;
         }
 
-        $contatore = 0;
+        $contatoreCommesse = 0;
+        $contatoreErrori = 0;
+        $contatoreCommR = 0;
+        $contatoreCommComp = 0;
+        $totOreImportateCommessa = 0;
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
 
-            $tipologiaCommessa = $con->escape_string($spreadSheetAry[$curRow][COL_TIPO_COMMESSA]);
-            $codCommessa = $con->escape_string($spreadSheetAry[$curRow][COL_COD_COMMESSA]);
-            $totOreCommessa = $spreadSheetAry[$curRow][COL_TOT_ORE];
-            $pctCompatibilita = $spreadSheetAry[$curRow][COL_PCT_RD];
-            $totOreRd = $spreadSheetAry[$curRow][COL_TOT_ORE_RD];
+            $tipologiaCommessa = trim($con->escape_string($spreadSheetAry[$curRow][COL_TIPO_COMMESSA]));
+            $codCommessa = trim($con->escape_string($spreadSheetAry[$curRow][COL_COD_COMMESSA]));
+            $totOreCommessa = trim($spreadSheetAry[$curRow][COL_TOT_ORE]);
+            $totOreImportateCommessa = $totOreImportateCommessa+$totOreCommessa;
+            $pctCompatibilita = trim($spreadSheetAry[$curRow][COL_PCT_RD]);
+            $totOreRd = trim($spreadSheetAry[$curRow][COL_TOT_ORE_RD]);
+            $rigaAttuale = $curRow+1;
+            switch ($tipologiaCommessa) {
+                case 'commesse \"R\"':
+                    $contatoreCommR++;
+                    break;
+                case 'commesse compatibili':
+                    $contatoreCommComp++;
+                    break;
+                default:
+                    # code...
+                    break;
+            }
 
-            if (!$codCommessa || !$pctCompatibilita) {
-                $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
+            if (empty($pctCompatibilita)) {
+                $message->error .= "Campo obbligatorio Excel: pctCompatibilita non valorizzato alla riga $rigaAttuale<br/>";
+                $contatoreErrori++;
+                continue;
+            }
+            if (empty($codCommessa)) {
+                $message->error .= "Campo obbligatorio Excel: codCommessa non valorizzato alla riga $rigaAttuale<br/>";
+                $contatoreErrori++;
                 continue;
             }
 
@@ -133,7 +156,7 @@ class CommesseManager
                         WHERE COD_COMMESSA='$codCommessa' AND DATA_INIZIO='$dataInizio' AND DATA_FINE='$dataFine'";
             }
             execute_update($query);
-            ++$contatore;
+            ++$contatoreCommesse;
         }
 
         $cols = count($spreadSheetAry[0]);
@@ -153,17 +176,30 @@ class CommesseManager
         $contatore = 0;
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
             foreach ($projectMap as $curCol => $idProgetto) {
-                $codCommessa = $spreadSheetAry[$curRow][COL_COD_COMMESSA];
+                $codCommessa = trim($spreadSheetAry[$curRow][COL_COD_COMMESSA]);
                 $valueOre = empty($spreadSheetAry[$curRow][$curCol]) ? 0.0 : $spreadSheetAry[$curRow][$curCol];
-                if (!empty($idProgetto)) {
+                if (!empty($idProgetto) && !empty($codCommessa)) {
                     $query = "REPLACE INTO progetti_commesse (ID_PROGETTO,COD_COMMESSA,ORE_PREVISTE, DATA_INIZIO, DATA_FINE)
                     VALUES('$idProgetto','$codCommessa','$valueOre', '$dataInizio', '$dataFine')";
                     execute_update($query);
+                    ++$contatore;
                 }
             }
-            ++$contatore;
         }
-        $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
+        if($message->error != "") {
+            $message->success .= "Caricamento concluso. $contatoreCommesse righe caricate. $contatoreErrori righe non caricate <br/>
+                                                        Commesse 'R' importate: $contatoreCommR<br/>
+                                                        Commesse compatibili importate: $contatoreCommComp<br/>
+                                                        Totale Ore Importate: $totOreImportateCommessa";
+        } else {
+            $message->success .= "Caricamento concluso. Righe importate $contatoreCommesse righe caricate.<br/>
+                                                        Commesse 'R' importate: $contatoreCommR<br/>
+                                                        Commesse compatibili importate: $contatoreCommComp<br/>
+                                                        Totale Ore Importate; $totOreImportateCommessa";
+        }
+
+
+        
     }
 
     public function get_periodi()
@@ -178,6 +214,10 @@ class CommesseManager
 
     public function elimina_periodo($dataInizio, $dataFine)
     {
+        $sql = "DELETE FROM progetti_commesse WHERE
+                    DATA_INIZIO=DATE('$dataInizio') AND
+                    DATA_FINE=DATE('$dataFine')";
+        execute_update($sql);
         $sql = "DELETE FROM commesse WHERE
                     DATA_INIZIO=DATE('$dataInizio') AND
                     DATA_FINE=DATE('$dataFine')";

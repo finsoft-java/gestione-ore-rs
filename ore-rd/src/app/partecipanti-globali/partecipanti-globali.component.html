@@ -1,50 +1,52 @@
 <div>
     <h5 class="title col-4 offset-4" style="margin-bottom: 20px; text-align: center;">Partecipanti Globali</h5>
+    
+    <mat-expansion-panel hideToggle>
+        <mat-expansion-panel-header>
+        <mat-panel-description>
+            Pannello Filtri
+        </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div style="width:6cm" class="mat-form-field-wrapper">
+            <mat-label class="label_mat">Nome e cognome</mat-label>
+            <ng-select [items]="allNomeMatricole" 
+                bindLabel="DENOMINAZIONE" 
+                bindValue="MATRICOLA" 
+                [(ngModel)]="filter.matricola">
+            </ng-select>
+        </div>
+        <mat-form-field appearance="fill" style="margin-right:15px;">
+            <mat-label>Matricola</mat-label>
+            <input matInput [(ngModel)]="filter.matricola">
+        </mat-form-field>
+
+
+        <mat-form-field appearance="fill" style="margin-right:15px;">
+            <mat-label>Perc. Utilizzo</mat-label>
+            <input matInput [(ngModel)]="filter.prcUtilizzo">
+        </mat-form-field>
+        <mat-form-field appearance="fill" style="margin-right:15px;">
+            <mat-label>Mansione</mat-label>
+            <input matInput [(ngModel)]="filter.mansione">
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="dropdownDate" style="margin-right: 15px;min-width: 225px;">
+            <mat-label>Periodo</mat-label>
+            <mat-select [(ngModel)]="filtroPeriodo" name="x" required>
+                <mat-option *ngFor="let x of allPeriodi" [value]="x" (click)="filtraPeriodo()">
+                    {{"Da: " + x.DATA_INIZIO + " A: " + x.DATA_FINE}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" style="margin-right:15px;" (click)="filterRow()">Filtra</button>
+        <button mat-raised-button color="secondary" style="margin-right:15px;" (click)="resetFilter()">Reset</button>
+    </mat-expansion-panel>
+    
     <button mat-raised-button color="primary" style="position: absolute;top: 130px;right: 15px;"
         (click)="addPartecipante()">Nuovo Parteciapante</button>
 </div>
 
-  <mat-expansion-panel hideToggle>
-    <mat-expansion-panel-header>
-      <mat-panel-description>
-        Pannello Filtri
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-
-    <div style="width:6cm" class="mat-form-field-wrapper">
-        <mat-label class="label_mat">Nome e cognome</mat-label>
-        <ng-select [items]="allNomeMatricole" 
-            bindLabel="DENOMINAZIONE" 
-            bindValue="MATRICOLA" 
-            [(ngModel)]="filter.matricola">
-        </ng-select>
-    </div>
-    <mat-form-field appearance="fill" style="margin-right:15px;">
-        <mat-label>Matricola</mat-label>
-        <input matInput [(ngModel)]="filter.matricola">
-    </mat-form-field>
-
-
-    <mat-form-field appearance="fill" style="margin-right:15px;">
-        <mat-label>Perc. Utilizzo</mat-label>
-        <input matInput [(ngModel)]="filter.prcUtilizzo">
-    </mat-form-field>
-    <mat-form-field appearance="fill" style="margin-right:15px;">
-        <mat-label>Mansione</mat-label>
-        <input matInput [(ngModel)]="filter.mansione">
-    </mat-form-field>
-    <mat-form-field appearance="fill" class="dropdownDate" style="margin-right: 15px;min-width: 225px;">
-        <mat-label>Periodo</mat-label>
-        <mat-select [(ngModel)]="filtroPeriodo" name="x" required>
-            <mat-option *ngFor="let x of allPeriodi" [value]="x" (click)="filtraPeriodo()">
-                {{"Da: " + x.DATA_INIZIO + " A: " + x.DATA_FINE}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-
-    <button mat-raised-button color="primary" style="margin-right:15px;" (click)="filterRow()">Filtra</button>
-    <button mat-raised-button color="secondary" style="margin-right:15px;" (click)="resetFilter()">Reset</button>
-  </mat-expansion-panel>
 
 <mat-paginator (page)="handlePageEvent($event)" [length]="length" [pageSize]="pageSize"
     [showFirstLastButtons]="showFirstLastButtons" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" style="float:left; width:100%">

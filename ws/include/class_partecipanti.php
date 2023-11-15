@@ -11,8 +11,8 @@ $partecipantiManager = new PartecipantiManager();
 
 class PartecipantiManager {
     
-    function get_partecipanti($skip=null, $top=null, $orderby=null, $denominazione=null, $matricola=null, $ptcUtilizzo=null, $mansione=null) {
-        global $con;
+    function get_partecipanti($skip=null, $top=null, $orderby=null, $denominazione=null, $matricola=null, $ptcUtilizzo=null, $mansione=null, $dataInizio=null, $dataFine=null) {
+        global $con, $panthera;
         
         $sql0 = "SELECT COUNT(*) AS cnt ";
         $sql1 = "SELECT * ";
@@ -53,6 +53,22 @@ class PartecipantiManager {
         //echo $sql;
         $data = select_list($sql1 . $sql);
         
+        if($dataInizio != null && $dataFine != null){
+            $panthera->connect();
+            $dataReturn = array();
+            foreach ($data as $row) {
+                $idDipendente = $row["ID_DIPENDENTE"];
+                
+                $cst = $panthera->getCostoRisorsa($dataInizio, $dataFine, $idDipendente);
+                if($cst != null){
+                    $row["COSTO"] = round($cst[0]["COSTO"],2);
+                } else {
+                    $row["COSTO"] = "ND";
+                }
+                $dataReturn.array_push($dataReturn, $row);
+            }
+            $data = $dataReturn;
+        }
         return [$data, $count];
     }
     
@@ -108,13 +124,13 @@ class PartecipantiManager {
         $spreadSheetAry = $excelSheet->toArray(NULL, TRUE, FALSE);
         
         // salto la header
+        $contatoreErrori = 0;
         $firstRow = 1;
         $numRows = count($spreadSheetAry);
         if ($numRows <= 1) {
             $message->error .= 'Il file deve contenere almeno una riga (header esclusa).<br/>';
             return;
         }
-
         $contatore = 0;
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
     
@@ -122,21 +138,29 @@ class PartecipantiManager {
                 continue;
             }
 
-            $matricola = $spreadSheetAry[$curRow][COL_PARTECIPANTI_MATRICOLA];
+            $matricola = trim($spreadSheetAry[$curRow][COL_PARTECIPANTI_MATRICOLA]);
             $dipendente = null;
-            $pctImpiego = $spreadSheetAry[$curRow][COL_PARTECIPANTI_PCT_IMPEGO];
-            $mansione = $con->escape_string($spreadSheetAry[$curRow][COL_PARTECIPANTI_MANSIONE]);
-            $costo = $spreadSheetAry[$curRow][COL_PARTECIPANTI_COSTO];
+            $pctImpiego = trim($spreadSheetAry[$curRow][COL_PARTECIPANTI_PCT_IMPEGO]);
+            $mansione = trim($con->escape_string($spreadSheetAry[$curRow][COL_PARTECIPANTI_MANSIONE]));
+            $costo = trim($spreadSheetAry[$curRow][COL_PARTECIPANTI_COSTO]);
+            $rigaAttuale = $curRow+1;
+            if (empty($matricola)) {
+                $message->error .= "Campo obbligatorio (matricola) non valorizzato alla riga $rigaAttuale<br/>";
+                $contatoreErrori++;
+                continue;
+            }
 
-            if (empty($matricola) || empty($pctImpiego)) {
-                $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
+            if (empty($pctImpiego)) {
+                $message->error .= "Campo obbligatorio (pctImpiego) non valorizzato alla riga $rigaAttuale<br/>";
+                $contatoreErrori++;
                 continue;
             }
 
             if (array_key_exists($matricola, $mapMatricoleUtenti)) {
                 $dipendente = $mapMatricoleUtenti[$matricola][0]['ID_DIPENDENTE'];
             } else {
-                $message->error .= "Matricola non riconosciuta: $matricola<br/>";
+                $message->error .= "Matricola non riconosciuta: $matricola  alla riga $rigaAttuale<br/>";
+                $contatoreErrori++;
                 // non posso continuare perchè l'ID_DIPENDENTE è chiave primaria
                 continue;
             }
@@ -146,8 +170,12 @@ class PartecipantiManager {
             execute_update($query);
             ++$contatore;
         }
-
-        $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
+        if($message->error != "") {
+            $message->success .= "Caricamento concluso. $contatore righe caricate. $contatoreErrori righe non caricate <br/>";
+        } else {
+            $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
+        }
+        
     }
 
 }
