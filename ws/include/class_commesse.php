@@ -49,12 +49,22 @@ class CommesseManager
         $arr = select_list($sql);
 
         foreach ($arr as $id => $commessa) {
-            $arr[$id]["PROGETTI"] = $this->get_progetti($commessa["COD_COMMESSA"], $dataInizio, $dataFine);
+            $arr[$id]["PROGETTI"] = $this->get_progetti_periodo($commessa["COD_COMMESSA"], $dataInizio, $dataFine);
         }
         return $arr;
     }
 
-    public function get_progetti($codCommessa, $dataInizio, $dataFine)
+    public function get_progetti($codCommessa)
+    {
+        $sql = "SELECT p.ID_PROGETTO,p.ACRONIMO,pc.ORE_PREVISTE
+                FROM progetti p
+                JOIN progetti_commesse pc ON p.ID_PROGETTO=pc.ID_PROGETTO
+                WHERE pc.COD_COMMESSA='$codCommessa'";
+        $arr = select_list($sql);
+        return $arr;
+    }
+
+    public function get_progetti_periodo($codCommessa, $dataInizio, $dataFine)
     {
         $sql = "SELECT p.ID_PROGETTO,p.ACRONIMO,pc.ORE_PREVISTE
                 FROM progetti p
@@ -190,12 +200,12 @@ class CommesseManager
             $message->success .= "Caricamento concluso. $contatoreCommesse righe caricate. $contatoreErrori righe non caricate <br/>
                                                         Commesse 'R' importate: $contatoreCommR<br/>
                                                         Commesse compatibili importate: $contatoreCommComp<br/>
-                                                        Totale Ore Importate: $totOreImportateCommessa";
+                                                        Totale Ore per Periodo: $totOreImportateCommessa";
         } else {
             $message->success .= "Caricamento concluso. Righe importate $contatoreCommesse righe caricate.<br/>
                                                         Commesse 'R' importate: $contatoreCommR<br/>
                                                         Commesse compatibili importate: $contatoreCommComp<br/>
-                                                        Totale Ore Importate; $totOreImportateCommessa";
+                                                        Totale Ore per Periodo: $totOreImportateCommessa";
         }
 
 

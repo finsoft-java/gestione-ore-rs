@@ -435,25 +435,53 @@ class RapportiniManager {
         $idCaricamento = $this->nuovo_caricamento();
 
         $contatore = 0;
+        $arrayMesi = array();
+        $msg = "";
         for ($curRow = $firstRow; $curRow < $numRows; ++$curRow) {
     
             if(!isset($spreadSheetAry[$curRow][0])) {
                 continue;
             }
 
-            $serieDoc = $spreadSheetAry[$curRow][COL_SERIE_DOC];
-            $nrDoc = $spreadSheetAry[$curRow][COL_NUMERO_DOC];
-            $dataDoc = $spreadSheetAry[$curRow][COL_DATA_DOC];
-            $matricola = $spreadSheetAry[$curRow][COL_MATRICOLA];
-            $codCommessa = $spreadSheetAry[$curRow][COL_COMMESSA];
-            $codAtv = $spreadSheetAry[$curRow][COL_ATV];
-            $codSottoComm = $spreadSheetAry[$curRow][COL_SOTTO_COMM];
-            $numOre = $spreadSheetAry[$curRow][COL_NUM_ORE];
-
+            $serieDoc = mysqli_real_escape_string($con, trim($spreadSheetAry[$curRow][COL_SERIE_DOC]));
+            $nrDoc = mysqli_real_escape_string($con, trim($spreadSheetAry[$curRow][COL_NUMERO_DOC]));
+            $dataDoc = mysqli_real_escape_string($con, trim($spreadSheetAry[$curRow][COL_DATA_DOC]));
+            $matricola = mysqli_real_escape_string($con, trim($spreadSheetAry[$curRow][COL_MATRICOLA]));
+            $codCommessa = mysqli_real_escape_string($con, trim($spreadSheetAry[$curRow][COL_COMMESSA]));
+            $codAtv = mysqli_real_escape_string($con, trim($spreadSheetAry[$curRow][COL_ATV]));
+            $codSottoComm = mysqli_real_escape_string($con, trim($spreadSheetAry[$curRow][COL_SOTTO_COMM]));
+            $numOre = mysqli_real_escape_string($con, trim($spreadSheetAry[$curRow][COL_NUM_ORE]));
+            //echo $matricola.' '.$codSottoComm.' '.$numOre;
             if (!$codCommessa || !$dataDoc || !$matricola || !$codAtv || !$serieDoc || !$nrDoc || !$codSottoComm) {
                 $message->error .= "Campi obbligatori non valorizzati alla riga $curRow<br/>";
                 continue;
             }
+            if( strlen($codCommessa) > 50) {
+                $message->error .= "Campi codCommessa troppo lungo alla riga $curRow<br/>";
+                continue;
+            }
+            if( strlen($matricola) > 50 ) {
+                $message->error .= "Campi matricola troppo lungo alla riga $curRow<br/>";
+                continue;
+            }
+            if( strlen($codAtv) > 30 ) {
+                $message->error .= "Campi codAtv troppo lungo alla riga $curRow<br/>";
+                continue;
+            }
+            if( strlen($serieDoc) > 10 ) {
+                $message->error .= "Campi serieDoc troppo lungo alla riga $curRow<br/>";
+                continue;
+            }
+            if( strlen($nrDoc) > 50) {
+                $message->error .= "Campi nrDoc troppo lungo alla riga $curRow<br/>";
+                continue;
+            }
+
+            if( strlen($codSottoComm) > 50) {
+                $message->error .= "Campi codSottoComm troppo lungo alla riga $curRow<br/>";
+                continue;
+            }
+
             if (!$numOre) {
                 $numOre = 0.0;
             }
@@ -464,14 +492,32 @@ class RapportiniManager {
                 continue;
             }
             $dataDoc = $dataDocDt->format('Y-m-d');
-
+            $time=strtotime($dataDoc);
+            $mese = date('F',$time);
+            if (!in_array($mese, $arrayMesi)) {
+                //print_r($arrayMesi);
+                //echo 'inserisco '.$mese.' da data: '.$dataDoc;
+                array_push($arrayMesi, $mese);
+            }            
+            $arrayNomiMesi = array("Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre");
+            //$mese = $arrayMesi[intval($meseSheet)-1];
+           
             $query = "REPLACE INTO ore_consuntivate_commesse (COD_COMMESSA,ID_DIPENDENTE,DATA,RIF_SERIE_DOC,RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA,NUM_ORE_LAVORATE,ID_CARICAMENTO) " .
                         "VALUES('$codCommessa','$matricola','$dataDoc','$serieDoc','$nrDoc','$codAtv','$codSottoComm','$numOre',$idCaricamento)";
+            //echo '</br>curRow :'.$curRow.' -> '.$query.'</br>';
             execute_update($query);
+            
+            //echo '</br>curRow :'.$curRow.' -> '.$query.' - result:'.$resultQuery.'</br>';
+            
             ++$contatore;
         }
-
-        $message->success .= "Caricamento concluso. $contatore righe caricate.<br/>";
+        $mesiText = "";
+        foreach ($arrayMesi as $key => $value) {
+            $mesiText .= $arrayNomiMesi[$key].' '; 
+        }
+        $message->success .= "Caricamento concluso.<br/> 
+                              $contatore righe caricate.<br/>
+                              Mese/i caricati: ".$mesiText;
     }
 
     function nuovo_caricamento() {
@@ -540,19 +586,51 @@ class RapportiniManager {
         $d2 = date_create("$anno-$mese-01");
         return date_diff($d2, $d1)->format('%m') + 1;
     }
-    
-    function get_ore_commesse($skip=null, $top=null, $orderby=null, $month=null, $matricola=null) {
+    function get_ore_commesseDettagli($month=null, $matricola=null, $dataInizio=null, $dataFine=null) {
+        global $con;
+        $sqlplus  = "";
+        
+        $sqlComm = "SELECT count(*) FROM `ore_consuntivate_commesse` occ JOIN commesse c ON c.COD_COMMESSA = occ.COD_COMMESSA where TIPOLOGIA IN ('Commesse compatibili') ";
+        $sqlDip = "SELECT count(DISTINCT ID_DIPENDENTE) FROM `ore_consuntivate_commesse` WHERE 1 ";
+        $sqlPart = "SELECT count(DISTINCT ID_DIPENDENTE) FROM `partecipanti_globali` ";
+
+        if($dataFine !== null && $dataInizio !== null) {
+            $sqlplus .= "AND (data BETWEEN '$dataInizio' AND '$dataFine') ";
+        } else {
+            if ($month !== null && $month !== '') {
+                // in forma YYYY-MM
+                $month = substr($con->escape_string($month), 0, 7);
+                $first = "DATE('$month-01')";
+                $sqlplus .= "AND (data BETWEEN $first AND LAST_DAY($first)) ";
+            }
+        }        
+        if ($matricola !== null && $matricola !== '') {
+            $matricola = $con->escape_string($matricola);
+            $sqlplus .= "AND ID_DIPENDENTE='$matricola' ";
+        }
+
+        $countComm = select_single_value($sqlComm.$sqlplus);
+        $countDip = select_single_value($sqlDip.$sqlplus);
+        $countPart = select_single_value($sqlPart);
+        return [$countComm, $countDip, $countPart];
+    }
+
+    function get_ore_commesse($skip=null, $top=null, $orderby=null, $month=null, $matricola=null, $dataInizio=null, $dataFine=null) {
         global $con;
         
         $sql0 = "SELECT COUNT(*) AS cnt ";
         $sql1 = "SELECT * ";
         $sql = "FROM ore_consuntivate_commesse WHERE 1 ";
         
-        if ($month !== null && $month !== '') {
-            // in forma YYYY-MM
-            $month = substr($con->escape_string($month), 0, 7);
-            $first = "DATE('$month-01')";
-            $sql .= "AND (data BETWEEN $first AND LAST_DAY($first)) ";
+        if($dataFine !== null && $dataInizio !== null) {
+            $sql .= "AND (data BETWEEN '$dataInizio' AND '$dataFine') ";
+        } else {
+            if ($month !== null && $month !== '') {
+                // in forma YYYY-MM
+                $month = substr($con->escape_string($month), 0, 7);
+                $first = "DATE('$month-01')";
+                $sql .= "AND (data BETWEEN $first AND LAST_DAY($first)) ";
+            }
         }
         
         if ($matricola !== null && $matricola !== '') {
@@ -576,6 +654,7 @@ class RapportiniManager {
                 $sql .= " LIMIT $top";
             }
         }        
+        //echo $sql1 . $sql;
         $oggetti = select_list($sql1 . $sql);
         
         return [$oggetti, $count];

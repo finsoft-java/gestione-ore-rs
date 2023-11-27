@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ColumnDefinition } from '../mat-edit-table';
-import { Matricola, OreCommesse } from '../_models';
+import { Matricola, OreCommesse, Periodo } from '../_models';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import {MatDatepicker} from '@angular/material/datepicker';
@@ -16,6 +16,7 @@ import { formatDate } from '@angular/common';
 import { OreCommesseService } from '../_services/ore.commesse.service';
 import { ProgettiService } from '../_services/progetti.service';
 import { AlertService } from '../_services/alert.service';
+import { PeriodiService } from '../_services/periodi.service';
 
 const moment = _moment;
 export const MY_FORMATS = {
@@ -83,17 +84,38 @@ export class GrigliaOreImportateComponent implements OnInit {
   service!: OreCommesseService;
   date = new FormControl();
   allMatricole: Matricola[] = [];
-  
+  length?= 0;
+  filtroPeriodo?: Periodo;
+  allPeriodi: Periodo[] = [];
+  dataInizio: string = '';
+  dataFine: string = '';
+
+  commesseImportate: string = '';
+  dipendentiCaricati: string = '';
+  oreADisposizione: string = '';
+  oreStraordinarie: string = '';
+  countDip: string= '';
+  countPart: string= '';
   constructor(private svc: OreCommesseService,
     private progettiService: ProgettiService,
+    private periodiService: PeriodiService,
     private alertService: AlertService){
     this.service = svc;
   }
 
   ngOnInit(): void {
     this.getMatricole();
+    this.getAllPeriodi();
   }
 
+  
+  getAllPeriodi() {
+    this.periodiService.getAll().subscribe(response => {
+      this.allPeriodi = response.data;
+      this.dataFine = this.allPeriodi[0].DATA_FINE;
+      this.dataInizio = this.allPeriodi[0].DATA_INIZIO;
+    })
+  }
   // carica l'elenco di tutte le matricole da Panthera
   getMatricole(): void {
     this.progettiService.getAllMatricole()
@@ -117,7 +139,33 @@ export class GrigliaOreImportateComponent implements OnInit {
       delete this.filter.month;
     }
 
+    if (this.filtroPeriodo) {
+      this.filter.dataInizio = this.filtroPeriodo.DATA_INIZIO;
+      this.filter.dataFine = this.filtroPeriodo.DATA_FINE;
+    }
     editTableComponent.filter(this.filter);
+    this.popolaDettagli(this.filter);
+  }
+
+  popolaDettagli(filtro: any){
+
+    this.svc.getAllDettagli(filtro)
+    .subscribe(response => {
+      console.log("aaa",response.data);
+      //console.log(response[0].specchietto);
+      this.commesseImportate = response.data[0];
+      this.countDip = response.data[1];
+      this.countPart = response.data[2];
+      //this.commesseImportate = response['a'];
+      //this.dipendentiCaricati
+    },
+    error => {
+      this.alertService.error(error);
+    });
+    this.commesseImportate = '';
+    this.dipendentiCaricati = '';
+    this.oreADisposizione = '';
+    this.oreStraordinarie= '';
   }
 
   resetFilter(editTableComponent: any): void {
@@ -143,4 +191,10 @@ export class GrigliaOreImportateComponent implements OnInit {
     datepicker.close();
   }
 
+  filtraPeriodo() {
+    if (this.filtroPeriodo) {
+      this.filter.dataInizio = this.filtroPeriodo.DATA_INIZIO;
+      this.filter.dataFine = this.filtroPeriodo.DATA_FINE;
+    }
+  }
 }

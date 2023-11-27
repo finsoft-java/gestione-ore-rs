@@ -20,10 +20,10 @@ export class CommesseComponent implements OnInit {
   allCommesse: Commessa[] = [];
   allProgetti: string[] = [];
   allPeriodi: Periodo[] = [];
+  filtroPeriodo?: Periodo;
   isLoading: Boolean = true;
   dataInizio: string = '';
   dataFine: string = '';
-  filtroPeriodo?: Periodo;
   checkRiepilogo: Boolean = false;
   cntR:number=0;
   cntC:number=0;

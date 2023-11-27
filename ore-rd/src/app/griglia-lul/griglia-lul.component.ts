@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ColumnDefinition } from '../mat-edit-table';
-import { Lul, Matricola } from '../_models';
+import { Lul, Matricola, Periodo } from '../_models';
 import { LulService } from '../_services/lul.service';
 import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
@@ -16,6 +16,7 @@ import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
 import { ProgettiService } from '../_services/progetti.service';
 import { AlertService } from '../_services/alert.service';
+import { PeriodiService } from '../_services/periodi.service';
 
 const moment = _moment;
 export const MY_FORMATS = {
@@ -51,6 +52,9 @@ export class GrigliaLulComponent implements OnInit {
   myControl = new FormControl();
   columns: ColumnDefinition<Lul>[] = [
     {
+      title: 'Denominazione',
+      data: 'DENOMINAZIONE'
+    },{
       title: 'Matricola',
       data: 'MATRICOLA_DIPENDENTE'
     },
@@ -70,15 +74,25 @@ export class GrigliaLulComponent implements OnInit {
   service!: LulService;
   date = new FormControl();
   allMatricole: Matricola[] = [];
-  
+  allPeriodi: Periodo[] = [];
+  filtroPeriodo?: Periodo;
+  specchietto:string = '';
   constructor(private lulService: LulService,
     private progettiService: ProgettiService,
-    private alertService: AlertService){
+    private alertService: AlertService,
+    private periodiService: PeriodiService){
     this.service = lulService;
   }
 
   ngOnInit(): void {
     this.getMatricole();
+    this.getAllPeriodi();
+  }
+
+  getAllPeriodi() {
+    this.periodiService.getAll().subscribe(response => {
+      this.allPeriodi = response.data;
+    })
   }
 
   filterRow(editTableComponent: any): void {
@@ -93,7 +107,12 @@ export class GrigliaLulComponent implements OnInit {
       delete this.filter.month;
     }
 
+    if (this.filtroPeriodo) {
+      this.filter.dataInizio = this.filtroPeriodo.DATA_INIZIO;
+      this.filter.dataFine = this.filtroPeriodo.DATA_FINE;
+    }
     editTableComponent.filter(this.filter);
+    this.getSpecchietto(this.filter);
   }
 
   // carica l'elenco di tutte le matricole da Panthera
@@ -107,9 +126,23 @@ export class GrigliaLulComponent implements OnInit {
       });
   }
 
+  getSpecchietto(filter:any): void {
+    this.lulService.getSpecchietto(filter)
+      .subscribe(response => {
+        this.specchietto = response.value;
+      },
+      error => {
+        this.alertService.error(error);
+      });
+  }
+
   resetFilter(editTableComponent: any): void {
     delete this.filter.matricola;
     delete this.filter.month;
+    delete this.filter.data;
+    delete this.filter.dataInizio;
+    delete this.filter.dataFine;
+    delete this.filtroPeriodo;
     this.date.setValue(null);
     editTableComponent.filter(this.filter);
   }
@@ -129,5 +162,4 @@ export class GrigliaLulComponent implements OnInit {
     this.date.setValue(ctrlValue);
     datepicker.close();
   }
-
 }

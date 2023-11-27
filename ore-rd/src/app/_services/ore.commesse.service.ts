@@ -9,8 +9,30 @@ import { Observable } from 'rxjs';
 export class OreCommesseService implements HttpCrudService<OreCommesse> {
     constructor(private http: HttpClient) { }
 
-    getAll(parameters: any) {
+    getAllDettagli(parameters: any) {
+        console.log(parameters);
+        let url = environment.wsUrl + 'OreCommesse.php?dettagli=Y';
+        if (parameters.top) {
+            url += `&top=${parameters.top}`;
+        }
+        if (parameters.skip) {
+            url += `&skip=${parameters.skip}`;
+        }
+        if (parameters.matricola) {
+            url += `&matricola=${parameters.matricola}`;
+        }
+        if (parameters.month) {
+            url += `&month=${parameters.month}`;
+        }
 
+        if (parameters.dataFine && parameters.dataInizio) {
+            url += `&dataFine=${parameters.dataFine}&dataInizio=${parameters.dataInizio}`;
+        }
+        return this.http.get<ListBean<string>>(url);
+    }
+
+    getAll(parameters: any) {
+        console.log(parameters);
         let url = environment.wsUrl + 'OreCommesse.php?';
         if (parameters.top) {
             url += `&top=${parameters.top}`;
@@ -23,6 +45,10 @@ export class OreCommesseService implements HttpCrudService<OreCommesse> {
         }
         if (parameters.month) {
             url += `&month=${parameters.month}`;
+        }
+
+        if (parameters.dataFine && parameters.dataInizio) {
+            url += `&dataFine=${parameters.dataFine}&dataInizio=${parameters.dataInizio}`;
         }
         return this.http.get<ListBean<OreCommesse>>(url);
     }

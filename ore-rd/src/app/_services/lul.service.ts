@@ -23,7 +23,30 @@ export class LulService implements HttpCrudService<Lul> {
         if (parameters.month) {
             url += `&month=${parameters.month}`;
         }
+        if (parameters.dataInizio) {
+            url += `&dataInizio=${parameters.dataInizio}`;
+        }
+        if (parameters.dataFine) {
+            url += `&dataFine=${parameters.dataFine}`;
+        }
         return this.http.get<ListBean<Lul>>(url);
+    }
+
+    getSpecchietto(parameters: any) {
+        let url = environment.wsUrl + 'LulSpecchietto.php?';
+        if (parameters.matricola) {
+            url += `&matricola=${parameters.matricola}`;
+        }
+        if (parameters.month) {
+            url += `&month=${parameters.month}`;
+        }
+        if (parameters.dataInizio) {
+            url += `&dataInizio=${parameters.dataInizio}`;
+        }
+        if (parameters.dataFine) {
+            url += `&dataFine=${parameters.dataFine}`;
+        }
+        return this.http.get<ValueBean<string>>(url);
     }
 
     create(obj: Lul): Observable<ValueBean<Lul>> {

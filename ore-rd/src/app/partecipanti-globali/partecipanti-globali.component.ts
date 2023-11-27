@@ -22,9 +22,10 @@ export class PartecipantiGlobaliComponent implements OnInit {
     denominazione : "",
     matricola : "",
     prcUtilizzo : "",
-    mansione : ""
+    mansione : "",
+    dataInizio: "",
+    dataFine: ""
   };
-  length?= 0;
   dataSource = new MatTableDataSource<Partecipante>();
   pageSize = 500;
   pageIndex = 0;
@@ -32,15 +33,17 @@ export class PartecipantiGlobaliComponent implements OnInit {
   dataFine: string = '';
   pageSizeOptions = [50, 100, 250, 500];
   showFirstLastButtons = true;
-  displayedColumns: string[] = ['DENOMINAZIONE', 'MATRICOLA', 'PCT_UTILIZZO', 'MANSIONE', 'COSTO', 'actions'];
+  displayedColumns: string[] = ['DENOMINAZIONE', 'MATRICOLA', 'PCT_UTILIZZO', 'MANSIONE', 'COSTO', 'DATA', 'actions'];
   
   service!: PartecipantiService;
   allPartecipanti: Partecipante[] = [];
-  allPeriodi: Periodo[] = [];
   maxDate: String = '';
   allNomeMatricole: Matricola[] = [];
   isLoading: Boolean = true;
+  length?= 0;
   filtroPeriodo?: Periodo;
+  primoPeriodo?:Periodo;
+  allPeriodi: Periodo[] = [];
   
 
   constructor(
@@ -61,6 +64,10 @@ export class PartecipantiGlobaliComponent implements OnInit {
   getAllPeriodi() {
     this.periodiService.getAll().subscribe(response => {
       this.allPeriodi = response.data;
+      this.dataFine = this.allPeriodi[0].DATA_FINE;
+      this.dataInizio = this.allPeriodi[0].DATA_INIZIO;
+      this.filtroPeriodo = new Periodo(this.dataInizio,this.dataFine);
+      this.primoPeriodo = new Periodo(this.dataInizio,this.dataFine);
     })
   }
 
@@ -69,6 +76,10 @@ export class PartecipantiGlobaliComponent implements OnInit {
       this.allPartecipanti = response.data;
       this.length = response.count;
       this.isLoading = false;
+      if(filter.dataFine != null && filter.dataInizio != null){
+        this.dataFine = filter.dataFine;
+        this.dataInizio = filter.dataInizio;
+      }
       this.getMatricole();      
     },
       error => {
@@ -80,6 +91,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
   getAll(top: number, skip: number) {
 
     this.partecipanteService.getAll(top,skip).subscribe(response => {
+      
       this.allPartecipanti = response.data;
       this.length = response.count;
       this.isLoading = false;
@@ -216,6 +228,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
     delete this.filter.denominazione;
     delete this.filter.prcUtilizzo;
     delete this.filter.mansione;  
+    this.filtroPeriodo = this.primoPeriodo;
     this.getAll(0, this.pageSize);
   }
 
@@ -240,6 +253,10 @@ export class PartecipantiGlobaliComponent implements OnInit {
       this.filter.mansione = this.filter.mansione.trim();
     } else {
       this.filter.mansione = "";
+    }
+    if (this.filtroPeriodo) {
+      this.filter.dataInizio = this.filtroPeriodo.DATA_INIZIO;
+      this.filter.dataFine = this.filtroPeriodo.DATA_FINE;
     }
     this.getAllWithFilter(0,500,this.filter);
   }

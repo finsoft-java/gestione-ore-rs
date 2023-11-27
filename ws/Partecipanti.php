@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         [$progetti, $count] = $partecipantiManager->get_partecipanti($top, $skip, $orderby, $denominazione, $matricola, $prcUtilizzo, $mansione, $dataInizio, $dataFine);
         
         header('Content-Type: application/json');
-        echo json_encode(['data' => $progetti, 'count' => $count]);
+        echo json_encode(['data' => $progetti, 'count' => $count, 'dataInizio' => $dataInizio, 'dataFine' => $dataFine ]);
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //==========================================================

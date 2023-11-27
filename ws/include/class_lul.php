@@ -45,23 +45,43 @@ class LULManager {
         $excelSheet = $spreadSheet->getActiveSheet();
         $spreadSheetAry = $excelSheet->toArray();
         $numRows = count($spreadSheetAry);
+        $annoMese = false;
+        $ultimoGiornoMese = false;
         $primaRiga = 0;
+        $contatoreMatricole = 0;
         $mapMatricole = $this->getMapMatricole();
+        $cntMatricoleInesistenti=0;
         while ($primaRiga < $numRows) {
             if ($spreadSheetAry[$primaRiga][0] == 'Azienda') {
+                $meseSheet = $spreadSheetAry[$primaRiga+1][3];
                 [$annoMese, $ultimoGiornoMese] = $this->leggiAzienda($primaRiga, $spreadSheetAry);
                 if ($annoMese === false || $ultimoGiornoMese === false) {
                     return;
                 }
                 $primaRiga = $primaRiga + 3;
             } else if($spreadSheetAry[$primaRiga][0] == 'Matricola'){
+                if ($annoMese === false || $ultimoGiornoMese === false) {
+                    return;
+                }
                 $this->leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, $mapMatricole, $spreadSheetAry);
+                if($spreadSheetAry[$primaRiga][1] != 0) {
+                    $contatoreMatricole++;
+                } else {
+                    $cntMatricoleInesistenti++;
+                }
                 $primaRiga = $primaRiga + 10;
             } else {
                 break;
             }
         }
-        $message->success .= 'Caricamento Effettuato correttamente.</br>';
+        if($cntMatricoleInesistenti > 0 ) {
+            $message->error .= 'Nel File caricato sono presenti '.$cntMatricoleInesistenti.' matricole inesistenti<br/>';
+        }
+        $arrayMesi = array("Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre");
+        $mese = $arrayMesi[intval($meseSheet)-1];
+        $message->success .= 'Caricamento Effettuato correttamente.</br>
+                              Mese Caricato: '.$mese.'</br>
+                              Matricole importate: '.$contatoreMatricole.'.</br>';
     }
 
     /**
@@ -128,18 +148,21 @@ class LULManager {
         execute_update($sql);
     }
     
-    function get_all($skip=null, $top=null, $orderby=null, $month=null, $matricola=null) {
+    function get_all($skip=null, $top=null, $orderby=null, $month=null, $matricola=null, $dataInizio=null, $dataFine=null) {
         global $con;
         
         $sql0 = "SELECT COUNT(*) AS cnt ";
         $sql1 = "SELECT * ";
         $sql = "FROM ore_presenza_lul p WHERE 1 ";
-        
-        if ($month !== null && $month !== '') {
-            // in forma YYYY-MM
-            $month = substr($con->escape_string($month), 0, 7);
-            $first = "DATE('$month-01')";
-            $sql .= "AND (data BETWEEN $first AND LAST_DAY($first)) ";
+        if (($dataInizio !== null && $dataInizio !== "") && ($dataFine !== null && $dataFine !== "")) {
+            $sql .= "AND (data BETWEEN '$dataInizio' AND '$dataFine') ";
+        } else {
+            if ($month !== null && $month !== '') {
+                // in forma YYYY-MM
+                $month = substr($con->escape_string($month), 0, 7);
+                $first = "DATE('$month-01')";
+                $sql .= "AND (data BETWEEN $first AND LAST_DAY($first)) ";
+            }
         }
         
         if ($matricola !== null && $matricola !== '') {
@@ -162,7 +185,40 @@ class LULManager {
             } else {
                 $sql .= " LIMIT $top";
             }
-        }        
+        }    
+        //echo $sql1 . $sql;    
+        $oggetti = select_list($sql1 . $sql);
+        
+        return [$oggetti, $count];
+    }
+
+    function getSpecchietto($month=null, $matricola=null, $dataInizio=null, $dataFine=null) {
+        global $con;
+        
+        $sql0 = "SELECT COUNT(*) AS cnt ";
+        $sql1 = "SELECT DISTINCT MATRICOLA_DIPENDENTE, MONTH(DATA) AS MESE, SUM(ORE_PRESENZA_ORDINARIE) AS ORE_LAVORATE ";
+        $sql = "FROM ore_presenza_lul WHERE 1 ";
+
+        if (($dataInizio !== null && $dataInizio !== "") && ($dataFine !== null && $dataFine !== "")) {
+            $sql .= "AND (data BETWEEN '$dataInizio' AND '$dataFine') ";
+        } else {
+            if ($month !== null && $month !== '') {
+                // in forma YYYY-MM
+                $month = substr($con->escape_string($month), 0, 7);
+                $first = "DATE('$month-01')";
+                $sql .= "AND (data BETWEEN $first AND LAST_DAY($first)) ";
+            }
+        }
+        
+        if ($matricola !== null && $matricola !== '') {
+            $matricola = $con->escape_string($matricola);
+            $sql .= "AND (MATRICOLA_DIPENDENTE='$matricola' or ID_DIPENDENTE='$matricola')";
+        }
+
+        $sql .= " GROUP BY MONTH(DATA), MATRICOLA_DIPENDENTE ORDER BY MATRICOLA_DIPENDENTE, DATA";
+        
+        $count = select_single_value($sql0 . $sql);
+        echo $sql1 . $sql;    
         $oggetti = select_list($sql1 . $sql);
         
         return [$oggetti, $count];
