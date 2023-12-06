@@ -8,6 +8,7 @@ export * from './ValueBean';
 export * from './esecuzione';
 export * from './caricamento';
 export * from './lul';
+export * from './progettoRD';
 export * from './ore.commesse';
 export * from './commesse';
 export * from './partecipanti';

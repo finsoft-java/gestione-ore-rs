@@ -582,13 +582,29 @@ class RapportiniManager {
         
         return [$oggetti, $count];
     }
-    function get_caricamenti_rd($skip=null, $top=null, $orderby=null) {
+    function get_caricamenti_rd($skip=null, $top=null, $orderby=null, $matricola=null, $month=null, $dataInizio=null, $dataFine=null) {
         global $con;
         
         $sql0 = "SELECT COUNT(*) AS cnt ";
         $sql1 = "SELECT * ";
-        $sql = "FROM caricamenti_rd p ";
+        $sql = "FROM caricamenti_rd p WHERE 1 ";
         
+
+        if (($dataInizio !== null && $dataInizio !== "") && ($dataFine !== null && $dataFine !== "")) {
+            $sql .= "AND (data BETWEEN '$dataInizio' AND '$dataFine') ";
+        } else {
+            if ($month !== null && $month !== '') {
+                // in forma YYYY-MM
+                $month = substr($con->escape_string($month), 0, 7);
+                $first = "DATE('$month-01')";
+                $sql .= "AND (data BETWEEN $first AND LAST_DAY($first)) ";
+            }
+        }
+        if ($matricola !== null && $matricola !== '') {
+            $matricola = $con->escape_string($matricola);
+            $sql .= "AND (MATRICOLA_DIPENDENTE='$matricola' or ID_DIPENDENTE='$matricola')";
+        }
+
         if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
             // avoid SQL-injection
             $sql .= " ORDER BY $orderby";

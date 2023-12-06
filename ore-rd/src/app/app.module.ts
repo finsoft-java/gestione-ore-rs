@@ -52,7 +52,7 @@ import { CommesseComponent } from './commesse/commesse.component';
 import { ImportazioneCommesseComponent } from './importazione-commesse/importazione-commesse.component';
 import { AssociazioneOreComponent } from './associazione-ore/associazione-ore.component';
 import { ImportazioneProgettiOreComponent } from './importazione-progetti-ore/importazione-progetti-ore.component';
-
+import { GrigliaRDComponent } from './griglia-rd/griglia-rd.component';
 
 registerLocaleData(localeIt);
 
@@ -80,7 +80,8 @@ registerLocaleData(localeIt);
     ImportazionePartecipantiComponent,
     ImportazioneProgettiOreComponent,
     CommesseComponent,
-    ImportazioneCommesseComponent
+    ImportazioneCommesseComponent,
+    GrigliaRDComponent
   ],
   imports: [
     HttpClientModule,
