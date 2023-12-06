@@ -18,6 +18,7 @@ import { ImportazionePartecipantiComponent } from './importazione-partecipanti/i
 import { CommesseComponent } from './commesse/commesse.component';
 import { ImportazioneCommesseComponent } from './importazione-commesse/importazione-commesse.component';
 import { AssociazioneOreComponent } from './associazione-ore/associazione-ore.component';
+import { ImportazioneProgettiOreComponent } from './importazione-progetti-ore/importazione-progetti-ore.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent},
@@ -28,12 +29,14 @@ const routes: Routes = [
   { path: 'associazione-ore', component: AssociazioneOreComponent, canActivate:[AuthGuard]},
   { path: 'tipologie-spesa', component: TipologiaSpesaComponent, canActivate:[AuthGuard]},
   { path: 'importazione-lul', component: ImportazioneLulComponent, canActivate:[AuthGuard]},
+  { path: 'importazione-rd', component: ImportazioneProgettiOreComponent, canActivate:[AuthGuard]},
   { path: 'importazione-ore', component: ImportazioneRapportiniComponent, canActivate:[AuthGuard]},
   { path: 'esportazione-rapportini', component: EsportazioneRapportiniComponent, canActivate:[AuthGuard]},
   { path: 'raccolta-date-firma', component: RaccoltaDateFirmaComponent, canActivate:[AuthGuard]},
   { path: 'regressione', component: StoricoAssociazioniOreComponent, canActivate:[AuthGuard]},
   { path: 'ore-importate', component: GrigliaOreImportateComponent, canActivate:[AuthGuard]},
   { path: 'lul-importati', component: GrigliaLulComponent, canActivate:[AuthGuard]},
+  { path: 'rd-importati', component: GrigliaLulComponent, canActivate:[AuthGuard]},
   { path: 'partecipanti-globali', component: PartecipantiGlobaliComponent, canActivate:[AuthGuard]},
   { path: 'importazione-partecipanti', component: ImportazionePartecipantiComponent, canActivate:[AuthGuard]},
   { path: 'commesse', component: CommesseComponent, canActivate:[AuthGuard]},

@@ -5,6 +5,7 @@ import { AlertService } from '../_services/alert.service';
 import { CaricamentiService } from '../_services/caricamenti.service';
 import { EsecuzioniService } from '../_services/esecuzioni.service';
 import { PeriodiService } from '../_services/periodi.service';
+import { CaricamentiRDService } from '../_services/caricamentiRD.service';
 
 @Component({
   selector: 'app-storico-associazioni-ore',
@@ -24,12 +25,17 @@ export class StoricoAssociazioniOreComponent implements OnInit {
 
   dataSource2 = new MatTableDataSource<Caricamento>();
   displayedColumns2: string[] = ['idCaricamento', 'utente', 'tmsEsecuzione', 'actions'];
+
+  
+  dataSource3 = new MatTableDataSource<Caricamento>();
+  displayedColumns3: string[] = ['idCaricamento', 'utente', 'tmsEsecuzione', 'actions'];
   
   allPeriodiCommesse: Periodo[] = [];
   periodoCommessa?: Periodo;
 
   constructor(private esecuzioniService: EsecuzioniService,
     private caricamentiService: CaricamentiService,
+    private caricamentiRDService: CaricamentiRDService,    
     private periodiService: PeriodiService,
     private alertService: AlertService) { }
 
@@ -59,6 +65,18 @@ export class StoricoAssociazioniOreComponent implements OnInit {
           this.alertService.error(error);
           this.checkIsCaricamentoEliminabile();
         });
+    
+    this.caricamentiRDService.getLast()
+        .subscribe(response => {
+          this.length = response.count;
+          this.dataSource3 = new MatTableDataSource<Caricamento>(response.data);
+          //this.checkIsCaricamentoEliminabile();
+        },
+        error => {
+          this.alertService.error(error);
+          this.checkIsCaricamentoEliminabile();
+        });
+    
   }
 
   checkIsCaricamentoEliminabile() {
@@ -79,6 +97,14 @@ export class StoricoAssociazioniOreComponent implements OnInit {
   eliminaCaricamento(e: Caricamento) {
     if (confirm('Stai per eliminare l\'ultimo **caricamento** ore, sei sicuro?')) {
       this.caricamentiService.delete(e.ID_CARICAMENTO).subscribe(
+        response => { this.getLast(); },
+        error => { this.alertService.error(error); }
+      );
+    }
+  }
+  eliminaCaricamentoRD(e: Caricamento) {
+    if (confirm('Stai per eliminare l\'ultimo caricamento **ore Progetto RD** , sei sicuro?')) {
+      this.caricamentiRDService.delete(e.ID_CARICAMENTO).subscribe(
         response => { this.getLast(); },
         error => { this.alertService.error(error); }
       );

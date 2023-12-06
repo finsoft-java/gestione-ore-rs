@@ -196,6 +196,17 @@ class PantheraManager
         return $matricola;
     }
 
+    function getAllDataMatricolaByName($denominazione)
+    {
+        if ($this->mock) {
+            $matricola = 'PIPPO'; // or 1234
+        } else {
+            $query = "SELECT DISTINCT MATRICOLA,DENOMINAZIONE,ID_DIPENDENTE FROM THIP.DIPENDENTI_V01 WHERE ID_AZIENDA='001' AND RTRIM(DENOMINAZIONE)=RTRIM('$denominazione')";
+            $matricola = $this->select_list($query);
+        }
+        return $matricola;
+    }
+
     function getTipiCosto()
     {
         if ($this->mock) {

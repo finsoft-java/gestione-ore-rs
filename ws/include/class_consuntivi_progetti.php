@@ -20,7 +20,8 @@ class ConsuntiviProgettiManager {
         // human readable dates
         $dataInizioHR = DateTime::createFromFormat('Y-m-d', $dataInizio)->format('d/m/Y');
         $dataFineHR = DateTime::createFromFormat('Y-m-d', $dataFine)->format('d/m/Y');
-
+        //$dataInizio = str_replace("-","",$dataInizio); 
+        //$dataFine = str_replace("-","",$dataFine); 
         $progetto = $progettiManager->get_progetto($idProgetto);
         if ($progetto == null) {
             $message->error .= "Progetto non trovato: $idProgetto" . NL;
@@ -146,7 +147,7 @@ class ConsuntiviProgettiManager {
         $query = "SELECT DISTINCT pc.COD_COMMESSA
                     FROM progetti_commesse pc
                     JOIN commesse c ON c.COD_COMMESSA=pc.COD_COMMESSA AND c.DATA_INIZIO=pc.DATA_INIZIO AND c.DATA_FINE=pc.DATA_FINE
-                    WHERE pc.ID_PROGETTO=$idProgetto AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
+                    WHERE pc.ID_PROGETTO=$idProgetto AND pc.DATA_INIZIO='$dataInizio' AND pc.DATA_FINE='$dataFine'
                     and c.PCT_COMPATIBILITA<=0";
         $commesse = select_column($query);
         if (count($commesse) > 0) {
@@ -159,7 +160,7 @@ class ConsuntiviProgettiManager {
                 JOIN progetti pr ON pr.ID_PROGETTO=c.ID_PROGETTO
                 WHERE pr.id_progetto=$idProgetto
                 AND ID_DIPENDENTE NOT IN (SELECT DISTINCT ID_DIPENDENTE FROM partecipanti_globali WHERE PCT_UTILIZZO>0)
-                AND (oc.DATA IS NULL OR (oc.DATA >= DATE('$dataInizio') and oc.DATA <= DATE('$dataFine')))
+                AND (oc.DATA IS NULL OR (oc.DATA >= '$dataInizio' and oc.DATA <= '$dataFine'))
                 ORDER BY 1";
         $ore = select_column($query);
         if (count($ore) > 0) {
@@ -170,13 +171,14 @@ class ConsuntiviProgettiManager {
             FROM progetti pr
             JOIN progetti_commesse pc ON pr.ID_PROGETTO=pc.ID_PROGETTO
             JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=pc.COD_COMMESSA 
-                AND oc.DATA >= DATE('$dataInizio') AND oc.DATA <= DATE('$dataFine')
+                AND oc.DATA >= '$dataInizio' AND oc.DATA <= '$dataFine'
             WHERE
                 pr.ID_PROGETTO=$idProgetto
-                AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
-                AND oc.DATA >= DATE('$dataInizio') and oc.DATA <= DATE('$dataFine')
+                AND pc.DATA_INIZIO='$dataInizio' AND pc.DATA_FINE='$dataFine'
+                AND oc.DATA >= '$dataInizio' and oc.DATA <= '$dataFine'
                 AND oc.NUM_ORE_RESIDUE > 0
             LIMIT 1";
+            //echo $query;
         $result = select_single_value($query);
         if (empty($result)) {
             $message->error .= "Nessun caricamento trovato per il progetto n.$idProgetto!" . NL;
@@ -189,7 +191,7 @@ class ConsuntiviProgettiManager {
     function get_progetti_attivi($dataInizio, $dataFine) {
         $query = "SELECT *
             FROM progetti p
-            WHERE p.DATA_FINE >= DATE('$dataInizio') AND p.DATA_INIZIO <= DATE('$dataFine')";
+            WHERE p.DATA_FINE >= '$dataInizio' AND p.DATA_INIZIO <= '$dataFine'";
         return select_list($query);
     }
 
@@ -217,10 +219,8 @@ class ConsuntiviProgettiManager {
             JOIN commesse c ON c.COD_COMMESSA=pc.COD_COMMESSA AND c.DATA_INIZIO=pc.DATA_INIZIO AND c.DATA_FINE=pc.DATA_FINE
                 AND c.PCT_COMPATIBILITA>0 AND pc.ORE_PREVISTE>0
             JOIN partecipanti_globali p ON p.PCT_UTILIZZO>0
-            JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA 
-                AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE
-                AND oc.DATA >= DATE('$dataInizio') AND oc.DATA < DATE('$dataFine')
-            WHERE pr.ID_PROGETTO=$idProgetto and pc.DATA_INIZIO >= DATE('$dataInizio') AND pc.DATA_FINE < DATE('$dataFine')";
+            JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE AND oc.DATA >= pc.DATA_INIZIO AND oc.DATA <= pc.DATA_FINE WHERE pr.ID_PROGETTO = $idProgetto and pc.DATA_INIZIO >= '$dataInizio' AND pc.DATA_FINE < '$dataFine' ";
+            echo $query;
         $r = execute_update($query);
         return $r;
     }
@@ -247,7 +247,7 @@ class ConsuntiviProgettiManager {
         $query = "SELECT SUM(ORE_PREVISTE) AS ORE_PREVISTE
                 FROM progetti_commesse pc
                 WHERE ID_PROGETTO=$idProgetto AND COD_COMMESSA IN($commesse_imploded)
-                    AND DATA_INIZIO=DATE('$dataInizio') AND DATA_FINE=DATE('$dataFine')";
+                    AND DATA_INIZIO='$dataInizio' AND DATA_FINE='$dataFine'";
         return select_single_value($query);
     }
 
@@ -398,7 +398,7 @@ class ConsuntiviProgettiManager {
                 FROM assegnazioni_dettaglio ad
                 LEFT JOIN progetti_commesse pc
                         ON ad.ID_PROGETTO=pc.ID_PROGETTO AND ad.COD_COMMESSA=pc.COD_COMMESSA
-                        AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
+                        AND pc.DATA_INIZIO='$dataInizio' AND pc.DATA_FINE='$dataFine'
                 WHERE ad.ID_ESECUZIONE=$idEsecuzione AND ad.ID_PROGETTO='$idProgetto' AND ad.COD_COMMESSA IN($commesse_imploded)
                 GROUP BY ad.COD_COMMESSA, pc.ORE_PREVISTE";
         $result = select_list($query);
@@ -460,7 +460,7 @@ class ConsuntiviProgettiManager {
         $query = "SELECT *
             FROM assegnazioni_dettaglio ad
             JOIN progetti_commesse pc ON ad.COD_COMMESSA=pc.COD_COMMESSA AND pc.ID_PROGETTO=$idProgetto
-                AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
+                AND pc.DATA_INIZIO='$dataInizio' AND pc.DATA_FINE='$dataFine'
             WHERE ID_ESECUZIONE=$idEsecuzione AND pc.COD_COMMESSA IN ($commesse_imploded)
                 AND NUM_ORE_RESIDUE >= 0.25
             ORDER BY ID_DIPENDENTE, DATA";
@@ -532,6 +532,7 @@ class ConsuntiviProgettiManager {
                      WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_PRELEVATE>0 AND ID_PROGETTO=$idProgetto
                      GROUP BY ID_PROGETTO, ID_DIPENDENTE, DATA
                      ";
+                     echo $query;
             execute_update($query);
 
             $query = "UPDATE assegnazioni

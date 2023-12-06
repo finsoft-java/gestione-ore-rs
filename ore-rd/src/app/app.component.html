@@ -39,6 +39,16 @@
         </button>
       </mat-menu>
 
+      <button mat-menu-item [matMenuTriggerFor]="rdMenu">Progetti RD <mat-icon class="arrowIcon">keyboard_arrow_down</mat-icon></button>
+      <mat-menu #rdMenu="matMenu" xPosition="after" yPosition="below">
+        <button mat-menu-item routerLink="importazione-rd" class="btnSubMenu">
+          <span>Importazione Progetti RD</span>
+        </button>
+        <button mat-menu-item routerLink="rd-importati" class="btnSubMenu">
+          <span>Visualizzazione Progetti RD</span>
+        </button>
+      </mat-menu>
+
       <button mat-menu-item [matMenuTriggerFor]="dipendentiMenu">Ore dipendenti <mat-icon class="arrowIcon">keyboard_arrow_down</mat-icon></button>
       <mat-menu #dipendentiMenu="matMenu" xPosition="after" yPosition="below">
         <button mat-menu-item routerLink="importazione-ore" class="btnSubMenu">

@@ -28,8 +28,8 @@ export class UploadRapportiniService {
     return this.http.request(req);
   }
   
-  download(periodo: string, isEsploso: boolean) {
-    return this.http.get(`${this.baseUrl}/EsportazioneRapportini.php?periodo=${periodo}&isEsploso=${isEsploso}`, {
+  download(dataInizio: string, dataFine: string, isEsploso: boolean) {
+    return this.http.get(`${this.baseUrl}/EsportazioneRapportini.php?dataInizio=${dataInizio}&dataFine=${dataFine}&isEsploso=${isEsploso}`, {
       responseType: 'arraybuffer'
     });
   }

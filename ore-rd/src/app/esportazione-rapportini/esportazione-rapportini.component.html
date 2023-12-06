@@ -8,6 +8,15 @@
             style="margin-right:10px;">
             Modalità esplosa
         </mat-checkbox>
+        <mat-form-field appearance="fill" class="dropdownDate"  style="margin-left: 15px;min-width: 45%;">
+            <mat-label>Periodo</mat-label>
+            <mat-select [(ngModel)]="filtroPeriodo" name="x" required>
+                <mat-option *ngFor="let x of allPeriodi" [value]="x">
+                    {{"Da: " + x.DATA_INIZIO + " A: " + x.DATA_FINE}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <!--
         <mat-form-field appearance="fill" style="margin-right: 10px;">
             <mat-label>Data</mat-label>
             <input matInput readonly [matDatepicker]="picker" [formControl]="date" required>
@@ -15,6 +24,7 @@
             <mat-datepicker #picker startView="multi-year" (yearSelected)="chosenYearHandler($event)" (monthSelected)="chosenMonthHandler($event, picker)" panelClass="example-month-picker">
             </mat-datepicker>
         </mat-form-field>
+    -->
         <button mat-raised-button color="primary" (click)="download()">DOWNLOAD HERE</button>
     </p>
 </div>

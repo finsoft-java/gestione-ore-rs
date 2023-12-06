@@ -51,6 +51,7 @@ import { ImportazionePartecipantiComponent } from './importazione-partecipanti/i
 import { CommesseComponent } from './commesse/commesse.component';
 import { ImportazioneCommesseComponent } from './importazione-commesse/importazione-commesse.component';
 import { AssociazioneOreComponent } from './associazione-ore/associazione-ore.component';
+import { ImportazioneProgettiOreComponent } from './importazione-progetti-ore/importazione-progetti-ore.component';
 
 
 registerLocaleData(localeIt);
@@ -77,6 +78,7 @@ registerLocaleData(localeIt);
     MatEditTableComponent,
     PartecipantiGlobaliComponent,
     ImportazionePartecipantiComponent,
+    ImportazioneProgettiOreComponent,
     CommesseComponent,
     ImportazioneCommesseComponent
   ],

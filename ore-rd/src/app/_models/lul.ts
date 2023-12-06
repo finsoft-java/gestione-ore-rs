@@ -7,3 +7,10 @@
     public DENOMINAZIONE: string
     ) {}    
 }
+export class LulSpecchietto {
+  constructor(
+    public MATRICOLA_DIPENDENTE: string,
+    public MESE: string,
+    public ORE_LAVORATE: number
+    ) {}    
+}

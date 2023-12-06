@@ -14,6 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_logged_user_JWT();
 
 
+$dataInizio = isset($_GET['dataInizio']) ? $con->escape_string($_GET['dataInizio']) : null;
+$dataFine = isset($_GET['dataFine']) ? $con->escape_string($_GET['dataFine']) : null;
 $periodo = isset($_GET['periodo']) ? $con->escape_string($_GET['periodo']) : null;
 $isEsploso = isset($_GET['isEsploso']) ? $con->escape_string($_GET['isEsploso']) === "true" : null;
 
@@ -22,16 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     // CONTROLLO PARAMETRI
 
-    if ($periodo == null) {
+    if ($dataInizio == null || $dataFine == null) {
         print_error(400, "Missing parameter: periodo");
     }
-    if (strlen($periodo) != 7) {
-        print_error(400, "Bad parameter: Il periodo di lancio deve essere nella forma YYYY-MM");
-    }
-    $anno = substr($periodo, 0, 4);
-    $mese = substr($periodo, 5, 2);
 
-    $zipfilename = $rapportini->creaZip($anno, $mese, $isEsploso);
+    $zipfilename = $rapportini->creaZip($dataInizio, $dataFine, $isEsploso);
     
     header('Content-Type: application/zip');
     header('Content-Disposition: attachment; filename="export.zip"');

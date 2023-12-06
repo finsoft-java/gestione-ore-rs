@@ -26,5 +26,20 @@ export class UploadFilesService {
 
     return this.http.request(req);
   }
+
+  uploadRD(file: FileList): Observable<HttpEvent<any>> {
+    const formData: FormData = new FormData();
+
+    for (let i = 0; i < file.length; i++) {
+      formData.append('file[]', file[i]);
+    }
+
+    const req = new HttpRequest('POST', `${this.baseUrl}/ImportProgettiRD.php`, formData, {
+      reportProgress: true,
+      responseType: 'json'
+    });
+
+    return this.http.request(req);
+  }
   
 }

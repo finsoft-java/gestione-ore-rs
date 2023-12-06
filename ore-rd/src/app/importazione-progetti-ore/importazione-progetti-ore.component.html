@@ -1,0 +1,51 @@
+<h5 style="margin-bottom: 30px;text-align:center">Importazione Progetti Ore RD</h5>
+
+<div style="border: 1px;border-style: dashed;padding: 30px;text-align: center;">
+
+    <div class="card mt-3" style="margin-bottom: 30px;" *ngIf="nomiFile">
+        <div class="card-header">Nome File</div>
+        <ul class="list-group list-group-flush" *ngFor="let file of nomiFile">
+            <li class="list-group-item">
+                {{ file }}
+            </li>
+        </ul>
+    </div>
+
+    <div class="mb-2" *ngIf="progressInfos" style="margin-bottom: 30px !important;">
+        <span>{{ progressInfos.fileName }}</span>
+        <div class="progress">
+            <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" attr.aria-valuenow="{{ progressInfos.value }}" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{ width: progressInfos.value + '%' }">
+                {{ progressInfos.value }}%
+            </div>
+        </div>
+    </div>
+    <div class="alert alert-success" role="alert" *ngIf="message_success">
+        <button type="button" class="close" (click)="resetAlertSuccess()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <div [innerHtml]="message_success">
+        </div>
+    </div>
+    <div class="alert alert-danger" role="alert" *ngIf="message_error">
+        <button type="button" class="close" (click)="resetAlertDanger()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <div [innerHtml]="message_error">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-3">
+            <button mat-raised-button color="primary" [disabled]="loading" (click)="fileInput.click()">
+              <span>Seleziona uno o più file...</span>
+              <input #fileInput type="file" multiple (change)="selectFiles($event)" accept=".xlsx,.xls" style="display:none;" />
+            </button>
+        </div>
+
+        <div class="col-3">
+            <button mat-raised-button color="warn" [disabled]="!selectedFiles||loading" (click)="uploadFiles()" style="margin-right:15px;">Carica</button>
+            <button mat-raised-button color="primary" [disabled]="!selectedFiles||loading" (click)="reset()">Reset</button>
+        </div>
+    </div>
+</div>

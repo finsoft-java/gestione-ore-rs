@@ -11,23 +11,20 @@ $lul = new LULManager();
 
 class LULManager {
 
-    function carica_da_db($anno, $mese) {
-        $primo = "DATE('$anno-$mese-01')";
+    function carica_da_db($dataInizio, $dataFine) {
 
-        $query_lul = "SELECT ID_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE " .
-                    "FROM ore_presenza_lul " .
-                    "WHERE DATA >= $primo AND DATA <= LAST_DAY($primo)";
+        $query_lul = "SELECT ID_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE  FROM ore_presenza_lul WHERE DATA BETWEEN '$dataInizio' AND '$dataFine'";
         $rows = select_list($query_lul);
         
         // trasformo la matrice $rows in una struttura $map_matr_ore
         $map_matr_ore = array();
         foreach ($rows as $row) {
             $matr = $row["ID_DIPENDENTE"];
-            $data = new DateTime($row["DATA"]);
-            if (! isset($map_matr_ore[$matr])) $map_matr_ore[$matr] = array();
-            $map_matr_ore[$matr][$data->format('j')] = $row["ORE_PRESENZA_ORDINARIE"];
-        }
-        
+            if($matr != ""){
+                if (! isset($map_matr_ore[$matr])) $map_matr_ore[$matr] = array();
+                $map_matr_ore[$matr][$row["DATA"]] = $row["ORE_PRESENZA_ORDINARIE"];
+            }
+        }        
         return $map_matr_ore;
     }
 
@@ -48,6 +45,7 @@ class LULManager {
         $annoMese = false;
         $ultimoGiornoMese = false;
         $primaRiga = 0;
+        $matrInesistenti = array();
         $contatoreMatricole = 0;
         $mapMatricole = $this->getMapMatricole();
         $cntMatricoleInesistenti=0;
@@ -67,6 +65,7 @@ class LULManager {
                 if($spreadSheetAry[$primaRiga][1] != 0) {
                     $contatoreMatricole++;
                 } else {
+                    array_push($matrInesistenti,$spreadSheetAry[$primaRiga][1]);
                     $cntMatricoleInesistenti++;
                 }
                 $primaRiga = $primaRiga + 10;
@@ -75,13 +74,75 @@ class LULManager {
             }
         }
         if($cntMatricoleInesistenti > 0 ) {
-            $message->error .= 'Nel File caricato sono presenti '.$cntMatricoleInesistenti.' matricole inesistenti<br/>';
+            $message->error .= 'Nel File caricato sono presenti '.$cntMatricoleInesistenti.' matricole inesistenti.<br/> Le matricole inserite sono le seguenti: '.implode(",", $matrInesistenti).'<br/>';
         }
         $arrayMesi = array("Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre");
         $mese = $arrayMesi[intval($meseSheet)-1];
         $message->success .= 'Caricamento Effettuato correttamente.</br>
                               Mese Caricato: '.$mese.'</br>
                               Matricole importate: '.$contatoreMatricole.'.</br>';
+    }
+
+    function importExcelRD($filename, &$message, $typeFile) {
+        global $con, $panthera, $progettiManager,$rapportini;
+        ini_set('memory_limit', '-1');
+        set_time_limit(400);
+        if($typeFile == 'application/vnd.ms-excel' || $typeFile ==  'text/xls'){
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+        } else {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        }
+        
+        $spreadSheet = $reader->load($filename);
+        $annoMese = false;
+        $ultimoGiornoMese = false;
+        $primaRiga = 0;
+        $matrInesistenti = array();
+        $contatoreRigeInserite = 0;
+        $cntMatricoleInesistenti=0;
+        $sheetData= "";
+        $denominazione="";
+        $sql = "";
+        $sheetCount = $spreadSheet->getSheetCount();
+        
+        $idCaricamento = $rapportini->nuovo_caricamentoRd();
+        for ($i = 0; $i < $sheetCount; $i++) {
+            $sheet = $spreadSheet->getSheet($i);
+            $sheetData = $sheet->toArray();
+            $numRows = count($sheetData);
+
+            $rigaProgetto = 8;
+            $datiUtente = $panthera->getAllDataMatricolaByName($sheetData[0][1]);
+            $denominazione = trim($datiUtente[0]["DENOMINAZIONE"]);
+            $matricola = trim($datiUtente[0]["MATRICOLA"]);
+            $idDipendente = $datiUtente[0]["ID_DIPENDENTE"];                
+            while ($rigaProgetto < $numRows) {
+                $progetto = trim($sheetData[$rigaProgetto][0]);
+                if($progetto == "TOTAL PROJECTS" || $progetto == "") {
+                    break;
+                }
+                [$annoMese, $ultimoGiornoMese] = $this->leggiMeseRD($primaRiga, $sheetData);
+                $pezzi_comando_sql = [];
+                for($a= 1; $a <= $ultimoGiornoMese; $a++){
+                    $data = "$annoMese-$a";
+                    $ore = $sheetData[$rigaProgetto][$a+1];
+                    if($ore == ''){
+                        $ore = 0;
+                    }
+                    $pezzi_comando_sql[] = "('$idCaricamento','$progetto','$matricola','$data','$ore','$idDipendente')";
+                    $contatoreRigeInserite++;
+                }     
+                $sql = " INSERT INTO ore_presenza_progetti (ID_CARICAMENTO,PROGETTO,MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE,ID_DIPENDENTE) VALUES ".implode(',', $pezzi_comando_sql);
+                execute_update($sql);       
+                $rigaProgetto++; 
+            }
+        }
+
+        if($contatoreRigeInserite == 0 ) {
+            $message->error .= 'Nel File caricato sono presenti errori';
+        }
+        $message->success .= 'Caricamento Effettuato correttamente.</br>
+                              Righe importate per Utente '.$denominazione.': '.$contatoreRigeInserite.'.</br>';
     }
 
     /**
@@ -142,6 +203,17 @@ class LULManager {
             execute_update($sql);
         }
     }
+
+    function leggiMeseRD($primaRiga, &$spreadSheetAry) {
+        $dataLul = $spreadSheetAry[$primaRiga+2][0];//JANUARY 2022
+        $data_lul = new DateTime($dataLul);
+        $mese = date_format($data_lul, "m");
+        $anno = date_format($data_lul, "Y");
+        $data_lul->modify('last day of this month');
+        $ultimoGiornoMese = $data_lul->format('d');
+        return ["$anno-$mese", $ultimoGiornoMese];
+        
+    }
         
     function elimina($anno, $mese) {
         $sql = "DELETE FROM ore_presenza_lul WHERE YEAR(DATA)=$anno AND MONTH(DATA)=$mese";
@@ -192,10 +264,9 @@ class LULManager {
         return [$oggetti, $count];
     }
 
-    function getSpecchietto($month=null, $matricola=null, $dataInizio=null, $dataFine=null) {
+    function getSpecchietto($skip = null, $top = null, $month=null, $matricola=null, $dataInizio=null, $dataFine=null) {
         global $con;
-        
-        $sql0 = "SELECT COUNT(*) AS cnt ";
+        $sql0 = "SELECT COUNT(*) ";
         $sql1 = "SELECT DISTINCT MATRICOLA_DIPENDENTE, MONTH(DATA) AS MESE, SUM(ORE_PRESENZA_ORDINARIE) AS ORE_LAVORATE ";
         $sql = "FROM ore_presenza_lul WHERE 1 ";
 
@@ -216,9 +287,15 @@ class LULManager {
         }
 
         $sql .= " GROUP BY MONTH(DATA), MATRICOLA_DIPENDENTE ORDER BY MATRICOLA_DIPENDENTE, DATA";
-        
-        $count = select_single_value($sql0 . $sql);
-        echo $sql1 . $sql;    
+        $oggettiCnt = select_list($sql1 . $sql);
+        $count = count($oggettiCnt);
+        if ($top != null) {
+            if ($skip != null) {
+                $sql .= " LIMIT $skip,$top";
+            } else {
+                $sql .= " LIMIT $top";
+            }
+        }
         $oggetti = select_list($sql1 . $sql);
         
         return [$oggetti, $count];

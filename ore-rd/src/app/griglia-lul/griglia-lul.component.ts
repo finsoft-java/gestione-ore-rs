@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { LulSpecchietto } from './../_models/lul';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ColumnDefinition } from '../mat-edit-table';
 import { Lul, Matricola, Periodo } from '../_models';
@@ -17,6 +18,8 @@ import { formatDate } from '@angular/common';
 import { ProgettiService } from '../_services/progetti.service';
 import { AlertService } from '../_services/alert.service';
 import { PeriodiService } from '../_services/periodi.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 const moment = _moment;
 export const MY_FORMATS = {
@@ -71,12 +74,22 @@ export class GrigliaLulComponent implements OnInit {
       data: 'ORE_PRESENZA_ORDINARIE'
     }
   ];
+  
+  displayedColumns: string[] = ['matricola', 'mese', 'ore'];
   service!: LulService;
   date = new FormControl();
   allMatricole: Matricola[] = [];
   allPeriodi: Periodo[] = [];
   filtroPeriodo?: Periodo;
-  specchietto:string = '';
+  pageSizeOptions = [5, 10, 25];
+  showFirstLastButtons = true;
+  
+  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
+  length?= 0;
+  pageSize = 10;
+  pageIndex = 0;
+  isAttivo = false;
+  specchietto = new MatTableDataSource<LulSpecchietto>();
   constructor(private lulService: LulService,
     private progettiService: ProgettiService,
     private alertService: AlertService,
@@ -111,8 +124,10 @@ export class GrigliaLulComponent implements OnInit {
       this.filter.dataInizio = this.filtroPeriodo.DATA_INIZIO;
       this.filter.dataFine = this.filtroPeriodo.DATA_FINE;
     }
+    
+    this.getSpecchietto(0, this.pageSize, this.filter);
+    
     editTableComponent.filter(this.filter);
-    this.getSpecchietto(this.filter);
   }
 
   // carica l'elenco di tutte le matricole da Panthera
@@ -126,10 +141,13 @@ export class GrigliaLulComponent implements OnInit {
       });
   }
 
-  getSpecchietto(filter:any): void {
-    this.lulService.getSpecchietto(filter)
+  getSpecchietto(top: number, skip: number, filter:any): void {
+    this.lulService.getSpecchietto(top, skip, filter)
       .subscribe(response => {
-        this.specchietto = response.value;
+        this.length = response.count;
+        this.specchietto = new MatTableDataSource<LulSpecchietto>(response.data);
+        this.specchietto.paginator = this.paginator;
+        this.isAttivo = true;
       },
       error => {
         this.alertService.error(error);
@@ -161,5 +179,17 @@ export class GrigliaLulComponent implements OnInit {
     ctrlValue.month(normalizedMonth.month());
     this.date.setValue(ctrlValue);
     datepicker.close();
+  }
+
+  handlePageEvent(event: PageEvent) {
+    console.log(event);
+    this.length = event.length;
+    this.pageSize = event.pageSize;
+    this.pageIndex = event.pageIndex;
+    if (this.pageIndex > 0) {
+      this.getSpecchietto((this.pageIndex) * this.pageSize, this.pageSize, this.filter);
+    } else {
+      this.getSpecchietto(0, this.pageSize, this.filter);
+    }
   }
 }

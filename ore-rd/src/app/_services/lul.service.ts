@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { ListBean, Lul, ValueBean } from '../_models';
+import { ListBean, Lul, LulSpecchietto, ValueBean } from '../_models';
 import { HttpCrudService } from './HttpCrudService';
 import { Observable } from 'rxjs';
 
@@ -32,8 +32,14 @@ export class LulService implements HttpCrudService<Lul> {
         return this.http.get<ListBean<Lul>>(url);
     }
 
-    getSpecchietto(parameters: any) {
+    getSpecchietto(top: number, skip: number, parameters: any) {
         let url = environment.wsUrl + 'LulSpecchietto.php?';
+        if (top) {
+            url += `&top=${top}`;
+        }
+        if (skip) {
+            url += `&skip=${skip}`;
+        }
         if (parameters.matricola) {
             url += `&matricola=${parameters.matricola}`;
         }
@@ -46,7 +52,7 @@ export class LulService implements HttpCrudService<Lul> {
         if (parameters.dataFine) {
             url += `&dataFine=${parameters.dataFine}`;
         }
-        return this.http.get<ValueBean<string>>(url);
+        return this.http.get<ListBean<LulSpecchietto>>(url);
     }
 
     create(obj: Lul): Observable<ValueBean<Lul>> {

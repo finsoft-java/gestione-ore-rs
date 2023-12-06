@@ -13,6 +13,8 @@ import {Moment} from 'moment';
 import * as _moment from 'moment';
 import { formatDate } from '@angular/common';
 import { AlertService } from '../_services/alert.service';
+import { Periodo } from '../_models';
+import { PeriodiService } from '../_services/periodi.service';
 // tslint:disable-next-line:no-duplicate-imports
 
 const moment = _moment;
@@ -42,11 +44,26 @@ export const MY_FORMATS = {
 export class EsportazioneRapportiniComponent {
     date = new FormControl(moment());
     isEsploso = false;
+    filter: any = {};
+    allPeriodi: Periodo[] = [];
+    filtroPeriodo?: Periodo;
 
     constructor(private alertService: AlertService,
-        private uploadRapportiniService: UploadRapportiniService) {
+        private uploadRapportiniService: UploadRapportiniService,
+        private periodiService: PeriodiService) {
     }
 
+
+    ngOnInit(): void {
+      this.getAllPeriodi();
+    }
+  
+    getAllPeriodi() {
+      this.periodiService.getAll().subscribe(response => {
+        this.allPeriodi = response.data;
+      })
+    }
+    
     chosenYearHandler(normalizedYear: Moment) {
       const ctrlValue = this.date.value;
       ctrlValue.year(normalizedYear.year());
@@ -61,8 +78,11 @@ export class EsportazioneRapportiniComponent {
     }
 
     download() {
-      if(this.date.value != null){
-        this.uploadRapportiniService.download(formatDate(this.date.value,"YYYY-MM","en-GB"), this.isEsploso).subscribe(response => {
+      if (this.filtroPeriodo != null) {
+        this.filter.dataInizio = this.filtroPeriodo.DATA_INIZIO;
+        this.filter.dataFine = this.filtroPeriodo.DATA_FINE;
+        
+        this.uploadRapportiniService.download(this.filter.dataInizio, this.filter.dataFine, this.isEsploso).subscribe(response => {
             this.downloadFile(response);
         },
         error => {
