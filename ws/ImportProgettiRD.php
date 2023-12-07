@@ -29,11 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     ];
 
+    $idCaricamento = $rapportini->nuovo_caricamentoRd();
     for ($filenum = 0; $filenum < count($_FILES["file"]["name"]); ++$filenum) {
         $message->success .= "Analysing file " . $_FILES["file"]["name"][$filenum] . "...<br/>";
         $filename =  $_FILES["file"]["tmp_name"][$filenum];
         if (in_array($_FILES["file"]["type"][$filenum], $allowedFileType)) {
-            $lul->importExcelRD($filename, $message, $_FILES["file"]["type"][$filenum]);
+            
+            $lul->importExcelRD($filename, $message, $_FILES["file"]["type"][$filenum], $idCaricamento);
         } else {
             $message->error .= "Invalid File Type. Upload Excel File.<br/>";
         }

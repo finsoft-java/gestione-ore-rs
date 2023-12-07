@@ -46,6 +46,15 @@
         </mat-select>
     </mat-form-field>
 
+    <mat-form-field appearance="fill" class="dropdownDate"  style="margin-left: 0px;margin-right: 15px;min-width: 45%;">
+      <mat-label>Progetti RD</mat-label>
+      <mat-select [(ngModel)]="searchProgetto" name="x" required>
+          <mat-option *ngFor="let x of allProgetti" [value]="x">
+              {{x}}
+          </mat-option>
+      </mat-select>
+  </mat-form-field>
+
     
     <button mat-raised-button color="primary" style="margin-right:15px;" (click)="filterRow(myTable)">Filtra</button>
     <button mat-raised-button color="secondary" style="margin-right:15px;" (click)="resetFilter(myTable)">Reset</button>
@@ -61,8 +70,8 @@
         <td mat-cell *matCellDef="let element"> {{element.PROGETTO}} </td>
     </ng-container>
     <ng-container matColumnDef="denominazione">
-      <th mat-header-cell *matHeaderCellDef> Dipendente </th>
-      <td mat-cell *matCellDef="let element"> {{element.DENOMINAZIONE}} </td>
+      <th mat-header-cell *matHeaderCellDef> Matricola </th>
+      <td mat-cell *matCellDef="let element"> {{element.MATRICOLA_DIPENDENTE}} </td>
     </ng-container>
     <ng-container matColumnDef="data">
         <th mat-header-cell *matHeaderCellDef> Data </th>
@@ -70,7 +79,7 @@
     </ng-container>
     <ng-container matColumnDef="ore">
         <th mat-header-cell *matHeaderCellDef> Ore </th>
-        <td mat-cell *matCellDef="let element"> {{element.ORE_LAVORATE}} </td>
+        <td mat-cell *matCellDef="let element"> {{element.ORE_PRESENZA_ORDINARIE}} </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

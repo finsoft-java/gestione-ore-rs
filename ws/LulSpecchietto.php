@@ -25,9 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $arrayMesi = array("Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre");
         
     foreach ($objects as $object) {
-
+        
         $nome_dipendente = $panthera->getUtenteByMatricola($object["MATRICOLA_DIPENDENTE"]);
-        $object["MATRICOLA_DIPENDENTE"] = $nome_dipendente ? $nome_dipendente : null;
+        $object["MATRICOLA_DIPENDENTE"] = $nome_dipendente ? $nome_dipendente : "Denominazione non trovata matricola: ".$object["MATRICOLA_DIPENDENTE"];
         $object["MESE"]  = $arrayMesi[intval($object["MESE"])-1];
         array_push($newObj, $object);
 

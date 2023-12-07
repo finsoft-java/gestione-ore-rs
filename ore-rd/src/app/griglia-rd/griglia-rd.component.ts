@@ -1,3 +1,4 @@
+import { ProgettiRDService } from './../_services/progettiRD.service';
 import { LulSpecchietto } from '../_models/lul';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
@@ -20,7 +21,6 @@ import { AlertService } from '../_services/alert.service';
 import { PeriodiService } from '../_services/periodi.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { ProgettiRDService } from '../_services/progettiRD.service';
 
 const moment = _moment;
 export const MY_FORMATS = {
@@ -59,8 +59,8 @@ export class GrigliaRDComponent implements OnInit {
       title: 'Progetto',
       data: 'PROGETTO'
     },{
-      title: 'Dipendente',
-      data: 'DENOMINAZIONE'
+      title: 'Matricola',
+      data: 'MATRICOLA_DIPENDENTE'
     },
     {
       title: 'Data',
@@ -68,7 +68,7 @@ export class GrigliaRDComponent implements OnInit {
     },
     {
       title: 'Ore presenza ordinarie',
-      data: 'ORE_LAVORATE'
+      data: 'ORE_PRESENZA_ORDINARIE'
     }
   ];
   
@@ -77,7 +77,10 @@ export class GrigliaRDComponent implements OnInit {
   date = new FormControl();
   allMatricole: Matricola[] = [];
   allPeriodi: Periodo[] = [];
+  allProgetti: string[] = [];
+  filtroProgetti: string =  "";
   filtroPeriodo?: Periodo;
+  searchProgetto: string = "";
   pageSizeOptions = [5, 10, 25];
   showFirstLastButtons = true;
   
@@ -97,6 +100,7 @@ export class GrigliaRDComponent implements OnInit {
   ngOnInit(): void {
     this.getMatricole();
     this.getAllPeriodi();
+    this.getAllProgettiRD();
   }
 
   getAllPeriodi() {
@@ -105,7 +109,24 @@ export class GrigliaRDComponent implements OnInit {
     })
   }
 
+  getAllProgettiRD() {
+    this.filter.progetto = "Y";
+    console.log(this.filter);
+    this.rdService.getAll(this.filter)
+      .subscribe(response => {
+        response.data.forEach(element => {
+          this.allProgetti.push(element["PROGETTO"]);
+        });
+        console.log(this.allProgetti);
+        delete this.filter.progetto;
+      },
+      error => {
+        this.alertService.error(error);
+      });
+  }
+
   filterRow(editTableComponent: any): void {
+    console.log("this",this);
     if (this.filter.matricola) {
       this.filter.matricola = this.filter.matricola.trim();
     } else {
@@ -121,9 +142,9 @@ export class GrigliaRDComponent implements OnInit {
       this.filter.dataInizio = this.filtroPeriodo.DATA_INIZIO;
       this.filter.dataFine = this.filtroPeriodo.DATA_FINE;
     }
-    
-    //this.getSpecchietto(0, this.pageSize, this.filter);
-    
+    if(this.searchProgetto){
+      this.filter.searchProgetto = this.searchProgetto;
+    }    
     editTableComponent.filter(this.filter);
   }
 

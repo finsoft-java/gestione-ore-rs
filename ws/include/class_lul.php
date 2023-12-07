@@ -61,7 +61,7 @@ class LULManager {
                 if ($annoMese === false || $ultimoGiornoMese === false) {
                     return;
                 }
-                $this->leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, $mapMatricole, $spreadSheetAry);
+                $this->leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, $mapMatricole, $spreadSheetAry, $message);
                 if($spreadSheetAry[$primaRiga][1] != 0) {
                     $contatoreMatricole++;
                 } else {
@@ -74,7 +74,7 @@ class LULManager {
             }
         }
         if($cntMatricoleInesistenti > 0 ) {
-            $message->error .= 'Nel File caricato sono presenti '.$cntMatricoleInesistenti.' matricole inesistenti.<br/> Le matricole inserite sono le seguenti: '.implode(",", $matrInesistenti).'<br/>';
+            $message->error .= 'Nel File caricato sono presenti '.$cntMatricoleInesistenti.' matricole inesistenti.<br/> Le matricole non inserite sono le seguenti: '.implode(",", $matrInesistenti).'<br/>';
         }
         $arrayMesi = array("Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre");
         $mese = $arrayMesi[intval($meseSheet)-1];
@@ -83,7 +83,7 @@ class LULManager {
                               Matricole importate: '.$contatoreMatricole.'.</br>';
     }
 
-    function importExcelRD($filename, &$message, $typeFile) {
+    function importExcelRD($filename, &$message, $typeFile, $idCaricamento) {
         global $con, $panthera, $progettiManager,$rapportini;
         ini_set('memory_limit', '-1');
         set_time_limit(400);
@@ -105,7 +105,6 @@ class LULManager {
         $sql = "";
         $sheetCount = $spreadSheet->getSheetCount();
         
-        $idCaricamento = $rapportini->nuovo_caricamentoRd();
         for ($i = 0; $i < $sheetCount; $i++) {
             $sheet = $spreadSheet->getSheet($i);
             $sheetData = $sheet->toArray();
@@ -129,6 +128,15 @@ class LULManager {
                     if($ore == ''){
                         $ore = 0;
                     }
+                    if(($matricola == 0 || $matricola == null || $matricola == "") && ($idDipendente == 0 || $idDipendente == null || $idDipendente == "")) {
+                        $message->error .= 'Nel File caricato sono presenti errori nella matricola |'.$sheetData[0][1].'| alla data '.$data;
+                        break;
+                    }
+                    if($data == 0 || $data == null || $data == "" ) {
+                        $message->error .= 'Nel File caricato sono presenti errori nella data '.$data;
+                        break;
+                    }
+
                     $pezzi_comando_sql[] = "('$idCaricamento','$progetto','$matricola','$data','$ore','$idDipendente')";
                     $contatoreRigeInserite++;
                 }     
@@ -181,7 +189,7 @@ class LULManager {
         return ["$anno-$mese", $ultimoGiornoMese];
     }
 
-    function leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, $mapMatricole, &$spreadSheetAry) {
+    function leggiOreDipendente($primaRiga, $annoMese, $ultimoGiornoMese, $mapMatricole, &$spreadSheetAry, &$message) {
         $pezzi_comando_sql = [];
         $matricola = $spreadSheetAry[$primaRiga][1];
         if($matricola != 0){
@@ -194,10 +202,11 @@ class LULManager {
                 $idDipendente = '';
                 if (isset($mapMatricole[$matricola])) {
                     $idDipendente = $mapMatricole[$matricola];
+                    $pezzi_comando_sql[] = "('$matricola','$idDipendente','$data','$ore')";
+                } else {
+                    $message->error .= 'Nel File caricato è presente la matricola |'.$matricola.'| che non esiste.<br/> Non inserisco la riga<br/>';
                 }
-                $pezzi_comando_sql[] = "('$matricola','$idDipendente','$data','$ore')";
             }
-        
             $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,ID_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES " .
                 implode(',', $pezzi_comando_sql);
             execute_update($sql);
@@ -266,7 +275,6 @@ class LULManager {
 
     function getSpecchietto($skip = null, $top = null, $month=null, $matricola=null, $dataInizio=null, $dataFine=null) {
         global $con;
-        $sql0 = "SELECT COUNT(*) ";
         $sql1 = "SELECT DISTINCT MATRICOLA_DIPENDENTE, MONTH(DATA) AS MESE, SUM(ORE_PRESENZA_ORDINARIE) AS ORE_LAVORATE ";
         $sql = "FROM ore_presenza_lul WHERE 1 ";
 
@@ -287,6 +295,7 @@ class LULManager {
         }
 
         $sql .= " GROUP BY MONTH(DATA), MATRICOLA_DIPENDENTE ORDER BY MATRICOLA_DIPENDENTE, DATA";
+        
         $oggettiCnt = select_list($sql1 . $sql);
         $count = count($oggettiCnt);
         if ($top != null) {

@@ -20,8 +20,8 @@ class ConsuntiviProgettiManager {
         // human readable dates
         $dataInizioHR = DateTime::createFromFormat('Y-m-d', $dataInizio)->format('d/m/Y');
         $dataFineHR = DateTime::createFromFormat('Y-m-d', $dataFine)->format('d/m/Y');
-        //$dataInizio = str_replace("-","",$dataInizio); 
-        //$dataFine = str_replace("-","",$dataFine); 
+        $dataInizio = str_replace("-","",$dataInizio); 
+        $dataFine = str_replace("-","",$dataFine); 
         $progetto = $progettiManager->get_progetto($idProgetto);
         if ($progetto == null) {
             $message->error .= "Progetto non trovato: $idProgetto" . NL;
@@ -147,8 +147,9 @@ class ConsuntiviProgettiManager {
         $query = "SELECT DISTINCT pc.COD_COMMESSA
                     FROM progetti_commesse pc
                     JOIN commesse c ON c.COD_COMMESSA=pc.COD_COMMESSA AND c.DATA_INIZIO=pc.DATA_INIZIO AND c.DATA_FINE=pc.DATA_FINE
-                    WHERE pc.ID_PROGETTO=$idProgetto AND pc.DATA_INIZIO='$dataInizio' AND pc.DATA_FINE='$dataFine'
+                    WHERE pc.ID_PROGETTO=$idProgetto AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
                     and c.PCT_COMPATIBILITA<=0";
+                    //echo $query.NL;
         $commesse = select_column($query);
         if (count($commesse) > 0) {
             $message->success .= "<strong>WARNING</strong>: ci sono commesse con PCT_COMPATIBILITA<=0: " . implode(', ', $commesse). NL;
@@ -160,8 +161,9 @@ class ConsuntiviProgettiManager {
                 JOIN progetti pr ON pr.ID_PROGETTO=c.ID_PROGETTO
                 WHERE pr.id_progetto=$idProgetto
                 AND ID_DIPENDENTE NOT IN (SELECT DISTINCT ID_DIPENDENTE FROM partecipanti_globali WHERE PCT_UTILIZZO>0)
-                AND (oc.DATA IS NULL OR (oc.DATA >= '$dataInizio' and oc.DATA <= '$dataFine'))
+                AND (oc.DATA IS NULL OR (oc.DATA >= DATE('$dataInizio') and oc.DATA <= DATE('$dataFine')))
                 ORDER BY 1";
+                    //echo $query.NL;
         $ore = select_column($query);
         if (count($ore) > 0) {
             $message->success .= "<strong>WARNING</strong>: ci sono ore su commesse di progetto o compatibili ma con PCT_UTILIZZO<=0: " . implode(', ', $ore). NL;
@@ -171,14 +173,14 @@ class ConsuntiviProgettiManager {
             FROM progetti pr
             JOIN progetti_commesse pc ON pr.ID_PROGETTO=pc.ID_PROGETTO
             JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=pc.COD_COMMESSA 
-                AND oc.DATA >= '$dataInizio' AND oc.DATA <= '$dataFine'
+                AND oc.DATA >= DATE('$dataInizio') AND oc.DATA <= DATE('$dataFine')
             WHERE
                 pr.ID_PROGETTO=$idProgetto
-                AND pc.DATA_INIZIO='$dataInizio' AND pc.DATA_FINE='$dataFine'
-                AND oc.DATA >= '$dataInizio' and oc.DATA <= '$dataFine'
+                AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
+                AND oc.DATA >= DATE('$dataInizio') and oc.DATA <= DATE('$dataFine')
                 AND oc.NUM_ORE_RESIDUE > 0
             LIMIT 1";
-            //echo $query;
+            //echo $query.NL;
         $result = select_single_value($query);
         if (empty($result)) {
             $message->error .= "Nessun caricamento trovato per il progetto n.$idProgetto!" . NL;
@@ -191,7 +193,8 @@ class ConsuntiviProgettiManager {
     function get_progetti_attivi($dataInizio, $dataFine) {
         $query = "SELECT *
             FROM progetti p
-            WHERE p.DATA_FINE >= '$dataInizio' AND p.DATA_INIZIO <= '$dataFine'";
+            WHERE p.DATA_FINE >= DATE('$dataInizio') AND p.DATA_INIZIO <= DATE('$dataFine')";
+        //echo $query.NL;
         return select_list($query);
     }
 
@@ -219,8 +222,8 @@ class ConsuntiviProgettiManager {
             JOIN commesse c ON c.COD_COMMESSA=pc.COD_COMMESSA AND c.DATA_INIZIO=pc.DATA_INIZIO AND c.DATA_FINE=pc.DATA_FINE
                 AND c.PCT_COMPATIBILITA>0 AND pc.ORE_PREVISTE>0
             JOIN partecipanti_globali p ON p.PCT_UTILIZZO>0
-            JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE AND oc.DATA >= pc.DATA_INIZIO AND oc.DATA <= pc.DATA_FINE WHERE pr.ID_PROGETTO = $idProgetto and pc.DATA_INIZIO >= '$dataInizio' AND pc.DATA_FINE < '$dataFine' ";
-            echo $query;
+            JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE AND oc.DATA >= pc.DATA_INIZIO AND oc.DATA <= pc.DATA_FINE WHERE pr.ID_PROGETTO = $idProgetto and pc.DATA_INIZIO >= DATE('$dataInizio') AND pc.DATA_FINE <= DATE('$dataFine') ";
+            //echo $query;
         $r = execute_update($query);
         return $r;
     }
@@ -279,7 +282,7 @@ class ConsuntiviProgettiManager {
 
         $ore_previste = $this->get_ore_previste($idProgetto, $commesse_p, $dataInizio, $dataFine);
         
-        $message->success .= "<strong>Tot. $totale ore di progetto, contro $ore_previste previste (manca ancora controllo LUL)</strong>". NL;
+        $message->success .= "<strong>Tot. $totale ore di progetto, contro $ore_previste previste </strong>". NL;//(manca ancora controllo LUL)
 
         return $totale;
     }
@@ -316,7 +319,7 @@ class ConsuntiviProgettiManager {
         $ore_previste = $this->get_ore_previste($idProgetto, $commesse_c, $dataInizio, $dataFine);
         
         $totale = round($totale*100)/100;
-        $message->success .= "<strong>Tot. $totale ore su commesse compatibili, contro $ore_previste previste (manca ancora controllo LUL)</strong>". NL;
+        $message->success .= "<strong>Tot. $totale ore su commesse compatibili, contro $ore_previste previste</strong>". NL;// (manca ancora controllo LUL)
 
         return $totale;
     }
@@ -532,7 +535,7 @@ class ConsuntiviProgettiManager {
                      WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_PRELEVATE>0 AND ID_PROGETTO=$idProgetto
                      GROUP BY ID_PROGETTO, ID_DIPENDENTE, DATA
                      ";
-                     echo $query;
+                     //echo $query;
             execute_update($query);
 
             $query = "UPDATE assegnazioni

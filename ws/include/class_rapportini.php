@@ -582,12 +582,47 @@ class RapportiniManager {
         
         return [$oggetti, $count];
     }
-    function get_caricamenti_rd($skip=null, $top=null, $orderby=null, $matricola=null, $month=null, $dataInizio=null, $dataFine=null) {
+    function get_caricamenti_rd($skip=null, $top=null, $orderby=null) {
         global $con;
         
         $sql0 = "SELECT COUNT(*) AS cnt ";
         $sql1 = "SELECT * ";
-        $sql = "FROM caricamenti_rd p WHERE 1 ";
+        $sql = "FROM caricamenti_rd p ";
+        
+        if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {
+            // avoid SQL-injection
+            $sql .= " ORDER BY $orderby";
+        } else {
+            $sql .= " ORDER BY p.id_caricamento DESC";
+        }
+
+        $count = select_single_value($sql0 . $sql);
+
+        if ($top != null){
+            if ($skip != null) {
+                $sql .= " LIMIT $skip,$top";
+            } else {
+                $sql .= " LIMIT $top";
+            }
+        }        
+        $oggetti = select_list($sql1 . $sql);
+        
+        return [$oggetti, $count];
+    }
+    function get_progetti_ore_presenza_progetti() {
+        global $con;
+        $sql = "SELECT DISTINCT PROGETTO FROM ore_presenza_progetti p ORDER BY p.id_caricamento DESC";
+        //echo $sql;
+        $oggetti = select_list($sql);        
+        return $oggetti;
+    }
+
+    function get_ore_presenza_progetti($skip=null, $top=null, $orderby=null, $matricola=null, $month=null, $dataInizio=null, $dataFine=null, $searchProgetto=null) {
+        global $con;
+        
+        $sql0 = "SELECT COUNT(*) AS cnt ";
+        $sql1 = "SELECT * ";
+        $sql = "FROM ore_presenza_progetti p WHERE 1 ";
         
 
         if (($dataInizio !== null && $dataInizio !== "") && ($dataFine !== null && $dataFine !== "")) {
@@ -603,6 +638,10 @@ class RapportiniManager {
         if ($matricola !== null && $matricola !== '') {
             $matricola = $con->escape_string($matricola);
             $sql .= "AND (MATRICOLA_DIPENDENTE='$matricola' or ID_DIPENDENTE='$matricola')";
+        }
+
+        if($searchProgetto !== null && $searchProgetto !== ''){
+            $sql .= "AND PROGETTO='$searchProgetto'";
         }
 
         if ($orderby && preg_match("/^[a-zA-Z0-9,_ ]+$/", $orderby)) {

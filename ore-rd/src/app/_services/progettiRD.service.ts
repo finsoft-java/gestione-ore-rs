@@ -10,7 +10,8 @@ export class ProgettiRDService implements HttpCrudService<ProgettoRD> {
     constructor(private http: HttpClient) { }
 
     getAll(parameters: any) {
-        let url = environment.wsUrl + 'CaricamentiRD.php?';
+        let url = environment.wsUrl + 'OreProgettiRD.php?';
+        console.log("parameters ",parameters);
         if (parameters.top) {
             url += `&top=${parameters.top}`;
         }
@@ -28,6 +29,12 @@ export class ProgettiRDService implements HttpCrudService<ProgettoRD> {
         }
         if (parameters.dataFine) {
             url += `&dataFine=${parameters.dataFine}`;
+        }
+        if (parameters.progetto) {
+            url += `&progetto=${parameters.progetto}`;
+        }
+        if (parameters.searchProgetto) {
+            url += `&searchProgetto=${parameters.searchProgetto}`;
         }
         return this.http.get<ListBean<ProgettoRD>>(url);
     }
