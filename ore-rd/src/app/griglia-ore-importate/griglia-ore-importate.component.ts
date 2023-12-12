@@ -151,13 +151,9 @@ export class GrigliaOreImportateComponent implements OnInit {
 
     this.svc.getAllDettagli(filtro)
     .subscribe(response => {
-      console.log("aaa",response.data);
-      //console.log(response[0].specchietto);
       this.commesseImportate = response.data[0];
       this.countDip = response.data[1];
       this.countPart = response.data[2];
-      //this.commesseImportate = response['a'];
-      //this.dipendentiCaricati
     },
     error => {
       this.alertService.error(error);

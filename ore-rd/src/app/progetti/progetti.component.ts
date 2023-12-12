@@ -58,7 +58,6 @@ export class ProgettiComponent implements OnInit {
   }
 
   handlePageEvent(event: PageEvent) {
-    console.log(event);
     this.length = event.length;
     this.pageSize = event.pageSize;
     this.pageIndex = event.pageIndex;

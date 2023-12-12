@@ -111,13 +111,11 @@ export class GrigliaRDComponent implements OnInit {
 
   getAllProgettiRD() {
     this.filter.progetto = "Y";
-    console.log(this.filter);
     this.rdService.getAll(this.filter)
       .subscribe(response => {
         response.data.forEach(element => {
           this.allProgetti.push(element["PROGETTO"]);
         });
-        console.log(this.allProgetti);
         delete this.filter.progetto;
       },
       error => {
@@ -126,7 +124,6 @@ export class GrigliaRDComponent implements OnInit {
   }
 
   filterRow(editTableComponent: any): void {
-    console.log("this",this);
     if (this.filter.matricola) {
       this.filter.matricola = this.filter.matricola.trim();
     } else {
@@ -187,7 +184,6 @@ export class GrigliaRDComponent implements OnInit {
   }
 
   handlePageEvent(event: PageEvent) {
-    console.log(event);
     this.length = event.length;
     this.pageSize = event.pageSize;
     this.pageIndex = event.pageIndex;

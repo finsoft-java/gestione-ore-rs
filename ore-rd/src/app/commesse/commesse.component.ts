@@ -40,7 +40,6 @@ export class CommesseComponent implements OnInit {
 
   getAllCommesseFiltrate(dataInizio: string, dataFine: string) {
     this.commesseService.getAll(dataInizio, dataFine).subscribe(response => {
-      console.log("reeeee ", response);
       this.allCommesse = response.data;
       this.dataSource = new MatTableDataSource<Commessa>(response.data);
       this.isLoading = false;
@@ -49,7 +48,6 @@ export class CommesseComponent implements OnInit {
       this.cntC=0;
       this.totaleOre = 0;
       this.allCommesse.forEach(x => {
-        console.log(x.TIPOLOGIA);
         switch (x.TIPOLOGIA?.toUpperCase()) {
           case "COMMESSE \"R\"":
             this.cntR++

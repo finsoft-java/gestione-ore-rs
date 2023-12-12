@@ -17,6 +17,9 @@
         Pannello Filtri
       </mat-panel-description>
     </mat-expansion-panel-header>
+    <div>
+      <p>Se si vuole visualizzare lo specchietto riassuntivo delle ore per mese è necessario specificare la Matricola e il Periodo</p>
+    </div>
     <div style="width: 45%;display: inline-block;text-align: left" class="mat-form-field-wrapper">
       <mat-label class="label_mat">Nome e cognome</mat-label>
       <ng-select [items]="allMatricole" 
@@ -52,28 +55,19 @@
   </mat-expansion-panel>
 </app-mat-edit-table>
 
-
 <div *ngIf="isAttivo && specchietto">
-  <table mat-table [dataSource]="specchietto" class="mat-elevation-z8" style="width:100%">
-
-    <ng-container matColumnDef="matricola">
-        <th mat-header-cell *matHeaderCellDef> Matricola Dipendente </th>
-        <td mat-cell *matCellDef="let element"> {{element.MATRICOLA_DIPENDENTE}} </td>
-    </ng-container>
-    <ng-container matColumnDef="mese">
-        <th mat-header-cell *matHeaderCellDef> Mese </th>
-        <td mat-cell *matCellDef="let element" style="text-align: left;"> {{element.MESE}} </td>
-    </ng-container>
-    <ng-container matColumnDef="ore">
-        <th mat-header-cell *matHeaderCellDef> Ore Lavorate </th>
-        <td mat-cell *matCellDef="let element"> {{element.ORE_LAVORATE}} </td>
-    </ng-container>
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
+  <table class="mat-table cdk-table mat-elevation-z8" style="width:100%">
+    <thead>
+      <tr class="mat-header-row cdk-header-row ng-star-inserted">
+        <th class="mat-header-cell cdk-header-cell ng-star-inserted">Matricola</th>
+        <th class="mat-header-cell cdk-header-cell ng-star-inserted" *ngFor="let mesi of this.mesiRicerca">{{mesi}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="mat-row cdk-row ng-star-inserted">
+        <td class="mat-cell cdk-cell ng-star-inserted">{{this.specchietto[0].MATRICOLA_DIPENDENTE}}</td>
+        <td class="mat-cell cdk-cell ng-star-inserted" *ngFor="let ore of this.oreTabella">{{ore}}</td>
+      </tr>
+    </tbody>
   </table>
-
-  <mat-paginator (page)="handlePageEvent($event)" [length]="length" [pageSize]="pageSize"
-      [showFirstLastButtons]="showFirstLastButtons" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex">
-  </mat-paginator>
 </div>

@@ -75,21 +75,26 @@ export class GrigliaLulComponent implements OnInit {
     }
   ];
   
-  displayedColumns: string[] = ['matricola', 'mese', 'ore'];
+  displayedColumns: string[] = [];
   service!: LulService;
   date = new FormControl();
   allMatricole: Matricola[] = [];
   allPeriodi: Periodo[] = [];
+  mesiRicerca:any[] = [];
+  oreTabella:any[] = [];
   filtroPeriodo?: Periodo;
   pageSizeOptions = [5, 10, 25];
   showFirstLastButtons = true;
   
+  monthArray: any[] = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];  
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
   length?= 0;
   pageSize = 10;
+  pageSizeSpecchietto = 10;
   pageIndex = 0;
   isAttivo = false;
-  specchietto = new MatTableDataSource<LulSpecchietto>();
+  mesiArray = [];
+  specchietto: LulSpecchietto[] = [];
   constructor(private lulService: LulService,
     private progettiService: ProgettiService,
     private alertService: AlertService,
@@ -109,6 +114,8 @@ export class GrigliaLulComponent implements OnInit {
   }
 
   filterRow(editTableComponent: any): void {
+    this.displayedColumns = new Array();
+    this.mesiRicerca = new Array();
     if (this.filter.matricola) {
       this.filter.matricola = this.filter.matricola.trim();
     } else {
@@ -123,9 +130,18 @@ export class GrigliaLulComponent implements OnInit {
     if (this.filtroPeriodo) {
       this.filter.dataInizio = this.filtroPeriodo.DATA_INIZIO;
       this.filter.dataFine = this.filtroPeriodo.DATA_FINE;
+      let dInizio = new Date(this.filter.dataInizio);  
+      let dFine = new Date(this.filter.dataFine);
+      const monthDiff = dFine.getMonth() - dInizio.getMonth();
+      this.displayedColumns = ['matricola'];
+      this.pageSizeSpecchietto = monthDiff;
+      for(let i=0; i <= monthDiff; i++) {
+        this.mesiRicerca.push(this.monthArray[i]);
+        this.displayedColumns.push(this.monthArray[i]);
+      }
     }
     
-    this.getSpecchietto(0, this.pageSize, this.filter);
+    this.getSpecchietto(0, this.pageSizeSpecchietto+1, this.filter);
     
     editTableComponent.filter(this.filter);
   }
@@ -142,16 +158,21 @@ export class GrigliaLulComponent implements OnInit {
   }
 
   getSpecchietto(top: number, skip: number, filter:any): void {
-    this.lulService.getSpecchietto(top, skip, filter)
+    if(this.filter.dataInizio != null  && this.filter.dataFine != null && this.filter.matricola != null) {
+      this.lulService.getSpecchietto(top, skip, filter)
       .subscribe(response => {
-        this.length = response.count;
-        this.specchietto = new MatTableDataSource<LulSpecchietto>(response.data);
-        this.specchietto.paginator = this.paginator;
+        this.length = 1;
+        this.oreTabella = new Array();
+        for(let i=0;i<response.data.length;i++){
+          this.oreTabella.push(response.data[i].ORE_LAVORATE);
+        }
+        this.specchietto = response.data;
         this.isAttivo = true;
       },
       error => {
         this.alertService.error(error);
-      });
+      }); 
+    }
   }
 
   resetFilter(editTableComponent: any): void {
@@ -182,7 +203,6 @@ export class GrigliaLulComponent implements OnInit {
   }
 
   handlePageEvent(event: PageEvent) {
-    console.log(event);
     this.length = event.length;
     this.pageSize = event.pageSize;
     this.pageIndex = event.pageIndex;

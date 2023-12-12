@@ -119,13 +119,11 @@ export class MatEditTableComponent<T> implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.timeout) {
-      console.log(this.timeout);
       clearTimeout(this.timeout);
     }
   }
 
   refresh(): void {
-    console.log('Refreshing');
     if (this.pagination !== null) {
       this.pageIndex = 0;
     }
@@ -146,7 +144,6 @@ export class MatEditTableComponent<T> implements OnInit, OnDestroy {
   }
 
   getAll() {
-    console.log('Get all...');
     this.buttonsEnabled = false;
     if (this.pagination === 'server') {
       this.filtro.skip = this.pageIndex && this.pageSize && this.pageIndex * this.pageSize;
@@ -156,7 +153,6 @@ export class MatEditTableComponent<T> implements OnInit, OnDestroy {
       listBean => {
         this.dataSource.data = listBean.data;
         this.data = listBean.data;
-        console.log(this.dataSource.data);
         this.buttonsEnabled = true;
         this.paginatorLength = listBean.count;
       },
@@ -211,7 +207,6 @@ export class MatEditTableComponent<T> implements OnInit, OnDestroy {
     if (col.asyncOptions) {
       col.asyncOptions(row).subscribe(
         options => {
-          console.log('Received options', options);
           col.options = options;
         }
       );
@@ -236,7 +231,6 @@ export class MatEditTableComponent<T> implements OnInit, OnDestroy {
         if (col.asyncOptions) {
           col.asyncOptions(row).subscribe(
             options => {
-              console.log('Received options', options);
               col.options = options;
             }
           );
@@ -271,11 +265,9 @@ export class MatEditTableComponent<T> implements OnInit, OnDestroy {
     this.buttonsEnabled = false;
     this.editRowNumber = -1;
     const row = this.data[rowNum];
-    console.log(this);
 
     this.service.create(row).subscribe(
       response => {
-        console.log('Emitting create row:', row);
         this.create.emit(row);
         Object.assign(row, response.value);
         this.buttonsEnabled = true;
@@ -283,7 +275,6 @@ export class MatEditTableComponent<T> implements OnInit, OnDestroy {
       },
       error => {
         this.editRowNumber = rowNum;
-        console.log('Emitting error:', error);
         this.errorMessage.emit(error);
         this.buttonsEnabled = true;
         // creating remains true
@@ -295,17 +286,14 @@ export class MatEditTableComponent<T> implements OnInit, OnDestroy {
     this.buttonsEnabled = false;
     this.editRowNumber = -1;
     const row = this.data[rowNum];
-    console.log(this);
     this.service.update(row).subscribe(
       response => {
-        console.log('Emitting update row:', row);
         this.update.emit(row);
         Object.assign(row, response.value);
         this.buttonsEnabled = true;
       },
       error => {
         this.editRowNumber = rowNum;
-        console.log('Emitting error:', error);
         this.errorMessage.emit(error);
         this.buttonsEnabled = true;
       }
@@ -341,7 +329,6 @@ export class MatEditTableComponent<T> implements OnInit, OnDestroy {
   }
 
   undoChange(rowNum: number): void {
-    console.log('Undo');
     this.editRowNumber = -1;
     if (this.creating) {
       this.data.splice(rowNum, 1);

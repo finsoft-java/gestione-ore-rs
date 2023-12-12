@@ -53,12 +53,9 @@ export class TipologiaSpesaComponent /*implements OnInit*/ {
     if (a.ID_TIPOLOGIA == null) {
       this.tipologiaSpesaService.insert(a)
         .subscribe(response => {
-          console.log(this.dataSource.data);
-          console.log(response.value);
           this.alertService.success("Tipologia inserita");
           this.dataSource.data.splice(-1, 1);
           this.dataSource.data.push(response.value);
-          console.log(this.dataSource.data);
           this.dataSource.data = this.dataSource.data;
         },
           error => {

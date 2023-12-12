@@ -167,9 +167,6 @@ export class PartecipantiGlobaliComponent implements OnInit {
     if (row.isInsert) {
 
       let idDip = this.allNomeMatricole.find(x => x.MATRICOLA == matricola);
-
-      console.log(idDip?.ID_DIPENDENTE);
-
       row.ID_DIPENDENTE = idDip?.ID_DIPENDENTE!;
 
       this.partecipanteService.insert(row)
@@ -212,7 +209,6 @@ export class PartecipantiGlobaliComponent implements OnInit {
     }
   }
   handlePageEvent(event: PageEvent) {
-    console.log(event);
     this.length = event.length;
     this.pageSize = event.pageSize;
     this.pageIndex = event.pageIndex;
@@ -233,7 +229,6 @@ export class PartecipantiGlobaliComponent implements OnInit {
   }
 
   filterRow(): void {
-    console.log("filter", this.filter);
     if (this.filter.matricola) {
       this.filter.matricola = this.filter.matricola.trim();
     } else {

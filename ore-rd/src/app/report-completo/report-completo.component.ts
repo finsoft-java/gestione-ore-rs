@@ -117,7 +117,6 @@ export class ReportCompletoComponent implements OnInit {
         this.dataInizio = this.filtroPeriodo.DATA_INIZIO;
         this.dataFine = this.filtroPeriodo.DATA_FINE;
       }
-      console.log(this.filtroPeriodo);
       this.reportService.downloadReportBudget(this.idProgetto, dateRapportini, this.isCompleto, this.dataInizio, this.dataFine).subscribe(response => {
           this.openHtmlPage(response);
       },
@@ -134,16 +133,12 @@ export class ReportCompletoComponent implements OnInit {
     }
 
     changeSingoloMese($event: MatCheckboxChange) {
-      console.log($event);
       this.singoloMese = $event.checked;
       this.date.setValue(null);
-      console.log('HERE', this.date.value)
     }
 
     changePeriodo($event: MatCheckboxChange) {
-      console.log($event);
       this.periodo = $event.checked;
-      console.log('HERE', this.date.value)
     }
 
     back(){
