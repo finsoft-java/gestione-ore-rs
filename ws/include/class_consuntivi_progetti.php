@@ -45,7 +45,7 @@ class ConsuntiviProgettiManager {
         try {
             $message->success .= "Lancio assegnazione ore <strong>progetto n.$idProgetto - $progetto[ACRONIMO]</strong>" . NL;
             $message->success .= "Ore " . date("H:i:s") . " - Load commesse...". NL;
-
+            
             list($commesse_p, $commesse_c) = $this->load_commesse($idProgetto);
 
             if (count($commesse_p) == 0 && count($commesse_c) == 0) {
@@ -58,20 +58,17 @@ class ConsuntiviProgettiManager {
             if (!$canGoOn) {
                 return;
             }
-
             $message->success .= "Ore " . date("H:i:s") . " - Estrazione caricamenti...". NL;
             $this->estrazione_caricamenti($idEsecuzione, $idProgetto, $dataInizio, $dataFine, $message);
-
             $message->success .= "Ore " . date("H:i:s") . " - Prospetto...". NL;
             $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $dataInizio, $dataFine, $message);
             $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
-
             $message->success .= "<strong>Tot. " . ($ore_progetto_teoriche + $ore_compat_teoriche) .
                                                             " ore prelevabili teoriche (di progetto+compatibili)</strong>". NL;
 
             $message->success .= "Ore " . date("H:i:s") . " - Estrazione LUL...". NL;
+            
             $lul = $this->estrazione_lul($idEsecuzione, $message);
-
             $message->success .= "Ore " . date("H:i:s") . " - Verifica LUL...". NL;
             $ore_progetto = $this->prelievo_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $lul, $dataInizio, $dataFine, $message);
             $message->success .= "<strong>Tot. $ore_progetto ore prelevate da commesse di progetto</strong>". NL;
@@ -211,7 +208,7 @@ class ConsuntiviProgettiManager {
                 ID_DIPENDENTE, PCT_UTILIZZO,
                 DATA, RIF_SERIE_DOC, RIF_NUMERO_DOC,RIF_ATV,RIF_SOTTO_COMMESSA,
                 NUM_ORE_RESIDUE)
-            SELECT
+            SELECT DISTINCT
                 $idEsecuzione, $idProgetto,
                 pc.COD_COMMESSA,c.PCT_COMPATIBILITA,
                 p.ID_DIPENDENTE,p.PCT_UTILIZZO,
@@ -223,7 +220,7 @@ class ConsuntiviProgettiManager {
                 AND c.PCT_COMPATIBILITA>0 AND pc.ORE_PREVISTE>0
             JOIN partecipanti_globali p ON p.PCT_UTILIZZO>0
             JOIN ore_consuntivate_residuo oc ON oc.COD_COMMESSA=c.COD_COMMESSA AND oc.ID_DIPENDENTE=p.ID_DIPENDENTE AND oc.DATA >= pc.DATA_INIZIO AND oc.DATA <= pc.DATA_FINE WHERE pr.ID_PROGETTO = $idProgetto and pc.DATA_INIZIO >= DATE('$dataInizio') AND pc.DATA_FINE <= DATE('$dataFine') ";
-            //echo $query;
+        
         $r = execute_update($query);
         return $r;
     }
