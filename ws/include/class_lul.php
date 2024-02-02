@@ -74,13 +74,13 @@ class LULManager {
             }
         }
         if($cntMatricoleInesistenti > 0 ) {
-            $message->error .= 'Nel File caricato sono presenti '.$cntMatricoleInesistenti.' matricole inesistenti.<br/> Le matricole non inserite sono le seguenti: '.implode(",", $matrInesistenti).'<br/>';
+            $message->error .= 'Nel File caricato sono presenti '.$cntMatricoleInesistenti.' matricole inesistenti con valore 0.<br/> <br/>';
         }
         $arrayMesi = array("Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre");
         $mese = $arrayMesi[intval($meseSheet)-1];
         $message->success .= 'Caricamento Effettuato correttamente.</br>
                               Mese Caricato: '.$mese.'</br>
-                              Matricole importate: '.$contatoreMatricole.'.</br>';
+                              Matricole file: '.$contatoreMatricole.'.</br>';
     }
 
     function importExcelRD($filename, &$message, $typeFile, $idCaricamento) {
@@ -108,21 +108,27 @@ class LULManager {
         for ($i = 0; $i < $sheetCount; $i++) {
             $sheet = $spreadSheet->getSheet($i);
             $sheetData = $sheet->toArray();
+            
             $numRows = count($sheetData);
-
             $rigaProgetto = 8;
             $datiUtente = $panthera->getAllDataMatricolaByName($sheetData[0][1]);
             $denominazione = trim($datiUtente[0]["DENOMINAZIONE"]);
             $matricola = trim($datiUtente[0]["MATRICOLA"]);
-            $idDipendente = $datiUtente[0]["ID_DIPENDENTE"];                
+            $idDipendente = $datiUtente[0]["ID_DIPENDENTE"]; 
+            $pezzi_comando_sql = []; 
             while ($rigaProgetto < $numRows) {
                 $progetto = trim($sheetData[$rigaProgetto][0]);
-                if($progetto == "TOTAL PROJECTS" || $progetto == "") {
+                if($progetto == "TOT - " || $progetto == "") {
                     break;
                 }
+                if (strpos($progetto, "TOT -") === 0) {   
+                    $rigaProgetto += 2;
+                }
                 [$annoMese, $ultimoGiornoMese] = $this->leggiMeseRD($primaRiga, $sheetData);
-                $pezzi_comando_sql = [];
                 for($a= 1; $a <= $ultimoGiornoMese; $a++){
+                    if (strpos($progetto, "TOT -") === 0) {   
+                        break;
+                    }
                     $data = "$annoMese-$a";
                     $ore = $sheetData[$rigaProgetto][$a+1];
                     if($ore == ''){
@@ -136,14 +142,15 @@ class LULManager {
                         $message->error .= 'Nel File caricato sono presenti errori nella data '.$data;
                         break;
                     }
-
                     $pezzi_comando_sql[] = "('$idCaricamento','$progetto','$matricola','$data','$ore','$idDipendente')";
                     $contatoreRigeInserite++;
-                }     
-                $sql = " INSERT INTO ore_presenza_progetti (ID_CARICAMENTO,PROGETTO,MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE,ID_DIPENDENTE) VALUES ".implode(',', $pezzi_comando_sql);
-                execute_update($sql);       
-                $rigaProgetto++; 
+                }    
+                $rigaProgetto++;
             }
+            
+            $sql = " INSERT INTO ore_presenza_progetti (ID_CARICAMENTO,PROGETTO,MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE,ID_DIPENDENTE) VALUES ".implode(',', $pezzi_comando_sql);
+//            echo "||".$i.") ".$sql."||";
+            execute_update($sql);
         }
 
         if($contatoreRigeInserite == 0 ) {
@@ -193,23 +200,27 @@ class LULManager {
         $pezzi_comando_sql = [];
         $matricola = $spreadSheetAry[$primaRiga][1];
         if($matricola != 0){
-            for($a= 1; $a <= $ultimoGiornoMese; $a++){
+            $sql = "";
+            for($a= 1; $a <= $ultimoGiornoMese; $a++) {
                 $data = "$annoMese-$a";
                 $ore = $spreadSheetAry[$primaRiga+2][$a];
                 if($ore == ''){
                     $ore = 0;
                 }
                 $idDipendente = '';
-                if (isset($mapMatricole[$matricola])) {
+                if (!empty($matricola) && isset($mapMatricole[$matricola])) {
                     $idDipendente = $mapMatricole[$matricola];
-                    $pezzi_comando_sql[] = "('$matricola','$idDipendente','$data','$ore')";
+                    array_push($pezzi_comando_sql, "('$matricola','$idDipendente','$data','$ore')");
                 } else {
                     $message->error .= 'Nel File caricato è presente la matricola |'.$matricola.'| che non esiste.<br/> Non inserisco la riga<br/>';
+                    break;
                 }
             }
-            $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,ID_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES " .
-                implode(',', $pezzi_comando_sql);
-            execute_update($sql);
+            if(is_array($pezzi_comando_sql) && !empty($pezzi_comando_sql)) {
+                $sql = "INSERT INTO ore_presenza_lul (MATRICOLA_DIPENDENTE,ID_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE) VALUES " .
+                    implode(',', $pezzi_comando_sql);
+                execute_update($sql);
+            }
         }
     }
 
