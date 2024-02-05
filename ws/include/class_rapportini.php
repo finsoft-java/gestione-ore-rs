@@ -49,12 +49,34 @@ class RapportiniManager {
         return $map_dipendenti_progetti;
     }
 
+    function carica_da_db_rd($dataInizio, $dataFine) {
+        $dataInizio = trim($dataInizio);
+        $dataFine = trim($dataFine);
+        // Con questa query cerco di stampare solo i rapportini dei dipendenti che mi interessano
+       
+
+        $query_consuntivo = "SELECT ID_DIPENDENTE, DATA, ORE_PRESENZA_ORDINARIE
+                    FROM ore_presenza_progetti
+                    WHERE DATA BETWEEN '$dataInizio' AND '$dataFine'";
+        $consuntivo = select_list($query_consuntivo);
+
+        // trasformo i vari array in una struttura $map_dipendenti_progetti
+        $map_matr_ore_rd = array();
+
+        //print_r($map_dipendenti_progetti);
+        foreach ($consuntivo as $row) {
+            $map_matr_ore_rd[trim($row["ID_DIPENDENTE"])]['DATE'][$row["DATA"]] = 0.0 + (float) $row["ORE_PRESENZA_ORDINARIE"];
+        }
+        return $map_matr_ore_rd;
+    }
+
     function creaZip($dataInizio, $dataFine, $isEsploso) {
         global $lul;
         
         // REPERIRE DATI DA DB
         $map_dipendenti_progetti = $this->carica_da_db($dataInizio, $dataFine);
         $map_matr_ore = $lul->carica_da_db($dataInizio, $dataFine);
+        $map_matr_ore_rd = $this->carica_da_db_rd($dataInizio, $dataFine);
 
         if (empty($map_dipendenti_progetti)) {
             print_error(404, 'Nessun dato trovato.');
@@ -74,7 +96,7 @@ class RapportiniManager {
             if ($isEsploso) {
                 // un report distinto per ogni progetto
                 foreach( $map_progetti as $idprogetto => $row) {
-                    $xlsxfilename = $this->creaFileExcel($idDipendente,$dataInizio, $dataFine, [$idprogetto => $row], $map_matr_ore);
+                    $xlsxfilename = $this->creaFileExcel($idDipendente,$dataInizio, $dataFine, [$idprogetto => $row], $map_matr_ore, $map_matr_ore_rd);
                     if ($xlsxfilename != null) {
                         $idDipendente = trim($idDipendente);
                         $acronimo = trim($row["ACRONIMO"]);
@@ -85,7 +107,7 @@ class RapportiniManager {
                 }
             } else {
                 // unico report con tutti i progetti
-                $xlsxfilename = $this->creaFileExcel($idDipendente, $dataInizio, $dataFine, $map_progetti, $map_matr_ore);
+                $xlsxfilename = $this->creaFileExcel($idDipendente, $dataInizio, $dataFine, $map_progetti, $map_matr_ore, $map_matr_ore_rd);
                 if ($xlsxfilename != null) {
                     $idDipendente = trim($idDipendente);
                     $xlsxfilename_final = "Rapportini_${idDipendente}_$dataInizio$dataFine.xlsx";
@@ -116,7 +138,7 @@ class RapportiniManager {
         }
         return $months;
     }
-    function creaFileExcel($idDipendente, $dataInizio, $dataFine, $map_progetti, $map_matr_ore) {
+    function creaFileExcel($idDipendente, $dataInizio, $dataFine, $map_progetti, $map_matr_ore, $map_matr_ore_rd) {
         $CicloMesi = $this->getMonthsByRange($dataInizio, $dataFine);
         // Sto assumento che ci sia un unico supervisor per tutti i progetti...
         // E le stesse data firma!
@@ -153,8 +175,9 @@ class RapportiniManager {
 
             $this->adjustWidth($sheet);
             $this->creaIntestazione($sheet, $curRow, $idDipendente, $nomecognome, $nomecognome_super);
-            $this->creaTabellaPresenze($sheet, $curRow, $anno, $mese, $idDipendente, $map_matr_ore, $rigaTotali, $daysInMonth);
-
+            
+            $this->creaTabellaPresenze($sheet, $curRow, $anno, $mese, $idDipendente, $map_matr_ore, $rigaTotali, $daysInMonth, $map_matr_ore_rd);
+            
             $this->creaTabella($sheet, $curRow, $map_progetti, $anno, $mese, $idDipendente, $nomecognome, $map_matr_ore, $data_inizio_progetto, $daysInMonth);
 
             $this->aggiornaRigaTotali($sheet, $curRow, $rigaTotali, $daysInMonth);
@@ -183,7 +206,7 @@ class RapportiniManager {
         $sheet->getColumnDimensionByColumn(1)->setWidth(45);
         $sheet->getColumnDimensionByColumn(2)->setWidth(10);
         for ($i = 1; $i <= 31; ++$i) {
-            $sheet->getColumnDimensionByColumn($i + 2)->setWidth(4);
+            $sheet->getColumnDimensionByColumn($i + 2)->setWidth(5);
         }
     }
 
@@ -205,7 +228,7 @@ class RapportiniManager {
         $curRow ++;
     }
 
-    function creaTabellaPresenze($sheet, &$curRow, $anno, $mese, $idDipendente, $map_matr_ore, &$rigaTotali, $daysInMonth) {
+    function creaTabellaPresenze($sheet, &$curRow, $anno, $mese, $idDipendente, $map_matr_ore, &$rigaTotali, $daysInMonth, $map_matr_ore_rd) {
 
         $first_row = $curRow;
         // In alto i giorni
@@ -237,11 +260,28 @@ class RapportiniManager {
             $dayPad0 = str_pad($i, 2, '0', STR_PAD_LEFT); 
             $dataCurr = $anno."-".$mesePad0."-".$dayPad0;
             if (isset($map_matr_ore[$idDipendente][$dataCurr])) {
-                $ore = $map_matr_ore[$idDipendente][$dataCurr];
+                $oreRD = 0;
+                $oreLul= $map_matr_ore[$idDipendente][$dataCurr];
+                if(isset($map_matr_ore_rd[$idDipendente]) && isset($map_matr_ore_rd[$idDipendente]['DATE'][$dataCurr]) && $map_matr_ore_rd[$idDipendente]['DATE'][$dataCurr] >= 0){
+                   $oreRD = $map_matr_ore_rd[$idDipendente]['DATE'][$dataCurr];
+                   if($oreRD > $oreLul){
+                     $oreRD = $oreLul;
+                   }
+                }
+                $ore = $oreLul - $oreRD;
             } else {
                 $ore = 'A';
                 $map_matr_ore[$i] = 0;
             }
+            /*
+            if($idDipendente == "F000290"){
+                echo '$idDipendente -> '.$idDipendente. ' $dataCurr'. $dataCurr;
+                var_dump($map_matr_ore_rd[$idDipendente]);
+                echo '$ore -> '.$map_matr_ore_rd[$idDipendente]['DATE'][$dataCurr];
+                echo '$oretot -> '.$ore;
+                
+            }
+            */
             $sheet->setCellValueByColumnAndRow($curCol, $curRow, $ore);
         }
 
