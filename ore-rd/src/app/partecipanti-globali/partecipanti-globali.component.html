@@ -39,7 +39,8 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-
+        <mat-checkbox class="example-margin" [checked]="costiMancanti" (change)="changeTable($event)" title="Filtra per vedere quali costi sono mancanti in Panthera"  style="margin-right:10px;">Solo Costi N/D o 0</mat-checkbox>
+        
         <button mat-raised-button color="primary" style="margin-right:15px;" (click)="filterRow()">Filtra</button>
         <button mat-raised-button color="secondary" style="margin-right:15px;" (click)="resetFilter()">Reset</button>
     </mat-expansion-panel>

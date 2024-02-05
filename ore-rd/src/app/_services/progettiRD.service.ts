@@ -11,7 +11,6 @@ export class ProgettiRDService implements HttpCrudService<ProgettoRD> {
 
     getAll(parameters: any) {
         let url = environment.wsUrl + 'OreProgettiRD.php?';
-        console.log("parameters ",parameters);
         if (parameters.top) {
             url += `&top=${parameters.top}`;
         }
@@ -35,6 +34,10 @@ export class ProgettiRDService implements HttpCrudService<ProgettoRD> {
         }
         if (parameters.searchProgetto) {
             url += `&searchProgetto=${parameters.searchProgetto}`;
+        }
+        
+        if (parameters.costoErrato) {
+            url += `&costoErrato=${parameters.costoErrato}`;
         }
         return this.http.get<ListBean<ProgettoRD>>(url);
     }

@@ -130,14 +130,14 @@
                         <td class="numbers">
                             {% for d in dip.DETTAGLI %}
                                 {% if(d.DATA is null) %}
-                                    {{ d.NUM_ORE_LAVORATE }}&nbsp;
+                                    {{ d.NUM_ORE_LAVORATE | number_format(2, ',', '') }}&nbsp;
                                 {% endif %}
                             {% endfor %}
                         </td>
                         <td class="numbers">
                             {% for d in dip.DETTAGLI %}
                                 {% if(d.DATA is null) %}
-                                    {{ d.COSTO | number_format(2, ',', '.') }}&nbsp;
+                                    {{ d.COSTO | number_format(2, ',', '') }}&nbsp;
                                 {% endif %}
                             {% endfor %}
                         </td>

@@ -40,9 +40,9 @@ export class ProgettiComponent implements OnInit {
         this.dataSource = new MatTableDataSource<Progetto>(response.data);
         this.isLoading = false;
       },
-        error => {
-          this.isLoading = false;
-        });
+      error => {
+        this.isLoading = false;
+      });
   }
 
   getRecord(a: any) {

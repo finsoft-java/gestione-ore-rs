@@ -35,9 +35,7 @@ class ConsuntiviProgettiManager {
         }
 
         $nomiUtenti = array_group_by($panthera->getUtenti(), ['ID_DIPENDENTE']);
-
         $idEsecuzione = $esecuzioniManager->get_id_esecuzione();
-
         $message->success .= "Periodo: " . $dataInizioHR . " - " . $dataFineHR . NL;
         $message->success .= "Salvo i dati ottenuti con <strong>ID_ESECUZIONE=$idEsecuzione</strong>" . NL;
 
@@ -63,9 +61,9 @@ class ConsuntiviProgettiManager {
             $message->success .= "Ore " . date("H:i:s") . " - Prospetto...". NL;
             $ore_progetto_teoriche = $this->show_commesse_progetto($idEsecuzione, $idProgetto, $commesse_p, $dataInizio, $dataFine, $message);
             $ore_compat_teoriche = $this->show_commesse_compatibili($idEsecuzione, $idProgetto, $commesse_c, $dataInizio, $dataFine, $message);
+            //  TODO QUI DEVO PRENDERE I PROGETTI RD E STAMPARE I DATI
             $message->success .= "<strong>Tot. " . ($ore_progetto_teoriche + $ore_compat_teoriche) .
                                                             " ore prelevabili teoriche (di progetto+compatibili)</strong>". NL;
-
             $message->success .= "Ore " . date("H:i:s") . " - Estrazione LUL...". NL;
             
             $lul = $this->estrazione_lul($idEsecuzione, $message);
@@ -229,12 +227,13 @@ class ConsuntiviProgettiManager {
      * Restituisce le informazioni derivanti dai LUL
      */
     function estrazione_lul($idEsecuzione, &$message) {
-        $query = "SELECT t.ID_DIPENDENTE,t.DATA,l.ORE_PRESENZA_ORDINARIE
-                FROM (SELECT DISTINCT ID_DIPENDENTE,DATA
-                    FROM assegnazioni_dettaglio ad
-                    WHERE ID_ESECUZIONE=$idEsecuzione) t
-                LEFT JOIN ore_lul_residuo l
-                ON l.ID_DIPENDENTE=t.ID_DIPENDENTE AND l.DATA=t.DATA";
+        $query = "SELECT t.ID_DIPENDENTE,t.DATA,l.ORE_PRESENZA_ORDINARIE - NVL((
+                    SELECT ORE_PRESENZA_ORDINARIE FROM ore_presenza_progetti opp where opp.ID_DIPENDENTE = t.ID_DIPENDENTE and opp.DATA = t.DATA), 0) as ORE_PRESENZA_ORDINARIE 
+                        FROM (SELECT DISTINCT ID_DIPENDENTE,DATA
+                            FROM assegnazioni_dettaglio ad
+                            WHERE ID_ESECUZIONE=$idEsecuzione) t
+                        LEFT JOIN ore_lul_residuo l
+                        ON l.ID_DIPENDENTE=t.ID_DIPENDENTE AND l.DATA=t.DATA";
         $array = select_list($query);
         return array_group_by($array, ['ID_DIPENDENTE', 'DATA']);
     }
@@ -330,7 +329,6 @@ class ConsuntiviProgettiManager {
                 AND NUM_ORE_RESIDUE >= 0.25 AND pc.ID_PROGETTO=$idProgetto
             ORDER BY ID_DIPENDENTE, DATA";
         $map = array_group_by(select_list($query), ['ID_DIPENDENTE', 'DATA']);
-
         $data_corrente = "";
         $totale = 0.0;
         
@@ -338,20 +336,22 @@ class ConsuntiviProgettiManager {
             foreach($map1 as $data => $caricamenti) {
                 $totale_data = 0.0;
                 $max_data = (float) $lul[$matricola][$data][0]['ORE_PRESENZA_ORDINARIE']; // SHOULD BE SET!!!
-                foreach($caricamenti as $c) {
-                    $ore = (float) $c['NUM_ORE_RESIDUE'];
-                    // arrotondo al quarto d'ora per difetto
-                    $ore = $this->round_quarter($ore);
-                    if ($totale_data + $ore < $max_data) {
-                        // in questo caso posso prelevare tutto
-                        $this->preleva($idEsecuzione, $idProgetto, $c, $ore);
-                        $totale_data += $ore;
-                    } else {
-                        // prelevo quel che posso e poi interrompo
-                        $ore = $this->round_quarter($max_data - $totale_data);
-                        $this->preleva($idEsecuzione, $idProgetto, $c, $ore);
-                        $totale_data += $ore;
-                        break;
+                if($max_data > 0) {
+                    foreach($caricamenti as $c) {
+                        $ore = (float) $c['NUM_ORE_RESIDUE'];
+                        // arrotondo al quarto d'ora per difetto
+                        $ore = $this->round_quarter($ore);
+                        if ($totale_data + $ore <= $max_data) {
+                            // in questo caso posso prelevare tutto
+                            $this->preleva($idEsecuzione, $idProgetto, $c, $ore);
+                            $totale_data += $ore;
+                        } else {
+                            // prelevo quel che posso e poi interrompo
+                            $ore = $this->round_quarter($max_data - $totale_data);
+                            $this->preleva($idEsecuzione, $idProgetto, $c, $ore);
+                            $totale_data += $ore;
+                            break;
+                        }
                     }
                 }
                 $totale += $totale_data;
@@ -460,7 +460,7 @@ class ConsuntiviProgettiManager {
         $query = "SELECT *
             FROM assegnazioni_dettaglio ad
             JOIN progetti_commesse pc ON ad.COD_COMMESSA=pc.COD_COMMESSA AND pc.ID_PROGETTO=$idProgetto
-                AND pc.DATA_INIZIO='$dataInizio' AND pc.DATA_FINE='$dataFine'
+                AND pc.DATA_INIZIO=DATE('$dataInizio') AND pc.DATA_FINE=DATE('$dataFine')
             WHERE ID_ESECUZIONE=$idEsecuzione AND pc.COD_COMMESSA IN ($commesse_imploded)
                 AND NUM_ORE_RESIDUE >= 0.25
             ORDER BY ID_DIPENDENTE, DATA";
@@ -473,37 +473,38 @@ class ConsuntiviProgettiManager {
             foreach($map1 as $data => $caricamenti) {
                 $totale_data = 0.0;
                 $max_data = (float) $lul_p[$matricola][$data][0]['ORE_PRESENZA_ORDINARIE']; // SHOULD BE SET!!!
-                foreach($caricamenti as $c) {
-                    $ore = (float) $c['NUM_ORE_RESIDUE'];
-                    $ore_max_commessa = (float) $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'];
-                    if (!array_key_exists($c['ID_DIPENDENTE'], $max_dip)) {
-                        $message->success .= "<strong>WARNING</strong> Something's wrong, missing key $c[ID_DIPENDENTE]" . NL;
+                if($max_data > 0) {
+                    foreach($caricamenti as $c) {
+                        $ore = (float) $c['NUM_ORE_RESIDUE'];
+                        $ore_max_commessa = (float) $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'];
+                        if (!array_key_exists($c['ID_DIPENDENTE'], $max_dip)) {
+                            $message->success .= "<strong>WARNING</strong> Something's wrong, missing key $c[ID_DIPENDENTE]" . NL;
 
-                        var_dump($query);
-                        var_dump($max_dip);
-                        var_dump($map);
-                        return;
-                    }
-                    $ore_max_matricola = (float) $max_dip[$c['ID_DIPENDENTE']][0]['ORE_PREVISTE'];
-                    if ($ore_max_commessa > 0 && $ore_max_matricola > 0) {
+                            var_dump($query);
+                            var_dump($max_dip);
+                            var_dump($map);
+                            return;
+                        }
+                        $ore_max_matricola = (float) $max_dip[$c['ID_DIPENDENTE']][0]['ORE_PREVISTE'];
+                        if ($ore_max_commessa > 0 && $ore_max_matricola > 0) {
 
-                        $ore = min($ore, $ore_max_commessa, $ore_max_matricola);
-                        $ore = $this->round_quarter($ore);
-
-                        if ($totale_data + $ore < $max_data) {
-                            // in questo caso posso prelevare tutto
-                            $this->preleva($idEsecuzione, $idProgetto, $c, $ore);
-                            $totale_data += $ore;
-                            $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'] -= $ore;
-                            $max_dip[$c['ID_DIPENDENTE']][0]['ORE_PREVISTE'] -= $ore;
-                        } else {
-                            // prelevo quel che posso e poi interrompo
-                            $ore = $this->round_quarter($max_data - $totale_data);
-                            $this->preleva($idEsecuzione, $idProgetto, $c, $ore);
-                            $totale_data += $ore;
-                            $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'] -= $ore;
-                            $max_dip[$c['ID_DIPENDENTE']][0]['ORE_PREVISTE'] -= $ore;
-                            break;
+                            $ore = min($ore, $ore_max_commessa, $ore_max_matricola);
+                            $ore = $this->round_quarter($ore);
+                            if ($totale_data + $ore <= $max_data) {
+                                // in questo caso posso prelevare tutto
+                                $this->preleva($idEsecuzione, $idProgetto, $c, $ore);
+                                $totale_data += $ore;
+                                $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'] -= $ore;
+                                $max_dip[$c['ID_DIPENDENTE']][0]['ORE_PREVISTE'] -= $ore;
+                            } else {
+                                // prelevo quel che posso e poi interrompo
+                                $ore = $this->round_quarter($max_data - $totale_data);
+                                $this->preleva($idEsecuzione, $idProgetto, $c, $ore);
+                                $totale_data += $ore;
+                                $max_compat[$c['COD_COMMESSA']][0]['ORE_PREVISTE'] -= $ore;
+                                $max_dip[$c['ID_DIPENDENTE']][0]['ORE_PREVISTE'] -= $ore;
+                                break;
+                            }
                         }
                     }
                 }
@@ -526,11 +527,13 @@ class ConsuntiviProgettiManager {
         try {
             $query ="INSERT INTO ore_consuntivate_progetti(ID_PROGETTO, ID_DIPENDENTE, DATA, 
                         NUM_ORE_LAVORATE, ID_ESECUZIONE)
-                     SELECT ID_PROGETTO, ID_DIPENDENTE, DATA,
-                        SUM(NUM_ORE_PRELEVATE), $idEsecuzione
-                     FROM assegnazioni_dettaglio ad
-                     WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_PRELEVATE>0 AND ID_PROGETTO=$idProgetto
-                     GROUP BY ID_PROGETTO, ID_DIPENDENTE, DATA
+                        SELECT ID_PROGETTO, ad.ID_DIPENDENTE, ad.DATA,
+                    CASE
+                    WHEN SUM(NUM_ORE_PRELEVATE) > ol.ORE_PRESENZA_ORDINARIE THEN ol.ORE_PRESENZA_ORDINARIE ELSE SUM(NUM_ORE_PRELEVATE) END, $idEsecuzione
+                    FROM assegnazioni_dettaglio ad
+                    join ore_presenza_lul ol on ad.ID_DIPENDENTE= ol.ID_DIPENDENTE and ad.DATA = ol.DATA
+                    WHERE ID_ESECUZIONE=$idEsecuzione AND NUM_ORE_PRELEVATE>0 AND ID_PROGETTO=$idProgetto
+                    GROUP BY ID_PROGETTO, ID_DIPENDENTE, DATA
                      ";
                      //echo $query;
             execute_update($query);

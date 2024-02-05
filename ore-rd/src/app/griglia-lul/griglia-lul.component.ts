@@ -81,6 +81,7 @@ export class GrigliaLulComponent implements OnInit {
   allMatricole: Matricola[] = [];
   allPeriodi: Periodo[] = [];
   mesiRicerca:any[] = [];
+  matricola:string="";
   oreTabella:any[] = [];
   filtroPeriodo?: Periodo;
   pageSizeOptions = [5, 10, 25];
@@ -161,12 +162,40 @@ export class GrigliaLulComponent implements OnInit {
     if(this.filter.dataInizio != null  && this.filter.dataFine != null && this.filter.matricola != null) {
       this.lulService.getSpecchietto(top, skip, filter)
       .subscribe(response => {
-        this.length = 1;
         this.oreTabella = new Array();
-        for(let i=0;i<response.data.length;i++){
-          this.oreTabella.push(response.data[i].ORE_LAVORATE);
-        }
         this.specchietto = response.data;
+        this.oreTabella = Array(this.mesiRicerca.length).fill(0);
+        for (const month of this.mesiRicerca) {
+          const dataMonth = response.data.find(item => item.MESE === month);
+        
+          console.log(`Month: ${month}, Data: ${JSON.stringify(dataMonth)}`);
+        
+          if (dataMonth && dataMonth.ORE_LAVORATE !== undefined) {
+            this.oreTabella[this.mesiRicerca.indexOf(month)] = dataMonth.ORE_LAVORATE != null ? dataMonth.ORE_LAVORATE : 0;
+          } else {
+            // Se dataMonth è undefined o ORE_LAVORATE è undefined, assegna 0 alla posizione corrispondente in this.oreTabella
+            this.oreTabella[this.mesiRicerca.indexOf(month)] = 0;
+          }
+        }
+        /*
+        for (let i = 0; i < this.monthArray.length; i++) {
+          const indiceMese = response.data.findIndex(item => item.MESE === this.monthArray[i]);
+          console.log(" indiceMese "+indiceMese);
+          console.log(" indiceMese "+response.data[indiceMese]);
+          // Verifica se l'indiceMese è valido e l'elemento è definito prima di accedere a ORE_LAVORATE
+          if (indiceMese !== -1) {
+            console.log(typeof response.data[indiceMese].ORE_LAVORATE);
+            // Verifica se ORE_LAVORATE è un numero, altrimenti consideralo come 0
+            const oreLavorate = typeof response.data[indiceMese].ORE_LAVORATE === 'number' ? response.data[indiceMese].ORE_LAVORATE : 0;
+        
+            // Aggiorna oreTabella
+            this.oreTabella[i] = oreLavorate;
+          }
+          console.log(this.oreTabella);
+          // Se l'elemento non è definito o ORE_LAVORATE è undefined, l'elemento rimarrà 0 per impostazione predefinita.
+        }
+        */
+        this.matricola = response.data[0].MATRICOLA_DIPENDENTE;
         this.isAttivo = true;
       },
       error => {

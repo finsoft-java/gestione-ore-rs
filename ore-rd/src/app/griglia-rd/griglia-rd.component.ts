@@ -21,6 +21,7 @@ import { AlertService } from '../_services/alert.service';
 import { PeriodiService } from '../_services/periodi.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 const moment = _moment;
 export const MY_FORMATS = {
@@ -124,6 +125,7 @@ export class GrigliaRDComponent implements OnInit {
   }
 
   filterRow(editTableComponent: any): void {
+    console.log("filter "+this.filter);
     if (this.filter.matricola) {
       this.filter.matricola = this.filter.matricola.trim();
     } else {
@@ -163,8 +165,17 @@ export class GrigliaRDComponent implements OnInit {
     delete this.filter.dataInizio;
     delete this.filter.dataFine;
     delete this.filtroPeriodo;
+    delete this.filter.searchProgetto;
     this.date.setValue(null);
     editTableComponent.filter(this.filter);
+  }
+
+  changeTable($event: MatCheckboxChange, editTableComponent: any){
+    console.log($event);
+    this.filter.costoErrato = $event.checked;
+    console.log(this.filter);
+    editTableComponent.filter(this.filter);
+    
   }
 
   chosenYearHandler(normalizedYear: Moment) {

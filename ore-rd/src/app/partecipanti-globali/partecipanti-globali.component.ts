@@ -9,6 +9,7 @@ import { ColumnDefinition } from '../mat-edit-table';
 import {LiveAnnouncer} from '@angular/cdk/a11y';
 import {MatSort, Sort, MatSortModule} from '@angular/material/sort';
 import { PeriodiService } from '../_services/periodi.service';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-partecipanti-globali',
@@ -35,6 +36,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
   showFirstLastButtons = true;
   displayedColumns: string[] = ['DENOMINAZIONE', 'MATRICOLA', 'PCT_UTILIZZO', 'MANSIONE', 'COSTO', 'DATA', 'actions'];
   
+  costiMancanti: boolean = false;
   service!: PartecipantiService;
   allPartecipanti: Partecipante[] = [];
   maxDate: String = '';
@@ -61,6 +63,13 @@ export class PartecipantiGlobaliComponent implements OnInit {
     this.getAllPeriodi();
   }
 
+  changeTable($event: MatCheckboxChange){
+    console.log($event);
+    this.filter.costiMancanti = $event.checked;
+    console.log(this.filter);
+    this.getAllWithFilter(0,500,this.filter);
+    
+  }
   getAllPeriodi() {
     this.periodiService.getAll().subscribe(response => {
       this.allPeriodi = response.data;
@@ -72,7 +81,7 @@ export class PartecipantiGlobaliComponent implements OnInit {
   }
 
   getAllWithFilter(top: number, skip: number, filter: any) {
-    this.partecipanteService.getAllWithFilter(top,skip,filter.denominazione,filter.matricola,filter.prcUtilizzo,filter.mansione,filter.dataInizio, filter.dataFine).subscribe(response => {
+    this.partecipanteService.getAllWithFilter(top,skip,filter.denominazione,filter.matricola,filter.prcUtilizzo,filter.mansione,filter.dataInizio, filter.dataFine, filter.costiMancanti).subscribe(response => {
       this.allPartecipanti = response.data;
       this.length = response.count;
       this.isLoading = false;

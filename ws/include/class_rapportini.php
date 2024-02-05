@@ -44,7 +44,7 @@ class RapportiniManager {
         foreach ($consuntivo as $row) {
             $idprogetto = $row["ID_PROGETTO"];
             $idDipendente = $row["ID_DIPENDENTE"];
-            $map_dipendenti_progetti[$idDipendente][$idprogetto]['DATE'][$row["DATA"]] = 0.0 + $row["NUM_ORE_LAVORATE"];
+            $map_dipendenti_progetti[$idDipendente][$idprogetto]['DATE'][$row["DATA"]] = 0.0 + (float) $row["NUM_ORE_LAVORATE"];
         }
         return $map_dipendenti_progetti;
     }
@@ -180,16 +180,14 @@ class RapportiniManager {
 
     function adjustWidth($sheet) {
         // see https://phpspreadsheet.readthedocs.io/en/latest/topics/recipes/#setting-a-columns-width
-        $sheet->getColumnDimensionByColumn(1)->setWidth(35);
-        $sheet->getColumnDimensionByColumn(2)->setWidth(5);
+        $sheet->getColumnDimensionByColumn(1)->setWidth(45);
+        $sheet->getColumnDimensionByColumn(2)->setWidth(10);
         for ($i = 1; $i <= 31; ++$i) {
             $sheet->getColumnDimensionByColumn($i + 2)->setWidth(4);
         }
     }
 
     function creaIntestazione($sheet, &$curRow, $idDipendente, $nomecognome, $nomecognome_super) {
-        
-        
         
         $sheet->setCellValue('A' . $curRow, 'Working person:  ');
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
@@ -201,9 +199,7 @@ class RapportiniManager {
         $sheet->getStyle('P' . $curRow)->getFont()->setBold(true);
         $sheet->getRowDimension($curRow)->setRowHeight(25);
         $curRow++;
-        
         $this->insertImage($sheet, './images/logo.png', 50, 'Logo', 'AB1');
-
         $sheet->setCellValue('A' . $curRow, 'TIMESHEET');
         $sheet->getRowDimension($curRow)->setRowHeight(25);
         $curRow ++;
@@ -233,6 +229,8 @@ class RapportiniManager {
         $sheet->setCellValue('A' . $curRow, "Working hours *");
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->setCellValue('B' . $curRow, "=SUM(C$curRow:AG$curRow)");
+        $sheet->getStyle("B$curRow:AG$curRow")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+
         for ($i = 1; $i <= $daysInMonth; ++$i) {
             $curCol = $i + 2;
             $mesePad0 = str_pad($meseOld, 2, '0', STR_PAD_LEFT); 
@@ -259,6 +257,7 @@ class RapportiniManager {
         $sheet->setCellValue('A' . $curRow, 'TOTAL PROJECTS');
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->setCellValue('B' . $curRow, "=SUM(C$curRow:AG$curRow)");
+        $sheet->getStyle("B$curRow:AG$curRow")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
         for ($i = 1; $i <= $daysInMonth; ++$i) {
             $curCol = $i + 2;
             $sheet->setCellValueByColumnAndRow($curCol, $curRow, "=0");
@@ -276,6 +275,7 @@ class RapportiniManager {
         $curRow++;
         $sheet->setCellValue('A' . $curRow, 'remaining hours');
         $sheet->getStyle('A' . $curRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle("C$curRow:AG$curRow")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
         $rowLul = $curRow - 2;
         $rowTot = $curRow - 1;
         for ($i = 1; $i <= $daysInMonth; ++$i) {
@@ -354,12 +354,14 @@ class RapportiniManager {
                     $dayPad0 = str_pad($i, 2, '0', STR_PAD_LEFT); 
                     $dataCurr = $anno."-".$mesePad0."-".$dayPad0;
                     if (isset($row['DATE'][$dataCurr])) {
-                        $val = $this->arrotonda05($row['DATE'][$dataCurr]);
-                        $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $val);
+                        $val = $row['DATE'][$dataCurr];
+                        $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $val);                   
+                        $sheet->getStyle("B$curRow:AG$curRow")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
                     }
                 }
             }
         }
+        
         $row_ultima_riga = $curRow;
 
         $sheet->getStyle("A$row_prima_riga:AG$row_ultima_riga")->getFont()->setSize(10);
@@ -374,6 +376,7 @@ class RapportiniManager {
             $letter = Coordinate::stringFromColumnIndex($i + 2, $curRow);
             $formula = '=SUM('.$letter.$row_prima_riga.':'.$letter.$row_ultima_riga.')';
             $sheet->setCellValueByColumnAndRow($i + 2, $curRow, $formula);
+            $sheet->getStyle("B$curRow:AG$curRow")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
         }
         $sheet->getStyle("A$curRow:AG$curRow")->getFont()->setBold(true);
 
@@ -611,7 +614,7 @@ class RapportiniManager {
     }
     function get_progetti_ore_presenza_progetti() {
         global $con;
-        $sql = "SELECT DISTINCT PROGETTO FROM ore_presenza_progetti p ORDER BY p.id_caricamento DESC";
+        $sql = "SELECT DISTINCT PROGETTO FROM ore_presenza_progetti p ORDER BY progetto DESC";
         //echo $sql;
         $oggetti = select_list($sql);        
         return $oggetti;
@@ -648,7 +651,7 @@ class RapportiniManager {
             // avoid SQL-injection
             $sql .= " ORDER BY $orderby";
         } else {
-            $sql .= " ORDER BY p.id_caricamento DESC";
+            $sql .= " ORDER BY data ASC, p.id_caricamento DESC";
         }
 
         $count = select_single_value($sql0 . $sql);

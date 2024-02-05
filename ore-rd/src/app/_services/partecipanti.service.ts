@@ -13,9 +13,9 @@ export class PartecipantiService {
         return this.http.get<ListBean<Partecipante>>(environment.wsUrl + `Partecipanti.php?top=${top}&skip=${skip}`);
     }
 
-    getAllWithFilter(top:number, skip:number, denominazione: string, matricola: string, prcUtilizzo:string, mansione: string, dataInizio: string, dataFine: string) {
+    getAllWithFilter(top:number, skip:number, denominazione: string, matricola: string, prcUtilizzo:string, mansione: string, dataInizio: string, dataFine: string, controlloCosto: boolean) {
 
-        return this.http.get<ListBean<Partecipante>>(environment.wsUrl + `Partecipanti.php?filter=Y&top=${top}&skip=${skip}&denominazione=${denominazione}&matricola=${matricola}&prcUtilizzo=${prcUtilizzo}&mansione=${mansione}&dataInizio=${dataInizio}&dataFine=${dataFine}`);
+        return this.http.get<ListBean<Partecipante>>(environment.wsUrl + `Partecipanti.php?filter=Y&top=${top}&skip=${skip}&denominazione=${denominazione}&matricola=${matricola}&prcUtilizzo=${prcUtilizzo}&controlloCosto=${controlloCosto}&mansione=${mansione}&dataInizio=${dataInizio}&dataFine=${dataFine}`);
     }
 
     insert(partecipante: Partecipante) {

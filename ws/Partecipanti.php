@@ -16,7 +16,7 @@ $prcUtilizzo = isset($_GET['prcUtilizzo']) ? $con->escape_string($_GET['prcUtili
 $mansione = isset($_GET['mansione']) ? $con->escape_string($_GET['mansione']) : null;
 $dataInizio = isset($_GET['dataInizio']) ? $con->escape_string($_GET['dataInizio']) : null;
 $dataFine = isset($_GET['dataFine']) ? $con->escape_string($_GET['dataFine']) : null;
-
+$controlloCosto = isset($_GET['controlloCosto']) ? $con->escape_string($_GET['controlloCosto']) : false;
 
 $id_dipendente = isset($_GET['id_dipendente']) ? $con->escape_string($_GET['id_dipendente']) : null;
 $top = isset($_GET['top']) ? $con->escape_string($_GET['top']) : null;
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 break;
             }
         }
-        [$progetti, $count] = $partecipantiManager->get_partecipanti($top, $skip, $orderby, $denominazione, $matricola, $prcUtilizzo, $mansione, $dataInizio, $dataFine);
+        [$progetti, $count] = $partecipantiManager->get_partecipanti($top, $skip, $orderby, $denominazione, $matricola, $prcUtilizzo, $mansione, $dataInizio, $dataFine, $controlloCosto);
         
         header('Content-Type: application/json');
         echo json_encode(['data' => $progetti, 'count' => $count, 'dataInizio' => $dataInizio, 'dataFine' => $dataFine ]);

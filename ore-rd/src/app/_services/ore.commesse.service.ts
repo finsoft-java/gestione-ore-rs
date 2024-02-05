@@ -10,7 +10,6 @@ export class OreCommesseService implements HttpCrudService<OreCommesse> {
     constructor(private http: HttpClient) { }
 
     getAllDettagli(parameters: any) {
-        console.log(parameters);
         let url = environment.wsUrl + 'OreCommesse.php?dettagli=Y';
         if (parameters.top) {
             url += `&top=${parameters.top}`;
@@ -32,7 +31,6 @@ export class OreCommesseService implements HttpCrudService<OreCommesse> {
     }
 
     getAll(parameters: any) {
-        console.log(parameters);
         let url = environment.wsUrl + 'OreCommesse.php?';
         if (parameters.top) {
             url += `&top=${parameters.top}`;

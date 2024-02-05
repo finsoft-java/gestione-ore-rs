@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     header('Content-Length: ' . filesize($zipfilename));
     flush();
     readfile($zipfilename);
+    chmod($zipfilename, 0777);//aggiunto per possibili problemi di rimozione file
     unlink($zipfilename);
     
 } else {

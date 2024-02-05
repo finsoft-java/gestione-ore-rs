@@ -4,7 +4,7 @@
 /* sviluppo */
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', 'Giofalchi_1992');
+define('DB_PASS', '');
 define('DB_NAME', 'ore-rd-prod');
 
 

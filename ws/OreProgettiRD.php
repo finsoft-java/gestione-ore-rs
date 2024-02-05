@@ -25,7 +25,7 @@ $searchProgetto = isset($_GET['searchProgetto']) ? $con->escape_string($_GET['se
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     //==========================================================
     if(!$progetto) {
-        [$objects, $count] = $rapportini->get_ore_presenza_progetti($skip, $top, $orderby, $matricola, $month, $dataInizio, $dataInizio, $searchProgetto);
+        [$objects, $count] = $rapportini->get_ore_presenza_progetti($skip, $top, $orderby, $matricola, $month, $dataInizio, $dataFine, $searchProgetto);
         header('Content-Type: application/json');
         echo json_encode(['data' => $objects, 'count' => $count]);
     } else {

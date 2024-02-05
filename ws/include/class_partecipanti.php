@@ -11,7 +11,7 @@ $partecipantiManager = new PartecipantiManager();
 
 class PartecipantiManager {
     
-    function get_partecipanti($skip=null, $top=null, $orderby=null, $denominazione=null, $matricola=null, $ptcUtilizzo=null, $mansione=null, $dataInizio=null, $dataFine=null) {
+    function get_partecipanti($skip=null, $top=null, $orderby=null, $denominazione=null, $matricola=null, $ptcUtilizzo=null, $mansione=null, $dataInizio=null, $dataFine=null, $controlloCosto=null) {
         global $con, $panthera;
         
         $sql0 = "SELECT COUNT(*) AS cnt ";
@@ -50,7 +50,6 @@ class PartecipantiManager {
                 $sql .= " LIMIT $top";
             }
         }        
-        //echo $sql;
         $data = select_list($sql1 . $sql);
         
         if($dataInizio != null && $dataFine != null){
@@ -65,7 +64,15 @@ class PartecipantiManager {
                 } else {
                     $row["COSTO"] = "ND";
                 }
-                $dataReturn.array_push($dataReturn, $row);
+                if($controlloCosto == "true"){
+                    $count = 0;
+                    if ($row["COSTO"] == "ND" || $row["COSTO"] == "0"){
+                        $dataReturn.array_push($dataReturn, $row);
+                        $count++;
+                    }
+                } else {
+                    $dataReturn.array_push($dataReturn, $row);
+                }
             }
             $data = $dataReturn;
         }

@@ -217,12 +217,9 @@ export class ProgettoDettaglioComponent implements OnInit {
 
   uploadGiustificativo(p: Progetto, event: any) {
 
-    console.log(event);
     let file = event.target.files && event.target.files[0];
-    console.log('Going to upload:', file);
 
     if (file) {
-      console.log(file);
       this.progettiService.uploadGiustificativo(p.ID_PROGETTO!, file).subscribe(response => {
         p.HAS_GIUSTIFICATIVO = 'Y';
         p.GIUSTIFICATIVO_FILENAME = file.name;
