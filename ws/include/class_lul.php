@@ -110,33 +110,44 @@ class LULManager {
             $sheetData = $sheet->toArray();
             
             $numRows = count($sheetData);
-            $rigaProgetto = 4;
+            $rigaProgetto = 8;
             $datiUtente = $panthera->getAllDataMatricolaByName($sheetData[0][1]);
             $denominazione = trim($datiUtente[0]["DENOMINAZIONE"]);
             $matricola = trim($datiUtente[0]["MATRICOLA"]);
             $idDipendente = $datiUtente[0]["ID_DIPENDENTE"]; 
             $pezzi_comando_sql = []; 
-            $progetto = "TOTAL PROJECTS";                
-            [$annoMese, $ultimoGiornoMese] = $this->leggiMeseRD($primaRiga, $sheetData);
-            for($a= 1; $a <= $ultimoGiornoMese; $a++){
-                
-                $data = "$annoMese-$a";
-                $ore = $sheetData[$rigaProgetto][$a+1];
-                if($ore == ''){
-                    $ore = 0;
-                }
-                if(($matricola == 0 || $matricola == null || $matricola == "") && ($idDipendente == 0 || $idDipendente == null || $idDipendente == "")) {
-                    $message->error .= 'Nel File caricato sono presenti errori nella matricola |'.$sheetData[0][1].'| alla data '.$data;
+            while ($rigaProgetto < $numRows) {
+                $progetto = trim($sheetData[$rigaProgetto][0]);
+                if($progetto == "TOT - " || $progetto == "") {
                     break;
                 }
-                if($data == 0 || $data == null || $data == "" ) {
-                    $message->error .= 'Nel File caricato sono presenti errori nella data '.$data;
-                    break;
+                if (strpos($progetto, "TOT -") === 0) {   
+                    $rigaProgetto += 2;
                 }
-                $pezzi_comando_sql[] = "('$idCaricamento','$progetto','$matricola','$data','$ore','$idDipendente')";
-                $contatoreRigeInserite++;
-            }    
-           
+                [$annoMese, $ultimoGiornoMese] = $this->leggiMeseRD($primaRiga, $sheetData);
+                for($a= 1; $a <= $ultimoGiornoMese; $a++){
+                    if (strpos($progetto, "TOT -") === 0) {   
+                        break;
+                    }
+                    $data = "$annoMese-$a";
+                    $ore = $sheetData[$rigaProgetto][$a+1];
+                    if($ore == ''){
+                        $ore = 0;
+                    }
+                    if(($matricola == 0 || $matricola == null || $matricola == "") && ($idDipendente == 0 || $idDipendente == null || $idDipendente == "")) {
+                        $message->error .= 'Nel File caricato sono presenti errori nella matricola |'.$sheetData[0][1].'| alla data '.$data;
+                        break;
+                    }
+                    if($data == 0 || $data == null || $data == "" ) {
+                        $message->error .= 'Nel File caricato sono presenti errori nella data '.$data;
+                        break;
+                    }
+                    $pezzi_comando_sql[] = "('$idCaricamento','$progetto','$matricola','$data','$ore','$idDipendente')";
+                    $contatoreRigeInserite++;
+                }    
+                $rigaProgetto++;
+            }
+            
             $sql = " INSERT INTO ore_presenza_progetti (ID_CARICAMENTO,PROGETTO,MATRICOLA_DIPENDENTE,DATA,ORE_PRESENZA_ORDINARIE,ID_DIPENDENTE) VALUES ".implode(',', $pezzi_comando_sql);
 //            echo "||".$i.") ".$sql."||";
             execute_update($sql);
