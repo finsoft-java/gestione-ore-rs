@@ -203,8 +203,8 @@ class RapportiniManager {
 
     function adjustWidth($sheet) {
         // see https://phpspreadsheet.readthedocs.io/en/latest/topics/recipes/#setting-a-columns-width
-        $sheet->getColumnDimensionByColumn(1)->setWidth(45);
-        $sheet->getColumnDimensionByColumn(2)->setWidth(10);
+        $sheet->getColumnDimensionByColumn(1)->setWidth(35);
+        $sheet->getColumnDimensionByColumn(2)->setWidth(7);
         for ($i = 1; $i <= 31; ++$i) {
             $sheet->getColumnDimensionByColumn($i + 2)->setWidth(5);
         }
@@ -268,7 +268,7 @@ class RapportiniManager {
                      $oreRD = $oreLul;
                    }
                 }
-                $ore = $oreLul - $oreRD;
+                $ore = $oreLul;
             } else {
                 $ore = 'A';
                 $map_matr_ore[$i] = 0;
